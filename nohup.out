@@ -1,0 +1,21 @@
+
+
+***************************************************
+*              Jetbrains Crack v2.7               *
+*                                                 *
+*  rover12421@163.com                             *
+*  QQ Group: 126896013                            *
+*  https://plus.google.com/117387751303563410161  *
+*                                                 *
+*                                    2018/02/02   *
+*                                                 *
+***************************************************
+
+
+Gtk-Message: 08:13:13.731: Failed to load module "overlay-scrollbar"
+WARN: BashSupport not loaded: until build 171.SNAPSHOT < IU-181.4445.78
+WARN: Scala not loaded: until build 172.0 < IU-181.4445.78
+WARN: Docker integration not loaded: until build 171.SNAPSHOT < IU-181.4445.78
+WARN: Docker integration not loaded: since build 181.5087 > IU-181.4445.78
+WARN: Python not loaded: since build 181.5087 > IU-181.4445.78
+WARN: Ini4Idea not loaded: since build 181.4892 > IU-181.4445.78

@@ -1,0 +1,42 @@
+In the past few years, I noticed that the so-called scrum-agile-extreme programming has got a second life.
+
+
+For some time I did not pay attention to it, scrum masters fluttered around with clever faces, but in fact they were harmless like butterflies
+and that's why I did not soar. And at some point in the reflection, I was puzzled with what this anomaly is connected with.
+
+The fact is that I am personally skeptical about the religion of scrum, especially if it is viewed as a silver bullet.
+Progs are cracking problems not the scrum musters. If the IT stuff is shit, then no one scrum master would pull out - shit-in-shit-out as they say.
+ 
+I thought a while about this and came to some conclusion ...
+
+Let's take for example average "senior management" in non-IT organizations. They are good at sweet speaking,
+diagrams drawing and working the angles, but, as you may notice, software making is absent in this list of skills.
+
+When such a manager got piece of happiness in the form of IT department he starts scratching his head and thinking about what to do about it.
+
+Then, he/she usually comes up with a brilliant idea, to abstract himself from the stupid programmers with an intelligent layer
+in the form of all sorts of masters: scram, agile, yoda masters and enterprise architects who would translate binary thoughts of IT developers into something
+understandable i.e. powerpoint presentation.
+
+Bingo! the question is settled, the pigs are loaded, the scrum masters are hired, everything works in a bunch.
+
+there is only one small problem, all these scrum idlers usually understand in no way more than the notorious "senior management" and
+they, in turn, would not mind abstracting from low-level items, but who would give them.
+
+so they have to dance between their bosses and progs in order to reach out longer, earn more.
+
+There is zero profit in this setup, this "master" layer usually acts as Chinese whispers ,
+if successful, they beat themselves with a heel in their chests and report on another success story, in the event of a failure, they all fall for prog.
+
+I have never witnessed when a master's scrum really solved problems, at the same time I
+many times witnessed when a modest kid, like me, pulled out decent projects over which the hordes of nedprogs with the skraf of the brotherhood were piling.
+
+Steve Jobs, by the way, did not hesitate to press the buttons on the iPhone checking whether it is convenient.
+
+In fact, the whole story, the American management model does not work from the word at all.
+for those who do not know about this American in which managers are not going through the food chain of the career path,
+in contrast to the Japanese.
+
+I'm for the Japanese !!
+
+how can I write about the enterprise architecture of my little football fans.

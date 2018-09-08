@@ -1,0 +1,11 @@
+.center {
+    text-align: center;
+    color: red;
+    width : 50px;
+}
+
+.widget {
+    width : 600px;
+    height : 500px;
+}
+
