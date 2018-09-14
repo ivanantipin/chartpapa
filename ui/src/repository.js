@@ -2,7 +2,7 @@
 
 
 import {MainControllerApi} from "./api";
-import type {MergedSeries} from "./api";
+
 
 export type InstrId = {
     name: string,

@@ -74,19 +74,71 @@ export class RequiredError extends Error {
  * 
  * @export
  */
-export type MergedSeries = {
+export type Annotations = {
     /**
      * 
-     * @type {{ [key: string]: Array<number>; }}
-     * @memberof MergedSeries
+     * @type {Array<Label>}
+     * @memberof Annotations
      */
-    closes: { [key: string]: Array<number>; };
+    labels: Array<Label>;
     /**
      * 
-     * @type {Array<LocalDateTime>}
-     * @memberof MergedSeries
+     * @type {Array<HLine>}
+     * @memberof Annotations
      */
-    index: Array<Date>;
+    lines: Array<HLine>;
+}
+
+
+/**
+ * 
+ * @export
+ */
+export type HLine = {
+    /**
+     * 
+     * @type {Date}
+     * @memberof HLine
+     */
+    end: Date;
+    /**
+     * 
+     * @type {number}
+     * @memberof HLine
+     */
+    level: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof HLine
+     */
+    start: Date;
+}
+
+
+/**
+ * 
+ * @export
+ */
+export type Label = {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Label
+     */
+    high: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Label
+     */
+    text: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof Label
+     */
+    time: Date;
 }
 
 
@@ -154,6 +206,70 @@ export type ModelAndView = {
  * 
  * @export
  */
+export type Ohlc = {
+    /**
+     * 
+     * @type {number}
+     * @memberof Ohlc
+     */
+    close: number;
+    /**
+     * 
+     * @type {Date}
+     * @memberof Ohlc
+     */
+    dateTime: Date;
+    /**
+     * 
+     * @type {number}
+     * @memberof Ohlc
+     */
+    high: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Ohlc
+     */
+    low: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Ohlc
+     */
+    open: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Ohlc
+     */
+    volume: number;
+}
+
+
+/**
+ * 
+ * @export
+ */
+export type TimePoint = {
+    /**
+     * 
+     * @type {Date}
+     * @memberof TimePoint
+     */
+    time: Date;
+    /**
+     * 
+     * @type {number}
+     * @memberof TimePoint
+     */
+    value: number;
+}
+
+
+/**
+ * 
+ * @export
+ */
 export type View = {
     /**
      * 
@@ -174,10 +290,10 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
     return {
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingDELETE(options: RequestOptions): FetchArgs {
+        errorHtmlUsingDELETE(options: RequestOptions): FetchArgs {
             const localVarPath = `/error`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'DELETE' }, options);
@@ -196,10 +312,10 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingGET(options: RequestOptions): FetchArgs {
+        errorHtmlUsingGET(options: RequestOptions): FetchArgs {
             const localVarPath = `/error`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'GET' }, options);
@@ -218,10 +334,10 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingHEAD(options: RequestOptions): FetchArgs {
+        errorHtmlUsingHEAD(options: RequestOptions): FetchArgs {
             const localVarPath = `/error`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'HEAD' }, options);
@@ -240,10 +356,10 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingOPTIONS(options: RequestOptions): FetchArgs {
+        errorHtmlUsingOPTIONS(options: RequestOptions): FetchArgs {
             const localVarPath = `/error`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'OPTIONS' }, options);
@@ -262,10 +378,10 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingPATCH(options: RequestOptions): FetchArgs {
+        errorHtmlUsingPATCH(options: RequestOptions): FetchArgs {
             const localVarPath = `/error`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'PATCH' }, options);
@@ -284,10 +400,10 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingPOST(options: RequestOptions): FetchArgs {
+        errorHtmlUsingPOST(options: RequestOptions): FetchArgs {
             const localVarPath = `/error`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'POST' }, options);
@@ -306,10 +422,10 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingPUT(options: RequestOptions): FetchArgs {
+        errorHtmlUsingPUT(options: RequestOptions): FetchArgs {
             const localVarPath = `/error`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'PUT' }, options);
@@ -330,19 +446,19 @@ export const BasicErrorControllerApiFetchParamCreator = function (configuration?
 };
 
 export type BasicErrorControllerApiType = { 
-    errorUsingDELETE(options?: RequestOptions): Promise<{ [key: string]: Object; }>,
+    errorHtmlUsingDELETE(options?: RequestOptions): Promise<ModelAndView>,
 
-    errorUsingGET(options?: RequestOptions): Promise<{ [key: string]: Object; }>,
+    errorHtmlUsingGET(options?: RequestOptions): Promise<ModelAndView>,
 
-    errorUsingHEAD(options?: RequestOptions): Promise<{ [key: string]: Object; }>,
+    errorHtmlUsingHEAD(options?: RequestOptions): Promise<ModelAndView>,
 
-    errorUsingOPTIONS(options?: RequestOptions): Promise<{ [key: string]: Object; }>,
+    errorHtmlUsingOPTIONS(options?: RequestOptions): Promise<ModelAndView>,
 
-    errorUsingPATCH(options?: RequestOptions): Promise<{ [key: string]: Object; }>,
+    errorHtmlUsingPATCH(options?: RequestOptions): Promise<ModelAndView>,
 
-    errorUsingPOST(options?: RequestOptions): Promise<{ [key: string]: Object; }>,
+    errorHtmlUsingPOST(options?: RequestOptions): Promise<ModelAndView>,
 
-    errorUsingPUT(options?: RequestOptions): Promise<{ [key: string]: Object; }>,
+    errorHtmlUsingPUT(options?: RequestOptions): Promise<ModelAndView>,
 }
 
 /**
@@ -354,11 +470,11 @@ export const BasicErrorControllerApi = function(configuration?: Configuration, f
     return {
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingDELETE(options?: RequestOptions = {}): Promise<{ [key: string]: Object; }> {
-            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorUsingDELETE(options);
+        errorHtmlUsingDELETE(options?: RequestOptions = {}): Promise<ModelAndView> {
+            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorHtmlUsingDELETE(options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response.json();
@@ -369,11 +485,11 @@ export const BasicErrorControllerApi = function(configuration?: Configuration, f
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingGET(options?: RequestOptions = {}): Promise<{ [key: string]: Object; }> {
-            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorUsingGET(options);
+        errorHtmlUsingGET(options?: RequestOptions = {}): Promise<ModelAndView> {
+            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorHtmlUsingGET(options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response.json();
@@ -384,11 +500,11 @@ export const BasicErrorControllerApi = function(configuration?: Configuration, f
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingHEAD(options?: RequestOptions = {}): Promise<{ [key: string]: Object; }> {
-            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorUsingHEAD(options);
+        errorHtmlUsingHEAD(options?: RequestOptions = {}): Promise<ModelAndView> {
+            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorHtmlUsingHEAD(options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response.json();
@@ -399,11 +515,11 @@ export const BasicErrorControllerApi = function(configuration?: Configuration, f
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingOPTIONS(options?: RequestOptions = {}): Promise<{ [key: string]: Object; }> {
-            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorUsingOPTIONS(options);
+        errorHtmlUsingOPTIONS(options?: RequestOptions = {}): Promise<ModelAndView> {
+            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorHtmlUsingOPTIONS(options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response.json();
@@ -414,11 +530,11 @@ export const BasicErrorControllerApi = function(configuration?: Configuration, f
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingPATCH(options?: RequestOptions = {}): Promise<{ [key: string]: Object; }> {
-            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorUsingPATCH(options);
+        errorHtmlUsingPATCH(options?: RequestOptions = {}): Promise<ModelAndView> {
+            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorHtmlUsingPATCH(options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response.json();
@@ -429,11 +545,11 @@ export const BasicErrorControllerApi = function(configuration?: Configuration, f
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingPOST(options?: RequestOptions = {}): Promise<{ [key: string]: Object; }> {
-            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorUsingPOST(options);
+        errorHtmlUsingPOST(options?: RequestOptions = {}): Promise<ModelAndView> {
+            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorHtmlUsingPOST(options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response.json();
@@ -444,11 +560,11 @@ export const BasicErrorControllerApi = function(configuration?: Configuration, f
         },
         /**
          * 
-         * @summary error
+         * @summary errorHtml
          * @throws {RequiredError}
          */
-        errorUsingPUT(options?: RequestOptions = {}): Promise<{ [key: string]: Object; }> {
-            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorUsingPUT(options);
+        errorHtmlUsingPUT(options?: RequestOptions = {}): Promise<ModelAndView> {
+            const localVarFetchArgs = BasicErrorControllerApiFetchParamCreator(configuration).errorHtmlUsingPUT(options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response.json();
@@ -484,6 +600,58 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
 
             if (metadata !== undefined) {
                 localVarQueryParameter['metadata'] = ((metadata:any):string);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary getAnnotationsForChart
+         * @throws {RequiredError}
+         */
+        getAnnotationsForChartUsingGET(code?: string, options: RequestOptions): FetchArgs {
+            const localVarPath = `/annotations`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'GET' }, options);
+            const localVarHeaderParameter = {};
+            const localVarQueryParameter = {};
+
+            if (code !== undefined) {
+                localVarQueryParameter['code'] = ((code:any):string);
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary getChart
+         * @throws {RequiredError}
+         */
+        getChartUsingGET(code?: string, options: RequestOptions): FetchArgs {
+            const localVarPath = `/load_ohlc`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions: RequestOptions = Object.assign({}, { method: 'GET' }, options);
+            const localVarHeaderParameter = {};
+            const localVarQueryParameter = {};
+
+            if (code !== undefined) {
+                localVarQueryParameter['code'] = ((code:any):string);
             }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
@@ -628,11 +796,15 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
 export type MainControllerApiType = { 
     addMetadataUsingPUT(metadata: string, options?: RequestOptions): Promise<Response>,
 
+    getAnnotationsForChartUsingGET(code?: string, options?: RequestOptions): Promise<Annotations>,
+
+    getChartUsingGET(code?: string, options?: RequestOptions): Promise<Array<Ohlc>>,
+
     instrumentsUsingGET(options?: RequestOptions): Promise<Array<string>>,
 
     loadAllMetasUsingGET(options?: RequestOptions): Promise<Array<Metadata>>,
 
-    loadUsingGET(codes?: Array<string>, options?: RequestOptions): Promise<MergedSeries>,
+    loadUsingGET(codes?: Array<string>, options?: RequestOptions): Promise<{ [key: string]: Array<TimePoint>; }>,
 
     selectAllUsingGET(options?: RequestOptions): Promise<Array<string>>,
 
@@ -656,6 +828,36 @@ export const MainControllerApi = function(configuration?: Configuration, fetch: 
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {
                     return response;
+                } else {
+                    throw response;
+                }
+            });
+        },
+        /**
+         * 
+         * @summary getAnnotationsForChart
+         * @throws {RequiredError}
+         */
+        getAnnotationsForChartUsingGET(code?: string, options?: RequestOptions = {}): Promise<Annotations> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getAnnotationsForChartUsingGET(code, options);
+            return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
+                } else {
+                    throw response;
+                }
+            });
+        },
+        /**
+         * 
+         * @summary getChart
+         * @throws {RequiredError}
+         */
+        getChartUsingGET(code?: string, options?: RequestOptions = {}): Promise<Array<Ohlc>> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getChartUsingGET(code, options);
+            return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response.json();
                 } else {
                     throw response;
                 }
@@ -696,7 +898,7 @@ export const MainControllerApi = function(configuration?: Configuration, fetch: 
          * @summary load
          * @throws {RequiredError}
          */
-        loadUsingGET(codes?: Array<string>, options?: RequestOptions = {}): Promise<MergedSeries> {
+        loadUsingGET(codes?: Array<string>, options?: RequestOptions = {}): Promise<{ [key: string]: Array<TimePoint>; }> {
             const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).loadUsingGET(codes, options);
             return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                 if (response.status >= 200 && response.status < 300) {

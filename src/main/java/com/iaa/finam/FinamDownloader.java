@@ -1,5 +1,6 @@
 package com.iaa.finam;
 
+import com.funstat.domain.Ohlc;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.io.IOUtils;
 import org.asynchttpclient.AsyncHttpClient;
@@ -95,7 +96,8 @@ public class FinamDownloader {
                 });
 
         try {
-            return ret.get().stream().map(Ohlc::parse).flatMap(opt -> {
+            Stream<String> str = ret.get().stream();
+            return str.map(Ohlc::parse).flatMap(opt -> {
                 if (opt.isPresent()) {
                     return Stream.of(opt.get());
                 } else {

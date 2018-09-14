@@ -1,7 +1,7 @@
 In the past few years, I noticed that the so-called scrum-agile-extreme programming has got a second life.
 
 
-For some time I did not pay attention to it, scrum masters fluttered around with clever faces, but in fact they were harmless like butterflies
+For some dateTime I did not pay attention to it, scrum masters fluttered around with clever faces, but in fact they were harmless like butterflies
 and that's why I did not soar. And at some point in the reflection, I was puzzled with what this anomaly is connected with.
 
 The fact is that I am personally skeptical about the religion of scrum, especially if it is viewed as a silver bullet.
@@ -28,7 +28,7 @@ so they have to dance between their bosses and progs in order to reach out longe
 There is zero profit in this setup, this "master" layer usually acts as Chinese whispers ,
 if successful, they beat themselves with a heel in their chests and report on another success story, in the event of a failure, they all fall for prog.
 
-I have never witnessed when a master's scrum really solved problems, at the same time I
+I have never witnessed when a master's scrum really solved problems, at the same dateTime I
 many times witnessed when a modest kid, like me, pulled out decent projects over which the hordes of nedprogs with the skraf of the brotherhood were piling.
 
 Steve Jobs, by the way, did not hesitate to press the buttons on the iPhone checking whether it is convenient.

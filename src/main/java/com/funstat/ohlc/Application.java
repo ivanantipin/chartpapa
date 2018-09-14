@@ -1,4 +1,4 @@
-package sample;
+package com.funstat.ohlc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

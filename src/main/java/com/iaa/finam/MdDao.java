@@ -1,5 +1,6 @@
 package com.iaa.finam;
 
+import com.funstat.domain.Ohlc;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,7 +26,7 @@ public class MdDao {
     public List<Ohlc> queryAll(String code) {
         new JdbcTemplate(ds).execute("create table if not exists " + code + " (dt datetime primary key , o number,h number,l number ,c number) ");
         return new JdbcTemplate(ds).query("select * from " + code, (RowMapper<Ohlc>) (rs, rowNum) -> {
-            return new Ohlc(rs.getTimestamp("DT").toLocalDateTime(), rs.getDouble("o"), rs.getDouble("l"), rs.getDouble("c"), rs.getDouble("h"));
+            return new Ohlc(rs.getTimestamp("DT").toLocalDateTime(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"));
         });
     }
 

@@ -1,4 +1,4 @@
-package sample.city;
+package com.funstat.ohlc;
 
 import com.iaa.finam.Symbol;
 

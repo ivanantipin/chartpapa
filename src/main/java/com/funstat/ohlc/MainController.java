@@ -1,8 +1,10 @@
-package sample.city;
+package com.funstat.ohlc;
 
+import com.funstat.domain.Ohlc;
+import com.iaa.finam.Annotations;
+import com.iaa.finam.Label;
 import com.iaa.finam.MdDao;
-import com.iaa.finam.MergedSeries;
-import com.iaa.finam.Ohlc;
+import com.iaa.finam.TimePoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.builders.PathSelectors;
@@ -68,13 +70,48 @@ public class MainController {
     MdDao mdDao = new MdDao();
 
 
+    @GetMapping("load_ohlc")
+    public Collection<Ohlc> getChart(String code){
+        return mdDao.queryAll(code);
+    }
+
+    @GetMapping("/annotations")
+    public Annotations getAnnotationsForChart(String code){
+        Sequenta sequenta = new Sequenta();
+
+        List<Label> labels = new ArrayList<>();
+
+        mdDao.queryAll(code).forEach(oh->{
+            List<Signal> signals = sequenta.onOhlc(oh);
+            signals.forEach(s->{
+                if(s.type == SignalType.Signal){
+                    labels.add(new Label("" + s.reference.countDowns.size(), oh.dateTime, s.reference.up));
+                }
+            });
+        });
+
+        return new Annotations(labels,new ArrayList<>());
+    }
+
+
     @GetMapping("/spread")
-    public MergedSeries load(List<String> codes) {
-        Map<LocalDateTime,Map<String,Double>> points = new TreeMap<>();
+    public Map<String,Collection<TimePoint>> load(List<String> codes) {
+        Map<String,Collection<TimePoint>> mm = new HashMap<>();
+        codes.forEach(c->{
+            List<Ohlc> ohlcs = mdDao.queryAll(c);
+            List<TimePoint> lst = ohlcs.stream().map(oh -> new TimePoint(oh.dateTime, oh.close)).collect(Collectors.toList());
+            Collections.sort(lst);
+            mm.put(c, lst);
+        });
+        return mm;
+    }
+
+    /*
+            Map<LocalDateTime,Map<String,Double>> points = new TreeMap<>();
         codes.forEach(c->{
             List<Ohlc> ohlcs = mdDao.queryAll(c);
             ohlcs.forEach(o->{
-                points.computeIfAbsent(o.time, a->new HashMap<>()).put(c,o.close);
+                points.computeIfAbsent(o.dateTime, a->new HashMap<>()).put(c,o.close);
             });
         });
         LocalDateTime[] index = points.keySet().toArray(new LocalDateTime[0]);
@@ -97,7 +134,8 @@ public class MainController {
             return ret;
         }));
         return new MergedSeries(index,charts);
-    }
+
+     */
 
 
     @Bean

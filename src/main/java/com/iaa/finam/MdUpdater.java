@@ -1,5 +1,7 @@
 package com.iaa.finam;
 
+import com.funstat.domain.Ohlc;
+
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,15 +37,15 @@ public class MdUpdater {
 
     public void run(){
         getUpdateSymbols().forEach(symbol -> {
-            List<Ohlc> data = loader.load(symbol, LocalDate.now().minusDays(100));
+            List<Ohlc> data = loader.load(symbol, LocalDate.now().minusDays(600));
 
-            Set<LocalDateTime> existed = mdDao.queryAll(symbol.code).stream().map(oh -> oh.time).collect(Collectors.toSet());
-            List<Ohlc> tbinserted = data.stream().filter(dt -> !existed.contains(dt.time)).collect(Collectors.toList());
+            Set<LocalDateTime> existed = mdDao.queryAll(symbol.code).stream().map(oh -> oh.dateTime).collect(Collectors.toSet());
+            List<Ohlc> tbinserted = data.stream().filter(dt -> !existed.contains(dt.dateTime)).collect(Collectors.toList());
 
             Map[] maps = tbinserted.stream().map(oh -> {
                 return new HashMap<String, Object>() {
                     {
-                        put("DT", Timestamp.valueOf(oh.time));
+                        put("DT", Timestamp.valueOf(oh.dateTime));
                         put("OPEN", oh.open);
                         put("HIGH", oh.high);
                         put("LOW", oh.low);
