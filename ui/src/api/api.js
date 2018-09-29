@@ -64,7 +64,7 @@ export type RequestOptions = {
  * @extends {Error}
  */
 export class RequiredError extends Error {
-    name:string = "RequiredError"
+    name:string = "RequiredError";
     constructor(field: string, msg?: string) {
         super(msg);
     }

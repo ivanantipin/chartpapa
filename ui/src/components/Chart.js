@@ -37,7 +37,7 @@ const defdataset={
     pointRadius: 1,
     pointHitRadius: 10,
     // data: [65, 59, 80, 81, 56, 55, 40]
-}
+};
 
 
 class Chart extends React.Component<ChartData, any> {
@@ -47,16 +47,16 @@ class Chart extends React.Component<ChartData, any> {
         const datasets=Array.from(this.props.chart.keys())
             .filter(code=>this.props.chart.has(code))
             .map(code=>{
-                console.log('mapping', code)
+                console.log('mapping', code);
             return {...defdataset, label : code, data : this.props.chart.get(code), borderColor: getRandomColor()}
-        })
+        });
         if(datasets.length == 0){
             return <div/>
         }
 
         const labels = this.props.index.map(dt=>{
             return dt.toLocaleDateString("en-US")
-        })
+        });
 
         return (
             <div className="chart">

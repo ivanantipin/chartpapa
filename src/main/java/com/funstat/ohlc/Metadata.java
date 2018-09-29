@@ -1,6 +1,6 @@
 package com.funstat.ohlc;
 
-import com.iaa.finam.Symbol;
+import com.funstat.finam.Symbol;
 
 import java.util.List;
 

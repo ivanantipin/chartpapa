@@ -3,9 +3,9 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { format } from "d3-format";
-import { timeFormat } from "d3-time-format";
+import {timeFormat, timeParse} from "d3-time-format";
 
-import { ChartCanvas, Chart } from "react-stockcharts";
+import {ChartCanvas, Chart} from "react-stockcharts";
 import { CandlestickSeries, LineSeries } from "react-stockcharts/lib/series";
 import { XAxis, YAxis } from "react-stockcharts/lib/axes";
 import {
@@ -29,6 +29,10 @@ import {
 import { ema } from "react-stockcharts/lib/indicator";
 import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
+import {PriceCoordinate} from "react-stockcharts/es/lib/coordinates/index";
+import StraightLine from "react-stockcharts/es/lib/series/StraightLine";
+import TrendLine from "react-stockcharts/es/lib/interactive/TrendLine"
+import type {HLine} from "../api";
 
 
 export type Ohlc={
@@ -45,7 +49,8 @@ export type CandleStickChartProps={
     width: number,
     ratio: number,
     type: "svg" | "hybrid",
-    tsToLabel: Map<number,Label>
+    tsToLabel: Map<number,Label>,
+    hlines : Array<HLine>
 }
 
 
@@ -61,7 +66,7 @@ class CandleStickChart extends React.Component<CandleStickChartProps> {
                 return this.props.tsToLabel.get(some.date.getTime()).text
             },
             y: (obj) => {
-                const high = this.props.tsToLabel.get(obj.datum.date.getTime()).high
+                const high = this.props.tsToLabel.get(obj.datum.date.getTime()).high;
                 if(high){
                     return obj.yScale(obj.datum.high)
                 }else{
@@ -89,11 +94,32 @@ class CandleStickChart extends React.Component<CandleStickChartProps> {
             initialData
         );
 
-        console.log('data',data)
+        console.log('data',data);
 
         const start = xAccessor(last(data));
         const end = xAccessor(data[Math.max(0, data.length - 150)]);
         const xExtents = [start, end];
+
+
+        const dtTo : Map<number,any> = new Map();
+
+        data.forEach(d=>{
+            dtTo.set(d.date.getTime(), d)
+        });
+
+        console.log('hliens',this.props.hlines);
+
+        let parser = timeParse("%Y-%m-%dT%H:%M:%S");
+
+        const trends_1 = this.props.hlines.map(line=>{
+            const x0 = xAccessor(dtTo.get(parser(line.start).getTime()));
+            const x1 = xAccessor(dtTo.get(parser(line.end).getTime()));
+            return {
+                start : [x0, line.level],
+                end : [x1, line.level],
+                appearance: { stroke: "green" }, type: "LINE"
+            }
+        });
 
         return (
             <ChartCanvas
@@ -158,6 +184,40 @@ class CandleStickChart extends React.Component<CandleStickChartProps> {
                         yAccessor={d => d.close}
                         fill={d => (d.close > d.open ? "#6BA583" : "#FF0000")}
                     />
+
+                    {/*{
+                        this.props.hlines.map(line=>{
+                            console.log('hline',line)
+                            return (
+                                <PriceCoordinate
+                                    at="right"
+                                    orient="right"
+                                    price={line.level}
+                                    stroke="#3490DC"
+                                    strokeWidth={1}
+                                    fill="#FFFFFF"
+                                    textFill="#22292F"
+                                    arrowWidth={7}
+                                    strokeDasharray="ShortDash"
+                                    displayFormat={format(".2f")}
+                                />
+                            )
+                        })
+                    }*/}
+
+
+                    <TrendLine
+                        //ref={this.saveInteractiveNodes("Trendline", 1)}
+                        enabled={false}
+                         type="LINE"
+                        snap={false}
+                        snapTo={d => [d.high, d.low]}
+                        onStart={() => console.log("START")}
+                        //onComplete={this.onDrawCompleteChart1}
+                        trends={trends_1}
+                    />
+
+
 
                     <OHLCTooltip origin={[-40, 0]} />
 

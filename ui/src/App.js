@@ -28,13 +28,13 @@ export type AppCallBack = {
 }
 
 function chunk_array<T>(arr : Array<T>, chunk : number) : Array<Array<T>>{
-    const ret = []
+    const ret = [];
     arr.forEach((val : T, idx : number)=>{
         if(idx % chunk == 0){
             ret.push([])
         }
         ret[ret.length - 1].push(val)
-    })
+    });
     return ret
 }
 
@@ -42,7 +42,7 @@ function chunk_array<T>(arr : Array<T>, chunk : number) : Array<Array<T>>{
 class App extends Component<MainStore & AppCallBack, AppState> {
 
     componentDidMount() {
-        console.log('')
+        console.log('');
         this.props.onFetchInstr()
     }
 
@@ -59,7 +59,7 @@ class App extends Component<MainStore & AppCallBack, AppState> {
     }
 
     render() {
-        console.log('store', this.props)
+        console.log('store', this.props);
         return (
             <div>
                 <Button onClick={this.props.onAdd}>Add</Button>
@@ -80,18 +80,18 @@ const dispatchToProps = (dispatch): AppCallBack => {
     return {
         onAdd: () => {
             dispatch(makeAmend((state: MainStore) => {
-                const arr : Array<ChartMeta> = Array.from(state.widgets)
+                const arr : Array<ChartMeta> = Array.from(state.widgets);
                 arr.push({
                     codes: [],
                     period: 1,
                     id : ID()
-                })
+                });
                 return {...state, widgets: arr}
             }))
         },
         onFetchInstr: () => {
             fetchInstruments().then(inst => {
-                console.log('inst',inst)
+                console.log('inst',inst);
                 dispatch(makeAmend((state: MainStore) => {
                     return {...state, instruments: inst}
                 }))
@@ -102,6 +102,6 @@ const dispatchToProps = (dispatch): AppCallBack => {
 
     }
 
-}
+};
 
 export default connect(l => l, dispatchToProps)(App);

@@ -11,9 +11,6 @@ import type {ChartData, WidgetCallbacks} from "./WidgetComponent";
 import {WidgetComponent} from "./WidgetComponent";
 import {fetchChart} from "../repository";
 
-
-
-
 const dispatchCallbacks = (dispatch) : WidgetCallbacks=>{
     return {
         onChange : (metaId : string, codes : Array<string>)=>{
@@ -21,24 +18,24 @@ const dispatchCallbacks = (dispatch) : WidgetCallbacks=>{
                 dispatch(makeAmend((store : MainStore)=>{
                     const nmetas = store.widgets.map(meta=>{
                         if(meta.id == metaId){
-
                             const chartData : ChartData = {
                                 index : ms.index,
                                 chart : ms.closes
-                            }
-
+                            };
                             return {...meta, chartData : chartData,  codes : codes}
                         }else{
                             return meta
                         }
-                    })
+                    });
 
                     return {...store, widgets : nmetas}
                 }))
             })
         },
     }
-}
+};
+
+const WContainer = connect(l=>l, dispatchCallbacks)(WidgetComponent)
 
 
-export default connect(l=>l, dispatchCallbacks)(WidgetComponent)
+export default WContainer

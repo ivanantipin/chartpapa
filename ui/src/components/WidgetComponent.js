@@ -30,20 +30,20 @@ export type WidgetCallbacks = {
 export class WidgetComponent extends Component<WidgetData & WidgetCallbacks, any> {
 
     constructor() {
-        super()
+        super();
         this.state = {}
 
     }
 
 
     onSelect(opts: Array<{name : string,value : string}>) {
-        console.log("on select",opts)
+        console.log("on select",opts);
         this.props.onChange(this.props.id, opts.map(o=>o.value))
     }
 
 
     render() {
-        const selected = this.props.instruments
+        const selected = this.props.instruments;
         return (
             <div className="widget">
                 <Select
