@@ -4,15 +4,21 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
 
-public class Label{
+public class Label {
     String text;
     LocalDateTime time;
-    boolean high;
+    double level;
+    String color;
+    boolean drawOnTop;
 
-    public Label(String text, LocalDateTime time, boolean high) {
+    public Label(String text, LocalDateTime time, double level, String color,
+                 boolean drawOnTop
+    ) {
         this.text = text;
         this.time = time;
-        this.high = high;
+        this.level = level;
+        this.color = color;
+        this.drawOnTop = drawOnTop;
     }
 
 
@@ -27,7 +33,17 @@ public class Label{
     }
 
     @ApiModelProperty(required = true)
-    public boolean isHigh() {
-        return high;
+    public double getLevel() {
+        return level;
+    }
+
+    @ApiModelProperty(required = true)
+    public String getColor() {
+        return color;
+    }
+
+    @ApiModelProperty(required = true)
+    public boolean isDrawOnTop() {
+        return drawOnTop;
     }
 }

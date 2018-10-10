@@ -8,12 +8,12 @@ import {TimePointTr} from "../build/lib/src/repository";
 
 const stories = storiesOf("Components", module);
 
-const getChart = (): Map<string,Array<TimePointTr>> => {
-    const mp = new Map<string,Array<TimePointTr>>();
+const getChart = (): Map<string, Array<TimePointTr>> => {
+    const mp = new Map<string, Array<TimePointTr>>();
     mp.set('aaa', [
-        {time : new Date(2015, 5, 1), value : 1},
-        {time : new Date(2015, 5, 2), value : 2},
-        {time : new Date(2015, 5, 1), value : 1},
+            {time: new Date(2015, 5, 1), value: 1},
+            {time: new Date(2015, 5, 2), value: 2},
+            {time: new Date(2015, 5, 1), value: 1},
         ]
     );
     return mp
@@ -21,7 +21,7 @@ const getChart = (): Map<string,Array<TimePointTr>> => {
 
 stories.add(
     "TicTacToeCell",
-    withInfo({ inline: true })(() => {
+    withInfo({inline: true})(() => {
         {
             return <Chart series={getChart()}/>
         }

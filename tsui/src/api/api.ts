@@ -132,10 +132,22 @@ export interface HLine {
 export interface Label {
     /**
      * 
+     * @type {string}
+     * @memberof Label
+     */
+    color: string;
+    /**
+     * 
      * @type {boolean}
      * @memberof Label
      */
-    high: boolean;
+    drawOnTop: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Label
+     */
+    level: number;
     /**
      * 
      * @type {string}
@@ -867,13 +879,13 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
         },
         /**
          * 
-         * @summary getAnnotationsForChart
+         * @summary getAnnotations
          * @param {string} [code] code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnotationsForChartUsingGET(code?: string, options: any = {}): FetchArgs {
-            const localVarPath = `/annotations`;
+        getAnnotationsUsingGET(code?: string, options: any = {}): FetchArgs {
+            const localVarPath = `/get_annotations`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
@@ -895,13 +907,13 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
         },
         /**
          * 
-         * @summary getChart
+         * @summary getOhlcs
          * @param {string} [code] code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getChartUsingGET(code?: string, options: any = {}): FetchArgs {
-            const localVarPath = `/load_ohlc`;
+        getOhlcsUsingGET(code?: string, options: any = {}): FetchArgs {
+            const localVarPath = `/get_ohlcs`;
             const localVarUrlObj = url.parse(localVarPath, true);
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
@@ -909,6 +921,38 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
 
             if (code !== undefined) {
                 localVarQueryParameter['code'] = code;
+            }
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary getSeries
+         * @param {Array<string>} codes codes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSeriesUsingGET(codes: Array<string>, options: any = {}): FetchArgs {
+            // verify required parameter 'codes' is not null or undefined
+            if (codes === null || codes === undefined) {
+                throw new RequiredError('codes','Required parameter codes was null or undefined when calling getSeriesUsingGET.');
+            }
+            const localVarPath = `/get_series`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (codes) {
+                localVarQueryParameter['codes'] = codes;
             }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
@@ -956,34 +1000,6 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary load
-         * @param {Array<string>} [codes] codes
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        loadUsingGET(codes?: Array<string>, options: any = {}): FetchArgs {
-            const localVarPath = `/spread`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (codes) {
-                localVarQueryParameter['codes'] = codes;
-            }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
@@ -1085,13 +1101,13 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary getAnnotationsForChart
+         * @summary getAnnotations
          * @param {string} [code] code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnotationsForChartUsingGET(code?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Annotations> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getAnnotationsForChartUsingGET(code, options);
+        getAnnotationsUsingGET(code?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Annotations> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getAnnotationsUsingGET(code, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1104,13 +1120,32 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary getChart
+         * @summary getOhlcs
          * @param {string} [code] code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getChartUsingGET(code?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Ohlc>> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getChartUsingGET(code, options);
+        getOhlcsUsingGET(code?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Ohlc>> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getOhlcsUsingGET(code, options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary getSeries
+         * @param {Array<string>} codes codes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSeriesUsingGET(codes: Array<string>, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<{ [key: string]: Array<TimePoint>; }> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getSeriesUsingGET(codes, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1147,25 +1182,6 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
          */
         loadAllMetasUsingGET(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Metadata>> {
             const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).loadAllMetasUsingGET(options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * 
-         * @summary load
-         * @param {Array<string>} [codes] codes
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        loadUsingGET(codes?: Array<string>, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<{ [key: string]: Array<TimePoint>; }> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).loadUsingGET(codes, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1235,23 +1251,33 @@ export const MainControllerApiFactory = function (configuration?: Configuration,
         },
         /**
          * 
-         * @summary getAnnotationsForChart
+         * @summary getAnnotations
          * @param {string} [code] code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnotationsForChartUsingGET(code?: string, options?: any) {
-            return MainControllerApiFp(configuration).getAnnotationsForChartUsingGET(code, options)(fetch, basePath);
+        getAnnotationsUsingGET(code?: string, options?: any) {
+            return MainControllerApiFp(configuration).getAnnotationsUsingGET(code, options)(fetch, basePath);
         },
         /**
          * 
-         * @summary getChart
+         * @summary getOhlcs
          * @param {string} [code] code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getChartUsingGET(code?: string, options?: any) {
-            return MainControllerApiFp(configuration).getChartUsingGET(code, options)(fetch, basePath);
+        getOhlcsUsingGET(code?: string, options?: any) {
+            return MainControllerApiFp(configuration).getOhlcsUsingGET(code, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary getSeries
+         * @param {Array<string>} codes codes
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSeriesUsingGET(codes: Array<string>, options?: any) {
+            return MainControllerApiFp(configuration).getSeriesUsingGET(codes, options)(fetch, basePath);
         },
         /**
          * 
@@ -1270,16 +1296,6 @@ export const MainControllerApiFactory = function (configuration?: Configuration,
          */
         loadAllMetasUsingGET(options?: any) {
             return MainControllerApiFp(configuration).loadAllMetasUsingGET(options)(fetch, basePath);
-        },
-        /**
-         * 
-         * @summary load
-         * @param {Array<string>} [codes] codes
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        loadUsingGET(codes?: Array<string>, options?: any) {
-            return MainControllerApiFp(configuration).loadUsingGET(codes, options)(fetch, basePath);
         },
         /**
          * 
@@ -1325,26 +1341,38 @@ export class MainControllerApi extends BaseAPI {
 
     /**
      * 
-     * @summary getAnnotationsForChart
+     * @summary getAnnotations
      * @param {string} [code] code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MainControllerApi
      */
-    public getAnnotationsForChartUsingGET(code?: string, options?: any) {
-        return MainControllerApiFp(this.configuration).getAnnotationsForChartUsingGET(code, options)(this.fetch, this.basePath);
+    public getAnnotationsUsingGET(code?: string, options?: any) {
+        return MainControllerApiFp(this.configuration).getAnnotationsUsingGET(code, options)(this.fetch, this.basePath);
     }
 
     /**
      * 
-     * @summary getChart
+     * @summary getOhlcs
      * @param {string} [code] code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MainControllerApi
      */
-    public getChartUsingGET(code?: string, options?: any) {
-        return MainControllerApiFp(this.configuration).getChartUsingGET(code, options)(this.fetch, this.basePath);
+    public getOhlcsUsingGET(code?: string, options?: any) {
+        return MainControllerApiFp(this.configuration).getOhlcsUsingGET(code, options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary getSeries
+     * @param {Array<string>} codes codes
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MainControllerApi
+     */
+    public getSeriesUsingGET(codes: Array<string>, options?: any) {
+        return MainControllerApiFp(this.configuration).getSeriesUsingGET(codes, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -1367,18 +1395,6 @@ export class MainControllerApi extends BaseAPI {
      */
     public loadAllMetasUsingGET(options?: any) {
         return MainControllerApiFp(this.configuration).loadAllMetasUsingGET(options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * 
-     * @summary load
-     * @param {Array<string>} [codes] codes
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof MainControllerApi
-     */
-    public loadUsingGET(codes?: Array<string>, options?: any) {
-        return MainControllerApiFp(this.configuration).loadUsingGET(codes, options)(this.fetch, this.basePath);
     }
 
     /**

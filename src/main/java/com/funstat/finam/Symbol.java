@@ -13,6 +13,10 @@ public class Symbol{
         this.code = code;
     }
 
+    public Symbol() {
+        this(null,null,null,null);
+    }
+
     @Override
     public String toString() {
         return "Symbol{" +

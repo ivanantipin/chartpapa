@@ -1,22 +1,20 @@
-
+import * as React from 'react';
 import {Component} from 'react';
 import Select from "react-virtualized-select";
 import "react-select/dist/react-select.css";
 import "react-virtualized-select/styles.css";
-
-import * as React from "react";
-
 // import './static/style.css'
-import Chart from "../Chart/Chart";
 import {TimePointTr} from "../../../build/lib/src/repository";
-
+import {MainStore} from "../types";
+import {InstrId} from "../../repository";
+import HChart from "../HChart/HChart";
 
 
 export interface WidgetData {
     period: number,
     id: string,
     chartData : Map<string, Array<TimePointTr>>,
-    instruments: Array<string>
+    selectedInstruments: Array<string>
 }
 
 
@@ -26,7 +24,7 @@ export interface WidgetCallbacks {
 }
 
 
-export class WidgetComponent extends Component<WidgetData & WidgetCallbacks, any> {
+export class WidgetComponent extends Component<WidgetData & WidgetCallbacks & MainStore, any> {
 
     onSelect(opts: Array<{name : string,value : string}>) {
         console.log("on select",opts);
@@ -35,25 +33,32 @@ export class WidgetComponent extends Component<WidgetData & WidgetCallbacks, any
 
 
     render() {
-        const selected = this.props.instruments;
+        console.log('selected', this.props.selectedInstruments)
         return (
             <div className="widget">
+                <div>Panel</div>
+
                 <Select
                     onChange={this.onSelect.bind(this)}
                     multi
-                    value={selected} options={this.props.instruments.map(r => {
+                    value={this.props.selectedInstruments.map(si=>{
+                        return {
+                            label : si,
+                            value : si
+                        }
+                    })} options={this.props.instruments.map(r => {
                     return this.instrToOpt(r);
                 })}/>
 
-                <Chart  series={this.props.chartData}/>
+                <HChart  series={this.props.chartData}/>
             </div>
         )
     }
 
-    instrToOpt(r : string) {
+    instrToOpt(r : InstrId) {
         return {
-            label: r,
-            value: r
+            label: r.code,
+            value: r.code
         }
     }
 }

@@ -50,6 +50,7 @@ class Chart extends Component<{series : Map<string, Array<TimePointTr>>}, any> {
                         y : tp.value
                     }
                 })
+                console.log('nppp',nv)
                 return {...defdataset, label: key, data: nv, borderColor: getRandomColor()}
             });
         if (datasets.length == 0) {

@@ -21,8 +21,8 @@ public class Sequenta {
     }
 
     public class Setup{
-        int start;
-        int end;
+        public int start;
+        public int end;
         public boolean up;
         public List<Integer> countDowns = new ArrayList<>();
         int pendingSignal = 0;
@@ -46,6 +46,10 @@ public class Sequenta {
 
         public LocalDateTime getEnd(){
             return data.get(end).dateTime;
+        }
+
+        public int setupSize(){
+            return end - start;
         }
 
 

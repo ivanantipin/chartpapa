@@ -8,6 +8,7 @@ export type InstrId = {
 
 export function fetchInstruments(): Promise<Array<InstrId>> {
     return new MainControllerApi().instrumentsUsingGET().then(instr=>{
+        console.log('receidev instr',instr)
         return instr.map(code=>{
                 return {
                     name : code,
@@ -23,7 +24,9 @@ export interface TimePointTr {
 }
 
 export function fetchChart(codes: Array<string>) :Promise<Map<string,Array<TimePointTr>>> {
-    return new MainControllerApi().loadUsingGET(codes).then(res=>{
+    console.log('fetching codes', codes)
+    return new MainControllerApi().getSeriesUsingGET(codes).then(res=>{
+        console.log('receidev chart',res)
         const ret = new Map<string,Array<TimePointTr>>()
         Object.keys(res).forEach(key=>{
             let nar = res[key].map(tp=>{
@@ -37,3 +40,4 @@ export function fetchChart(codes: Array<string>) :Promise<Map<string,Array<TimeP
         return ret;
     });
 }
+

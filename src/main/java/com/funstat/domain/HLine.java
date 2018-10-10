@@ -15,6 +15,10 @@ public class HLine{
         this.level = level;
     }
 
+    public HLine copyWithNewEnd(LocalDateTime end){
+        return new HLine(this.start,end,level);
+    }
+
     @ApiModelProperty(required = true)
     public LocalDateTime getStart() {
         return start;

@@ -1,6 +1,7 @@
 package com.funstat;
 
 import com.funstat.domain.*;
+import com.funstat.finam.Symbol;
 import com.funstat.ohlc.Metadata;
 import com.funstat.sequenta.Sequenta;
 import com.funstat.sequenta.Signal;
@@ -13,10 +14,13 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -25,6 +29,22 @@ import java.util.stream.Collectors;
 public class MainController {
 
     Map<Integer,String> dao = new ConcurrentHashMap<>();
+
+    MdUpdater updater = new MdUpdater();
+
+    @PostConstruct
+    void onStart(){
+        System.out.println("starting updater");
+        updater.start();
+    }
+
+    ConcurrentHashMap<String,Object> cache = new ConcurrentHashMap<>();
+
+    <T> T getThings(String key, Supplier<T> factory){
+        return (T) cache.computeIfAbsent(key, k->{
+            return factory.get();
+        });
+    }
 
     @GetMapping("/")
     public Collection<String> selectAll() {
@@ -53,44 +73,31 @@ public class MainController {
 
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
     public Collection<String> instruments(){
-        return Arrays.asList("TATN","ROSN","GMKN");
+        return getThings("instruments", ()->{
+            return mdDao.read("instruments", Symbol.class)
+                    .stream().filter(s->s.market.equals("1")).map(s->s.code).collect(Collectors.toList());
+        });
+
     }
 
 
     MdDao mdDao = new MdDao();
 
 
-    @GetMapping("load_ohlc")
-    public Collection<Ohlc> getChart(String code){
+    @GetMapping("/get_ohlcs")
+    public Collection<Ohlc> getOhlcs(String code){
+        mdDao.saveGeneric("requested", Collections.singletonList(code), s->s);
+        updater.update(code);
         return mdDao.queryAll(code);
     }
 
-    @GetMapping("/annotations")
-    public Annotations getAnnotationsForChart(String code){
-        Sequenta sequenta = new Sequenta();
-
-        List<Label> labels = new ArrayList<>();
-        List<HLine> lines = new ArrayList<>();
-
-
-        mdDao.queryAll(code).forEach(oh->{
-            List<Signal> signals = sequenta.onOhlc(oh);
-            signals.forEach(s->{
-                if(s.type == SignalType.Signal){
-                    labels.add(new Label("" + s.reference.countDowns.size(), oh.dateTime, s.reference.up));
-                }
-                if(s.type == SignalType.SetupReach){
-                    lines.add(new HLine(s.reference.getStart(),s.reference.getEnd(), s.reference.getTdst()));
-                }
-            });
-        });
-
-        return new Annotations(labels,lines);
+    @GetMapping("/get_annotations")
+    public Annotations getAnnotations(String code){
+        return AnnotationCreator.createAnnotations(code);
     }
 
-
-    @GetMapping("/spread")
-    public Map<String,Collection<TimePoint>> load(List<String> codes) {
+    @GetMapping("/get_series")
+    public Map<String,Collection<TimePoint>> getSeries(@RequestParam(name = "codes")  ArrayList<String> codes) {
         Map<String,Collection<TimePoint>> mm = new HashMap<>();
         codes.forEach(c->{
             List<Ohlc> ohlcs = mdDao.queryAll(c);
@@ -98,40 +105,9 @@ public class MainController {
             Collections.sort(lst);
             mm.put(c, lst);
         });
+        System.out.println("return" + mm);
         return mm;
     }
-
-    /*
-            Map<LocalDateTime,Map<String,Double>> points = new TreeMap<>();
-        codes.forEach(c->{
-            List<Ohlc> ohlcs = mdDao.queryAll(c);
-            ohlcs.forEach(o->{
-                points.computeIfAbsent(o.dateTime, a->new HashMap<>()).put(c,o.close);
-            });
-        });
-        LocalDateTime[] index = points.keySet().toArray(new LocalDateTime[0]);
-
-        Map<String, double[]> charts = codes.stream().collect(Collectors.toMap(c -> c, c -> {
-            double[] ret = Arrays.stream(index).mapToDouble(dt -> {
-                Map<String, Double> mp = points.get(dt);
-                return mp.getOrDefault(c, Double.NaN);
-            }).toArray();
-
-            for(int i = 1; i < ret.length; i++){
-                if(Double.isNaN(ret[i])){
-                    ret[i] = ret[i - 1];
-                }
-                ret[i] /= ret[0];
-            }
-            ret[0] = 1;
-
-
-            return ret;
-        }));
-        return new MergedSeries(index,charts);
-
-     */
-
 
     @Bean
     public Docket customImplementation() {
@@ -144,7 +120,4 @@ public class MainController {
                 .paths(PathSelectors.regex("/.*"))
                 .build()
                 .pathMapping("/");    }
-
-
-
 }
