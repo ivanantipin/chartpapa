@@ -1,0 +1,6 @@
+recon sequenta
+move sequenta to submenu
+signal explanations
+recon cancel marker on signal
+presignal signs 11 12 13
+update last ohlc

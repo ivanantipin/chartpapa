@@ -1,6 +1,7 @@
 package com.funstat.finam;
 
 import com.funstat.domain.Ohlc;
+import com.funstat.vantage.Source;
 import com.google.common.util.concurrent.SettableFuture;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +29,9 @@ import java.util.stream.Stream;
 import static com.google.common.io.CharStreams.readLines;
 
 
-public class FinamDownloader implements AutoCloseable {
+public class FinamDownloader implements AutoCloseable, Source {
     private static final Logger log = LoggerFactory.getLogger(FinamDownloader.class);
+    public static final String FINAM = "FINAM";
 
     private AsyncHttpClient client;
 
@@ -44,7 +47,87 @@ public class FinamDownloader implements AutoCloseable {
         );
     }
 
-    public List<Ohlc> load(Symbol symbolSpec, LocalDate start) {
+
+
+    static void populate(String inl, Map<String, String[]> map) {
+        if (inl.indexOf('[') < 0) return;
+        String origStr = inl.substring(inl.indexOf('[') + 1, inl.indexOf(']'));
+        String[] data = origStr.split(",");
+        String key = inl.substring(0, inl.indexOf('['))
+                .replace(" ", "")
+                .replace("=", "");
+
+        if (key.equals("varaEmitentNames")) {
+            CSVParser parser = new CSVParserBuilder().withQuoteChar('\'').build();
+            try {
+                data = parser.parseLine(origStr);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        map.put(key, data);
+    }
+
+
+    @Override
+    public void close() throws Exception {
+        try {
+            client.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Symbol> symbols() {
+        try {
+            InputStream in = new URL("https://www.finam.ru/cache/icharts/icharts.js").openStream();
+            List<String> lines = IOUtils.readLines(in);
+
+            HashMap<String, String[]> map = new HashMap<>();
+            lines.forEach(l -> {
+                populate(l, map);
+            });
+
+            String[] names = map.get("varaEmitentNames");
+            String[] ids = map.get("varaEmitentIds");
+            String[] codes = map.get("varaEmitentCodes");
+            String[] markets = map.get("varaEmitentMarkets");
+
+            List<Symbol> ret = new ArrayList<>();
+
+            for (int i = 0; i < codes.length; i++) {
+                ret.add(new Symbol(ids[i], names[i], markets[i], codes[i].replace("'", ""), getName()));
+            }
+
+            System.out.println(map);
+            return ret;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Ohlc> load(Symbol symbolSpec) {
+        return load(symbolSpec, LocalDateTime.now().minusDays(600));
+    }
+
+    volatile long lastFinamCall  = 0;
+
+    @Override
+    public synchronized List<Ohlc> load(Symbol symbolSpec, LocalDateTime start) {
+
+        while ((System.currentTimeMillis() - lastFinamCall) < 1100){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        lastFinamCall = System.currentTimeMillis();
+
+
         LocalDate finish = LocalDate.now();
         Map<String, String> params = new HashMap<String, String>() {
             {
@@ -110,66 +193,9 @@ public class FinamDownloader implements AutoCloseable {
         }
     }
 
-
-    static void populate(String inl, Map<String, String[]> map) {
-        if (inl.indexOf('[') < 0) return;
-        String origStr = inl.substring(inl.indexOf('[') + 1, inl.indexOf(']'));
-        String[] data = origStr.split(",");
-        String key = inl.substring(0, inl.indexOf('['))
-                .replace(" ", "")
-                .replace("=", "");
-
-        if (key.equals("varaEmitentNames")) {
-            CSVParser parser = new CSVParserBuilder().withQuoteChar('\'').build();
-            try {
-                data = parser.parseLine(origStr);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        map.put(key, data);
-    }
-
-    public List<Symbol> readMeta() {
-        try {
-            InputStream in = new URL("https://www.finam.ru/cache/icharts/icharts.js").openStream();
-            List<String> lines = IOUtils.readLines(in);
-
-            HashMap<String, String[]> map = new HashMap<>();
-            lines.forEach(l -> {
-                populate(l, map);
-            });
-
-            String[] names = map.get("varaEmitentNames");
-            String[] ids = map.get("varaEmitentIds");
-            String[] codes = map.get("varaEmitentCodes");
-            String[] markets = map.get("varaEmitentMarkets");
-
-            List<Symbol> ret = new ArrayList<>();
-
-            for (int i = 0; i < codes.length; i++) {
-                ret.add(new Symbol(ids[i], names[i], markets[i], codes[i].replace("'", "")));
-            }
-
-            System.out.println(map);
-            return ret;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void main(String[] args) {
-        List<Symbol> meta = new FinamDownloader().readMeta();
-        System.out.println(meta);
-    }
-
     @Override
-    public void close() throws Exception {
-        try {
-            client.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public String getName() {
+        return FINAM;
     }
 }
 

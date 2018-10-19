@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class Sequenta {
 
+    public static final int SETUP_LENGTH = 9;
     int[] counts = new int[]{13,21};
 
     List<Ohlc> data = new ArrayList<>();
@@ -28,6 +29,9 @@ public class Sequenta {
         int pendingSignal = 0;
         Setup cancelledRef;
         Setup recycleRef;
+
+        int closesBeyondTdst = 0;
+
         double min;
         double max;
 
@@ -81,7 +85,11 @@ public class Sequenta {
         }
 
         boolean reached(){
-            return (end - start) >= 9;
+            return (end - start) >= (SETUP_LENGTH - 1);
+        }
+
+        boolean invalidated(){
+            return closesBeyondTdst > 5;
         }
 
         boolean isCancelled(){
@@ -92,35 +100,58 @@ public class Sequenta {
             return pendingSignal == counts.length;
         }
 
-        boolean isCurrent(){
-            return this == pendingSetups.get(pendingSetups.size() - 1);
+        boolean isExpired(){
+            return data.size() - start > 150;
+        }
+
+
+        public int getCompletedSignal(){
+            if(pendingSignal == 0){
+                return -1;
+            }
+            return counts[pendingSignal - 1];
         }
 
         List<Signal> checkCountDown(){
             int idx = data.size() - 1;
             List<Signal> ret = new ArrayList<>();
-            if(cdn(idx)){
+
+            checkClosesBeyondTdst(idx);
+
+            if(isCntdn(idx)){
                 countDowns.add(idx);
                 ret.add(new Signal(SignalType.Cdn, this));
-            }
-            if(countDowns.size() >= counts[pendingSignal]){
-                if(up && data.get(idx).high > data.get(countDowns.get(8)).close
-                        || !up && data.get(idx).low < data.get(countDowns.get(8)).close
-                        ){
-                    pendingSignal++;
-                    ret.add(new Signal(SignalType.Signal, this));
-                }else {
-                    ret.add(new Signal(SignalType.Deffered, this));
+                if(countDowns.size() >= counts[pendingSignal]){
+                    if(up && data.get(idx).high > data.get(countDowns.get(8)).close
+                            || !up && data.get(idx).low < data.get(countDowns.get(8)).close
+                            ){
+                        pendingSignal++;
+                        ret.add(new Signal(SignalType.Signal, this));
+                    }else {
+                        ret.add(new Signal(SignalType.Deffered, this));
+                    }
                 }
             }
-            if(pendingSignal == counts.length){
+            if(isCompleted()){
                 ret.add(new Signal(SignalType.Completed, this));
             }
             return ret;
         }
 
+        private void checkClosesBeyondTdst(int idx) {
+            if(up ){
+                if(data.get(idx).close < getTdst()){
+                    closesBeyondTdst++;
+                }
+            }else {
+                if(data.get(idx).close > getTdst()){
+                    closesBeyondTdst++;
+                }
+            }
+        }
 
-        private boolean cdn(int idx) {
+
+        private boolean isCntdn(int idx) {
             return up && getClose(idx) > data.get(idx - 2).high
                     || !up && getClose(idx) < data.get(idx - 2).low;
         }
@@ -135,18 +166,18 @@ public class Sequenta {
     }
 
     boolean getCurrentTrend(){
-        Ohlc ohlc = data.get(data.size() - 1);
-        return ohlc.close > past(4).close;
+        Ohlc ohlc = past(1);
+        return ohlc.close > past(5).close;
     }
 
     Setup currentSetup;
 
     public List<Signal> onOhlc(Ohlc ohlc){
         data.add(ohlc);
-        if(data.size() < 4){
+        if(data.size() < 5){
             return Collections.emptyList();
         }
-        if(data.size() == 4){
+        if(data.size() == 5){
             currentSetup = new Setup(data.size() - 1, data.size() - 1, getCurrentTrend());
             return Collections.emptyList();
         }
@@ -157,7 +188,7 @@ public class Sequenta {
             ret.addAll(ps.checkCountDown());
         });
         this.pendingSetups = this.pendingSetups.stream().filter(ps->{
-            return !ps.isCompleted();
+            return !ps.isCompleted() && !ps.isExpired() && !ps.invalidated();
         }).collect(Collectors.toList());
         return ret;
     }
@@ -167,9 +198,8 @@ public class Sequenta {
         List<Signal> ret = new ArrayList<>();
         int idx = data.size() - 1;
         currentSetup.updateEnd(idx);
-        currentSetup.end = idx;
         if( getCurrentTrend() != currentSetup.up){
-            if(currentSetup.length() < 9){
+            if(!currentSetup.reached()){
                 ret.add(new Signal(SignalType.SetupUnreach, currentSetup));
             }else {
                 ret.add(new Signal(SignalType.Flip, currentSetup));
@@ -179,7 +209,7 @@ public class Sequenta {
         }else {
             ret.add(new Signal(SignalType.SetupCount, currentSetup));
         }
-        if(currentSetup.length() == 9){
+        if(currentSetup.reached() && !pendingSetups.contains(currentSetup)){
             pendingSetups.add(currentSetup);
             ret.add(new Signal(SignalType.SetupReach, currentSetup));
         }

@@ -12,6 +12,7 @@ import {CandleStickChartProps, OhlcTr} from "../OhlcChart/OhlcChart";
 import {MainControllerApi} from "../../api";
 import {Label, Ohlc} from "../../api/api";
 import {connect} from "react-redux";
+import {Spin} from "antd";
 
 
 const fetchChart = (code: string): Promise<CandleStickChartProps> => {
@@ -29,6 +30,8 @@ const fetchChart = (code: string): Promise<CandleStickChartProps> => {
 
         const lb: Map<number, Label> = new Map<number, Label>();
 
+        console.log('ann', arr[1])
+
         arr[1].labels.forEach((ll: Label) => {
             lb.set(parseDate(ll.time).getTime(), ll)
         })
@@ -42,23 +45,28 @@ const fetchChart = (code: string): Promise<CandleStickChartProps> => {
 }
 
 
-class SeqPanel extends Component<MainStore, { inst?: string, chart?: CandleStickChartProps }> {
+class SeqPanel extends Component<MainStore, { inst?: string, loading : boolean, chart?: CandleStickChartProps }> {
 
     constructor(props: MainStore){
         super(props)
-        this.state = {}
+        this.state = {loading : false}
     }
 
     onSelect(sel : {label: string, value : string}) {
+        this.setState({...this.state, loading : true})
         fetchChart(sel.label).then(ch => {
-            console.log('fetched',ch)
-            this.setState({inst : sel.label, chart: ch})
+            this.setState({inst : sel.label, loading : false, chart: ch})
         }).catch(e=>{
             console.log('err',e)
         })
+        console.log('state', this.state)
     }
 
     getSome(){
+        if(this.state.loading){
+            console.log('spinning')
+            return <Spin style={{top : '50%', left : '50%' , position: 'absolute'}} size='large'/>
+        }
         if(this.state.chart == null){
             return <div/>
         }else {

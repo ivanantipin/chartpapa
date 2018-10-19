@@ -19,19 +19,36 @@ public class Ohlc implements Comparable<Ohlc>{
         this.close = close;
         this.high = high;
         this.low = low;
+        if(high < Math.max(Math.max(close,open),low)){
+            throw new RuntimeException("not valid high " + this);
+        }
+        if(low > Math.min(Math.min(close,open),high)){
+            throw new RuntimeException("not valid low " + this);
+        }
+
     }
 
+    static DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
+
     public static Optional<Ohlc> parse(String str){
-        DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
+        return parseWithPattern(str, pattern);
+    }
+
+    public static Optional<Ohlc> parseWithPattern(String str, DateTimeFormatter pattern) {
         try {
             String[] arr = str.split(";");
-            return Optional.of(new Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1],pattern),
+            return Optional.of(new Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1], pattern),
                     Double.parseDouble(arr[2]),
                     Double.parseDouble(arr[3]), Double.parseDouble(arr[4]), Double.parseDouble(arr[5])
             ));
         }catch (Exception e){
+            System.out.println("not valid entry "+ str + " because " + e.getMessage());
             return Optional.empty();
         }
+    }
+
+    public double getRange(){
+        return high - low;
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.funstat.sequenta.Sequenta;
 import com.funstat.sequenta.Signal;
 import com.funstat.sequenta.SignalType;
 import com.funstat.store.MdDao;
+import com.funstat.vantage.VantageDownloader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.builders.PathSelectors;
@@ -74,26 +75,23 @@ public class MainController {
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
     public Collection<String> instruments(){
         return getThings("instruments", ()->{
-            return mdDao.read("instruments", Symbol.class)
-                    .stream().filter(s->s.market.equals("1")).map(s->s.code).collect(Collectors.toList());
+            return updater.getMeta().stream().filter(s->{
+                return s.market.equals("1") || s.market.equals(VantageDownloader.MICEX);
+            })                    .map(s->s.code).collect(Collectors.toList());
         });
-
     }
-
 
     MdDao mdDao = new MdDao();
 
 
     @GetMapping("/get_ohlcs")
     public Collection<Ohlc> getOhlcs(String code){
-        mdDao.saveGeneric("requested", Collections.singletonList(code), s->s);
-        updater.update(code);
-        return mdDao.queryAll(code);
+        return updater.get(code);
     }
 
     @GetMapping("/get_annotations")
     public Annotations getAnnotations(String code){
-        return AnnotationCreator.createAnnotations(code);
+        return AnnotationCreator.createAnnotations(code,updater);
     }
 
     @GetMapping("/get_series")

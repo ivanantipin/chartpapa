@@ -10,16 +10,17 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.sqlite.SQLiteDataSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,10 +40,22 @@ public class MdDao {
 
 
     public List<Ohlc> queryAll(String code) {
+        ensureTableExists(code);
+        return new JdbcTemplate(ds).query("select * from " + code + " order by dt asc ", (rs, rowNum) -> mapOhlc(rs));
+    }
+
+    private void ensureTableExists(String code) {
         new JdbcTemplate(ds).execute("create table if not exists " + code + " (dt datetime primary key , o number,h number,l number ,c number) ");
-        return new JdbcTemplate(ds).query("select * from " + code, (rs, rowNum) -> {
-            return new Ohlc(rs.getTimestamp("DT").toLocalDateTime(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"));
-        });
+    }
+
+    private Ohlc mapOhlc(ResultSet rs) throws SQLException {
+        return new Ohlc(rs.getTimestamp("DT").toLocalDateTime(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"));
+    }
+
+    public Optional<Ohlc> queryLast(String code){
+        ensureTableExists(code);
+        List<Ohlc> ret = new JdbcTemplate(ds).query("select * from " + code + " order by dt desc LIMIT 1 ", (rs, rowNum) -> mapOhlc(rs));
+        return ret.size() == 0 ? Optional.empty() : Optional.of(ret.get(0));
     }
 
     String write(Object obj){
@@ -88,8 +101,9 @@ public class MdDao {
 
     }
 
+    DataSourceTransactionManager manager = new DataSourceTransactionManager(ds);
+
     private void saveInTransaction(String sql, Map[] data) {
-        DataSourceTransactionManager manager = new DataSourceTransactionManager(ds);
         TransactionTemplate template = new TransactionTemplate(manager);
         template.execute(status -> {
             new NamedParameterJdbcTemplate(ds).batchUpdate(sql, data);
@@ -104,15 +118,5 @@ public class MdDao {
     }
 
 
-    public static void main(String[] args) {
-        Symbol symbol = new Symbol("some", "name", "market", "code");
-        MdDao dao = new MdDao();
-        dao.saveGeneric("test", Collections.singletonList(symbol), s->s.id);
-        System.out.println(dao.read("test", Symbol.class));
-
-
-
-
-    }
 
 }

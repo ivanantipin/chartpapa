@@ -4,62 +4,79 @@ import com.funstat.domain.Ohlc;
 import com.funstat.finam.Symbol;
 import com.funstat.finam.FinamDownloader;
 import com.funstat.store.MdDao;
+import com.funstat.vantage.Source;
+import com.funstat.vantage.VantageDownloader;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class MdUpdater {
 
-    FinamDownloader loader = new FinamDownloader();
+    Map<String, Source> sources = new HashMap<String, Source>() {
+        {
+            put(FinamDownloader.FINAM, new FinamDownloader());
+            put(VantageDownloader.SOURCE, new VantageDownloader());
+        }
+    };
+
     MdDao mdDao = new MdDao();
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
 
-    public void start(){
+    public void start() {
         executor.scheduleAtFixedRate(this::run, 0, 10, TimeUnit.MINUTES);
     }
 
     List<Symbol> metaCache = null;
 
-    List<Symbol> getMeta(){
-        if(metaCache == null){
-            this.metaCache = loader.readMeta();
-            System.out.println("updated meta cache" + metaCache);
+    public List<Symbol> getMeta() {
+        if (metaCache == null) {
+            this.metaCache = sources.values().stream().flatMap(s -> s.symbols().stream()).collect(Collectors.toList());
         }
         return metaCache;
-
     }
 
-    List<String> getCodesToUpdate(){
-        return mdDao.read("requested",String.class);
+
+    List<Symbol> getCodesToUpdate() {
+        return mdDao.read("requested", String.class).stream().map(code->findSymbol(code)).collect(Collectors.toList());
     }
 
-    Symbol findSymbol(String  code){
-        return getMeta().stream().filter(s->{
-            return s.code.equals(code) && s.market.equals("1");
+    Symbol findSymbol(String code) {
+        return getMeta().stream().filter(s -> {
+            return s.code.equals(code) && (s.market.equals("1")
+                    || s.market.equals("MICEX"));
         }).findFirst().get();
     }
 
-    public void run(){
+    public void run() {
         getCodesToUpdate().forEach(symbol -> {
             update(symbol);
         });
     }
 
-    public void update(String code) {
+    List<Ohlc> get(String code) {
+
         Symbol symbol = findSymbol(code);
-        List<Ohlc> data = loader.load(symbol, LocalDate.now().minusDays(600));
 
-        Set<LocalDateTime> existed = mdDao.queryAll(symbol.code).stream().map(oh -> oh.dateTime).collect(Collectors.toSet());
-        List<Ohlc> tbinserted = data.stream().filter(dt -> !existed.contains(dt.dateTime)).collect(Collectors.toList());
+        mdDao.saveGeneric("requested", Collections.singletonList(symbol), s -> s.code);
 
-        Map[] maps = tbinserted.stream().map(oh -> {
+        List<Ohlc> ret = mdDao.queryAll(symbol.tableToPersist());
+        if (ret.isEmpty()) {
+            update(symbol);
+        }
+        return ret;
+    }
+
+    public void update(Symbol symbol) {
+
+        LocalDateTime startTime = mdDao.queryLast(symbol.tableToPersist()).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));
+
+        List<Ohlc> data = sources.get(symbol.source).load(symbol, startTime);
+
+        Map[] maps = data.stream().map(oh -> {
             return new HashMap<String, Object>() {
                 {
                     put("DT", Timestamp.valueOf(oh.dateTime));
@@ -70,17 +87,12 @@ public class MdUpdater {
                 }
             };
         }).toArray(sz -> new Map[sz]);
-        System.out.println("to be inserted " + maps.length + " into " + symbol.code);
-        mdDao.save(symbol.code, maps);
+        System.out.println("to be inserted/updated " + maps.length + " into " + symbol.tableToPersist());
+        try {
+            mdDao.save(symbol.tableToPersist(), maps);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("DONE " + symbol.code);
     }
-
-    public void updateInstruments(){
-        List<Symbol> meta = loader.readMeta();
-        mdDao.saveGeneric("instruments", meta, s->s.id + '/' + s.market);
-    }
-
-    public static void main(String[] args) {
-        new MdUpdater().updateInstruments();
-    }
-
 }
