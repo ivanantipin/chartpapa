@@ -9,10 +9,10 @@ export type InstrId = {
 export function fetchInstruments(): Promise<Array<InstrId>> {
     return new MainControllerApi().instrumentsUsingGET().then(instr=>{
         console.log('receidev instr',instr)
-        return instr.map(code=>{
+        return instr.map(symbol=>{
                 return {
-                    name : code,
-                    code : code
+                    name : symbol.name,
+                    code : symbol.code
             }
         });
     })

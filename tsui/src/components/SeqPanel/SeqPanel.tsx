@@ -57,8 +57,8 @@ class SeqPanel extends Component<MainStore, { inst?: string, loading: boolean, c
             return
         }
         this.setState({...this.state, loading: true})
-        fetchChart(sel.label).then(ch => {
-            this.setState({inst: sel.label, loading: false, chart: ch})
+        fetchChart(sel.value).then(ch => {
+            this.setState({inst: sel.value, loading: false, chart: ch})
         }).catch(e => {
             console.log('err', e)
         })
@@ -67,7 +67,6 @@ class SeqPanel extends Component<MainStore, { inst?: string, loading: boolean, c
 
     getSome() {
         if (this.state.loading) {
-            console.log('spinning')
             return <Spin style={{top: '50%', left: '50%', position: 'absolute'}} size='large'/>
         }
         if (this.state.chart == null) {
@@ -99,7 +98,7 @@ class SeqPanel extends Component<MainStore, { inst?: string, loading: boolean, c
 
     static instrToOpt(r: InstrId) {
         return {
-            label: r.code,
+            label: r.name,
             value: r.code
         }
     }

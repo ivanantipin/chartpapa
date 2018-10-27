@@ -74,9 +74,9 @@ public class MainController {
     }
 
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
-    public Collection<String> instruments(){
+    public Collection<Symbol> instruments(){
         return getThings("instruments", ()->{
-            return updater.getMeta().stream().map(s->s.code).collect(Collectors.toList());
+            return updater.getMeta();
         });
     }
 

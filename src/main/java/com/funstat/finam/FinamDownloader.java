@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -82,7 +83,7 @@ public class FinamDownloader implements AutoCloseable, Source {
     public List<Symbol> symbols() {
         try {
             InputStream in = new URL("https://www.finam.ru/cache/icharts/icharts.js").openStream();
-            List<String> lines = IOUtils.readLines(in);
+            List<String> lines = IOUtils.readLines(in, Charset.forName("cp1251"));
 
             HashMap<String, String[]> map = new HashMap<>();
             lines.forEach(l -> {

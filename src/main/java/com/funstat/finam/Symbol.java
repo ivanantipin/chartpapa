@@ -1,5 +1,7 @@
 package com.funstat.finam;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class Symbol{
     public final String id;
     public final String name;
@@ -15,8 +17,29 @@ public class Symbol{
         this.source = source;
     }
 
-    public String tableToPersist(){
-        return code.replace('.','_');
+    @ApiModelProperty(required = true)
+    public String getId() {
+        return id;
+    }
+
+    @ApiModelProperty(required = true)
+    public String getName() {
+        return name;
+    }
+
+    @ApiModelProperty(required = true)
+    public String getMarket() {
+        return market;
+    }
+
+    @ApiModelProperty(required = true)
+    public String getCode() {
+        return code;
+    }
+
+    @ApiModelProperty(required = true)
+    public String getSource() {
+        return source;
     }
 
     public Symbol() {

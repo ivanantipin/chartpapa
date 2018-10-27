@@ -4,6 +4,7 @@ import SeqPanel from "./components/SeqPanel/SeqPanel";
 export interface MenuConf {
     name : string,
     path : string,
+    shown : boolean,
     component : any
 }
 
@@ -11,11 +12,13 @@ export const routerConfig : Array<MenuConf>=[
     {
         name : "Indicators",
         path : '/indicators',
-        component : SeqPanel
+        component : SeqPanel,
+        shown : true
     },
     {
         name : "Widgets",
         path : '/widgets',
-        component : WidgetPanel
+        component : WidgetPanel,
+        shown : false
     }
 ]

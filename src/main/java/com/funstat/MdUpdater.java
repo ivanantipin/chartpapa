@@ -54,7 +54,7 @@ public class MdUpdater {
 
 
     List<Symbol> getCodesToUpdate() {
-        return mdDao.readGeneric("requested", String.class).stream().map(code -> findSymbol(code)).collect(Collectors.toList());
+        return mdDao.readGeneric("requested", Symbol.class);
     }
 
     Symbol findSymbol(String code) {
@@ -62,9 +62,14 @@ public class MdUpdater {
     }
 
     public void run() {
-        getCodesToUpdate().forEach(symbol -> {
-            update(symbol);
-        });
+        System.out.println("running aoeuaoeu");
+        try {
+            getCodesToUpdate().forEach(symbol -> {
+                update(symbol);
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     List<Ohlc> get(String code) {
@@ -80,6 +85,15 @@ public class MdUpdater {
         }
         return ret;
     }
+
+
+    ExecutorService updateExecutor = Executors.newSingleThreadExecutor();
+
+    void scheduleUpdate(Symbol symbol){
+
+
+    }
+
 
     public void update(Symbol symbol) {
         LocalDateTime startTime = mdDao.queryLast(symbol.code, symbol.source).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));

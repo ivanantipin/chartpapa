@@ -35,7 +35,7 @@ class MainMenu extends Component<HomeProps,any> {
 
                 <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} onSelect={this.selectMenu.bind(this)}>
                     {
-                        routerConfig.map((cfg : MenuConf)=>{
+                        routerConfig.filter(cfg=>cfg.shown).map((cfg : MenuConf)=>{
                             return <Menu.Item key={cfg.path}>
                                 <Icon type="user"/>
                                 <span>{cfg.name}</span>
@@ -55,7 +55,7 @@ class MainMenu extends Component<HomeProps,any> {
                 <Content style={{margin: '24px 16px', padding: 24, background: '#fff', minHeight: 700}}>
 
                         {
-                            routerConfig.map(rc => {
+                            routerConfig.filter(cfg=>cfg.shown).map(rc => {
                                 return (
                                 <Route
                                     path={rc.path}
