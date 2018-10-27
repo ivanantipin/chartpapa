@@ -4,8 +4,7 @@ import {Line} from 'react-chartjs-2';
 // import './static/style.css'
 import * as React from "react";
 import {Component} from "react";
-import {TimePointTr} from "../../../build/lib/src/repository";
-
+import {TimePointTr} from 'repository';
 
 
 function getRandomColor() {
