@@ -1,6 +1,6 @@
 import {Component, default as React} from "react";
-import {TimePointTr} from "../../../build/lib/src/repository";
 import * as Highcharts from "highcharts";
+import {TimePointTr} from "repository";
 
 let HighchartsReact = require('highcharts-react-official')
 

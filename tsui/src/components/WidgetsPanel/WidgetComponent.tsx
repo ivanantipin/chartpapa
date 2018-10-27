@@ -4,9 +4,8 @@ import Select from "react-virtualized-select";
 import "react-select/dist/react-select.css";
 import "react-virtualized-select/styles.css";
 // import './static/style.css'
-import {TimePointTr} from "../../../build/lib/src/repository";
 import {MainStore} from "../types";
-import {InstrId} from "../../repository";
+import {InstrId, TimePointTr} from "../../repository";
 import HChart from "../HChart/HChart";
 
 
