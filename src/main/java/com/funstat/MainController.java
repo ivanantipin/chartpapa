@@ -1,14 +1,12 @@
 package com.funstat;
 
-import com.funstat.domain.*;
+import com.funstat.domain.Annotations;
+import com.funstat.domain.Ohlc;
+import com.funstat.domain.TimePoint;
 import com.funstat.finam.FinamDownloader;
 import com.funstat.finam.Symbol;
 import com.funstat.ohlc.Metadata;
-import com.funstat.sequenta.Sequenta;
-import com.funstat.sequenta.Signal;
-import com.funstat.sequenta.SignalType;
 import com.funstat.store.MdDao;
-import com.funstat.vantage.VantageDownloader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.builders.PathSelectors;
@@ -21,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -30,13 +27,13 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 public class MainController {
 
-    Map<Integer,String> dao = new ConcurrentHashMap<>();
+    MdDao mdDao = new MdDao();
 
     MdUpdater updater = new MdUpdater();
 
     @PostConstruct
     void onStart(){
-        System.out.println("starting updater");
+        updater.updateSymbolsIfNeeded();
         updater.start();
     }
 
@@ -48,18 +45,6 @@ public class MainController {
         });
     }
 
-    @GetMapping("/")
-    public Collection<String> selectAll() {
-        return dao.values();
-    }
-
-    @PutMapping("/update")
-    public Collection<String> updateAndSelectAll(
-            @RequestParam(value = "id", defaultValue = "1") int id,
-            @RequestParam("name") String name) {
-        dao.put(id,name);
-        return dao.values();
-    }
 
     List<Metadata> allMetas = new ArrayList<>();
 
@@ -79,9 +64,6 @@ public class MainController {
             return updater.getMeta();
         });
     }
-
-    MdDao mdDao = new MdDao();
-
 
     @GetMapping("/get_ohlcs")
     public Collection<Ohlc> getOhlcs(String code){

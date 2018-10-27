@@ -1,22 +1,28 @@
 package com.funstat;
 
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.Symbol;
 import com.funstat.finam.FinamDownloader;
+import com.funstat.finam.Symbol;
 import com.funstat.store.MdDao;
 import com.funstat.vantage.Source;
 import com.funstat.vantage.VantageDownloader;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class MdUpdater {
 
     public static final String SYMBOLS_TABLE = "symbols";
+    public static final String SYMBOLS_LAST_UPDATED = "SYMBOLS_LAST_UPDATED";
     Map<String, Source> sources = new HashMap<String, Source>() {
         {
             put(FinamDownloader.FINAM, new FinamDownloader());
@@ -38,6 +44,17 @@ public class MdUpdater {
 
     public void start() {
         executor.scheduleAtFixedRate(this::run, 0, 10, TimeUnit.MINUTES);
+    }
+
+
+    public void updateSymbolsIfNeeded(){
+        Pair<String,Long> lastUpdated = Tables.PAIRS.readByKey(mdDao, SYMBOLS_LAST_UPDATED);
+
+        if(lastUpdated == null ||  (System.currentTimeMillis() - lastUpdated.getRight()) > 24*3600_000){
+            System.out.println("updating symbols as they are stale");
+            updateSymbols();
+            Tables.PAIRS.writeSingle(mdDao, Pair.of(SYMBOLS_LAST_UPDATED,System.currentTimeMillis()));
+        }
     }
 
     public void updateSymbols(){
@@ -76,7 +93,7 @@ public class MdUpdater {
 
         Symbol symbol = findSymbol(code);
 
-        mdDao.saveGeneric("requested", Collections.singletonList(symbol), s -> s.code);
+        Tables.REQUESTED.writeSingle(mdDao, symbol);
 
         List<Ohlc> ret = mdDao.queryAll(symbol.code, symbol.source);
         if (ret.isEmpty()) {
@@ -84,14 +101,6 @@ public class MdUpdater {
             ret = mdDao.queryAll(symbol.code, symbol.source);
         }
         return ret;
-    }
-
-
-    ExecutorService updateExecutor = Executors.newSingleThreadExecutor();
-
-    void scheduleUpdate(Symbol symbol){
-
-
     }
 
 

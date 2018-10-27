@@ -2,17 +2,10 @@ package com.funstat.store;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.FinamDownloader;
 import com.funstat.finam.Symbol;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionStatus;
-import org.springframework.transaction.support.SimpleTransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.sqlite.SQLiteDataSource;
 
@@ -24,7 +17,6 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class MdDao {
 
@@ -104,7 +96,7 @@ public class MdDao {
 
     public <T> void saveGeneric(String type, List<T> obj, Function<T,String> keyMapper){
 
-        new JdbcTemplate(ds).execute("create table if not exists " + type + " (json varchar, key varchar primary key )");
+        ensureExistGeneric(type);
 
 
         System.out.println("inserting " + obj.size() + " into " + type);
@@ -124,6 +116,10 @@ public class MdDao {
 
     }
 
+    private void ensureExistGeneric(String type) {
+        new JdbcTemplate(ds).execute("create table if not exists " + type + " (json varchar, key varchar primary key )");
+    }
+
     DataSourceTransactionManager manager = new DataSourceTransactionManager(ds);
 
     private void saveInTransaction(String sql, Map[] data) {
@@ -134,8 +130,9 @@ public class MdDao {
         });
     }
 
-    public <T> List<T> readGeneric(String type, Class<T> clazz){
-        return new JdbcTemplate(ds).query("select * from " + type, (rs, rowNum) -> {
+    public <T> List<T> readGeneric(String tableName, Class<T> clazz){
+        ensureExistGeneric(tableName);
+        return new JdbcTemplate(ds).query("select * from " + tableName, (rs, rowNum) -> {
             return deser(rs.getString("json"), clazz);
         });
     }
