@@ -33,18 +33,14 @@ const getOpts = (data: CandleStickChartProps) => {
     const labels = new Array<any>()
 
     data.tsToLabel.forEach((value, key) => {
-        labels.push({
+        labels.push({...value.attributes,
             point: {
                 xAxis: 0,
                 yAxis: 0,
                 x: key,
                 y: value.level
             },
-            allowOverlap : true,
-            text: value.text,
-            backgroundColor: value.color,
-            verticalAlign: value.drawOnTop ? 'bottom' : 'top',
-            distance : value.drawOnTop ? 10 : -30,
+            allowOverlap : true
             //y: -15
 
         })

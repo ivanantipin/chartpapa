@@ -11,10 +11,12 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class MdUpdater {
 
+    public static final String SYMBOLS_TABLE = "symbols";
     Map<String, Source> sources = new HashMap<String, Source>() {
         {
             put(FinamDownloader.FINAM, new FinamDownloader());
@@ -25,30 +27,38 @@ public class MdUpdater {
     MdDao mdDao = new MdDao();
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
+    ConcurrentHashMap<String, Object> cache = new ConcurrentHashMap<>();
+
+    <T> T getThings(String key, Supplier<T> factory) {
+        return (T) cache.computeIfAbsent(key, k -> {
+            return factory.get();
+        });
+    }
+
 
     public void start() {
         executor.scheduleAtFixedRate(this::run, 0, 10, TimeUnit.MINUTES);
     }
 
-    List<Symbol> metaCache = null;
+    public void updateSymbols(){
+        mdDao.saveGeneric(SYMBOLS_TABLE, sources.values().stream()
+                .flatMap(s -> s.symbols().stream()).filter(s -> {
+                    return s.market.equals("1") || s.source.equals(VantageDownloader.SOURCE);
+                }).collect(Collectors.toList()), s->s.code);
+    }
+
 
     public List<Symbol> getMeta() {
-        if (metaCache == null) {
-            this.metaCache = sources.values().stream().flatMap(s -> s.symbols().stream()).collect(Collectors.toList());
-        }
-        return metaCache;
+        return getThings(SYMBOLS_TABLE, () -> mdDao.readGeneric(SYMBOLS_TABLE, Symbol.class));
     }
 
 
     List<Symbol> getCodesToUpdate() {
-        return mdDao.read("requested", String.class).stream().map(code->findSymbol(code)).collect(Collectors.toList());
+        return mdDao.readGeneric("requested", String.class).stream().map(code -> findSymbol(code)).collect(Collectors.toList());
     }
 
     Symbol findSymbol(String code) {
-        return getMeta().stream().filter(s -> {
-            return s.code.equals(code) && (s.market.equals("1")
-                    || s.market.equals("MICEX"));
-        }).findFirst().get();
+        return getMeta().stream().filter(f -> f.code.equals(code)).findFirst().get();
     }
 
     public void run() {
@@ -63,36 +73,20 @@ public class MdUpdater {
 
         mdDao.saveGeneric("requested", Collections.singletonList(symbol), s -> s.code);
 
-        List<Ohlc> ret = mdDao.queryAll(symbol.tableToPersist());
+        List<Ohlc> ret = mdDao.queryAll(symbol.code, symbol.source);
         if (ret.isEmpty()) {
             update(symbol);
+            ret = mdDao.queryAll(symbol.code, symbol.source);
         }
         return ret;
     }
 
     public void update(Symbol symbol) {
+        LocalDateTime startTime = mdDao.queryLast(symbol.code, symbol.source).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));
+        mdDao.saveOhlc(symbol,sources.get(symbol.source).load(symbol, startTime));
+    }
 
-        LocalDateTime startTime = mdDao.queryLast(symbol.tableToPersist()).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));
-
-        List<Ohlc> data = sources.get(symbol.source).load(symbol, startTime);
-
-        Map[] maps = data.stream().map(oh -> {
-            return new HashMap<String, Object>() {
-                {
-                    put("DT", Timestamp.valueOf(oh.dateTime));
-                    put("OPEN", oh.open);
-                    put("HIGH", oh.high);
-                    put("LOW", oh.low);
-                    put("CLOSE", oh.close);
-                }
-            };
-        }).toArray(sz -> new Map[sz]);
-        System.out.println("to be inserted/updated " + maps.length + " into " + symbol.tableToPersist());
-        try {
-            mdDao.save(symbol.tableToPersist(), maps);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        System.out.println("DONE " + symbol.code);
+    public static void main(String[] args) {
+        new MdUpdater().updateSymbols();
     }
 }

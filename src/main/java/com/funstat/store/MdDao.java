@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -31,30 +32,52 @@ public class MdDao {
 
     {
         ds.setUrl("jdbc:sqlite:/home/ivan/site.db");
+        new JdbcTemplate(ds).execute("create table if not exists ohlc (source varchar, code varchar, dt datetime, o number,h number,l number ,c number, primary key (source,code,dt)) ");
+    }
+
+    public void saveOhlc(Symbol symbol, List<Ohlc> data) {
+        Map[] maps = data.stream().map(oh -> {
+            return new HashMap<String, Object>() {
+                {
+                    put("SOURCE",symbol.source);
+                    put("CODE",symbol.code);
+                    put("DT", Timestamp.valueOf(oh.dateTime));
+                    put("OPEN", oh.open);
+                    put("HIGH", oh.high);
+                    put("LOW", oh.low);
+                    put("CLOSE", oh.close);
+                }
+            };
+        }).toArray(sz -> new Map[sz]);
+        System.out.println("to be inserted/updated " + maps.length + " into " + symbol.code);
+        try {
+            saveInTransaction("insert OR REPLACE into ohlc (SOURCE, CODE, DT,O,H,L,C) values (:SOURCE,:CODE,:DT,:OPEN,:HIGH,:LOW,:CLOSE)", maps);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("DONE " + symbol.code);
     }
 
 
-    public void save(String code, Map[] data) {
-        saveInTransaction("insert OR REPLACE into " + code + " (DT,O,H,L,C) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE)", data);
+    public List<Ohlc> queryAll(String code, String source) {
+        HashMap<String, Object> params = getParamsMap(code, source);
+        return new NamedParameterJdbcTemplate(ds).query("select * from ohlc where code=:CODE and source=:SOURCE order by dt asc ", params, (rs, rowNum) -> mapOhlc(rs));
     }
 
-
-    public List<Ohlc> queryAll(String code) {
-        ensureTableExists(code);
-        return new JdbcTemplate(ds).query("select * from " + code + " order by dt asc ", (rs, rowNum) -> mapOhlc(rs));
+    private HashMap<String, Object> getParamsMap(String code, String source) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("CODE",code);
+        params.put("SOURCE",source);
+        return params;
     }
 
-    private void ensureTableExists(String code) {
-        new JdbcTemplate(ds).execute("create table if not exists " + code + " (dt datetime primary key , o number,h number,l number ,c number) ");
-    }
 
     private Ohlc mapOhlc(ResultSet rs) throws SQLException {
         return new Ohlc(rs.getTimestamp("DT").toLocalDateTime(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"));
     }
 
-    public Optional<Ohlc> queryLast(String code){
-        ensureTableExists(code);
-        List<Ohlc> ret = new JdbcTemplate(ds).query("select * from " + code + " order by dt desc LIMIT 1 ", (rs, rowNum) -> mapOhlc(rs));
+    public Optional<Ohlc> queryLast(String code, String source){
+        List<Ohlc> ret = new NamedParameterJdbcTemplate(ds).query("select * from ohlc where source = :SOURCE and code=:CODE order by dt desc LIMIT 1 ", getParamsMap(code,source), (rs, rowNum) -> mapOhlc(rs));
         return ret.size() == 0 ? Optional.empty() : Optional.of(ret.get(0));
     }
 
@@ -111,7 +134,7 @@ public class MdDao {
         });
     }
 
-    public <T> List<T> read(String type, Class<T> clazz){
+    public <T> List<T> readGeneric(String type, Class<T> clazz){
         return new JdbcTemplate(ds).query("select * from " + type, (rs, rowNum) -> {
             return deser(rs.getString("json"), clazz);
         });

@@ -138,28 +138,16 @@ export interface HLine {
 export interface Label {
     /**
      * 
-     * @type {string}
+     * @type {{ [key: string]: string; }}
      * @memberof Label
      */
-    color: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Label
-     */
-    drawOnTop: boolean;
+    attributes: { [key: string]: string; };
     /**
      * 
      * @type {number}
      * @memberof Label
      */
     level: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Label
-     */
-    text: string;
     /**
      * 
      * @type {string}

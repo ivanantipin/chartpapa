@@ -36,7 +36,7 @@ const fetchChart = (code: string): Promise<CandleStickChartProps> => {
             lb.set(parseDate(ll.time).getTime(), ll)
         })
         return {
-            name : code,
+            name: code,
             data: ohlcs,
             tsToLabel: lb,
             hlines: arr[1].lines
@@ -45,45 +45,50 @@ const fetchChart = (code: string): Promise<CandleStickChartProps> => {
 }
 
 
-class SeqPanel extends Component<MainStore, { inst?: string, loading : boolean, chart?: CandleStickChartProps }> {
+class SeqPanel extends Component<MainStore, { inst?: string, loading: boolean, chart?: CandleStickChartProps }> {
 
-    constructor(props: MainStore){
+    constructor(props: MainStore) {
         super(props)
-        this.state = {loading : false}
+        this.state = {loading: false}
     }
 
-    onSelect(sel : {label: string, value : string}) {
-        this.setState({...this.state, loading : true})
+    onSelect(sel: { label: string, value: string }) {
+        if (!sel) {
+            return
+        }
+        this.setState({...this.state, loading: true})
         fetchChart(sel.label).then(ch => {
-            this.setState({inst : sel.label, loading : false, chart: ch})
-        }).catch(e=>{
-            console.log('err',e)
+            this.setState({inst: sel.label, loading: false, chart: ch})
+        }).catch(e => {
+            console.log('err', e)
         })
         console.log('state', this.state)
     }
 
-    getSome(){
-        if(this.state.loading){
+    getSome() {
+        if (this.state.loading) {
             console.log('spinning')
-            return <Spin style={{top : '50%', left : '50%' , position: 'absolute'}} size='large'/>
+            return <Spin style={{top: '50%', left: '50%', position: 'absolute'}} size='large'/>
         }
-        if(this.state.chart == null){
+        if (this.state.chart == null) {
             return <div/>
-        }else {
+        } else {
             return <HOhlcChart {...this.state.chart}/>
         }
     }
+
 
 
     render() {
 
         return (
             <div className="widget">
-                <Select style={{width : 150}}
-                    onChange={this.onSelect.bind(this)}
-                    value={{value : this.state.inst, label : this.state.inst}} options={this.props.instruments.map(r => {
-                    return SeqPanel.instrToOpt(r);
-                })}/>
+                <Select style={{width: 150}}
+                        onChange={this.onSelect.bind(this)}
+                        value={{value: this.state.inst, label: this.state.inst}}
+                        options={this.props.instruments.map(r => {
+                            return SeqPanel.instrToOpt(r);
+                        })}/>
                 {
                     this.getSome.bind(this)()
                 }
@@ -101,5 +106,5 @@ class SeqPanel extends Component<MainStore, { inst?: string, loading : boolean, 
 }
 
 
-export default connect<MainStore,any>((l : MainStore) => l)(SeqPanel)
+export default connect<MainStore, any>((l: MainStore) => l)(SeqPanel)
 

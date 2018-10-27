@@ -1,6 +1,7 @@
 package com.funstat;
 
 import com.funstat.domain.*;
+import com.funstat.finam.FinamDownloader;
 import com.funstat.finam.Symbol;
 import com.funstat.ohlc.Metadata;
 import com.funstat.sequenta.Sequenta;
@@ -75,9 +76,7 @@ public class MainController {
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
     public Collection<String> instruments(){
         return getThings("instruments", ()->{
-            return updater.getMeta().stream().filter(s->{
-                return s.market.equals("1") || s.market.equals(VantageDownloader.MICEX);
-            })                    .map(s->s.code).collect(Collectors.toList());
+            return updater.getMeta().stream().map(s->s.code).collect(Collectors.toList());
         });
     }
 
@@ -98,7 +97,7 @@ public class MainController {
     public Map<String,Collection<TimePoint>> getSeries(@RequestParam(name = "codes")  ArrayList<String> codes) {
         Map<String,Collection<TimePoint>> mm = new HashMap<>();
         codes.forEach(c->{
-            List<Ohlc> ohlcs = mdDao.queryAll(c);
+            List<Ohlc> ohlcs = mdDao.queryAll(c, FinamDownloader.FINAM);
             List<TimePoint> lst = ohlcs.stream().map(oh -> new TimePoint(oh.dateTime, oh.close)).collect(Collectors.toList());
             Collections.sort(lst);
             mm.put(c, lst);
@@ -115,6 +114,7 @@ public class MainController {
                 .directModelSubstitute(LocalDate.class, String.class)
                 .select()
                 .apis(RequestHandlerSelectors.any())
+
                 .paths(PathSelectors.regex("/.*"))
                 .build()
                 .pathMapping("/");    }

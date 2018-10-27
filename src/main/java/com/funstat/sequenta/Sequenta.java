@@ -80,8 +80,12 @@ public class Sequenta {
             this.up = up;
         }
 
-        double recycleRatio(){
-            return this.range()/recycleRef.range();
+        public Optional<Double> recycleRatio(){
+
+            if(recycleRef == null){
+                return Optional.empty();
+            }
+            return Optional.of(recycleRef.range()/this.range());
         }
 
         boolean reached(){
@@ -235,41 +239,4 @@ public class Sequenta {
         }
         return ret;
     }
-
-
-
-    public static void testSequenta(){
-        Sequenta sequenta = new Sequenta();
-        List<Ohlc> testHistory = new ArrayList<>();
-
-        sequenta.onOhlc(new Ohlc(LocalDateTime.now(), 1, 2, 0, 1 ));
-        sequenta.onOhlc(new Ohlc(LocalDateTime.now(), 1, 2, 0, 1 ));
-        sequenta.onOhlc(new Ohlc(LocalDateTime.now(), 1, 2, 0, 1 ));
-        sequenta.onOhlc(new Ohlc(LocalDateTime.now(), 1, 2, 0, 1 ));
-
-        for(int i = 1; i < 10; i++){
-            sequenta.onOhlc(new Ohlc(LocalDateTime.now(), i, i - 1, i, i + 1));
-        }
-
-        for (int i = 0; i < 12; i++){
-            Ohlc last = sequenta.last(2);
-            sequenta.onOhlc(last);
-            sequenta.onOhlc(new Ohlc(last.dateTime, last.close,last.high + 0.2,last.low - 0.2,last.high + 0.1));
-        }
-
-        Ohlc last = sequenta.last(2);
-        sequenta.onOhlc(last);
-        List<Signal> signals = sequenta.onOhlc(new Ohlc(last.dateTime, last.close,last.high + 0.2,last.low - 0.2,last.high + 0.1));
-        System.out.println(signals);
-    }
-
-    public static void main(String[] args) {
-        MdDao mdDao = new MdDao();
-        List<Ohlc> tatn = mdDao.queryAll("TATN");
-        Sequenta sequenta = new Sequenta();
-        tatn.forEach(oh->{
-            System.out.println(sequenta.onOhlc(oh));
-        });
-    }
-
 }

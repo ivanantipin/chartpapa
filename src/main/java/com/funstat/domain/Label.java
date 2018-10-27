@@ -3,33 +3,25 @@ package com.funstat.domain;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Label {
-    String text;
-    LocalDateTime time;
-    double level;
-    String color;
-    boolean drawOnTop;
+    final double level;
 
-    public Label(String text, LocalDateTime time, double level, String color,
-                 boolean drawOnTop
-    ) {
-        this.text = text;
+    private LocalDateTime time;
+    final Map<String, String> attributes;
+
+    public Label(LocalDateTime time, double level, Map<String, String> attributes) {
         this.time = time;
+        this.attributes = attributes;
         this.level = level;
-        this.color = color;
-        this.drawOnTop = drawOnTop;
     }
 
-
-    @ApiModelProperty(required = true)
-    public String getText() {
-        return text;
-    }
-
-    @ApiModelProperty(required = true)
-    public LocalDateTime getTime() {
-        return time;
+    public Label(double level, LocalDateTime time) {
+        this.level = level;
+        this.time = time;
+        attributes = new HashMap<>();
     }
 
     @ApiModelProperty(required = true)
@@ -38,12 +30,20 @@ public class Label {
     }
 
     @ApiModelProperty(required = true)
-    public String getColor() {
-        return color;
+    public Map<String, String> getAttributes() {
+        return attributes;
     }
 
     @ApiModelProperty(required = true)
-    public boolean isDrawOnTop() {
-        return drawOnTop;
+    public LocalDateTime getTime() {
+        return time;
     }
+
+    public Label withAttribute(String key, String obj){
+        HashMap<String, String> attrs = new HashMap<>(this.attributes);
+        attrs.put(key,obj);
+        return new Label(this.time, this.level, attrs);
+    }
+
+
 }

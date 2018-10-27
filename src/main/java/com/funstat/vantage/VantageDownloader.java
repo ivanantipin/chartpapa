@@ -2,6 +2,7 @@ package com.funstat.vantage;
 
 import com.funstat.domain.Ohlc;
 import com.funstat.finam.Symbol;
+import com.funstat.store.MdDao;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -43,7 +44,9 @@ public class VantageDownloader implements Source{
 
     @Override
     public List<Symbol> symbols() {
-        return Arrays.asList(new Symbol("RASP.MOS","RASP.MOS", MICEX,"RASP.MOS", SOURCE));
+        List<Symbol> ret = new MdDao().readGeneric("vantage_symbols", Symbol.class);
+        ret.add(new Symbol("RASP.MOS","RASP.MOS", MICEX,"RASP.MOS", SOURCE));
+        return ret;
     }
 
     @Override
