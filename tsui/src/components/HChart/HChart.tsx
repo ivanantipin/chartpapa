@@ -1,8 +1,10 @@
 import {Component, default as React} from "react";
-import * as Highcharts from "highcharts";
+// import * as Highcharts from "highcharts";
 import {TimePointTr} from "repository";
 
-let HighchartsReact = require('highcharts-react-official')
+// let HighchartsReact = require('highcharts-react-official')
+
+let HighchartsReact = require('react-highcharts/ReactHighcharts.src');
 
 
 const getOpts=(data : Map<string, Array<TimePointTr>>)=>{
@@ -78,8 +80,9 @@ export default class HChart extends Component<{series : Map<string, Array<TimePo
         return(
             <div style={{width : 500}}>
         <HighchartsReact
-            highcharts={Highcharts}
-            options={getOpts(this.props.series)}
+            config={getOpts(this.props.series)}
+            // highcharts={Highcharts}
+            // options={getOpts(this.props.series)}
         /></div>)
     }
 }
