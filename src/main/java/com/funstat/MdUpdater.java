@@ -7,7 +7,7 @@ import com.funstat.store.MdDao;
 import com.funstat.vantage.Source;
 import com.funstat.vantage.VSymbolDownloader;
 import com.funstat.vantage.VantageDownloader;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -47,21 +47,21 @@ public class MdUpdater {
 
 
     public void updateSymbolsIfNeeded(){
-        Pair<String,Long> lastUpdated = Tables.PAIRS.readByKey(mdDao, SYMBOLS_LAST_UPDATED);
+        MutablePair<String,Long> lastUpdated = Tables.PAIRS.readByKey(mdDao, SYMBOLS_LAST_UPDATED);
 
-        Pair<String,Long> lastVantageUpdated = Tables.PAIRS.readByKey(mdDao, VANTAGE_LAST_UPDATED);
+        MutablePair<String,Long> lastVantageUpdated = Tables.PAIRS.readByKey(mdDao, VANTAGE_LAST_UPDATED);
 
         if(lastUpdated == null ||  (System.currentTimeMillis() - lastUpdated.getRight()) > 24*3600_000){
             System.out.println("updating symbols as they are stale");
             updateSymbols();
-            Tables.PAIRS.writeSingle(mdDao, Pair.of(SYMBOLS_LAST_UPDATED,System.currentTimeMillis()));
+            Tables.PAIRS.writeSingle(mdDao, MutablePair.of(SYMBOLS_LAST_UPDATED,System.currentTimeMillis()));
         }
 
         if(lastVantageUpdated == null){
             ExecutorService exec = Executors.newSingleThreadExecutor();
             exec.submit(()->{
                 VSymbolDownloader.updateVantageSymbols(mdDao);
-                Tables.PAIRS.writeSingle(mdDao, Pair.of(VANTAGE_LAST_UPDATED,System.currentTimeMillis()));
+                Tables.PAIRS.writeSingle(mdDao, MutablePair.of(VANTAGE_LAST_UPDATED,System.currentTimeMillis()));
             });
 
         }
