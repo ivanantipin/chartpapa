@@ -5,6 +5,7 @@ import com.funstat.finam.FinamDownloader;
 import com.funstat.finam.Symbol;
 import com.funstat.store.MdDao;
 import com.funstat.vantage.Source;
+import com.funstat.vantage.VSymbolDownloader;
 import com.funstat.vantage.VantageDownloader;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -12,10 +13,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -23,6 +21,7 @@ public class MdUpdater {
 
     public static final String SYMBOLS_TABLE = "symbols";
     public static final String SYMBOLS_LAST_UPDATED = "SYMBOLS_LAST_UPDATED";
+    private static final String VANTAGE_LAST_UPDATED = "VANTAGE_LAST_UPDATED";
     Map<String, Source> sources = new HashMap<String, Source>() {
         {
             put(FinamDownloader.FINAM, new FinamDownloader());
@@ -50,10 +49,21 @@ public class MdUpdater {
     public void updateSymbolsIfNeeded(){
         Pair<String,Long> lastUpdated = Tables.PAIRS.readByKey(mdDao, SYMBOLS_LAST_UPDATED);
 
+        Pair<String,Long> lastVantageUpdated = Tables.PAIRS.readByKey(mdDao, VANTAGE_LAST_UPDATED);
+
         if(lastUpdated == null ||  (System.currentTimeMillis() - lastUpdated.getRight()) > 24*3600_000){
             System.out.println("updating symbols as they are stale");
             updateSymbols();
             Tables.PAIRS.writeSingle(mdDao, Pair.of(SYMBOLS_LAST_UPDATED,System.currentTimeMillis()));
+        }
+
+        if(lastVantageUpdated == null){
+            ExecutorService exec = Executors.newSingleThreadExecutor();
+            exec.submit(()->{
+                VSymbolDownloader.updateVantageSymbols(mdDao);
+                Tables.PAIRS.writeSingle(mdDao, Pair.of(VANTAGE_LAST_UPDATED,System.currentTimeMillis()));
+            });
+
         }
     }
 
@@ -66,12 +76,12 @@ public class MdUpdater {
 
 
     public List<Symbol> getMeta() {
-        return getThings(SYMBOLS_TABLE, () -> mdDao.readGeneric(SYMBOLS_TABLE, Symbol.class));
+        return getThings(SYMBOLS_TABLE, () -> Tables.SYMBOLS.read(mdDao));
     }
 
 
     List<Symbol> getCodesToUpdate() {
-        return mdDao.readGeneric("requested", Symbol.class);
+        return Tables.REQUESTED.read(mdDao);
     }
 
     Symbol findSymbol(String code) {
@@ -79,7 +89,6 @@ public class MdUpdater {
     }
 
     public void run() {
-        System.out.println("running aoeuaoeu");
         try {
             getCodesToUpdate().forEach(symbol -> {
                 update(symbol);

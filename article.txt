@@ -1,54 +1,66 @@
-In the past few years, I noticed that the so-called scrum-agile-extreme programming has got a second life.
-First time I heard about it at 2000 something, I do not remember actually, I had quick glance and it passed away.
-Personally I am skeptical about the religion of scrum, especially if it is viewed as a silver bullet.
-For some time I did not pay attention to it, scrum masters fluttered around with clever faces, but in fact they were harmless like butterflies
-and that's why I did not bother much.
-But eventually it stuck into my head as I do not like idlers and I spent some time thinking about the nature of this anomaly,
-why it gets more attention than it deserves to and came to some interesting conclusion...
+First time when I heard about agile programming approach was in 2000x something,
+I had quick glance at it and it passed by without big impact on how I organized my work.
 
-Here you are..
+In the past few years, I noticed that scrumy-agility got the new momentum, maybe it is just my subjective perception,I do not know.
 
-It all starts from so called "senior management". Let's picture ordinary "senior management" in ordinary organization.
+Scum mastering became a "profession", so people seriously do a full time work on this agenda.
 
-They are usually distinguished from others by sweet speaking, diagrams drawing and working the angles,
-but, as you may notice, software making usually absent in those list of skills.
+Personally I was always skeptical about the religion of scrum, especially if it was viewed as a silver bullet.
 
-When such a manager got piece of happiness in the form of IT department he starts scratching his head and thinking about what to do about.
+So full time scrum masters fluttered around with clever faces, they were harmless like butterflies, but I do not like idlers
+and I spent some spare time thinking about the nature of this anomaly, why it gets more attention than it deserves to.
 
-Then, he/she usually comes with a brilliant idea, to abstract themselves from stupid programmers with an intelligent layer
-presented by all sorts of masters: scram, agile, yoda, you name masters plus enterprise architects who would translate
-binary thoughts of IT developers into something understandable i.e. powerpoint presentation.
+Here you are, my pure subjective conclusion about reasoning of that ..
 
-Bingo! the question is settled, HRs hires scrum masters and they rushing to fix the problem.
-and senior managers get what they used to digest - power points, sexy charts and diagrams.
+It all starts from so called "senior management".
 
-Though there is small problem that slips those attention,
+Lets make a mind experiment and picture ordinary "senior management" in ordinary organization.
 
-All these scrum idlers unfortunately understand in no way more than the notorious "senior management" in software making.
-From my experience they are either failed ex-programmers or product of short courses of "agile mastering" bullshit.
+These people are usually distinguished from others by sweet speaking, excellent diagrams drawing and working the angles,
+but, as you may notice, software making is not in this skills list.
 
-and they, in turn, would not mind abstracting from low-level items, but who would give them.
+When such a "manager" got piece of IT in his area of responsibility
+he starts scratching his head and thinking about what to do next about it.
 
-so they have to dance between their bosses and progs in order to reach out longer, earn more.
+Then, he usually comes with a brilliant idea, to abstract himself from nerdy programmers with an intelligent layer
+presented by all sorts of masters: scrum, agile, yoda,enterprise architects, etc.
 
-There is zero profit in this setup, this abstraction layer usually acts as Chinese whispers ,
-in case of success ( thanks to good progs) they are stealing victory and report it with fanfares
-otherwise they blame progers, so this is win-win situation for them.
+Main purpose of this layer is to translate binary thoughts of IT into something understandable
+i.e. powerpoint presentations, jira reports etc.
+
+Bingo! the problem is solved, HRs hires scrum masters and they rushes fixing the problem,
+
+senior managers get what they used to digest - power points, sexy charts and diagrams.
+
+There is small problem that usually come to the scene,
+
+this new "intelligent layer" unfortunately understands in no way more than the notorious "senior management" in software making.
+
+From my experience scrum masters could be anything from taxi driver to ex-managers, but they never are close to core IT.
+
+Those education usually consists of some sort of "short agile/scrum master course" and here you are,
+brand new agile master looking for new challenge.
+
+There is zero profit in described setup, the abstraction layer usually acts as Chinese whispers,
+it just add additional entropy into play.
+
+So if your IT is already fucked then scrum plugin would just add some more mess and formalities, you better
+fix IT in that case,
+in case of shiny IT experienced peoplo knows how to organize
+release cycles, planning, risk management etc, and additional scrum yoda would
+just play stupid ( I saw it many times ) in best case and in worst case would
+bother developers with stupid catchup meetings trying to get the clue.
+
+I have never witnessed scrum mastering solving real big problems, at the same time I
+saw many times when a modest programmer, like me, saved relatively big projects from total fuck up.
 
 
-I have never witnessed when a master's scrum really solved problems, at the same time I
-witnessed many times when a modest kid, like me, pulled out decent projects over which the
 
-hordes of nedprogs with the skraf of the brotherhood were piling.
+Bottom line if you want to fix your it just hire good programmers do not try to look solution in scrum,
+all experienced guys have already
 
-#Progs are cracking problems not the scrum musters. If the IT stuff is shit, then no one scrum master would pull out - shit-in-shit-out as they say.
+If the IT stuff is shit, then no one scrum master would pull out - shit-in-shit-out as they say.
 
-Steve Jobs, by the way, did not hesitate to press the buttons on the iPhone checking whether it is convenient.
+Some time in future I will may write small article about "pure" architects, they also funny creatures in the landscape
+of mediocre IT.
 
-In fact, the whole story, the American management model does not work from the word at all.
-for those who do not know about this American in which managers are not going through the food chain of the career path,
-in contrast to the Japanese.
-
-I'm for the Japanese !!
-
-how can I write about the enterprise architecture of my little football fans.

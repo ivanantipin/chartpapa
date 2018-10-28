@@ -94,7 +94,7 @@ public class MdDao {
         }
     }
 
-    public <T> void saveGeneric(String type, List<T> obj, Function<T,String> keyMapper){
+    public synchronized  <T> void saveGeneric(String type, List<T> obj, Function<T,String> keyMapper){
 
         ensureExistGeneric(type);
 
@@ -130,7 +130,7 @@ public class MdDao {
         });
     }
 
-    public <T> List<T> readGeneric(String tableName, Class<T> clazz){
+    public synchronized <T> List<T> readGeneric(String tableName, Class<T> clazz){
         ensureExistGeneric(tableName);
         return new JdbcTemplate(ds).query("select * from " + tableName, (rs, rowNum) -> {
             return deser(rs.getString("json"), clazz);
