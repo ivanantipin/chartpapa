@@ -98,10 +98,7 @@ public class MdDao {
 
         ensureExistGeneric(type);
 
-
         System.out.println("inserting " + obj.size() + " into " + type);
-
-        AtomicInteger cnt = new AtomicInteger();
 
         HashMap[] data = obj.stream().map(ob -> {
             return new HashMap() {

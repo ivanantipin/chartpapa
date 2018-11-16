@@ -32,6 +32,9 @@ public class VSymbolDownloader {
                     String[] data = oh.split(",");
                     return new Symbol(data[0], data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0], VantageDownloader.SOURCE);
                 }).collect(Collectors.toList());
+                if(rows.size() == 0){
+                    System.out.println(entity.getBody());
+                }
                 Tables.SYMBOLS.write(mdDao, rows);
             }
         }
