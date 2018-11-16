@@ -15,9 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class AnnotationCreator {
 
-    static List<Integer> displayedCounts = Arrays.asList(11,12, 20);
+    static List<Integer> displayedCounts = Arrays.asList(11, 12, 20);
 
-    Map<String,String> lighAnn = new HashedMap(){
+    Map<String, String> lighAnn = new HashedMap() {
         {
             put("shape", "connector");
             put("align", "right");
@@ -40,12 +40,12 @@ public class AnnotationCreator {
     },
 */
 
-static String formatDbl(double dbl){
-    return new DecimalFormat("#.##").format(dbl);
-}
+    static String formatDbl(double dbl) {
+        return new DecimalFormat("#.##").format(dbl);
+    }
 
 
-    public static Annotations createAnnotations(String code, MdUpdater updater) {
+    public static Annotations createAnnotations(List<Ohlc> ohlcs) {
         Sequenta sequenta = new Sequenta();
 
         List<Label> labels = new ArrayList<>();
@@ -54,12 +54,11 @@ static String formatDbl(double dbl){
 
         AtomicInteger curLine = new AtomicInteger(0);
 
-        List<Ohlc> ohlcs = updater.get(code);
-        for(int ci = 0; ci < ohlcs.size(); ci++){
+        for (int ci = 0; ci < ohlcs.size(); ci++) {
             Ohlc oh = ohlcs.get(ci);
             List<Signal> signals = sequenta.onOhlc(oh);
             int finalCi = ci;
-            signals.forEach(s->{
+            signals.forEach(s -> {
 
                 HashMap<String, String> base = new HashMap<>();
 
@@ -72,26 +71,26 @@ static String formatDbl(double dbl){
 
                 Label baseLabel = new Label(oh.dateTime, level, base);
 
-                switch (s.type){
+                switch (s.type) {
                     case Cdn:
                         int count = s.reference.countDowns.size();
-                        if(count == 8 ||
-                                (finalCi > ohlcs.size() - 10) && displayedCounts.contains(count)){
+                        if (count == 8 ||
+                                (finalCi > ohlcs.size() - 10) && displayedCounts.contains(count)) {
                             labels.add(baseLabel.withAttribute("text", "" + count)
-                                    .withAttribute("shape","connector")
+                                    .withAttribute("shape", "connector")
                             );
                         }
                         break;
                     case Deffered:
-                        if(s.reference.getCompletedSignal() < 13){
+                        if (s.reference.getCompletedSignal() < 13) {
                             labels.add(baseLabel.withAttribute("text", "+")
-                                    .withAttribute("shape","connector")
+                                    .withAttribute("shape", "connector")
                             );
                         }
                         break;
                     case Signal:
 
-                        String recycle = s.reference.recycleRatio().map(ratio ->"/R=" + formatDbl(ratio)).orElse("");
+                        String recycle = s.reference.recycleRatio().map(ratio -> "/R=" + formatDbl(ratio)).orElse("");
 
                         labels.add(baseLabel.withAttribute("text", "" + s.reference.getCompletedSignal() + recycle));
                         Ohlc endOh = ohlcs.get(Math.min(finalCi + 3, ohlcs.size() - 1));
@@ -107,17 +106,17 @@ static String formatDbl(double dbl){
                         HLine hhline = new HLine(s.reference.getStart(), s.reference.getEnd(), s.reference.getTdst())
                                 .withAttribute("dashStyle", "ShortDash")
                                 .withAttribute("color", s.reference.up ? "green" : "red");
-                                ;
+                        ;
                         lines.add(hhline);
-                        while (curLine.get() < lines.size() - 5){
-                            lines.set(curLine.get(),lines.get(curLine.get()).copyWithNewEnd(oh.dateTime));
+                        while (curLine.get() < lines.size() - 5) {
+                            lines.set(curLine.get(), lines.get(curLine.get()).copyWithNewEnd(oh.dateTime));
                             curLine.incrementAndGet();
                         }
                         break;
                     case Flip:
                         double clevel = s.reference.up ? oh.high : oh.low;
                         labels.add(baseLabel
-                                .withAttribute("text","" + (finalCi - s.reference.start + 1))
+                                .withAttribute("text", "" + (finalCi - s.reference.start + 1))
                                 .withAttribute("backgroundColor", "white")
                                 .withAttribute("shape", "circle")
                         );
@@ -125,25 +124,25 @@ static String formatDbl(double dbl){
                 }
             });
         }
-        while (curLine.get() < lines.size()){
-            lines.set(curLine.get(),lines.get(curLine.get()).copyWithNewEnd(ohlcs.get(ohlcs.size() - 1).dateTime));
+        while (curLine.get() < lines.size()) {
+            lines.set(curLine.get(), lines.get(curLine.get()).copyWithNewEnd(ohlcs.get(ohlcs.size() - 1).dateTime));
             curLine.incrementAndGet();
         }
         lines.addAll(lines0);
-        return new Annotations(labels,lines);
+        return new Annotations(labels, lines);
     }
 
     private static double calcStopLine(List<Ohlc> ohlcs, int ci, Signal s) {
         double curLevel;
-        if(s.reference.up){
+        if (s.reference.up) {
             curLevel = Double.MIN_VALUE;
-            for(int i = s.reference.start; i <= ci; i++){
+            for (int i = s.reference.start; i <= ci; i++) {
                 Ohlc ohh = ohlcs.get(i);
                 curLevel = Math.max(curLevel, ohh.high + ohh.getRange());
             }
-        }else {
+        } else {
             curLevel = Double.MAX_VALUE;
-            for(int i = s.reference.start; i < ci; i++){
+            for (int i = s.reference.start; i < ci; i++) {
                 Ohlc ohh = ohlcs.get(i);
                 curLevel = Math.min(curLevel, ohh.low - ohh.getRange());
             }

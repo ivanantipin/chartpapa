@@ -1,7 +1,6 @@
 package com.funstat;
 
-import com.funstat.finam.Symbol;
-import com.funstat.store.MdDao;
+import com.funstat.store.GenericDao;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,25 +19,25 @@ public class PersistDescriptor<T> {
         this.keyExtractor = keyExtractor;
     }
 
-    public List<T> read(MdDao mdDao){
+    public List<T> read(GenericDao mdDao){
         return mdDao.readGeneric(table, clazz);
     }
 
-    public T readByKey(MdDao dao, String key){
+    public T readByKey(GenericDao dao, String key){
         return readAsMap(dao).get(key);
     }
 
 
 
-    public Map<String,T> readAsMap(MdDao mdDao){
+    public Map<String,T> readAsMap(GenericDao mdDao){
         return mdDao.readGeneric(table, clazz).stream().collect(Collectors.toMap(s->keyExtractor.apply(s),s->s));
     }
 
-    public void write(MdDao dao, List<T> data){
+    public void write(GenericDao dao, List<T> data){
         dao.saveGeneric(table, data, keyExtractor);
     }
 
-    public void writeSingle(MdDao dao, T data){
+    public void writeSingle(GenericDao dao, T data){
         dao.saveGeneric(table, Collections.singletonList(data),keyExtractor);
     }
 }

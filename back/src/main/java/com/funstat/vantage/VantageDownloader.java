@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,8 @@ public class VantageDownloader implements Source{
     public static final String SOURCE = "VANTAGE";
     public static final String MICEX = "MICEX";
     static DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    MdDao mdDao;
 
 
     public static void main(String[] args) {
@@ -44,9 +47,14 @@ public class VantageDownloader implements Source{
 
     @Override
     public List<Symbol> symbols() {
-        List<Symbol> ret = new MdDao().readGeneric("vantage_symbols", Symbol.class);
+        /*
+        fixme
+                List<Symbol> ret = mdDao.readGeneric("vantage_symbols", Symbol.class);
         ret.add(new Symbol("RASP.MOS","RASP.MOS", MICEX,"RASP.MOS", SOURCE));
         return ret;
+
+         */
+        return new ArrayList<>();
     }
 
     @Override

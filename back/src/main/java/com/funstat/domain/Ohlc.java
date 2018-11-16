@@ -25,7 +25,22 @@ public class Ohlc implements Comparable<Ohlc>{
         if(low > Math.min(Math.min(close,open),high)){
             throw new RuntimeException("not valid low " + this);
         }
+    }
 
+    public Ohlc(Ohlc ohlc) {
+        this(ohlc.dateTime,ohlc.open,ohlc.high,ohlc.low,ohlc.close);
+    }
+
+    public Ohlc withTime(LocalDateTime time){
+        return new Ohlc(time,open,high,low,close);
+    }
+
+    public Ohlc merge(Ohlc ohlc){
+        return new Ohlc(ohlc.dateTime, open,
+                Math.max(high, ohlc.high),
+                Math.min(low, ohlc.low),
+                ohlc.close
+                );
     }
 
     static DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");

@@ -3,10 +3,10 @@ package com.funstat;
 import com.funstat.domain.Annotations;
 import com.funstat.domain.Ohlc;
 import com.funstat.domain.TimePoint;
-import com.funstat.finam.FinamDownloader;
 import com.funstat.finam.Symbol;
 import com.funstat.ohlc.Metadata;
-import com.funstat.store.MdDao;
+import com.funstat.store.MdStorage;
+import com.funstat.store.MdStorageImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.builders.PathSelectors;
@@ -15,11 +15,10 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
 import javax.annotation.PostConstruct;
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -27,24 +26,13 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 public class MainController {
 
-    MdDao mdDao = new MdDao();
-
-    MdUpdater updater = new MdUpdater();
+    MdStorage storage = new MdStorageImpl("/ddisk/globaldatabase/md");
 
     @PostConstruct
     void onStart(){
-        updater.updateSymbolsIfNeeded();
-        updater.start();
+        storage.updateSymbolsMeta();
+
     }
-
-    ConcurrentHashMap<String,Object> cache = new ConcurrentHashMap<>();
-
-    <T> T getThings(String key, Supplier<T> factory){
-        return (T) cache.computeIfAbsent(key, k->{
-            return factory.get();
-        });
-    }
-
 
     List<Metadata> allMetas = new ArrayList<>();
 
@@ -54,37 +42,34 @@ public class MainController {
     }
 
     @PutMapping("/put_meta")
-    public void addMetadata(@RequestParam("metadata") Metadata metadata){
+    public void addMetadata(@Valid @RequestParam Metadata metadata){
         allMetas.add(metadata);
     }
 
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
     public Collection<Symbol> instruments(){
-        return getThings("instruments", ()->{
-            return updater.getMeta();
-        });
+        return storage.getMeta();
     }
 
-    @GetMapping("/get_ohlcs")
-    public Collection<Ohlc> getOhlcs(String code){
-        return updater.get(code);
+    @PostMapping("/get_ohlcs")
+    public Collection<Ohlc> getOhlcs(@RequestParam  Symbol symbol, String interval){
+        return storage.read(symbol, interval);
     }
 
-    @GetMapping("/get_annotations")
-    public Annotations getAnnotations(String code){
-        return AnnotationCreator.createAnnotations(code,updater);
+    @PostMapping("/get_annotations")
+    public Annotations getAnnotations(@RequestParam Symbol symbol,  @RequestParam String interval){
+        List<Ohlc> ohlcs = storage.read(symbol, interval);
+        return AnnotationCreator.createAnnotations(ohlcs);
     }
 
     @GetMapping("/get_series")
-    public Map<String,Collection<TimePoint>> getSeries(@RequestParam(name = "codes")  ArrayList<String> codes) {
+    public Map<String,Collection<TimePoint>> getSeries(Symbol[] codes, String interval) {
         Map<String,Collection<TimePoint>> mm = new HashMap<>();
-        codes.forEach(c->{
-            List<Ohlc> ohlcs = mdDao.queryAll(c, FinamDownloader.FINAM);
-            List<TimePoint> lst = ohlcs.stream().map(oh -> new TimePoint(oh.dateTime, oh.close)).collect(Collectors.toList());
+        Arrays.stream(codes).forEach(c->{
+            List<TimePoint> lst = storage.read(c,interval).stream().map(oh -> new TimePoint(oh.dateTime, oh.close)).collect(Collectors.toList());
             Collections.sort(lst);
-            mm.put(c, lst);
+            mm.put(c.code, lst);
         });
-        System.out.println("return" + mm);
         return mm;
     }
 

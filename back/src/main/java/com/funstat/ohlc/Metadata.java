@@ -12,4 +12,12 @@ public class Metadata{
         this.symbols = symbols;
         this.period = period;
     }
+
+    public List<Symbol> getSymbols() {
+        return symbols;
+    }
+
+    public int getPeriod() {
+        return period;
+    }
 }

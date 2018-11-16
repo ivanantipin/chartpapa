@@ -1,0 +1,1248 @@
+Symbol;Name;Price (Intraday);Avg Vol (3 month);Market Cap
+AAPL;Apple Inc.;203.16;34.169M;965.572B
+EC;Ecopetrol S.A.;21.65;1.213M;890.793B
+MSFT;Microsoft Corporation;107.45;29.154M;824.426B
+AMZN;Amazon.com, Inc.;1650.71;5.892M;805.332B
+GOOGL;Alphabet Inc.;1068.8;1.978M;736.542B
+GOOG;Alphabet Inc.;1052.42;1.657M;735.116B
+BRK-B;Berkshire Hathaway Inc.;217.16;4.354M;538.905B
+FB;Facebook, Inc.;149.63;25.333M;429.517B
+JNJ;Johnson & Johnson;142.53;6.392M;382.343B
+BABA;Alibaba Group Holding Limited;148.65;25.214M;381.674B
+JPM;JPMorgan Chase & Co.;109.04;13.95M;362.618B
+TCEHY;Tencent Holdings Limited;37.69;6.781M;363.932B
+XOM;Exxon Mobil Corporation;81.52;11.88M;345.31B
+V;Visa Inc.;140.61;8.617M;311.634B
+WMT;Walmart Inc.;102.41;8.566M;299.99B
+BAC;Bank of America Corporation;28.16;60.39M;276.27B
+RDS-A;Royal Dutch Shell plc;63.05;3.546M;278.457B
+RDS-B;Royal Dutch Shell plc;65.23;1.766M;278.602B
+WFC;Wells Fargo & Company;53.43;20.538M;251.644B
+UNH;UnitedHealth Group Incorporated;263.35;2.887M;253.833B
+PFE;Pfizer Inc.;43.15;21.185M;253.448B
+VZ;Verizon Communications Inc.;56.73;15.828M;234.719B
+PG;The Procter & Gamble Company;91.13;8.738M;227.229B
+CVX;Chevron Corporation;118;6.037M;226.345B
+T;AT&T Inc.;30.67;34.571M;223.496B
+INTC;Intel Corporation;47.31;27.203M;215.603B
+CSCO;Cisco Systems, Inc.;46.32;21.093M;211.698B
+BA;The Boeing Company;367.71;3.541M;208.641B
+KO;The Coca-Cola Company;48.92;11.814M;208.186B
+HD;The Home Depot, Inc.;181.54;4.776M;207.707B
+MA;Mastercard Incorporated;199.07;3.84M;205.598B
+NVS;Novartis AG;88.01;2.123M;203.322B
+TSM;Taiwan Semiconductor Manufacturing Company Limited;38.76;8.14M;197.734B
+MRK;Merck & Co., Inc.;73.56;9.518M;195.635B
+ORCL;Oracle Corporation;49.05;18.076M;185.833B
+CMCSA;Comcast Corporation;37.82;21.503M;172.062B
+DIS;The Walt Disney Company;116;7.139M;172.52B
+C;Citigroup Inc.;66.59;15.629M;162.622B
+HSBC;HSBC Holdings plc;41.675;2.059M;162.999B
+AVAL;Grupo Aval Acciones Y Valores S.A.;7.29;161826;162.429B
+HBCYF;HSBC Holdings plc;8.25;27500;161.955B
+PEP;PepsiCo, Inc.;114.11;4.35M;161.074B
+TOT;TOTAL S.A.;58.11;2.032M;152.797B
+BUD;Anheuser-Busch InBev SA/NV;75.71;1.864M;146.171B
+UN;Unilever N.V.;54.34;1.245M;145.935B
+MCD;McDonald's Corporation;181.15;3.739M;139.65B
+BP;BP p.l.c.;42.46;6.417M;139.332B
+PM;Philip Morris International Inc.;88.995;5.699M;138.345B
+UL;Unilever PLC;53.49;805595;137.162B
+NFLX;Netflix, Inc.;311.34;11.732M;135.773B
+DWDP;DowDuPont Inc.;57.9;10.088M;132.836B
+NVDA;NVIDIA Corporation;212.645;11.871M;129.288B
+SAP;SAP SE;106.97;883560;126.94B
+BHP;BHP Billiton Limited;48.05;2.327M;126.329B
+ABBV;AbbVie Inc.;82.99;5.404M;125.669B
+MDT;Medtronic plc;92.42;5.063M;124.814B
+ABT;Abbott Laboratories;70.755;6.064M;124.269B
+NKE;NIKE, Inc.;76.7302;7.582M;121.856B
+MO;Altria Group, Inc.;64.7867;6.954M;121.874B
+AMGN;Amgen Inc.;190.76;2.682M;121.556B
+ADBE;Adobe Inc.;240.75;3.465M;117.518B
+MMM;3M Company;194.65;2.381M;113.342B
+IBM;International Business Machines Corporation;123.17;6.019M;111.936B
+UNP;Union Pacific Corporation;149.78;4.562M;110.356B
+HON;Honeywell International Inc.;148.8;3.035M;110.155B
+BBL;BHP Billiton plc;41.97;1.55M;109.639B
+SNY;Sanofi;44.4333;1.702M;109.513B
+LLY;Eli Lilly and Company;105.8;4.003M;105.536B
+COST;Costco Wholesale Corporation;236.15;2.335M;103.483B
+NVO;Novo Nordisk A/S;43.05;1.585M;102.848B
+TD;The Toronto-Dominion Bank;55.6;1.39M;101.42B
+CRM;salesforce.com, inc.;135.6;5.715M;102.609B
+UTX;United Technologies Corporation;127.64;3.768M;102.238B
+ACN;Accenture plc;159.4475;2.037M;101.782B
+PBR;Petróleo Brasileiro S.A. - Petrobras;15.98;27.9M;99.604B
+PYPL;PayPal Holdings, Inc.;84.43;9.085M;99.489B
+PBR-A;Petróleo Brasileiro S.A. - Petrobras;14.64;10.073M;99.488B
+TMO;Thermo Fisher Scientific Inc.;238.6;1.441M;96.055B
+GSK;GlaxoSmithKline plc;39.72;2.446M;94.938B
+AVGO;Broadcom Inc.;227.3094;3.703M;93.98B
+AZN;AstraZeneca PLC;38.31;4.195M;93.812B
+QCOM;QUALCOMM Incorporated;63.63;13.934M;93.481B
+TXN;Texas Instruments Incorporated;96.87;6.874M;93.048B
+UPS;United Parcel Service, Inc.;108.03;2.63M;92.799B
+BKNG;Booking Holdings Inc.;1952.13;460583;92.672B
+BTI;British American Tobacco p.l.c.;43.79;2.244M;91.242B
+GILD;Gilead Sciences, Inc.;70.04;6.619M;90.796B
+AXP;American Express Company;105.01;3.121M;89.706B
+LMT;Lockheed Martin Corporation;307.63;1.255M;87.498B
+VWAPY;Volkswagen AG;17.7957;124701;87.223B
+FOX;Twenty-First Century Fox, Inc.;46.545;4.194M;86.718B
+FOXA;Twenty-First Century Fox, Inc.;46.9;9.091M;86.515B
+GS;The Goldman Sachs Group, Inc.;228.07;2.879M;86.107B
+SBUX;Starbucks Corporation;65.67;11.006M;85.962B
+USB;U.S. Bancorp;52.475;6.589M;84.804B
+EQNR;Equinor ASA;25.5;1.214M;84.408B
+RIO;Rio Tinto plc;51.17;2.709M;84.232B
+BMY;Bristol-Myers Squibb Company;51.3;6.955M;83.732B
+GE;General Electric Company;9.405;88.542M;81.806B
+NEE;NextEra Energy, Inc.;169.9423;1.75M;81.223B
+MS;Morgan Stanley;45.62;9.77M;79.597B
+VALE;Vale S.A.;15.325;21.243M;78.97B
+LOW;Lowe's Companies, Inc.;97.38;4.946M;78.975B
+COP;ConocoPhillips;68.41;5.852M;78.756B
+MUFG;Mitsubishi UFJ Financial Group, Inc.;5.98;1.039M;78.54B
+CVS;CVS Health Corporation;77.13;7.348M;78.523B
+ITUB;Itaú Unibanco Holding S.A.;13.41;17.598M;79.628B
+SAN;Banco Santander, S.A.;4.81;7.645M;76.174B
+CAT;Caterpillar Inc.;128.68;5.647M;75.935B
+WBA;Walgreens Boots Alliance, Inc.;79.94;5.957M;75.876B
+KMI-PA;Kinder Morgan, Inc. PFD SER A;0;499160;0
+ASML;ASML Holding N.V.;176.87;862387;74.373B
+BASFY;BASF SE;19.62;529713;71.752B
+SLB;Schlumberger Limited;51.7;8.334M;71.594B
+DHR;Danaher Corporation;101.91;2.385M;71.429B
+ANTM;Anthem, Inc.;272.32;1.194M;70.433B
+WBK;Westpac Banking Corporation;19.505;396313;65.798B
+AMT;American Tower Corporation (REIT);156;1.772M;68.716B
+ABEV;Ambev S.A.;4.41;32.875M;68.27B
+TJX;The TJX Companies, Inc.;109.09;3.771M;67.501B
+BIDU;Baidu, Inc.;193.4125;3.199M;67.416B
+AET;Aetna Inc.;205.93;2.008M;67.421B
+SPG;Simon Property Group, Inc.;183.41;1.494M;65.39B
+KHC;The Kraft Heinz Company;53.12;6.593M;64.782B
+BIIB;Biogen Inc.;320.7;1.226M;64.616B
+SCHW;The Charles Schwab Corporation;47.67;6.925M;64.405B
+BDX;Becton, Dickinson and Company;238.7;971033;63.866B
+CME;CME Group Inc.;186.92;1.543M;63.708B
+MDLZ;Mondelez International, Inc.;43.045;6.842M;62.581B
+ADP;Automatic Data Processing, Inc.;142.02;1.884M;62.167B
+CNI;Canadian National Railway Company;85.01;1.101M;61.787B
+EOG;EOG Resources, Inc.;106;2.896M;61.47B
+PNC;The PNC Financial Services Group, Inc.;131.75;2.267M;60.793B
+CB;Chubb Limited;129.75;1.581M;59.789B
+DUK;Duke Energy Corporation;83.88;3.728M;59.796B
+BBD;Banco Bradesco S.A.;9.75;16.173M;60.459B
+FDX;FedEx Corporation;225.6;1.653M;59.448B
+TSLA;Tesla, Inc.;345.9;10.752M;59.402B
+ISRG;Intuitive Surgical, Inc.;517.01;719130;59.043B
+CSX;CSX Corporation;69.83;5.664M;58.966B
+EPD;Enterprise Products Partners L.P.;26.852;4.288M;58.429B
+TMUS;T-Mobile US, Inc.;68.54;3.505M;58.148B
+ENB;Enbridge Inc.;33.03;3.377M;56.829B
+AGN;Allergan plc;164.4;1.97M;55.805B
+GLNCY;Glencore Plc;8.1;325080;55.661B
+INTU;Intuit Inc.;214.69;1.634M;55.534B
+ESRX;Express Scripts Holding Company;98.21;4.177M;55.206B
+SMFG;Sumitomo Mitsui Financial Group, Inc.;7.8779;1.378M;54.94B
+LLDTF;Lloyds Banking Group plc;0.727;46167;53.129B
+SU;Suncor Energy Inc.;34.09;3.325M;54.683B
+OXY;Occidental Petroleum Corporation;71.51;4.965M;54.685B
+LYG;Lloyds Banking Group plc;2.995;8.042M;53.032B
+GD;General Dynamics Corporation;182.03;1.365M;53.908B
+UBS;UBS Group AG;14.07;1.885M;52.477B
+RTN;Raytheon Company;184.87;1.645M;52.61B
+CL;Colgate-Palmolive Company;60.49;3.794M;52.464B
+CELG;Celgene Corporation;74.91;4.875M;52.381B
+VOD;Vodafone Group Plc;19.1813;7.324M;50.622B
+CI;Cigna Corporation;214.6;2.636M;52.262B
+EL;The Estée Lauder Companies Inc.;142.15;2.342M;51.58B
+HMC;Honda Motor Co., Ltd.;29.19;713329;51.854B
+GM;General Motors Company;36.35;13.283M;51.304B
+BSX;Boston Scientific Corporation;36.69;7.142M;50.767B
+AMX;América Móvil, S.A.B. de C.V.;15.467;2.753M;50.24B
+INGVF;ING Groep N.V.;12.552;29558;49.61B
+ATVI;Activision Blizzard, Inc.;64.69;7.343M;49.32B
+ING;ING Groep N.V.;12.745;3.77M;49.013B
+NOC;Northrop Grumman Corporation;281.91;1.253M;48.945B
+BMO;Bank of Montreal;75.14;551843;47.986B
+BK;The Bank of New York Mellon Corporation;48.181;5.47M;47.64B
+MPC;Marathon Petroleum Corporation;68.42;6.489M;47.266B
+PX;Praxair, Inc.;0;3.373M;0
+ILMN;Illumina, Inc.;320.64;1.014M;47.134B
+HCA;HCA Healthcare, Inc.;135.15;1.793M;46.768B
+DE;Deere & Company;144.18;2.367M;46.377B
+PSX;Phillips 66;99.97;2.757M;46.099B
+CCI;Crown Castle International Corp. (REIT);111.11;2.211M;46.093B
+SPGI;S&P Global Inc.;183.43;1.321M;46.133B
+D;Dominion Energy, Inc.;70.29;3.032M;46.046B
+SO;The Southern Company;45.245;6.722M;45.885B
+NSC;Norfolk Southern Corporation;167.22;1.99M;45.542B
+MU;Micron Technology, Inc.;39.91;37.2M;45.268B
+VRTX;Vertex Pharmaceuticals Incorporated;177.17;1.217M;45.277B
+ECL;Ecolab Inc.;156.38;1.056M;45.174B
+TGT;Target Corporation;85.42;4.599M;44.961B
+NRBAY;Nordea Bank AB (publ);11.02;871235;42.916B
+ICE;Intercontinental Exchange, Inc.;78.29;2.729M;44.59B
+ZTS;Zoetis Inc.;92.14;2.198M;44.269B
+EMR;Emerson Electric Co.;69.87;2.928M;43.911B
+MET;MetLife, Inc.;44.45;5.884M;44.217B
+ITW;Illinois Tool Works Inc.;132.14;1.73M;43.844B
+MZHOF;Mizuho Financial Group, Inc.;1.61;9221;43.64B
+MFG;Mizuho Financial Group, Inc.;3.425;430698;43.583B
+ABB;ABB Ltd;20.36;2.248M;43.53B
+PLD;Prologis, Inc.;65.295;3.441M;43.1B
+LVS;Las Vegas Sands Corp.;54.89;4.855M;42.997B
+TEF;Telefónica, S.A.;8.41;1.751M;42.507B
+ORAN;Orange S.A.;16.1175;290336;42.413B
+EXC;Exelon Corporation;43.875;5.525M;42.428B
+COF;Capital One Financial Corporation;89.12;2.554M;42.216B
+RENX;RELX NV;21.19;92295;41.802B
+ET;Energy Transfer LP;15.7057;13.988M;41.155B
+PRU;Prudential Financial, Inc.;97.93;2.023M;40.906B
+BX;The Blackstone Group L.P.;34.35;4.237M;41.087B
+PGR;The Progressive Corporation;70.04;3.102M;40.843B
+CTSH;Cognizant Technology Solutions Corporation;69.49;3.336M;40.237B
+INFY;Infosys Limited;9.52;10.158M;40.053B
+BAM;Brookfield Asset Management Inc.;41.32;1.027M;39.486B
+BSBR;Banco Santander (Brasil) S.A.;11.17;1.454M;39.964B
+RBS;The Royal Bank of Scotland Group plc;6.51;683856;37.771B
+CCL;Carnival Corporation;57;3.854M;39.717B
+BBVA;Banco Bilbao Vizcaya Argentaria, S.A.;5.87;3.808M;38.665B
+CUK;Carnival plc;56.36;274130;39.459B
+AIG;American International Group, Inc.;44.46;5.935M;39.331B
+HPQ;HP Inc.;24.77;9.307M;39.196B
+MAR;Marriott International, Inc.;112.55;2.365M;39.054B
+REGN;Regeneron Pharmaceuticals, Inc.;359.48;695276;38.804B
+VLO;Valero Energy Corporation;90.68;3.293M;38.756B
+BBT;BB&T Corporation;49.92;3.585M;38.473B
+BCS;Barclays PLC;9.05;3.606M;38.045B
+STZ;Constellation Brands, Inc.;202.45;2.371M;38.301B
+AON;Aon plc;158.76;897752;38.236B
+KMI;Kinder Morgan, Inc.;17.215;13.435M;37.994B
+F;Ford Motor Company;9.52;46.181M;37.85B
+KDP;Keurig Dr Pepper Inc.;27.21;2.712M;37.727B
+ROST;Ross Stores, Inc.;100.8;2.894M;37.635B
+DAL;Delta Air Lines, Inc.;55.1;5.999M;37.634B
+AABA;Altaba Inc.;62.12;9.872M;37.433B
+WM;Waste Management, Inc.;87.74;1.791M;37.408B
+KMB;Kimberly-Clark Corporation;107.16;2.104M;37.11B
+NGG;National Grid plc;54.99;615406;36.467B
+AEP;American Electric Power Company, Inc.;73.85;2.573M;36.416B
+BCE;BCE Inc.;40.43;826270;36.174B
+LYB;LyondellBasell Industries N.V.;94.06;2.597M;36.087B
+TRP;TransCanada Corporation;39.31;1.14M;35.851B
+PSA;Public Storage;202.91;918523;35.427B
+PHG;Koninklijke Philips N.V.;38.24;1.048M;35.365B
+CNQ;Canadian Natural Resources Limited;29.405;3.21M;35.334B
+NTR;Nutrien Ltd.;57;1.667M;34.992B
+JD;JD.com, Inc.;23.97;19.996M;34.667B
+TRV;The Travelers Companies, Inc.;128.22;1.487M;33.963B
+FIS;Fidelity National Information Services, Inc.;104.72;1.453M;34.295B
+APD;Air Products and Chemicals, Inc.;156.23;1.003M;34.257B
+AMAT;Applied Materials, Inc.;34.725;13.148M;34.134B
+SYY;Sysco Corporation;64.99;2.856M;33.84B
+BAX;Baxter International Inc.;63.24;3.215M;33.787B
+VFC;V.F. Corporation;85.14;2.535M;33.784B
+AFL;Aflac Incorporated;43.91;2.965M;33.428B
+CS;Credit Suisse Group AG;12.785;2.646M;32.803B
+NOK;Nokia Corporation;5.85;13.612M;32.643B
+ADI;Analog Devices, Inc.;87.66;3.348M;32.581B
+ETN;Eaton Corporation plc;74.86;2.672M;32.437B
+TKPYY;Takeda Pharmaceutical Company Limited;20.27;696878;32.436B
+MFC;Manulife Financial Corporation;16.31;3.106M;32.315B
+NOW;ServiceNow, Inc.;180.55;2.08M;32.128B
+SQ;Square, Inc.;78.04;15.031M;32.017B
+BT;BT Group plc;16.47;843441;31.955B
+EW;Edwards Lifesciences Corporation;152.12;1.664M;31.801B
+ALL;The Allstate Corporation;90.85;1.861M;31.293B
+HAL;Halliburton Company;35.59;8.979M;31.196B
+IBN;ICICI Bank Limited;9.64;7.911M;30.964B
+WMB;The Williams Companies, Inc.;25.57;12.93M;30.958B
+FISV;Fiserv, Inc.;77.32;1.928M;30.81B
+JCI;Johnson Controls International plc;33.3;5.314M;30.8B
+SRE;Sempra Energy;112.63;1.74M;30.8B
+RHT;Red Hat, Inc.;174.33;2.635M;30.777B
+SCCO;Southern Copper Corporation;39.35;948169;30.419B
+DG;Dollar General Corporation;114;2.329M;30.271B
+MNST;Monster Beverage Corporation;54.78;2.862M;30.262B
+NTES;NetEase, Inc.;228.94;1.1M;30.066B
+AMTD;TD Ameritrade Holding Corporation;52.43;2.565M;29.762B
+HOKCF;The Hong Kong and China Gas Company Limited;1.9043;16132;29.685B
+BHGE;Baker Hughes, a GE company;26.72;3.455M;29.379B
+LUV;Southwest Airlines Co.;52.27;4.791M;29.392B
+WDAY;Workday, Inc.;134.81;1.962M;29.379B
+ADSK;Autodesk, Inc.;133.99;2.166M;29.292B
+ERIC;Telefonaktiebolaget LM Ericsson (publ);8.97;5.79M;29.132B
+WP;Worldpay, Inc.;92.25;2.314M;28.845B
+EBAY;eBay Inc.;29.925;11.292M;28.813B
+STI;SunTrust Banks, Inc.;62.66;3.513M;28.738B
+SIRI;Sirius XM Holdings Inc.;6.325;22.779M;28.093B
+MIELY;Mitsubishi Electric Corporation;25.95;78816;28.23B
+EA;Electronic Arts Inc.;92.41;5.056M;28.168B
+ALXN;Alexion Pharmaceuticals, Inc.;124.53;1.575M;27.781B
+CXO;Concho Resources Inc.;138.89;1.776M;27.622B
+YUM;YUM! Brands, Inc.;87.95;1.804M;27.528B
+MCO;Moody's Corporation;150.8229;1.001M;27.421B
+TEL;TE Connectivity Ltd.;78.67;2.124M;27.413B
+STT;State Street Corporation;72.1;2.894M;27.365B
+PPERF;PT Bank Mandiri (Persero) Tbk;0.5;105473;27.225B
+APH;Amphenol Corporation;90.48;1.552M;27.264B
+APC;Anadarko Petroleum Corporation;53.55;4.348M;27.004B
+CNC;Centene Corporation;131.16;1.382M;26.934B
+MPLX;MPLX LP;33.89;1.556M;26.91B
+ADM;Archer-Daniels-Midland Company;48.13;3.267M;26.94B
+GLW;Corning Incorporated;33.46;5.443M;26.777B
+PEG;Public Service Enterprise Group Incorporated;52.81;2.896M;26.693B
+TRI;Thomson Reuters Corporation;47.48;2.888M;26.65B
+QSR;Restaurant Brands International Inc.;56.06;1.657M;26.273B
+GIS;General Mills, Inc.;43.73;4.56M;26.073B
+TWTR;Twitter, Inc.;34.335;25.07M;26.052B
+WELL;Welltower Inc.;68.77;2.061M;25.833B
+OKE;ONEOK, Inc.;62.71;2.298M;25.796B
+MT;ArcelorMittal;25.64;2.733M;25.695B
+SPOT;Spotify Technology S.A.;141.15;1.709M;25.568B
+EQR;Equity Residential;66.71;1.551M;25.514B
+S;Sprint Corporation;6.24;11.497M;25.442B
+FTV;Fortive Corporation;75.74;6.331M;25.294B
+FCAU;Fiat Chrysler Automobiles N.V.;16.333;5.119M;25.131B
+MCK;McKesson Corporation;128.5;1.543M;25.106B
+ETP;Energy Transfer Partners, L.P.;21.47;5.745M;25.043B
+XEL;Xcel Energy Inc.;48.78;3.4M;25.063B
+PXD;Pioneer Natural Resources Company;146.39;1.514M;24.945B
+PCG;PG&E Corporation;48.09;5.889M;24.87B
+AVB;AvalonBay Communities, Inc.;179.62;528636;24.828B
+NXPI;NXP Semiconductors N.V.;84;7.043M;24.822B
+IR;Ingersoll-Rand Plc;100.58;1.675M;24.708B
+UAL;United Continental Holdings, Inc.;89.88;3.205M;24.489B
+KR;The Kroger Co.;30.66;9.511M;24.449B
+PAYX;Paychex, Inc.;66.77;2.103M;23.976B
+ED;Consolidated Edison, Inc.;76.76;1.834M;23.905B
+DFS;Discover Financial Services;69.68;1.943M;23.41B
+CRH;CRH plc;29.2742;664930;23.803B
+DLR;Digital Realty Trust, Inc.;110.77;1.455M;23.774B
+CMI;Cummins Inc.;145.31;1.496M;23.258B
+TROW;T. Rowe Price Group, Inc.;98.215;1.323M;23.636B
+MTB;M&T Bank Corporation;164.22;844158;23.613B
+ZBH;Zimmer Biomet Holdings, Inc.;115.14;1.053M;23.486B
+RSG;Republic Services, Inc.;72.23;1.287M;23.444B
+HPE;Hewlett Packard Enterprise Company;15.91;10.036M;23.414B
+HRL;Hormel Foods Corporation;43.98;2.762M;23.447B
+TEVA;Teva Pharmaceutical Industries Limited;22.99;12.023M;23.42B
+LRCX;Lam Research Corporation;150.39;3.101M;23.338B
+BF-B;Brown-Forman Corporation;48.39;1.629M;23.328B
+ANDV;Andeavor;0;1.281M;0
+TSN;Tyson Foods, Inc.;62.68;2.515M;22.936B
+PPERY;PT Bank Mandiri (Persero) Tbk;9.8;95975;22.916B
+CTL;CenturyLink, Inc.;21.065;10.951M;22.753B
+PDD;Pinduoduo Inc.;20.47;6.157M;22.673B
+EIX;Edison International;68.46;2.025M;22.305B
+K;Kellogg Company;64.13;1.94M;22.254B
+CCE;Coca-Cola European Partners plc;46.63;1.581M;22.209B
+PPL;PPL Corporation;30.8;4.79M;22.182B
+RCL;Royal Caribbean Cruises Ltd.;106.07;1.812M;22.168B
+PH;Parker-Hannifin Corporation;167.27;1.188M;22.149B
+DISCK;Discovery, Inc.;29.8477;2.465M;22.108B
+DISCA;Discovery, Inc.;33.05;4.146M;22.078B
+RACE;Ferrari N.V.;116.16;766786;21.913B
+ROK;Rockwell Automation Inc.;175.85;1.06M;21.659B
+LNG;Cheniere Energy, Inc.;60.38;2.184M;21.63B
+CBS;CBS Corporation;57.73;3.292M;21.619B
+COL;Rockwell Collins, Inc.;130.79;1.45M;21.497B
+XLNX;Xilinx, Inc.;84.85;2.679M;21.471B
+WEC;WEC Energy Group, Inc.;67.88;2.008M;21.418B
+AMD;Advanced Micro Devices, Inc.;21.24;124.709M;21.227B
+NTRS;Northern Trust Corporation;95.98;1.377M;21.249B
+DB;Deutsche Bank Aktiengesellschaft;10.38;4.735M;21.334B
+VTR;Ventas, Inc.;58.73;2.233M;21.079B
+A;Agilent Technologies, Inc.;66.04;2.413M;21.052B
+AVVIY;Aviva plc;10.92;168661;21.04B
+NTAP;NetApp, Inc.;80.4;2.588M;20.845B
+HLT;Hilton Worldwide Holdings Inc.;69.74;3.792M;20.683B
+PCAR;PACCAR Inc;59.08;2.082M;20.645B
+INFO;IHS Markit Ltd.;52.22;1.602M;20.583B
+WY;Weyerhaeuser Company;27.485;4.165M;20.592B
+DLTR;Dollar Tree, Inc.;85.74;4.091M;20.397B
+DXC;DXC Technology Company;72.515;2.064M;20.388B
+CLX;The Clorox Company;158.04;976781;20.174B
+APTV;Aptiv PLC;76.47;2.414M;20.148B
+WLTW;Willis Towers Watson Public Limited Company;154.1;616675;20.024B
+WCN;Waste Connections, Inc.;75.13;676112;19.797B
+NUE;Nucor Corporation;61.96;2.509M;19.601B
+BBY;Best Buy Co., Inc.;71.32;3.408M;19.581B
+ETE;Energy Transfer Equity, L.P.;16.82;5.798M;19.517B
+MKC;McCormick & Company, Incorporated;147.425;877416;19.4B
+SYF;Synchrony Financial;26.94;5.309M;19.363B
+LBTYK;Liberty Global plc;24.84;2.94M;19.225B
+KEY;KeyCorp;18.585;11.62M;19.227B
+VRSN;VeriSign, Inc.;158.98;867973;19.219B
+LBTYA;Liberty Global plc;25.375;1.776M;19.24B
+VIV;Telefônica Brasil S.A.;11.79;2.196M;19.063B
+SBAC;SBA Communications Corporation;165.87;739069;19.049B
+FE;FirstEnergy Corp.;37.19;3.529M;19.021B
+FITB;Fifth Third Bancorp;27.965;5.307M;18.495B
+TDG;TransDigm Group Incorporated;360.25;425373;18.959B
+IP;International Paper Company;46.69;3.393M;18.911B
+CERN;Cerner Corporation;57.195;1.908M;18.845B
+MYL;Mylan N.V.;36.4925;4.907M;18.814B
+SWK;Stanley Black & Decker, Inc.;124.36;1.499M;18.786B
+EXPE;Expedia Group, Inc.;126.04;1.66M;18.777B
+LULU;Lululemon Athletica Inc.;140.94;1.983M;18.656B
+CTRP;Ctrip.com International, Ltd.;34.15;5.474M;18.619B
+RF;Regions Financial Corporation;17.57;11.878M;18.536B
+CLR;Continental Resources, Inc.;49.58;1.965M;18.442B
+ALGN;Align Technology, Inc.;229.1;1.085M;18.324B
+ANET;Arista Networks, Inc.;245.02;1.218M;18.333B
+O;Realty Income Corporation;61.53;2.011M;18.201B
+AMP;Ameriprise Financial, Inc.;127.57;888106;18.098B
+CFG;Citizens Financial Group, Inc.;37.78;4.224M;17.981B
+TS;Tenaris S.A.;30.56;1.946M;17.912B
+ABC;AmerisourceBergen Corporation;82.31;1.23M;17.808B
+GPN;Global Payments Inc.;112.495;1.105M;17.798B
+SEP;Spectra Energy Partners, LP;36.68;849641;17.786B
+FCX;Freeport-McMoRan Inc.;12.2;19.622M;17.678B
+HRS;Harris Corporation;150.12;885433;17.663B
+PANW;Palo Alto Networks, Inc.;186.54;1.319M;17.593B
+SOMLY;SECOM CO., LTD.;19.83;42681;17.507B
+CHKP;Check Point Software Technologies Ltd.;111.84;1.058M;17.47B
+FDC;First Data Corporation;18.625;10.161M;17.443B
+ULTA;Ulta Beauty, Inc.;291.035;935335;17.395B
+TEAM;Atlassian Corporation Plc;73.01;1.672M;17.355B
+HES;Hess Corporation;57.76;3.102M;17.31B
+AME;AMETEK, Inc.;74.54;1.27M;17.302B
+NEM;Newmont Mining Corporation;32.18;6.293M;17.141B
+BMRN;BioMarin Pharmaceutical Inc.;96.31;1.231M;17.149B
+CAG;Conagra Brands, Inc.;35.07;6.169M;17.03B
+OMC;Omnicom Group Inc.;75.54;2.542M;16.929B
+PAA;Plains All American Pipeline, L.P.;23.22;2.679M;16.848B
+MGA;Magna International Inc.;49.54;1.52M;16.667B
+DVN;Devon Energy Corporation;32.7;6.566M;16.638B
+CHD;Church & Dwight Co., Inc.;67.34;1.54M;16.581B
+TAL;TAL Education Group;29.21;6.237M;16.571B
+HIG;The Hartford Financial Services Group, Inc.;46.01;2.67M;16.505B
+TSS;Total System Services, Inc.;90.46;1.324M;16.502B
+IAC;IAC/InterActiveCorp;197.22;906072;16.412B
+MCHP;Microchip Technology Incorporated;69.54;4.467M;16.381B
+RYAAY;Ryanair Holdings plc;84.69;604215;16.246B
+AAL;American Airlines Group Inc.;35.16;8.185M;16.194B
+BEN;Franklin Resources, Inc.;31.08;3.63M;16.134B
+BLL;Ball Corporation;47.47;3.073M;16.101B
+SKM;SK Telecom Co., Ltd.;26.16;515041;16.051B
+IFF;International Flavors & Fragrances Inc.;149.4;1.182M;15.934B
+AEE;Ameren Corporation;64.81;1.598M;15.827B
+BPY;Brookfield Property Partners L.P.;18.76;3.595M;15.714B
+CAH;Cardinal Health, Inc.;52.085;3.408M;15.618B
+L;Loews Corporation;49.29;1.285M;15.575B
+HBAN;Huntington Bancshares Incorporated;14.63;11.519M;15.53B
+IQ;iQIYI, Inc.;21.72;11.188M;15.486B
+MRO;Marathon Oil Corporation;17.98;10.987M;15.358B
+EVRG;Evergy, Inc.;56.64;1.725M;15.388B
+WTKWY;Wolters Kluwer N.V.;57.018;25073;15.377B
+ETR;Entergy Corporation;84.82;1.437M;15.364B
+FAST;Fastenal Company;53.29;2.71M;15.297B
+SNN;Smith & Nephew plc;36.57;446312;15.292B
+ABX;Barrick Gold Corporation;13.07;17.981M;15.245B
+SHOP;Shopify Inc.;140.63;1.576M;15.047B
+LLL;L3 Technologies, Inc.;191.19;694669;15.046B
+XL;XL Group Ltd;0;1.699M;0
+SWKS;Skyworks Solutions, Inc.;82.94;1.821M;14.846B
+CGC;Canopy Growth Corporation;43.7418;14.33M;14.794B
+NDAQ;Nasdaq, Inc.;89.44;906332;14.714B
+INCY;Incyte Corporation;69.08;1.514M;14.701B
+MGM;MGM Resorts International;27.44;8.328M;14.596B
+DISH;DISH Network Corporation;31.01;3.071M;14.498B
+KLAC;KLA-Tencor Corporation;94.44;1.746M;14.456B
+SYMC;Symantec Corporation;22.68;8.397M;14.488B
+GPC;Genuine Parts Company;98.48;854701;14.453B
+MXIM;Maxim Integrated Products, Inc.;52.02;2.513M;14.413B
+WB;Weibo Corporation;64.3;2.512M;14.32B
+LEN;Lennar Corporation;44.33;4.42M;14.355B
+MTCH;Match Group, Inc.;51.65;2.574M;14.302B
+WPP;WPP plc;57.67;212076;14.265B
+CNHI;CNH Industrial N.V.;10.51;1.341M;14.247B
+CBRE;CBRE Group, Inc.;42.66;1.919M;14.166B
+CTXS;Citrix Systems, Inc.;104.32;1.583M;14.152B
+YUMC;Yum China Holdings, Inc.;37.03;2.871M;14.145B
+TTWO;Take-Two Interactive Software, Inc.;123.95;1.931M;14.109B
+DHI;D.R. Horton, Inc.;37.47;4.323M;14.104B
+WDC;Western Digital Corporation;48.556;4.611M;14.091B
+APA;Apache Corporation;37.08;3.266M;14.073B
+SPLK;Splunk Inc.;95.9;2.449M;14.061B
+MMP;Magellan Midstream Partners, L.P.;61.48;766961;14.029B
+TIF;Tiffany & Co.;114.4;1.841M;14.004B
+VNO;Vornado Realty Trust;68.75;890121;13.948B
+CMS;CMS Energy Corporation;48.91;2.324M;13.857B
+AJG;Arthur J. Gallagher & Co.;75.83;780116;13.847B
+NOV;National Oilwell Varco, Inc.;36.12;3.287M;13.847B
+HST;Host Hotels & Resorts, Inc.;18.5;7.076M;13.843B
+VMC;Vulcan Materials Company;104.78;1.453M;13.836B
+CNP;CenterPoint Energy, Inc.;27.59;5.273M;13.828B
+LNC;Lincoln National Corporation;64.21;1.519M;13.716B
+PFG;Principal Financial Group, Inc.;48.41;1.551M;13.702B
+CE;Celanese Corporation;102.26;1.086M;13.678B
+DRI;Darden Restaurants, Inc.;109.81;1.237M;13.629B
+CNPLL;CenterPoint Energy, Inc.;50.5;1.101M;13.609B
+CMA;Comerica Incorporated;83.62;1.696M;13.521B
+HCP;HCP, Inc.;28.37;2.767M;13.519B
+TXT;Textron Inc.;55.65;1.824M;13.521B
+ETFC;E*TRADE Financial Corporation;52.285;3.087M;13.422B
+MOS;The Mosaic Company;34.73;4.036M;13.387B
+TAP;Molson Coors Brewing Company;61.72;1.916M;13.331B
+KSS;Kohl's Corporation;79.89;3.244M;13.319B
+STM;STMicroelectronics N.V.;15.47;4.3M;13.29B
+VIAB;Viacom, Inc.;32.49;3.862M;13.299B
+SNPS;Synopsys, Inc.;89.09;1.226M;13.238B
+VEEV;Veeva Systems Inc.;91.57;1.39M;13.233B
+CDW;CDW Corporation;87.35;877966;13.101B
+CMG;Chipotle Mexican Grill, Inc.;470.93;760606;13.086B
+NLY;Annaly Capital Management, Inc.;9.9;12.782M;13.006B
+ROL;Rollins, Inc.;59.54;1.187M;12.992B
+MSCI;MSCI Inc.;147.4;670267;12.976B
+ATUS;Altice USA, Inc.;17.605;4.972M;12.976B
+ENIA;Enel Américas S.A.;8.185;1.24M;8.985B
+HSIC;Henry Schein, Inc.;83.59;1.384M;12.799B
+WCG;WellCare Health Plans, Inc.;257.165;892287;12.856B
+STX;Seagate Technology plc;44.78;4.215M;12.816B
+KKR;KKR & Co. Inc.;24.05;5.503M;12.725B
+FTNT;Fortinet, Inc.;75.11;2.485M;12.704B
+NBL;Noble Energy, Inc.;26.5025;4.989M;12.669B
+CDNS;Cadence Design Systems, Inc.;44.63;1.934M;12.622B
+XYL;Xylem Inc.;69.79;1.036M;12.542B
+GDDY;GoDaddy Inc.;72.45;1.826M;12.488B
+BR;Broadridge Financial Solutions, Inc.;107.15;839209;12.464B
+AAP;Advance Auto Parts, Inc.;167.76;1.106M;12.428B
+TI-A;Telecom Italia S.p.A.;5.38;70152;12.402B
+EXPD;Expeditors International of Washington, Inc.;70.705;1.186M;12.326B
+SQM;Sociedad Química y Minera de Chile S.A.;46.78;927052;12.312B
+CHRW;C.H. Robinson Worldwide, Inc.;88.6993;1.005M;12.289B
+TPR;Tapestry, Inc.;42.35;3.436M;12.266B
+VST;Vistra Energy Corp.;24.29;4.785M;12.253B
+AEG;Aegon N.V.;6.177;1.344M;12.231B
+GRMN;Garmin Ltd.;64.69;1.18M;12.214B
+FNV;Franco-Nevada Corporation;65.66;737026;12.205B
+ELAN;Elanco Animal Health Incorporated;33.31;3.156M;12.179B
+KMX;CarMax, Inc.;69.78;1.504M;12.185B
+JBHT;J.B. Hunt Transport Services, Inc.;110.04;791644;12.014B
+TECK;Teck Resources Limited;20.84;2.806M;11.987B
+FTI;TechnipFMC plc;26.4;3.277M;11.934B
+WRK;WestRock Company;46.99;2.12M;11.849B
+WYNN;Wynn Resorts, Limited;108.98;2.722M;11.84B
+EQH;AXA Equitable Holdings, Inc.;21.095;1.463M;11.834B
+MLM;Martin Marietta Materials, Inc.;187.72;877073;11.829B
+CPRT;Copart, Inc.;50.51;2.258M;11.815B
+SSNC;SS&C Technologies Holdings, Inc.;49.44;1.609M;11.812B
+AKAM;Akamai Technologies, Inc.;69.24;1.851M;11.737B
+EXR;Extra Space Storage Inc.;88.77;902223;11.731B
+CF;CF Industries Holdings, Inc.;50.73;2.943M;11.708B
+BURL;Burlington Stores, Inc.;172.99;965280;11.686B
+UHS;Universal Health Services, Inc.;125.54;660175;11.671B
+LW;Lamb Weston Holdings, Inc.;79.57;1.083M;11.653B
+ALB;Albemarle Corporation;107.12;1.513M;11.617B
+TRGP;Targa Resources Corp.;51.5;1.812M;11.616B
+LYV;Live Nation Entertainment, Inc.;55.495;1.319M;11.629B
+UDR;UDR, Inc.;39.93;1.479M;11.627B
+MAA;Mid-America Apartment Communities, Inc.;98.13;556663;11.575B
+DXCM;DexCom, Inc.;130.92;1.099M;11.568B
+DVA;DaVita Inc.;69.18;1.515M;11.546B
+NRG;NRG Energy, Inc.;38.08;3.667M;11.522B
+EMN;Eastman Chemical Company;82.13;1.168M;11.502B
+CPB;Campbell Soup Company;38.29;3.599M;11.512B
+TSCO;Tractor Supply Company;93.5;1.528M;11.389B
+JWN;Nordstrom, Inc.;67.29;2.789M;11.343B
+RJF;Raymond James Financial, Inc.;80.42;874992;11.351B
+ACGL;Arch Capital Group Ltd.;27.78;999715;11.291B
+FMC;FMC Corporation;83.55;1.089M;11.248B
+M;Macy's, Inc.;36.65;7.893M;11.249B
+MRVL;Marvell Technology Group Ltd.;17.06;11.341M;11.232B
+HFC;HollyFrontier Corporation;64.55;2.249M;11.157B
+JEC;Jacobs Engineering Group Inc.;78.53;1.154M;11.144B
+FANG;Diamondback Energy, Inc.;112.85;1.862M;11.135B
+ODFL;Old Dominion Freight Line, Inc.;135.79;622855;11.134B
+INVH;Invitation Homes Inc.;20.99;2.234M;11.116B
+KEYS;Keysight Technologies, Inc.;59.14;1.977M;11.084B
+VAR;Varian Medical Systems, Inc.;120.78;709527;11.057B
+COG;Cabot Oil & Gas Corporation;25.62;6.609M;11.047B
+CVE;Cenovus Energy Inc.;8.96;3.785M;10.984B
+HOLX;Hologic, Inc.;40.12;1.99M;10.918B
+XPO;XPO Logistics, Inc.;85.75;1.334M;10.882B
+NHYDY;Norsk Hydro ASA;5.34;63761;10.872B
+ALLY;Ally Financial Inc.;25.74;3.168M;10.633B
+REG;Regency Centers Corporation;63.3;1.19M;10.77B
+QRTEA;Qurate Retail, Inc.;23.3;2.799M;10.723B
+GPS;The Gap, Inc.;27.74;4.953M;10.67B
+URI;United Rentals, Inc.;128.13;1.663M;10.392B
+KSU;Kansas City Southern;102.03;1.161M;10.376B
+JNPR;Juniper Networks, Inc.;30.09;4.207M;10.375B
+NCLH;Norwegian Cruise Line Holdings Ltd.;46.62;2.084M;10.324B
+AES;The AES Corporation;15.6;6.596M;10.322B
+LNT;Alliant Energy Corporation;43.17;1.419M;10.274B
+RL;Ralph Lauren Corporation;126;1.025M;10.222B
+WLK;Westlake Chemical Corporation;78.73;857143;10.208B
+SNPTF;Sunny Optical Technology (Group) Company Limited;9.415;6415;10.179B
+DRE;Duke Realty Corporation;28.05;2.269M;10.143B
+ARNC;Arconic Inc.;20.975;3.322M;10.136B
+PRGO;Perrigo Company plc;73.53;1.535M;10.061B
+TLRY;Tilray, Inc.;106.832;8.072M;9.951B
+PTC;PTC Inc.;83.92;1.226M;9.888B
+YNDX;Yandex N.V.;30.14;4.706M;9.777B
+UAA;Under Armour, Inc.;23.25;5.057M;9.768B
+MAS;Masco Corporation;31.84;3.77M;9.727B
+UA;Under Armour, Inc.;20.92;2.676M;9.725B
+DBX;Dropbox, Inc.;24.16;5.082M;9.722B
+NBIX;Neurocrine Biosciences, Inc.;107.08;718069;9.687B
+STLD;Steel Dynamics, Inc.;41.05;2.456M;9.638B
+ZION;Zions Bancorporation, National Association;49.26;2.233M;9.466B
+EDU;New Oriental Education & Technology Group Inc.;60.47;2.264M;9.596B
+NLSN;Nielsen Holdings plc;26.98;5.606M;9.577B
+MHK;Mohawk Industries, Inc.;128.27;1.263M;9.517B
+NWL;Newell Brands Inc.;20.04;10.191M;9.468B
+NI;NiSource Inc.;25.97;3.747M;9.435B
+BSMX;Banco Santander (México), S.A., Institución de Banca Múltiple, Grupo Financiero Santander;7.01;1.68M;9.445B
+BHC;Bausch Health Companies Inc.;26.95;5.016M;9.425B
+LB;L Brands, Inc.;34.13;5.816M;9.388B
+PNW;Pinnacle West Capital Corporation;83.49;952495;9.349B
+TV;Grupo Televisa, S.A.B.;15.91;1.346M;9.245B
+SNAP;Snap Inc.;7.12;26.793M;9.22B
+ATH;Athene Holding Ltd.;46.11;1.044M;9.211B
+ZBRA;Zebra Technologies Corporation;171.12;425449;9.188B
+FNF;Fidelity National Financial, Inc.;33.29;1.164M;9.162B
+SRPT;Sarepta Therapeutics, Inc.;136.59;1.092M;9.127B
+SGEN;Seattle Genetics, Inc.;56.86;916638;9.106B
+IRM;Iron Mountain Incorporated;31.81;1.78M;9.105B
+TRMB;Trimble Inc.;36.34;1.181M;9.083B
+PAGS;PagSeguro Digital Ltd.;27.8;2.994M;9.082B
+PKG;Packaging Corporation of America;96.77;1.038M;9.072B
+EXAS;Exact Sciences Corporation;73.69;2.139M;9.057B
+IPG;The Interpublic Group of Companies, Inc.;23.4;4.514M;8.994B
+BG;Bunge Limited;63.25;1.533M;8.923B
+LEA;Lear Corporation;139.01;1.015M;8.921B
+EQT;EQT Corporation;34.935;3.45M;8.888B
+IVZ;Invesco Ltd.;21.58;5.2M;8.877B
+LKQ;LKQ Corporation;27.79;2.763M;8.843B
+QRVO;Qorvo, Inc.;70.53;1.24M;8.81B
+MLCO;Melco Resorts & Entertainment Limited;17.97;4.165M;8.802B
+ALNY;Alnylam Pharmaceuticals, Inc.;87.04;949216;8.761B
+ARMK;Aramark;35.53;1.971M;8.757B
+DATA;Tableau Software, Inc.;104.96;812930;8.706B
+HTHT;Huazhu Group Limited;29.58;1.828M;8.621B
+W;Wayfair Inc.;94.7;1.585M;8.556B
+KORS;Michael Kors Holdings Limited;56.9;2.388M;8.488B
+COTY;Coty Inc.;11.28;8.142M;8.473B
+AGNC;AGNC Investment Corp.;17.7128;4.878M;8.464B
+GRUB;GrubHub Inc.;93.515;1.668M;8.46B
+TTM;Tata Motors Limited;13.09;1.935M;8.425B
+CX;CEMEX, S.A.B. de C.V.;5.62;7.099M;8.427B
+ACBFF;Aurora Cannabis Inc.;8.69;9.186M;8.379B
+AEM;Agnico Eagle Mines Limited;36.06;1.774M;8.362B
+BWA;BorgWarner Inc.;39.85;2.389M;8.3B
+ECA;Encana Corporation;8.68;12.356M;8.257B
+Z;Zillow Group, Inc.;40.82;2.407M;8.25B
+ZG;Zillow Group, Inc.;40.54;744444;8.21B
+WU;The Western Union Company;18.5;5.03M;8.192B
+UNM;Unum Group;37.41;2.334M;8.183B
+GG;Goldcorp Inc.;9.405;10.028M;8.176B
+AOS;A. O. Smith Corporation;47.28;1.937M;8.066B
+VICI;VICI Properties Inc.;21.76;2.852M;8.058B
+AVY;Avery Dennison Corporation;92.56;617730;8.026B
+HLF;Herbalife Nutrition Ltd.;54.81;1.118M;8.007B
+CGNX;Cognex Corporation;46.27;1.301M;7.967B
+ALK;Alaska Air Group, Inc.;64.49;1.506M;7.952B
+PF;Pinnacle Foods Inc.;0;1.298M;0
+PE;Parsley Energy, Inc.;24.98;4.1M;7.913B
+XEC;Cimarex Energy Co.;82.97;1.439M;7.912B
+SCI;Service Corporation International;43.9;1.287M;7.944B
+TSU;TIM Participações S.A.;16.59;1.137M;7.917B
+ST;Sensata Technologies Holding PLC;47.95;1.279M;7.871B
+MOH;Molina Healthcare, Inc.;126.06;1.018M;7.785B
+XRAY;DENTSPLY SIRONA Inc.;35.34;3.257M;7.858B
+NTNX;Nutanix, Inc.;45.5768;3.298M;7.88B
+NWSA;News Corporation;13.243;4.181M;7.786B
+LAMR;Lamar Advertising Company (REIT);78.427;413112;7.751B
+TRIP;TripAdvisor, Inc.;56.35;1.818M;7.751B
+FWONK;Formula One Group;33.6522;1.148M;7.733B
+MBT;Public Joint-Stock Company Mobile TeleSystems;8.31;2.92M;7.683B
+H;Hyatt Hotels Corporation;69.22;723269;7.605B
+GOLD;Randgold Resources Limited;81.97;1.004M;7.579B
+ON;ON Semiconductor Corporation;17.91;6.569M;7.537B
+BLUE;bluebird bio, Inc.;136.98;691776;7.492B
+CQH;Cheniere Energy Partners LP Holdings, LLC;32.2;65701;7.461B
+VER;VEREIT, Inc.;7.5;9.591M;7.451B
+ARCC;Ares Capital Corporation;17.43;1.714M;7.433B
+CDK;CDK Global, Inc.;57.44;973666;7.406B
+ZAYO;Zayo Group Holdings, Inc.;30;3.01M;7.394B
+AIV;Apartment Investment and Management Company;44.58;1.003M;7.39B
+MOMO;Momo Inc.;36.04;4.537M;7.37B
+OGE;OGE Energy Corp.;36.86;1.419M;7.362B
+WPM;Wheaton Precious Metals Corp.;16.642;2.797M;7.354B
+PNR;Pentair plc;42.34;1.577M;7.35B
+IONS;Ionis Pharmaceuticals, Inc.;53.5;1.25M;7.344B
+ACB;Aurora Cannabis Inc.;7.62;21.243M;7.317B
+TYL;Tyler Technologies, Inc.;188.6;200998;7.322B
+VLEEY;Valeo SA;15.34;154873;7.259B
+GLPI;Gaming and Leisure Properties, Inc.;33.57;1.192M;7.187B
+HDS;HD Supply Holdings, Inc.;38.97;1.769M;7.162B
+OHI;Omega Healthcare Investors, Inc.;34.21;1.632M;7.153B
+TWLO;Twilio Inc.;72.13;3.166M;7.116B
+JEF;Jefferies Financial Group Inc.;21.88;2.091M;7.069B
+AMH;American Homes 4 Rent;19.95;2.178M;7.02B
+BAH;Booz Allen Hamilton Holding Corporation;49.27;973821;7.013B
+AMRN;Amarin Corporation plc;23.06;14.637M;7.012B
+PHM;PulteGroup, Inc.;24.94;5.681M;7.005B
+VOYA;Voya Financial, Inc.;44.9;1.483M;6.983B
+GGG;Graco Inc.;41.9;818469;6.974B
+RYKKY;Ryohin Keikaku Co., Ltd.;51.105;12083;6.968B
+XRX;Xerox Corporation;28.95;2.982M;6.898B
+USFD;US Foods Holding Corp.;31.81;3.133M;6.903B
+SC;Santander Consumer USA Holdings Inc.;19.02;1.39M;6.877B
+MFGP;Micro Focus International plc;16.27;847658;6.859B
+WPC;W. P. Carey Inc.;63.96;732201;6.857B
+HP;Helmerich & Payne, Inc.;62.95;1.155M;6.858B
+FCE-A;Forest City Realty Trust, Inc.;25.155;2.805M;6.849B
+SABR;Sabre Corporation;24.85;2.175M;6.842B
+GGB;Gerdau S.A.;4.55;12.269M;6.806B
+FLR;Fluor Corporation;48.16;1.511M;6.775B
+TER;Teradyne, Inc.;36.2;2.676M;6.749B
+AA;Alcoa Corporation;36.1;4.113M;6.732B
+KIM;Kimco Realty Corporation;15.93;3.622M;6.728B
+ORI;Old Republic International Corporation;22.19;1.622M;6.716B
+FLIR;FLIR Systems, Inc.;48.45;819740;6.703B
+DOCU;DocuSign, Inc.;42.47;1.893M;6.66B
+CVNA;Carvana Co.;45.31;1.483M;6.645B
+WPX;WPX Energy, Inc.;15.71;5.887M;6.603B
+LPT;Liberty Property Trust;43.57;961038;6.594B
+VNOM;Viper Energy Partners LP;33.45;700726;6.573B
+FBHS;Fortune Brands Home & Security, Inc.;45.93;1.91M;6.541B
+HOG;Harley-Davidson, Inc.;39.49;2.227M;6.513B
+GOOS;Canada Goose Holdings Inc.;59.23;1.066M;6.484B
+GIL;Gildan Activewear Inc.;31.12;515227;6.414B
+TGE;Tallgrass Energy, LP;22.46;1.026M;6.293B
+NRZ;New Residential Investment Corp.;17.225;3.262M;6.293B
+PAGP;Plains GP Holdings, L.P.;22.47;1.712M;6.291B
+STOR;STORE Capital Corporation;29.4;1.555M;6.257B
+NKTR;Nektar Therapeutics;36.26;2.189M;6.254B
+FLS;Flowserve Corporation;47.78;1.207M;6.252B
+CZR;Caesars Entertainment Corporation;9.315;17.787M;6.219B
+UGP;Ultrapar Participações S.A.;11.44;892664;6.207B
+OKTA;Okta, Inc.;56.88;1.917M;6.21B
+WES;Western Gas Partners, LP;39.62;717260;6.149B
+CCK;Crown Holdings, Inc.;45.38;2.271M;6.135B
+IDTI;Integrated Device Technology, Inc.;46.99;3.187M;6.054B
+AXTA;Axalta Coating Systems Ltd.;25.33;2.541M;6.047B
+KNX;Knight-Swift Transportation Holdings Inc.;33.9;2.411M;6.038B
+MASI;Masimo Corporation;113.58;469349;6.019B
+ALKS;Alkermes plc;38.72;683735;6.016B
+RNG;RingCentral, Inc.;75.82;848376;6.037B
+ALSN;Allison Transmission Holdings, Inc.;45.99;1.231M;5.962B
+DNKN;Dunkin' Brands Group, Inc.;72.3;751180;5.961B
+USG;USG Corporation;42.595;1.069M;5.953B
+PK;Park Hotels & Resorts Inc.;29.54;1.697M;5.944B
+MPW;Medical Properties Trust, Inc.;16.26;2.22M;5.935B
+BERY;Berry Global Group, Inc.;45.01;1.171M;5.932B
+ROKU;Roku, Inc.;55.86;8.602M;5.926B
+GDI;Gardner Denver Holdings, Inc.;27.03;1.575M;5.913B
+ENIC;Enel Chile S.A.;4.49;519420;4.319B
+HBI;Hanesbrands Inc.;16.19;5.55M;5.84B
+SAGE;Sage Therapeutics, Inc.;125.17;368426;5.841B
+GNTX;Gentex Corporation;21.59;2.439M;5.807B
+WTR;Aqua America, Inc.;32.57;574918;5.795B
+FL;Foot Locker, Inc.;50.39;3.268M;5.79B
+STWD;Starwood Property Trust, Inc.;21.6568;2.066M;5.784B
+CC;The Chemours Company;33.77;1.785M;5.778B
+PBCT;People's United Financial, Inc.;15.82;3.445M;5.759B
+AMRX;Amneal Pharmaceuticals, Inc.;19.3;1.306M;5.76B
+SERV;ServiceMaster Global Holdings, Inc.;41.78;1.803M;5.664B
+DIISF;Direct Line Insurance Group plc;4.3372;5223;5.671B
+WWE;World Wrestling Entertainment, Inc.;72.33;1.058M;5.644B
+HAE;Haemonetics Corporation;109.17;451521;5.643B
+ZEN;Zendesk, Inc.;53.01;1.495M;5.617B
+HRB;H&R Block, Inc.;27.15;2.652M;5.58B
+ADT;ADT Inc.;7.38;2.662M;5.583B
+SON;Sonoco Products Company;55.62;452306;5.551B
+JBGS;JBG Smith Properties;39.51;683690;5.536B
+EVHC;Envision Healthcare Corporation;0;1.642M;0
+HUN;Huntsman Corporation;23.11;2.861M;5.508B
+CIT;CIT Group Inc.;47.42;885590;5.063B
+LPLA;LPL Financial Holdings Inc.;63.38;650735;5.495B
+HTA;Healthcare Trust of America, Inc.;25.925;1.512M;5.466B
+OC;Owens Corning;49.82;1.673M;5.446B
+JBLU;JetBlue Airways Corporation;17.84;4.67M;5.437B
+TSG;The Stars Group Inc.;19.92;1.682M;5.412B
+CUBE;CubeSmart;28.69;1.365M;5.405B
+PINC;Premier, Inc.;40.46;610446;5.395B
+FHN;First Horizon National Corporation;16.525;3.233M;5.353B
+MUR;Murphy Oil Corporation;30.955;1.701M;5.357B
+EQM;EQM Midstream Partners, LP;44.42;674110;5.351B
+SEE;Sealed Air Corporation;33.99;2.274M;5.334B
+AR;Antero Resources Corporation;16.72;3.685M;5.302B
+CTLT;Catalent, Inc.;36.37;925518;5.281B
+BHF;Brighthouse Financial, Inc.;44.1;1.188M;5.282B
+HPHTF;Hamamatsu Photonics K.K.;33.08;7001;5.273B
+TTD;The Trade Desk, Inc.;122.35;1.27M;5.251B
+ACM;AECOM;32.62;837558;5.245B
+ENLK;EnLink Midstream Partners, LP;14.73;1.229M;5.225B
+PWR;Quanta Services, Inc.;34.98;1.374M;5.222B
+GT;The Goodyear Tire & Rubber Company;22.37;3.556M;5.212B
+PACW;PacWest Bancorp;42.045;1.115M;5.148B
+X;United States Steel Corporation;28.98;7.535M;5.137B
+EXEL;Exelixis, Inc.;17.04;3.661M;5.095B
+FAF;First American Financial Corporation;45.47;725306;5.083B
+CDEV;Centennial Resource Development, Inc.;19.28;2.306M;5.086B
+WSM;Williams-Sonoma, Inc.;63.01;1.942M;5.076B
+BPL;Buckeye Partners, L.P.;33.04;970053;5.068B
+PBF;PBF Energy Inc.;41.81;1.94M;5.063B
+SBS;Companhia de Saneamento Básico do Estado de São Paulo - SABESP;7.62;2.133M;5.059B
+BB;BlackBerry Limited;9.43;4.338M;5.054B
+PEN;Penumbra, Inc.;146.99;346078;5.053B
+RIG;Transocean Ltd.;10.92;14.793M;5.044B
+SYNH;Syneos Health, Inc.;48.87;618300;5.029B
+VEON;VEON Ltd.;2.83;2.416M;4.95B
+MAT;Mattel, Inc.;14.33;3.837M;4.946B
+CCJ;Cameco Corporation;12.49;2.229M;4.938B
+CNK;Cinemark Holdings, Inc.;42.24;1.265M;4.935B
+PSTG;Pure Storage, Inc.;20.85;3.112M;4.924B
+SIX;Six Flags Entertainment Corporation;58.2377;1.27M;4.916B
+ESRT;Empire State Realty Trust, Inc.;16.21;1.081M;4.917B
+PVTL;Pivotal Software, Inc.;19.1;1.936M;4.916B
+OSK;Oshkosh Corporation;67.14;737926;4.908B
+NUAN;Nuance Communications, Inc.;17.08;2.13M;4.899B
+TOL;Toll Brothers, Inc.;33.22;3.299M;4.895B
+ETSY;Etsy, Inc.;40.85;2.761M;4.892B
+CY;Cypress Semiconductor Corporation;13.48;6.084M;4.879B
+LAZ;Lazard Ltd;41.31;812475;4.878B
+ITT;ITT Inc.;55.54;693689;4.863B
+NEWR;New Relic, Inc.;86.03;862835;4.862B
+PPC;Pilgrim's Pride Corporation;19.4;1.014M;4.83B
+BRX;Brixmor Property Group Inc.;16.04;2.441M;4.809B
+WH;Wyndham Hotels & Resorts, Inc.;48.315;891298;4.789B
+CIEN;Ciena Corporation;33.4;2.934M;4.763B
+NYCB;New York Community Bancorp, Inc.;9.67;5.037M;4.742B
+COMM;CommScope Holding Company, Inc.;24.64;1.857M;4.736B
+BRFS;BRF S.A.;5.92;2.912M;4.715B
+HPP;Hudson Pacific Properties, Inc.;30.26;838986;4.717B
+PLNT;Planet Fitness, Inc.;47.92;1.147M;4.716B
+SKX;Skechers U.S.A., Inc.;29.8;2.628M;4.71B
+JHG;Janus Henderson Group plc;24.22;1.029M;4.701B
+SINA;SINA Corporation;65.69;855983;4.695B
+EEP;Enbridge Energy Partners, L.P.;10.81;2.061M;4.68B
+TKC;Turkcell Iletisim Hizmetleri A.S.;5.49;2.245M;4.669B
+VIRT;Virtu Financial, Inc.;24.5;1.019M;4.666B
+BOALF;Boral Limited;4.9;29634;4.66B
+CARG;CarGurus, Inc.;42.43;1.056M;4.645B
+OLED;Universal Display Corporation;97.7;1.15M;4.602B
+GPT;Gramercy Property Trust;0;1.411M;0
+AGCO;AGCO Corporation;57.55;712107;4.553B
+FSLR;First Solar, Inc.;43.25;1.415M;4.533B
+FLEX;Flex Ltd.;8.62;6.5M;4.539B
+NFG;National Fuel Gas Company;52.78;513600;4.537B
+IMMU;Immunomedics, Inc.;24.19;1.651M;4.519B
+MTG;MGIC Investment Corporation;12.46;2.758M;4.512B
+TDOC;Teladoc Health, Inc.;64.03;1.658M;4.489B
+UMC;United Microelectronics Corporation;1.78;1.06M;4.474B
+SNV;Synovus Financial Corp.;38.25;1.609M;4.464B
+ARRS;ARRIS International plc;24.69;1.207M;4.452B
+SLM;SLM Corporation;10.16;2.49M;4.426B
+URBN;Urban Outfitters, Inc.;40.08;2.569M;4.374B
+NFX;Newfield Exploration Company;22.11;3.666M;4.371B
+NYT;The New York Times Company;26.32;2.232M;4.341B
+CIG;Companhia Energética de Minas Gerais;3.05;6.162M;4.335B
+UMPQ;Umpqua Holdings Corporation;19.66;1.493M;4.33B
+CRI;Carter's, Inc.;94.43;997526;4.33B
+INXN;InterXion Holding N.V.;59.62;408603;4.273B
+SRCL;Stericycle, Inc.;46.79;902723;4.239B
+TDC;Teradata Corporation;35.58;1.013M;4.238B
+ERJ;Embraer S.A.;23.3;1.019M;4.235B
+RRC;Range Resources Corporation;17.27;6.321M;4.23B
+WYND;Wyndham Destinations, Inc.;43.22;1.317M;4.212B
+BGCP;BGC Partners, Inc.;11.08;1.911M;4.198B
+KL;Kirkland Lake Gold Ltd.;20.04;1.57M;4.188B
+SE;Sea Limited;12.47;1.239M;4.178B
+BILI;Bilibili Inc.;14.98;4.735M;4.172B
+JBL;Jabil Inc.;25.76;1.77M;4.17B
+SHLX;Shell Midstream Partners, L.P.;18.61;710170;4.165B
+ZS;Zscaler, Inc.;40.94;1.497M;4.904B
+HUYA;HUYA Inc.;20.33;2.123M;4.143B
+BXMT;Blackstone Mortgage Trust, Inc.;34.6;1.001M;4.141B
+STL;Sterling Bancorp;18.38;1.975M;4.125B
+WEN;The Wendy's Company;17.21;3.644M;4.079B
+CNDT;Conduent Incorporated;19.3;1.583M;4.076B
+CREE;Cree, Inc.;40.25;1.734M;4.06B
+OMF;OneMain Holdings, Inc.;29.77;482898;4.042B
+MDB;MongoDB, Inc.;77.28;944530;4.035B
+FLO;Flowers Foods, Inc.;19.13;1.279M;4.034B
+CVI;CVR Energy, Inc.;39.94;782930;4.015B
+LGF-B;Lions Gate Entertainment Corp.;18.08;474606;3.995B
+FNB;F.N.B. Corporation;12.27;2.497M;3.979B
+AEO;American Eagle Outfitters, Inc.;22.43;4.371M;3.978B
+INGN;Inogen, Inc.;185.86;348512;3.968B
+THO;Thor Industries, Inc.;74.79;1.089M;3.949B
+ASB;Associated Banc-Corp;23.44;1.315M;3.921B
+ENTG;Entegris, Inc.;27.47;1.161M;3.882B
+TDS;Telephone and Data Systems, Inc.;34.37;754700;3.881B
+AU;AngloGold Ashanti Limited;9.9;3.267M;3.869B
+PGRE;Paramount Group, Inc.;14.46;1.647M;3.844B
+ENDP;Endo International plc;17.04;4.615M;3.816B
+DKS;Dick's Sporting Goods, Inc.;37.4;2.993M;3.78B
+ACXM;Acxiom Holdings, Inc.;48.48;741197;3.765B
+SNH;Senior Housing Properties Trust;15.84;1.341M;3.764B
+I;Intelsat S.A.;27.45;2.722M;3.758B
+MTZ;MasTec, Inc.;48.46;1.339M;3.741B
+VIPS;Vipshop Holdings Limited;5.64;8.631M;3.734B
+SBRA;Sabra Health Care REIT, Inc.;20.92;1.269M;3.73B
+TRQ;Turquoise Hill Resources Ltd.;1.855;5.705M;3.715B
+FGEN;FibroGen, Inc.;44.14;441432;3.722B
+FEYE;FireEye, Inc.;19.16;5.07M;3.709B
+YELP;Yelp Inc.;44.19;2.287M;3.698B
+EXP;Eagle Materials Inc.;78.47;649210;3.679B
+TWO;Two Harbors Investment Corp.;14.77;2.042M;3.664B
+TCF;TCF Financial Corporation;21.897;1.209M;3.672B
+EVR;Evercore Inc.;84.2109;440063;3.651B
+APLE;Apple Hospitality REIT, Inc.;15.82;1.251M;3.644B
+NXST;Nexstar Media Group, Inc.;79.99;462272;3.644B
+GPK;Graphic Packaging Holding Company;11.73;4.184M;3.64B
+PTEN;Patterson-UTI Energy, Inc.;16.72;3.087M;3.632B
+JCOM;j2 Global, Inc.;73.82;374612;3.635B
+LHO;LaSalle Hotel Properties;32.83;1.632M;3.629B
+UNIT;Uniti Group Inc.;19.81;1.748M;3.628B
+ARRY;Array BioPharma Inc.;16.96;2.55M;3.614B
+OLN;Olin Corporation;21.55;2.367M;3.595B
+BSM;Black Stone Minerals, L.P.;17.75;140323;3.591B
+ALLO;Allogene Therapeutics, Inc.;30.49;1.31M;3.596B
+CUZ;Cousins Properties Incorporated;8.51;3.663M;3.577B
+VVV;Valvoline Inc.;18.7;1.337M;3.567B
+AMED;Amedisys, Inc.;110.97;425743;3.539B
+OZK;Bank OZK;27.43;1.682M;3.528B
+ATI;Allegheny Technologies Incorporated;28;1.52M;3.519B
+LITE;Lumentum Holdings Inc.;55.19;1.617M;3.499B
+IGT;International Game Technology PLC;17.17;3.56M;3.506B
+BVN;Compañía de Minas Buenaventura S.A.A.;13.81;1.099M;3.508B
+ACHC;Acadia Healthcare Company, Inc.;39.7;1.759M;3.504B
+PIFMF;PT Indofood Sukses Makmur Tbk;0.39;29106;3.492B
+AAXN;Axon Enterprise, Inc.;59.72;652452;3.483B
+BKU;BankUnited, Inc.;33.55;968441;3.482B
+CIM;Chimera Investment Corporation;18.6001;1.17M;3.478B
+SRC;Spirit Realty Capital, Inc.;8.11;4.623M;3.478B
+ESL;Esterline Technologies Corporation;117.62;392940;3.464B
+MD;MEDNAX, Inc.;39.11;805621;3.451B
+ISBC;Investors Bancorp, Inc.;12.26;2.016M;3.435B
+KS;KapStone Paper and Packaging Corporation;0;1.337M;0
+SID;Companhia Siderúrgica Nacional;2.57;2.209M;3.415B
+FHB;First Hawaiian, Inc.;25.22;1.494M;3.402B
+SYNT;Syntel, Inc.;40.99;563398;3.402B
+KGC;Kinross Gold Corporation;2.71;11.592M;3.394B
+CFX;Colfax Corporation;28.96;780241;3.394B
+LGND;Ligand Pharmaceuticals Incorporated;160.06;593460;3.378B
+DAR;Darling Ingredients Inc.;20.5;936329;3.375B
+STAY;Extended Stay America, Inc.;17.94;1.562M;3.378B
+LPX;Louisiana-Pacific Corporation;23.64;2.219M;3.374B
+MIC;Macquarie Infrastructure Corporation;39.13;858573;3.351B
+EDR;Education Realty Trust, Inc.;0;679274;0
+SFM;Sprouts Farmers Market, Inc.;26.25;1.854M;3.35B
+RLJ;RLJ Lodging Trust;19.11;1.227M;3.344B
+SHO;Sunstone Hotel Investors, Inc.;14.57;1.478M;3.327B
+NOMD;Nomad Foods Limited;19.09;1.033M;3.322B
+APHA;Aphria Inc.;12.8097;2.082M;3.315B
+WTW;Weight Watchers International, Inc.;49.5299;2.225M;3.31B
+VLY;Valley National Bancorp;9.99;2.247M;3.312B
+SWN;Southwestern Energy Company;5.75;19.835M;3.291B
+CHK;Chesapeake Energy Corporation;3.63;27.801M;3.262B
+NCR;NCR Corporation;26.73;1.088M;3.261B
+HZNP;Horizon Pharma Public Limited Company;19.45;1.436M;3.241B
+KMT;Kennametal Inc.;39.41;809898;3.233B
+TCBI;Texas Capital Bancshares, Inc.;64.32;504310;3.228B
+LILAK;Liberty Latin America Ltd.;18.73;580245;3.208B
+AYX;Alteryx, Inc.;52.56;1.104M;3.2B
+KLXI;KLX Inc.;62.99;1.105M;3.197B
+MTDR;Matador Resources Company;27.45;1.347M;3.193B
+SIG;Signet Jewelers Limited;61.54;1.511M;3.195B
+ZNGA;Zynga Inc.;3.69;12.514M;3.18B
+TRN;Trinity Industries, Inc.;21.785;2.107M;3.187B
+NEA;Nuveen AMT-Free Quality Municipal Income Fund;12.105;549946;3.181B
+FND;Floor & Decor Holdings, Inc.;32.57;1.877M;3.17B
+NAVI;Navient Corporation;12.26;1.921M;3.161B
+WLL;Whiting Petroleum Corporation;34.71;2.689M;3.158B
+CLF;Cleveland-Cliffs Inc.;10.59;10.006M;3.156B
+MFA;MFA Financial, Inc.;7.03;3.616M;3.153B
+PAH;Platform Specialty Products Corporation;10.93;2.877M;3.151B
+DK;Delek US Holdings, Inc.;36.25;1.809M;3.141B
+RES;RPC, Inc.;14.61;1.617M;3.138B
+AEL;American Equity Investment Life Holding Company;34.77;403783;3.139B
+CNO;CNO Financial Group, Inc.;19.04;842713;3.135B
+ESV;Ensco plc;7.2;11.782M;3.128B
+CNX;CNX Resources Corporation;15.34;2.709M;3.123B
+DOC;Physicians Realty Trust;16.62;1.272M;3.117B
+SBGI;Sinclair Broadcast Group, Inc.;30.34;1.337M;3.007B
+BJ;BJ's Wholesale Club Holdings, Inc.;22.8674;1.782M;3.097B
+PFGC;Performance Food Group Company;29.44;817010;3.097B
+GDS;GDS Holdings Limited;24.36;1.426M;3.067B
+CBT;Cabot Corporation;49.64;411761;3.056B
+UFS;Domtar Corporation;48.57;547781;3.055B
+UNVR;Univar Inc.;21.66;1.18M;3.065B
+OAS;Oasis Petroleum Inc.;9.53;7.577M;3.031B
+AJRD;Aerojet Rocketdyne Holdings, Inc.;38.56;709030;3.026B
+CLNY;Colony Capital, Inc.;5.78;2.147M;3.013B
+PDCE;PDC Energy, Inc.;45.47;1.149M;3.004B
+HMSY;HMS Holdings Corp.;35.51;558238;2.98B
+MIK;The Michaels Companies, Inc.;17.23;2.745M;2.953B
+NYLD;Clearway Energy, Inc.;0;487103;0
+NVCR;NovoCure Limited;31.545;881404;2.934B
+AZUL;Azul S.A.;25.67;1.184M;2.912B
+TWOU;2U, Inc.;50.62;611446;2.907B
+KBR;KBR, Inc.;20.6;1.568M;2.902B
+APHQF;Aphria Inc.;11.57;2.431M;2.89B
+ERI;Eldorado Resorts, Inc.;37.26;1.239M;2.882B
+HGV;Hilton Grand Vacations Inc.;29.71;1.275M;2.879B
+GLNG;Golar LNG Limited;29.16;1.395M;2.861B
+AMGP;Antero Midstream GP LP;15.35;759583;2.858B
+OUT;Outfront Media Inc.;20.45;938130;2.848B
+PS;Pluralsight, Inc.;20.97;712701;2.832B
+RH;RH;127.04;1.168M;2.825B
+HAIN;The Hain Celestial Group, Inc.;25.95;1.309M;2.816B
+SFIX;Stitch Fix, Inc.;28.3201;3.622M;2.807B
+ADNT;Adient plc;30.09;1.859M;2.81B
+RRR;Red Rock Resorts, Inc.;24.195;997641;2.809B
+MYGN;Myriad Genetics, Inc.;37.12;806953;2.773B
+VSH;Vishay Intertechnology, Inc.;19.23;1.697M;2.773B
+THS;TreeHouse Foods, Inc.;48.88;735541;2.737B
+NS;NuStar Energy L.P.;25.54;652744;2.734B
+JAG;Jagged Peak Energy Inc.;12.82;1.374M;2.734B
+VG;Vonage Holdings Corp.;11.335;1.655M;2.716B
+TPX;Tempur Sealy International, Inc.;49.77;1.062M;2.709B
+NVG;Nuveen AMT-Free Municipal Credit Income Fund;13.38;381501;2.71B
+GEO;The GEO Group, Inc.;22.19;608026;2.7B
+RARE;Ultragenyx Pharmaceutical Inc.;53.58;528453;2.689B
+OI;Owens-Illinois, Inc.;16.9;1.267M;2.682B
+ACAD;ACADIA Pharmaceuticals Inc.;21.365;2.98M;2.671B
+SM;SM Energy Company;23.61;2.469M;2.648B
+CXP;Columbia Property Trust, Inc.;22.46;868521;2.65B
+BOX;Box, Inc.;18.67;3.088M;2.644B
+BDN;Brandywine Realty Trust;14.43;1.276M;2.599B
+PENN;Penn National Gaming, Inc.;21.96;2.098M;2.597B
+KOS;Kosmos Energy Ltd.;5.9452;2.39M;2.577B
+NOVT;Novanta Inc.;74.45;217728;2.58B
+CLNC;Colony Credit Real Estate, Inc.;19.69;441910;2.579B
+BZUN;Baozun Inc.;45.25;1.971M;2.577B
+BTG;B2Gold Corp.;2.56;3.409M;2.533B
+WCC;WESCO International, Inc.;54.45;403932;2.542B
+CXW;CoreCivic, Inc.;21.27;658961;2.522B
+AHL;Aspen Insurance Holdings Limited;42.035;1.4M;2.509B
+ORA;Ormat Technologies, Inc.;49.4;203060;2.501B
+PSEC;Prospect Capital Corporation;6.81;1.865M;2.485B
+CRUS;Cirrus Logic, Inc.;41.4;895724;2.478B
+CPG;Crescent Point Energy Corp.;4.52;1.447M;2.477B
+VIAV;Viavi Solutions Inc.;10.81;2.501M;2.465B
+SOGO;Sogou Inc.;6.38;1.881M;2.468B
+THC;Tenet Healthcare Corporation;23.95;1.339M;2.452B
+CYBR;CyberArk Software Ltd.;67.93;552830;2.45B
+LBRT;Liberty Oilfield Services Inc.;20.57;908078;2.434B
+P;Pandora Media, Inc.;8.99;9.975M;2.425B
+CPE;Callon Petroleum Company;10.43;4.25M;2.374B
+CMC;Commercial Metals Company;20.28;1.223M;2.373B
+AKCA;Akcea Therapeutics, Inc.;27.55;381375;2.362B
+AVNS;Avanos Medical, Inc.;49.975;323701;2.363B
+CAR;Avis Budget Group, Inc.;29.63;1.827M;2.347B
+ENLC;EnLink Midstream, LLC;12.9;603280;2.339B
+TEX;Terex Corporation;31.54;1.287M;2.324B
+VC;Visteon Corporation;80.37;679803;2.323B
+PAAS;Pan American Silver Corp.;15.12;1.478M;2.317B
+MNK;Mallinckrodt Public Limited Company;27.53;2.614M;2.291B
+PEB;Pebblebrook Hotel Trust;33.12;1.386M;2.294B
+ERF;Enerplus Corporation;9.35;698356;2.285B
+AUY;Yamana Gold Inc.;2.385;12.266M;2.278B
+SBH;Sally Beauty Holdings, Inc.;18.91;1.63M;2.267B
+BDC;Belden Inc.;55.52;378209;2.256B
+ZUO;Zuora, Inc.;20.94;1.81M;2.256B
+GNW;Genworth Financial, Inc.;4.505;3.268M;2.256B
+SKT;Tanger Factory Outlet Centers, Inc.;22.93;1.3M;2.251B
+BL;BlackLine, Inc.;41.63;432743;2.246B
+ALTR;Altair Engineering Inc.;31.99;360698;2.236B
+SAIL;SailPoint Technologies Holdings, Inc.;25.48;1.344M;2.235B
+QEP;QEP Resources, Inc.;9.4;4.22M;2.229B
+SEAS;SeaWorld Entertainment, Inc.;25.42;2.379M;2.233B
+BSTI;BEST Inc.;5.76;1.266M;2.23B
+DSW;DSW Inc.;27.72;2.002M;2.226B
+CVG;Convergys Corporation;0;802504;0
+GFI;Gold Fields Limited;2.82;4.999M;2.217B
+DDR;DDR Corp.;11.99;1.541M;2.206B
+DM;Dominion Energy Midstream Partners, LP;17.37;913603;2.199B
+SITC;SITE Centers Corp.;11.92;1.365M;2.193B
+WRD;WildHorse Resource Development Corporation;21.96;1.593M;2.188B
+PDCO;Patterson Companies, Inc.;23.47;1.949M;2.191B
+DAN;Dana Incorporated;15.07;1.512M;2.18B
+CLDR;Cloudera, Inc.;14.19;3.344M;2.174B
+SUPN;Supernus Pharmaceuticals, Inc.;41.43;692909;2.163B
+BOFI;Axos Financial, Inc.;34.39;517246;2.161B
+CZZ;Cosan Limited;8.795;1.129M;2.152B
+RLGY;Realogy Holdings Corp.;18.15;2.957M;2.145B
+FOLD;Amicus Therapeutics, Inc.;11.195;2.7M;2.117B
+KYN;Kayne Anderson MLP/Midstream Investment Company;16.73;419395;2.11B
+MIME;Mimecast Limited;35.08;511118;2.106B
+TNDM;Tandem Diabetes Care, Inc.;36.5376;3.307M;2.096B
+DRH;DiamondRock Hospitality Company;10.08;2.003M;2.095B
+FTDR;frontdoor, inc.;24.64;1.138M;2.082B
+TELL;Tellurian Inc.;8.64;1.484M;2.078B
+RDC;Rowan Companies plc;16.29;3.565M;2.07B
+OPK;OPKO Health, Inc.;3.685;4.916M;2.063B
+ITRI;Itron, Inc.;52.2292;258263;2.053B
+GTT;GTT Communications, Inc.;37.21;753295;2.033B
+FBP;First BanCorp.;9.335;2.113M;2.027B
+AY;Atlantica Yield plc;20.16;254360;2.02B
+FNSR;Finisar Corporation;17.18;2.328M;2.014B
+PEGI;Pattern Energy Group Inc.;20.47;1.108M;2.012B
+IRWD;Ironwood Pharmaceuticals, Inc.;13.05;1.074M;1.999B
+EURN;Euronav NV;9.29;640726;1.996B
+BE;Bloom Energy Corporation;18.19;608524;1.987B
+BBBY;Bed Bath & Beyond Inc.;14.36;4.884M;1.982B
+LXP;Lexington Realty Trust;8.14;1.521M;1.982B
+GCP;GCP Applied Technologies Inc.;27.48;689307;1.983B
+SGMS;Scientific Games Corporation;21.68;1.853M;1.982B
+BECN;Beacon Roofing Supply, Inc.;28.95;1.331M;1.972B
+NBR;Nabors Industries Ltd.;5.495;11.232M;1.964B
+WBT;Welbilt, Inc.;14;1.136M;1.961B
+BLMN;Bloomin' Brands, Inc.;21.33;1.25M;1.96B
+IMPV;Imperva, Inc.;55.65;828413;1.956B
+AMC;AMC Entertainment Holdings, Inc.;18.79;1.913M;1.945B
+ECYT;Endocyte, Inc.;23.7;2.679M;1.945B
+TVPT;Travelport Worldwide Limited;15.37;1.177M;1.943B
+DLPH;Delphi Technologies PLC;21.9;1.527M;1.944B
+TMHC;Taylor Morrison Home Corporation;16.32;1.203M;1.937B
+LADR;Ladder Capital Corp;17.3;658764;1.925B
+PNK;Pinnacle Entertainment, Inc.;32.55;349112;1.917B
+OIBR-C;Oi S.A.;3.94;749185;1.917B
+NXTM;Nxstage Medical, Inc.;28.95;490495;1.898B
+BLD;TopBuild Corp.;53.21;413160;1.896B
+SFLY;Shutterfly, Inc.;56.45;825886;1.893B
+BGS;B&G Foods, Inc.;28.6;634044;1.886B
+HUD;Hudson Ltd.;20.38;355018;1.885B
+KBH;KB Home;21.31;2.223M;1.884B
+EAT;Brinker International, Inc.;48.44;1.157M;1.88B
+DO;Diamond Offshore Drilling, Inc.;13.57;1.593M;1.865B
+GRPN;Groupon, Inc.;3.2899;7.541M;1.87B
+CRSP;CRISPR Therapeutics AG;35.98;955444;1.855B
+TPH;TRI Pointe Group, Inc.;12.9925;2.591M;1.848B
+HOME;At Home Group Inc.;29.01;1.175M;1.842B
+SRCI;SRC Energy Inc.;7.585;3.39M;1.84B
+SHAK;Shake Shack Inc.;49.69;747184;1.84B
+MWA;Mueller Water Products, Inc.;11.625;851389;1.839B
+FN;Fabrinet;49.4;435407;1.819B
+GOL;GOL Linhas Aéreas Inteligentes S.A.;10.98;1.105M;1.823B
+GES;Guess', Inc.;22.56;826066;1.828B
+CADE;Cadence Bancorporation;21.83;1.35M;1.826B
+CCT;Corporate Capital Trust, Inc.;14.68;364092;1.822B
+VGR;Vector Group Ltd.;13.445;1.556M;1.895B
+PTCT;PTC Therapeutics, Inc.;35.39;882298;1.779B
+MDRX;Allscripts Healthcare Solutions, Inc.;10.1;1.643M;1.765B
+ACIA;Acacia Communications, Inc.;43.39;599746;1.755B
+MDR;McDermott International, Inc.;9.73;3.172M;1.757B
+SEDG;SolarEdge Technologies, Inc.;37.95;953647;1.736B
+BKD;Brookdale Senior Living Inc.;9.26;1.989M;1.738B
+PZZA;Papa John's International, Inc.;54.5752;1.519M;1.726B
+FI;Frank's International N.V.;7.68;695521;1.722B
+DNOW;NOW Inc.;15.85;1.236M;1.718B
+PPDF;PPDAI Group Inc.;5.72;1.007M;1.72B
+SSW;Seaspan Corporation;9.71;848681;1.714B
+BIG;Big Lots, Inc.;42.53;1.323M;1.716B
+LGORF;Largo Resources Ltd.;3.281;838338;1.712B
+WSC;WillScot Corporation;15.795;636913;1.711B
+AMKR;Amkor Technology, Inc.;7.08;1.249M;1.696B
+IAG;IAMGOLD Corporation;3.64;4.109M;1.693B
+GPOR;Gulfport Energy Corporation;9.75;3.579M;1.69B
+CTB;Cooper Tire & Rubber Company;33.36;746306;1.67B
+CRON;Cronos Group Inc.;9.2679;20.764M;1.655B
+NEO;NeoGenomics, Inc.;17.985;599233;1.645B
+CRZO;Carrizo Oil & Gas, Inc.;17.9;2.291M;1.64B
+TSRO;Tesaro, Inc.;29.63;1.763M;1.631B
+MB;MINDBODY, Inc.;33.87;707100;1.617B
+GTN;Gray Television, Inc.;18.51;751832;1.615B
+ESPR;Esperion Therapeutics, Inc.;59.49;664798;1.595B
+BLDR;Builders FirstSource, Inc.;13.91;1.6M;1.596B
+LX;LexinFintech Holdings Ltd.;9.59;444124;1.589B
+INVA;Innoviva, Inc.;15.68;803941;1.584B
+FSIC;FS Investment Corporation;6.6;1.196M;1.578B
+EVBG;Everbridge, Inc.;53.14;380733;1.562B
+ONCE;Spark Therapeutics, Inc.;41.48;664440;1.558B
+XOG;Extraction Oil & Gas, Inc.;8.84;2.953M;1.551B
+MRC;MRC Global Inc.;17.13;794429;1.547B
+SUM;Summit Materials, Inc.;13.425;2.993M;1.545B
+WDR;Waddell & Reed Financial, Inc.;19.68;917589;1.553B
+MTH;Meritage Homes Corporation;38.51;524910;1.539B
+TROX;Tronox Limited;12.53;1.558M;1.535B
+CORT;Corcept Therapeutics Incorporated;13.27;1.273M;1.532B
+GME;GameStop Corp.;14.945;3.245M;1.524B
+QD;Qudian Inc.;4.675;2.723M;1.523B
+FIT;Fitbit, Inc.;6.2;5.663M;1.52B
+HDP;Hortonworks, Inc.;18.43;1.688M;1.522B
+PBI;Pitney Bowes Inc.;8.06;2.474M;1.515B
+TVTY;Tivity Health, Inc.;37.88;407715;1.515B
+CTRE;CareTrust REIT, Inc.;18.6;559575;1.506B
+AGI;Alamos Gold Inc.;3.84;1.755M;1.498B
+ODP;Office Depot, Inc.;2.7;4.785M;1.497B
+KN;Knowles Corporation;16.44;937386;1.483B
+LC;LendingClub Corporation;3.485;3.01M;1.475B
+WPG;Washington Prime Group Inc.;6.685;2.157M;1.476B
+DDD;3D Systems Corporation;12.89;3.211M;1.471B
+PUMP;ProPetro Holding Corp.;17.53;1.387M;1.465B
+SKY;Skyline Champion Corporation;25.75;638116;1.455B
+BV;BrightView Holdings, Inc.;14.19;540385;1.454B
+RDFN;Redfin Corporation;16.4;1.371M;1.455B
+TWNK;Hostess Brands, Inc.;11.15;1.217M;1.451B
+PVG;Pretium Resources Inc.;7.89;2.482M;1.449B
+CROX;Crocs, Inc.;21.22;1.054M;1.445B
+RUN;Sunrun Inc.;12.94;1.742M;1.435B
+DNR;Denbury Resources Inc.;3.1763;11.815M;1.44B
+QSII;Quality Systems, Inc.;22.35;186475;1.435B
+SBGL;Sibanye Gold Limited;2.57;3.8M;1.423B
+FRAC;Keane Group, Inc.;13.32;1.145M;1.408B
+SGMO;Sangamo Therapeutics, Inc.;13.84;2.238M;1.407B
+WMIH;WMIH Corp.;1.31;5.703M;118.198M
+OCLR;Oclaro, Inc.;8.24;1.467M;1.407B
+CRC;California Resources Corporation;28.78;1.768M;1.398B
+USAC;USA Compression Partners, LP;14.45;373941;1.392B
+AROC;Archrock, Inc.;10.72;750163;1.386B
+CORE;Core-Mark Holding Company, Inc.;30.15;399541;1.385B
+ANF;Abercrombie & Fitch Co.;20.71;2.663M;1.382B
+MXL;MaxLinear, Inc.;19.85;807193;1.369B
+KTOS;Kratos Defense & Security Solutions, Inc.;13.125;1.018M;1.362B
+AXL;American Axle & Manufacturing Holdings, Inc.;12.19;2.001M;1.362B
+HCC;Warrior Met Coal, Inc.;25.74;866978;1.358B
+BITA;Bitauto Holdings Limited;18.98;781069;1.356B
+WEB;Web.com Group, Inc.;27.99;528418;1.354B
+LPI;Laredo Petroleum, Inc.;5.86;5.661M;1.352B
+FCF;First Commonwealth Financial Corporation;13.45;528487;1.35B
+WFT;Weatherford International plc;1.34;20.089M;1.341B
+HTZ;Hertz Global Holdings, Inc.;15.66;3.298M;1.318B
+SPPI;Spectrum Pharmaceuticals, Inc.;12.57;1.557M;1.319B
+EGFEF;Eurobank Ergasias S.A.;0.62;137900;1.317B
+NG;NovaGold Resources Inc.;4.08;1.191M;1.321B
+INSM;Insmed Incorporated;16.93;1.107M;1.305B
+HBM;Hudbay Minerals Inc.;4.96;619624;1.293B
+CWBHF;Charlotte's Web Holdings, Inc.;13.8593;130767;1.293B
+ARWR;Arrowhead Pharmaceuticals, Inc.;14.69;2.548M;1.293B
+RAD;Rite Aid Corporation;1.23;14.829M;1.295B
+SYNA;Synaptics Incorporated;36.91;535066;1.287B
+PTLA;Portola Pharmaceuticals, Inc.;19.17;1.579M;1.267B
+SVU;SUPERVALU INC.;0;976304;0
+SPN;Superior Energy Services, Inc.;8.11;2.809M;1.253B
+NGL;NGL Energy Partners LP;10.19;1.007M;1.244B
+HTGC;Hercules Capital, Inc.;12.745;431301;1.227B
+HOLI;Hollysys Automation Technologies Ltd.;20.25;273058;1.222B
+HLX;Helix Energy Solutions Group, Inc.;8.225;1.294M;1.219B
+SSRM;SSR Mining Inc.;10.13;755444;1.215B
+AKS;AK Steel Holding Corporation;3.84;11.091M;1.212B
+HL;Hecla Mining Company;2.52;5.423M;1.202B
+NE;Noble Corporation plc;4.865;5.469M;1.201B
+BCC;Boise Cascade Company;30.75;476215;1.196B
+FRPT;Freshpet, Inc.;33.84;289566;1.195B
+TRUE;TrueCar, Inc.;11.51;782216;1.175B
+NVRO;Nevro Corp.;38.8301;671075;1.169B
+BTE;Baytex Energy Corp.;2.13;2.674M;1.168B
+AQUA;Evoqua Water Technologies Corp.;10.18;1.014M;1.159B
+TLRD;Tailored Brands, Inc.;23.235;1.384M;1.16B
+KTWO;K2M Group Holdings, Inc.;26.515;1.244M;1.159B
+GCI;Gannett Co., Inc.;10.095;980061;1.141B
+AINV;Apollo Investment Corporation;5.39;868378;1.139B
+CBLK;Carbon Black, Inc.;16.72;481710;1.136B
+AG;First Majestic Silver Corp.;5.83;2.764M;1.128B
+UNFI;United Natural Foods, Inc.;22.35;1.005M;1.127B
+GTE;Gran Tierra Energy Inc.;2.87;1.412M;1.123B

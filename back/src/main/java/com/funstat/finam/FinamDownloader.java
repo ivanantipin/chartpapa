@@ -32,7 +32,7 @@ import static com.google.common.io.CharStreams.readLines;
 
 public class FinamDownloader implements AutoCloseable, Source {
     private static final Logger log = LoggerFactory.getLogger(FinamDownloader.class);
-    public static final String FINAM = "FINAM";
+    public static final String SOURCE = "SOURCE";
 
     private AsyncHttpClient client;
 
@@ -196,7 +196,7 @@ public class FinamDownloader implements AutoCloseable, Source {
 
     @Override
     public String getName() {
-        return FINAM;
+        return SOURCE;
     }
 }
 
