@@ -1,0 +1,1 @@
+this is NOT maven resources folder to prevent copying large market data STATIC files every time for testing
