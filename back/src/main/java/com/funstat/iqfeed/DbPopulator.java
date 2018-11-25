@@ -18,11 +18,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DbPopulator {
 
     public static void main(String[] args) throws Exception {
-        MdStorageImpl syncer = new MdStorageImpl("/ddisk/globaldatabase/md");
+        MdStorageImpl syncer = new MdStorageImpl(MdStorageImpl.HOME_PATH);
         ssync(syncer);
     }
 
-    private static void ssync(MdStorageImpl syncer) {
+    public static void ssync(MdStorageImpl syncer) {
         Path dir = Paths.get("/ddisk/globaldatabase/1MIN/STK");
         AtomicLong cnt = new AtomicLong();
         String iniFile = dir.resolve("common.ini").toAbsolutePath().toString();

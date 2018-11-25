@@ -1,7 +1,7 @@
 package com.funstat.iqfeed;
 
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 import com.funstat.store.MdDao;
 import com.funstat.vantage.Source;
 
@@ -13,19 +13,17 @@ import java.util.stream.Collectors;
 
 public class IqFeedSource implements Source {
 
-    public static final String SOURCE = "SOURCE";
+    public static final String SOURCE = "IQFEED";
 
     MdDao dao = null;
 
-
-
     @Override
-    public List<Symbol> symbols() {
+    public List<InstrId> symbols() {
         try {
             List<String> lines = Files.readAllLines(Paths.get(IqFeedSource.class.getResource("/iqfeed_symbols.txt").toURI()));
             return lines.stream().skip(1).map(l->{
                 String[] arr = l.split(";");
-                return new Symbol(arr[0],arr[1],"NA",arr[0], SOURCE);
+                return new InstrId(arr[0],arr[1],"NA",arr[0], SOURCE);
             }).collect(Collectors.toList());
 
         } catch (Exception e) {
@@ -34,13 +32,13 @@ public class IqFeedSource implements Source {
     }
 
     @Override
-    public List<Ohlc> load(Symbol symbol) {
-        return dao.queryAll(symbol.code);
+    public List<Ohlc> load(InstrId instrId) {
+        return dao.queryAll(instrId.code);
     }
 
     @Override
-    public List<Ohlc> load(Symbol symbol, LocalDateTime dateTime) {
-        return dao.queryAll(symbol.code);
+    public List<Ohlc> load(InstrId instrId, LocalDateTime dateTime) {
+        return dao.queryAll(instrId.code);
     }
 
     @Override

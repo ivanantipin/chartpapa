@@ -5,7 +5,7 @@ import com.funstat.Pair;
 import com.funstat.Tables;
 import com.funstat.domain.Ohlc;
 import com.funstat.finam.FinamDownloader;
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 import com.funstat.iqfeed.IntervalTransformer;
 import com.funstat.iqfeed.IqFeedSource;
 import com.funstat.vantage.Source;
@@ -18,6 +18,7 @@ import org.sqlite.SQLiteDataSource;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 public class MdStorageImpl implements MdStorage {
 
+    public static final String HOME_PATH = "/ddisk/globaldatabase/md";
     private String folder;
 
     SingletonsContainer container = new SingletonsContainer();
@@ -81,21 +83,17 @@ public class MdStorageImpl implements MdStorage {
 
 
     @Override
-    public List<Ohlc> read(Symbol symbol, String interval){
-
-        Tables.REQUESTED.writeSingle(getGeneric(), symbol);
-
-
-
-        MdDao dao = getDao(symbol.source, Interval.Min1.name());
-        List<Ohlc> ret = dao.queryAll(symbol.code);
+    public List<Ohlc> read(InstrId instrId, String interval){
+        Tables.REQUESTED.writeSingle(getGeneric(), instrId);
+        MdDao dao = getDao(instrId.source, Interval.Min1.name());
+        List<Ohlc> ret = dao.queryAll(instrId.code);
         Interval target = Interval.valueOf(interval);
 
 
 
         if (ret.isEmpty()) {
-            updateMarketData(symbol);
-            ret = dao.queryAll(symbol.code);
+            updateMarketData(instrId);
+            ret = dao.queryAll(instrId.code);
         }
         return IntervalTransformer.transform(target,ret);
     }
@@ -119,9 +117,6 @@ public class MdStorageImpl implements MdStorage {
 
     public void updateSymbolsMeta(){
         Pair lastUpdated = Tables.PAIRS.readByKey(getGeneric(), SYMBOLS_LAST_UPDATED);
-
-
-
         if(lastUpdated == null ||  (System.currentTimeMillis() - Long.parseLong(lastUpdated.value)) > 24*3600_000){
             System.out.println("updating symbols as they are stale");
             getGeneric().saveGeneric(SYMBOLS_TABLE, sources.values().stream()
@@ -129,6 +124,8 @@ public class MdStorageImpl implements MdStorage {
                         return s.market.equals("1") || s.source.equals(VantageDownloader.SOURCE);
                     }).collect(Collectors.toList()), s->s.code);
             Tables.PAIRS.writeSingle(getGeneric(), new Pair(SYMBOLS_LAST_UPDATED,"" + System.currentTimeMillis()));
+        }else {
+            System.out.println("not updating symbols as last update was " + LocalDateTime.ofEpochSecond(Long.parseLong(lastUpdated.value)/1000, 0, ZoneOffset.UTC));
         }
 
         if(false){
@@ -150,15 +147,22 @@ public class MdStorageImpl implements MdStorage {
     }
 
 
-    public List<Symbol> getMeta() {
+    public List<InstrId> getMeta() {
         return container.get(SYMBOLS_TABLE, () -> Tables.SYMBOLS.read(getGeneric()));
     }
 
 
-    public void updateMarketData(Symbol symbol) {
-        MdDao dao = getDao(symbol.source, Interval.Min1.name());
-        LocalDateTime startTime = dao.queryLast(symbol.code).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));
-        dao.insertJ(sources.get(symbol.source).load(symbol, startTime),symbol.code);
+    public void updateMarketData(InstrId instrId) {
+        MdDao dao = getDao(instrId.source, Interval.Min1.name());
+        LocalDateTime startTime = dao.queryLast(instrId.code).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));
+        dao.insertJ(sources.get(instrId.source).load(instrId, startTime), instrId.code);
+    }
+
+    public static void main(String[] args) {
+        MdStorageImpl mdStorage = new MdStorageImpl(HOME_PATH);
+        mdStorage.updateSymbolsMeta();
+        System.out.println(mdStorage.getMeta().stream().filter(s->s.source.equals(FinamDownloader.SOURCE)));
+
     }
 
 }

@@ -1,7 +1,7 @@
 package com.funstat.vantage;
 
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 import com.funstat.store.MdDao;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -27,7 +27,7 @@ public class VantageDownloader implements Source{
 
     public static void main(String[] args) {
 
-        List<Ohlc> load = new VantageDownloader().load(new Symbol("RASP.MOS", "RASP.MOS", "RASP.MOS", "RASP.MOS", "RASP.MOS"));
+        List<Ohlc> load = new VantageDownloader().load(new InstrId("RASP.MOS", "RASP.MOS", "RASP.MOS", "RASP.MOS", "RASP.MOS"));
         System.out.println(load);
 
     }
@@ -46,11 +46,11 @@ public class VantageDownloader implements Source{
     }
 
     @Override
-    public List<Symbol> symbols() {
+    public List<InstrId> symbols() {
         /*
         fixme
-                List<Symbol> ret = mdDao.readGeneric("vantage_symbols", Symbol.class);
-        ret.add(new Symbol("RASP.MOS","RASP.MOS", MICEX,"RASP.MOS", SOURCE));
+                List<InstrId> ret = mdDao.readGeneric("vantage_symbols", InstrId.class);
+        ret.add(new InstrId("RASP.MOS","RASP.MOS", MICEX,"RASP.MOS", SOURCE));
         return ret;
 
          */
@@ -58,7 +58,7 @@ public class VantageDownloader implements Source{
     }
 
     @Override
-    public List<Ohlc> load(Symbol symbol) {
+    public List<Ohlc> load(InstrId instrId) {
         RestTemplate template = new RestTemplate();
 
         String url = "https://www.alphavantage.co/query";
@@ -69,7 +69,7 @@ public class VantageDownloader implements Source{
 
         String request = url +
                 "?function=" + function
-                + "&symbol=" +symbol.code
+                + "&instrId=" + instrId.code
                 + "&apikey=" + apiKey
                 + "&datatype=" + dataType;
 
@@ -82,8 +82,8 @@ public class VantageDownloader implements Source{
     }
 
     @Override
-    public List<Ohlc> load(Symbol symbol, LocalDateTime dateTime) {
-        return load(symbol);
+    public List<Ohlc> load(InstrId instrId, LocalDateTime dateTime) {
+        return load(instrId);
     }
 
     @Override

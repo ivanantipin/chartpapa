@@ -1,10 +1,10 @@
 package com.funstat;
 
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 
 public class Tables{
-    public static final PersistDescriptor<Symbol> REQUESTED = new PersistDescriptor<>("requested",Symbol.class, s->s.code);
-    public static final PersistDescriptor<Symbol> SYMBOLS = new PersistDescriptor<>("symbols",Symbol.class, s->s.code);
+    public static final PersistDescriptor<InstrId> REQUESTED = new PersistDescriptor<>("requested", InstrId.class, s->s.code);
+    public static final PersistDescriptor<InstrId> SYMBOLS = new PersistDescriptor<>("symbols", InstrId.class, s->s.code);
     public static final PersistDescriptor<Pair> PAIRS = new PersistDescriptor<>("pairs", Pair.class, s -> s.key);
 }
 

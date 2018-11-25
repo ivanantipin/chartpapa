@@ -3,7 +3,7 @@ package com.funstat;
 import com.funstat.domain.Annotations;
 import com.funstat.domain.Ohlc;
 import com.funstat.domain.TimePoint;
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 import com.funstat.ohlc.Metadata;
 import com.funstat.store.MdStorage;
 import com.funstat.store.MdStorageImpl;
@@ -31,7 +31,6 @@ public class MainController {
     @PostConstruct
     void onStart(){
         storage.updateSymbolsMeta();
-
     }
 
     List<Metadata> allMetas = new ArrayList<>();
@@ -47,23 +46,23 @@ public class MainController {
     }
 
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
-    public Collection<Symbol> instruments(){
+    public Collection<InstrId> instruments(){
         return storage.getMeta();
     }
 
     @PostMapping("/get_ohlcs")
-    public Collection<Ohlc> getOhlcs(@RequestParam  Symbol symbol, String interval){
-        return storage.read(symbol, interval);
+    public Collection<Ohlc> getOhlcs(@RequestBody @Valid InstrId instrId, String interval){
+        return storage.read(instrId, interval);
     }
 
     @PostMapping("/get_annotations")
-    public Annotations getAnnotations(@RequestParam Symbol symbol,  @RequestParam String interval){
-        List<Ohlc> ohlcs = storage.read(symbol, interval);
+    public Annotations getAnnotations(@RequestBody @Valid InstrId instrId, String interval){
+        List<Ohlc> ohlcs = storage.read(instrId, interval);
         return AnnotationCreator.createAnnotations(ohlcs);
     }
 
-    @GetMapping("/get_series")
-    public Map<String,Collection<TimePoint>> getSeries(Symbol[] codes, String interval) {
+    @PostMapping("/get_series")
+    public Map<String,Collection<TimePoint>> getSeries(@RequestBody @Valid InstrId[] codes, String interval) {
         Map<String,Collection<TimePoint>> mm = new HashMap<>();
         Arrays.stream(codes).forEach(c->{
             List<TimePoint> lst = storage.read(c,interval).stream().map(oh -> new TimePoint(oh.dateTime, oh.close)).collect(Collectors.toList());

@@ -1,20 +1,20 @@
 package com.funstat.ohlc;
 
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 
 import java.util.List;
 
 public class Metadata{
-    List<Symbol> symbols;
+    List<InstrId> instrIds;
     int period;
 
-    public Metadata(List<Symbol> symbols, int period) {
-        this.symbols = symbols;
+    public Metadata(List<InstrId> instrIds, int period) {
+        this.instrIds = instrIds;
         this.period = period;
     }
 
-    public List<Symbol> getSymbols() {
-        return symbols;
+    public List<InstrId> getInstrIds() {
+        return instrIds;
     }
 
     public int getPeriod() {

@@ -32,7 +32,7 @@ import static com.google.common.io.CharStreams.readLines;
 
 public class FinamDownloader implements AutoCloseable, Source {
     private static final Logger log = LoggerFactory.getLogger(FinamDownloader.class);
-    public static final String SOURCE = "SOURCE";
+    public static final String SOURCE = "FINAM";
 
     private AsyncHttpClient client;
 
@@ -80,7 +80,7 @@ public class FinamDownloader implements AutoCloseable, Source {
     }
 
     @Override
-    public List<Symbol> symbols() {
+    public List<InstrId> symbols() {
         try {
             InputStream in = new URL("https://www.finam.ru/cache/icharts/icharts.js").openStream();
             List<String> lines = IOUtils.readLines(in, Charset.forName("cp1251"));
@@ -95,10 +95,10 @@ public class FinamDownloader implements AutoCloseable, Source {
             String[] codes = map.get("varaEmitentCodes");
             String[] markets = map.get("varaEmitentMarkets");
 
-            List<Symbol> ret = new ArrayList<>();
+            List<InstrId> ret = new ArrayList<>();
 
             for (int i = 0; i < codes.length; i++) {
-                ret.add(new Symbol(ids[i], names[i], markets[i], codes[i].replace("'", ""), getName()));
+                ret.add(new InstrId(ids[i], names[i], markets[i], codes[i].replace("'", ""), getName()));
             }
 
             System.out.println(map);
@@ -109,14 +109,14 @@ public class FinamDownloader implements AutoCloseable, Source {
     }
 
     @Override
-    public List<Ohlc> load(Symbol symbolSpec) {
-        return load(symbolSpec, LocalDateTime.now().minusDays(600));
+    public List<Ohlc> load(InstrId instrIdSpec) {
+        return load(instrIdSpec, LocalDateTime.now().minusDays(600));
     }
 
     volatile long lastFinamCall  = 0;
 
     @Override
-    public synchronized List<Ohlc> load(Symbol symbolSpec, LocalDateTime start) {
+    public synchronized List<Ohlc> load(InstrId instrIdSpec, LocalDateTime start) {
 
         while ((System.currentTimeMillis() - lastFinamCall) < 1100){
             try {
@@ -147,8 +147,8 @@ public class FinamDownloader implements AutoCloseable, Source {
         };
         StringBuilder url = new StringBuilder("http://export.finam.ru/table.csv?f=table");
         params.put("p", "" + Period.DAILY.getId());
-        params.put("em", "" + symbolSpec.id);
-        params.put("market", symbolSpec.market);
+        params.put("em", "" + instrIdSpec.id);
+        params.put("market", instrIdSpec.market);
 
         params.put("df", "" + start.getDayOfMonth());
         params.put("mf", "" + (start.getMonthValue() - 1));
@@ -158,8 +158,8 @@ public class FinamDownloader implements AutoCloseable, Source {
         params.put("mt", "" + (finish.getMonthValue() - 1));
         params.put("yt", "" + finish.getYear());
 
-        params.put("code", "" + symbolSpec.code);
-        params.put("cn", "" + symbolSpec.code);
+        params.put("code", "" + instrIdSpec.code);
+        params.put("cn", "" + instrIdSpec.code);
 
         params.put("from", start.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
         params.put("to", finish.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));

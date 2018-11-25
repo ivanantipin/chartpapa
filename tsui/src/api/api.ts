@@ -162,6 +162,18 @@ export interface Label {
  * @interface Metadata
  */
 export interface Metadata {
+    /**
+     * 
+     * @type {number}
+     * @memberof Metadata
+     */
+    period?: number;
+    /**
+     * 
+     * @type {Array<Symbol>}
+     * @memberof Metadata
+     */
+    symbols?: Array<Symbol>;
 }
 
 /**
@@ -352,31 +364,31 @@ export interface Symbol {
      * @type {string}
      * @memberof Symbol
      */
-    code: string;
+    code?: string;
     /**
      * 
      * @type {string}
      * @memberof Symbol
      */
-    id: string;
+    id?: string;
     /**
      * 
      * @type {string}
      * @memberof Symbol
      */
-    market: string;
+    market?: string;
     /**
      * 
      * @type {string}
      * @memberof Symbol
      */
-    name: string;
+    name?: string;
     /**
      * 
      * @type {string}
      * @memberof Symbol
      */
-    source: string;
+    source?: string;
 }
 
 /**
@@ -918,25 +930,34 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
         /**
          * 
          * @summary getAnnotations
-         * @param {string} [code] code
+         * @param {Symbol} symbol symbol
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnotationsUsingGET(code?: string, options: any = {}): FetchArgs {
+        getAnnotationsUsingPOST(symbol: Symbol, interval?: string, options: any = {}): FetchArgs {
+            // verify required parameter 'symbol' is not null or undefined
+            if (symbol === null || symbol === undefined) {
+                throw new RequiredError('symbol','Required parameter symbol was null or undefined when calling getAnnotationsUsingPOST.');
+            }
             const localVarPath = `/get_annotations`;
             const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            if (code !== undefined) {
-                localVarQueryParameter['code'] = code;
+            if (interval !== undefined) {
+                localVarQueryParameter['interval'] = interval;
             }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"Symbol" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(symbol || {}) : (symbol || "");
 
             return {
                 url: url.format(localVarUrlObj),
@@ -946,25 +967,34 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
         /**
          * 
          * @summary getOhlcs
-         * @param {string} [code] code
+         * @param {Symbol} symbol symbol
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getOhlcsUsingGET(code?: string, options: any = {}): FetchArgs {
+        getOhlcsUsingPOST(symbol: Symbol, interval?: string, options: any = {}): FetchArgs {
+            // verify required parameter 'symbol' is not null or undefined
+            if (symbol === null || symbol === undefined) {
+                throw new RequiredError('symbol','Required parameter symbol was null or undefined when calling getOhlcsUsingPOST.');
+            }
             const localVarPath = `/get_ohlcs`;
             const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            if (code !== undefined) {
-                localVarQueryParameter['code'] = code;
+            if (interval !== undefined) {
+                localVarQueryParameter['interval'] = interval;
             }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"Symbol" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(symbol || {}) : (symbol || "");
 
             return {
                 url: url.format(localVarUrlObj),
@@ -974,29 +1004,34 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
         /**
          * 
          * @summary getSeries
-         * @param {Array<string>} codes codes
+         * @param {Array<Symbol>} symbol codes
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getSeriesUsingGET(codes: Array<string>, options: any = {}): FetchArgs {
-            // verify required parameter 'codes' is not null or undefined
-            if (codes === null || codes === undefined) {
-                throw new RequiredError('codes','Required parameter codes was null or undefined when calling getSeriesUsingGET.');
+        getSeriesUsingPOST(symbol: Array<Symbol>, interval?: string, options: any = {}): FetchArgs {
+            // verify required parameter 'symbol' is not null or undefined
+            if (symbol === null || symbol === undefined) {
+                throw new RequiredError('symbol','Required parameter symbol was null or undefined when calling getSeriesUsingPOST.');
             }
             const localVarPath = `/get_series`;
             const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            if (codes) {
-                localVarQueryParameter['codes'] = codes;
+            if (interval !== undefined) {
+                localVarQueryParameter['interval'] = interval;
             }
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
             delete localVarUrlObj.search;
             localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"Array&lt;Symbol&gt;" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(symbol || {}) : (symbol || "");
 
             return {
                 url: url.format(localVarUrlObj),
@@ -1049,66 +1084,6 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
                 options: localVarRequestOptions,
             };
         },
-        /**
-         * 
-         * @summary selectAll
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        selectAllUsingGET(options: any = {}): FetchArgs {
-            const localVarPath = `/`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary updateAndSelectAll
-         * @param {string} name name
-         * @param {number} [id] id
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateAndSelectAllUsingPUT(name: string, id?: number, options: any = {}): FetchArgs {
-            // verify required parameter 'name' is not null or undefined
-            if (name === null || name === undefined) {
-                throw new RequiredError('name','Required parameter name was null or undefined when calling updateAndSelectAllUsingPUT.');
-            }
-            const localVarPath = `/update`;
-            const localVarUrlObj = url.parse(localVarPath, true);
-            const localVarRequestOptions = Object.assign({ method: 'PUT' }, options);
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (id !== undefined) {
-                localVarQueryParameter['id'] = id;
-            }
-
-            if (name !== undefined) {
-                localVarQueryParameter['name'] = name;
-            }
-
-            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
-            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-            delete localVarUrlObj.search;
-            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
-
-            return {
-                url: url.format(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
     }
 };
 
@@ -1140,12 +1115,13 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary getAnnotations
-         * @param {string} [code] code
+         * @param {Symbol} symbol symbol
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnotationsUsingGET(code?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Annotations> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getAnnotationsUsingGET(code, options);
+        getAnnotationsUsingPOST(symbol: Symbol, interval?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Annotations> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getAnnotationsUsingPOST(symbol, interval, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1159,12 +1135,13 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary getOhlcs
-         * @param {string} [code] code
+         * @param {Symbol} symbol symbol
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getOhlcsUsingGET(code?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Ohlc>> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getOhlcsUsingGET(code, options);
+        getOhlcsUsingPOST(symbol: Symbol, interval?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Ohlc>> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getOhlcsUsingPOST(symbol, interval, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1178,12 +1155,13 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary getSeries
-         * @param {Array<string>} codes codes
+         * @param {Array<Symbol>} symbol codes
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getSeriesUsingGET(codes: Array<string>, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<{ [key: string]: Array<TimePoint>; }> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getSeriesUsingGET(codes, options);
+        getSeriesUsingPOST(symbol: Array<Symbol>, interval?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<{ [key: string]: Array<TimePoint>; }> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getSeriesUsingPOST(symbol, interval, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1230,44 +1208,6 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
                 });
             };
         },
-        /**
-         * 
-         * @summary selectAll
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        selectAllUsingGET(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<string>> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).selectAllUsingGET(options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
-        /**
-         * 
-         * @summary updateAndSelectAll
-         * @param {string} name name
-         * @param {number} [id] id
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateAndSelectAllUsingPUT(name: string, id?: number, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<string>> {
-            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).updateAndSelectAllUsingPUT(name, id, options);
-            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
-                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
-                    if (response.status >= 200 && response.status < 300) {
-                        return response.json();
-                    } else {
-                        throw response;
-                    }
-                });
-            };
-        },
     }
 };
 
@@ -1290,32 +1230,35 @@ export const MainControllerApiFactory = function (configuration?: Configuration,
         /**
          * 
          * @summary getAnnotations
-         * @param {string} [code] code
+         * @param {Symbol} symbol symbol
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnotationsUsingGET(code?: string, options?: any) {
-            return MainControllerApiFp(configuration).getAnnotationsUsingGET(code, options)(fetch, basePath);
+        getAnnotationsUsingPOST(symbol: Symbol, interval?: string, options?: any) {
+            return MainControllerApiFp(configuration).getAnnotationsUsingPOST(symbol, interval, options)(fetch, basePath);
         },
         /**
          * 
          * @summary getOhlcs
-         * @param {string} [code] code
+         * @param {Symbol} symbol symbol
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getOhlcsUsingGET(code?: string, options?: any) {
-            return MainControllerApiFp(configuration).getOhlcsUsingGET(code, options)(fetch, basePath);
+        getOhlcsUsingPOST(symbol: Symbol, interval?: string, options?: any) {
+            return MainControllerApiFp(configuration).getOhlcsUsingPOST(symbol, interval, options)(fetch, basePath);
         },
         /**
          * 
          * @summary getSeries
-         * @param {Array<string>} codes codes
+         * @param {Array<Symbol>} symbol codes
+         * @param {string} [interval] interval
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getSeriesUsingGET(codes: Array<string>, options?: any) {
-            return MainControllerApiFp(configuration).getSeriesUsingGET(codes, options)(fetch, basePath);
+        getSeriesUsingPOST(symbol: Array<Symbol>, interval?: string, options?: any) {
+            return MainControllerApiFp(configuration).getSeriesUsingPOST(symbol, interval, options)(fetch, basePath);
         },
         /**
          * 
@@ -1334,26 +1277,6 @@ export const MainControllerApiFactory = function (configuration?: Configuration,
          */
         loadAllMetasUsingGET(options?: any) {
             return MainControllerApiFp(configuration).loadAllMetasUsingGET(options)(fetch, basePath);
-        },
-        /**
-         * 
-         * @summary selectAll
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        selectAllUsingGET(options?: any) {
-            return MainControllerApiFp(configuration).selectAllUsingGET(options)(fetch, basePath);
-        },
-        /**
-         * 
-         * @summary updateAndSelectAll
-         * @param {string} name name
-         * @param {number} [id] id
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateAndSelectAllUsingPUT(name: string, id?: number, options?: any) {
-            return MainControllerApiFp(configuration).updateAndSelectAllUsingPUT(name, id, options)(fetch, basePath);
         },
     };
 };
@@ -1380,37 +1303,40 @@ export class MainControllerApi extends BaseAPI {
     /**
      * 
      * @summary getAnnotations
-     * @param {string} [code] code
+     * @param {Symbol} symbol symbol
+     * @param {string} [interval] interval
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MainControllerApi
      */
-    public getAnnotationsUsingGET(code?: string, options?: any) {
-        return MainControllerApiFp(this.configuration).getAnnotationsUsingGET(code, options)(this.fetch, this.basePath);
+    public getAnnotationsUsingPOST(symbol: Symbol, interval?: string, options?: any) {
+        return MainControllerApiFp(this.configuration).getAnnotationsUsingPOST(symbol, interval, options)(this.fetch, this.basePath);
     }
 
     /**
      * 
      * @summary getOhlcs
-     * @param {string} [code] code
+     * @param {Symbol} symbol symbol
+     * @param {string} [interval] interval
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MainControllerApi
      */
-    public getOhlcsUsingGET(code?: string, options?: any) {
-        return MainControllerApiFp(this.configuration).getOhlcsUsingGET(code, options)(this.fetch, this.basePath);
+    public getOhlcsUsingPOST(symbol: Symbol, interval?: string, options?: any) {
+        return MainControllerApiFp(this.configuration).getOhlcsUsingPOST(symbol, interval, options)(this.fetch, this.basePath);
     }
 
     /**
      * 
      * @summary getSeries
-     * @param {Array<string>} codes codes
+     * @param {Array<Symbol>} symbol codes
+     * @param {string} [interval] interval
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MainControllerApi
      */
-    public getSeriesUsingGET(codes: Array<string>, options?: any) {
-        return MainControllerApiFp(this.configuration).getSeriesUsingGET(codes, options)(this.fetch, this.basePath);
+    public getSeriesUsingPOST(symbol: Array<Symbol>, interval?: string, options?: any) {
+        return MainControllerApiFp(this.configuration).getSeriesUsingPOST(symbol, interval, options)(this.fetch, this.basePath);
     }
 
     /**
@@ -1433,30 +1359,6 @@ export class MainControllerApi extends BaseAPI {
      */
     public loadAllMetasUsingGET(options?: any) {
         return MainControllerApiFp(this.configuration).loadAllMetasUsingGET(options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * 
-     * @summary selectAll
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof MainControllerApi
-     */
-    public selectAllUsingGET(options?: any) {
-        return MainControllerApiFp(this.configuration).selectAllUsingGET(options)(this.fetch, this.basePath);
-    }
-
-    /**
-     * 
-     * @summary updateAndSelectAll
-     * @param {string} name name
-     * @param {number} [id] id
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof MainControllerApi
-     */
-    public updateAndSelectAllUsingPUT(name: string, id?: number, options?: any) {
-        return MainControllerApiFp(this.configuration).updateAndSelectAllUsingPUT(name, id, options)(this.fetch, this.basePath);
     }
 
 }

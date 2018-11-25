@@ -1,7 +1,7 @@
 package com.funstat.vantage;
 
 import com.funstat.Tables;
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 import com.funstat.store.GenericDao;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -28,9 +28,9 @@ public class VSymbolDownloader {
                     }
                     entity = new RestTemplate().getForEntity(nurl, String.class);
                 }
-                List<Symbol> rows = Arrays.asList(entity.getBody().split("\r\n")).stream().skip(1).map(oh -> {
+                List<InstrId> rows = Arrays.asList(entity.getBody().split("\r\n")).stream().skip(1).map(oh -> {
                     String[] data = oh.split(",");
-                    return new Symbol(data[0], data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0], VantageDownloader.SOURCE);
+                    return new InstrId(data[0], data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0], VantageDownloader.SOURCE);
                 }).collect(Collectors.toList());
                 if(rows.size() == 0){
                     System.out.println(entity.getBody());

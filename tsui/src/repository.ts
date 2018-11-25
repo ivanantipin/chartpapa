@@ -1,4 +1,4 @@
-import {Configuration, MainControllerApi} from "./api";
+import {Configuration, MainControllerApi, Symbol} from "./api";
 import {parseDate} from "./dtutils";
 import {Label, Ohlc} from "./api/api";
 import {CandleStickChartProps, OhlcTr} from "./components/OhlcChart/OhlcChart";
@@ -10,12 +10,8 @@ const config : Configuration = {
     basePath : basePath
 }
 
-export type InstrId = {
-    name: string,
-    code: string
-}
 
-export function fetchInstruments(): Promise<Array<InstrId>> {
+export function fetchInstruments(): Promise<Array<Symbol>> {
     return new MainControllerApi(config).instrumentsUsingGET().then(instr=>{
         console.log('receidev instr',instr)
         return instr.map(symbol=>{

@@ -1,14 +1,14 @@
 package com.funstat.vantage;
 
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.Symbol;
+import com.funstat.finam.InstrId;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface Source{
-    List<Symbol> symbols();
-    List<Ohlc> load(Symbol symbol);
-    List<Ohlc> load(Symbol symbol, LocalDateTime dateTime);
+    List<InstrId> symbols();
+    List<Ohlc> load(InstrId instrId);
+    List<Ohlc> load(InstrId instrId, LocalDateTime dateTime);
     String getName();
 }
