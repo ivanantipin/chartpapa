@@ -1,7 +1,6 @@
 package com.funstat.store;
 
 import com.funstat.domain.Ohlc;
-import firelib.domain.Ohlc$;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -69,7 +68,7 @@ public class MdDao {
 
     public void insertJ(List<Ohlc> ohlcs, String table) {
         List<firelib.domain.Ohlc> conv = ohlcs.stream().map(oh -> {
-            return firelib.domain.Ohlc.apply(oh.dateTime.toInstant(ZoneOffset.UTC), oh.open, oh.high, oh.low, oh.close);
+            return new firelib.domain.Ohlc(oh.close, oh.dateTime.toInstant(ZoneOffset.UTC), oh.high, oh.low, oh.open, 0,0);
         }).collect(Collectors.toList());
         insert(conv,table);
     }

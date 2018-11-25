@@ -87,10 +87,9 @@ public class MdStorageImpl implements MdStorage {
 
 
 
-        MdDao dao = getDao(symbol.source, Interval.Min1().name());
+        MdDao dao = getDao(symbol.source, Interval.Min1.name());
         List<Ohlc> ret = dao.queryAll(symbol.code);
-
-        Interval target = Interval.resolveFromName(interval);
+        Interval target = Interval.valueOf(interval);
 
 
 
@@ -157,7 +156,7 @@ public class MdStorageImpl implements MdStorage {
 
 
     public void updateMarketData(Symbol symbol) {
-        MdDao dao = getDao(symbol.source, Interval.Min1().name());
+        MdDao dao = getDao(symbol.source, Interval.Min1.name());
         LocalDateTime startTime = dao.queryLast(symbol.code).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));
         dao.insertJ(sources.get(symbol.source).load(symbol, startTime),symbol.code);
     }

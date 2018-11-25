@@ -47,7 +47,7 @@ public class DbPopulator {
                         ohlcs.add(parser.current());
                         cnt.incrementAndGet();
                     }
-                    syncer.save(table, "IQFEED", Interval.Min1().name(), ohlcs);
+                    syncer.save(table, "IQFEED", Interval.Min1.name(), ohlcs);
                     System.out.println("done " + fname + " cnt is " + cnt);
 
                 }catch (Exception e){

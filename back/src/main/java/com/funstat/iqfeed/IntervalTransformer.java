@@ -35,7 +35,7 @@ public class IntervalTransformer {
     private static LocalDateTime interpolateTillEnd(Interval interval, Ohlc init, LocalDateTime nextTime, List<Ohlc> ret, LocalDateTime currTime) {
         while (currTime.isAfter(nextTime)){
             ret.add(init.withTime(nextTime));
-            nextTime = nextTime.plus(interval.duration());
+            nextTime = nextTime.plus(interval.getDuration());
         }
         return nextTime;
     }
