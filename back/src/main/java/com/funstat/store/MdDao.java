@@ -94,11 +94,13 @@ public class MdDao {
     }
 
     public Optional<Ohlc> queryLast(String code) {
+        ensureExist(code);
         List<Ohlc> ret = new NamedParameterJdbcTemplate(ds).query("select * from " + code + " order by dt desc LIMIT 1 ", (rs, rowNum) -> mapOhlc(rs));
         return ret.size() == 0 ? Optional.empty() : Optional.of(ret.get(0));
     }
 
     public List<Ohlc> queryAll(String code) {
+        ensureExist(code);
         return new NamedParameterJdbcTemplate(ds).query("select * from " + code + " order by dt asc ", (rs, rowNum) -> mapOhlc(rs));
     }
 

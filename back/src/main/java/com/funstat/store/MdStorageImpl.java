@@ -17,6 +17,7 @@ import org.sqlite.SQLiteDataSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class MdStorageImpl implements MdStorage {
         {
             put(FinamDownloader.SOURCE, new FinamDownloader());
             //put(VantageDownloader.SOURCE, new VantageDownloader());
-            put(IqFeedSource.SOURCE, new IqFeedSource());
+            put(IqFeedSource.Companion.getSOURCE(), new IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")));
         }
     };
 
@@ -85,7 +86,7 @@ public class MdStorageImpl implements MdStorage {
     @Override
     public List<Ohlc> read(InstrId instrId, String interval){
         Tables.REQUESTED.writeSingle(getGeneric(), instrId);
-        MdDao dao = getDao(instrId.source, Interval.Min1.name());
+        MdDao dao = getDao(instrId.source, sources.get(instrId.source).getDefaultInterval().name());
         List<Ohlc> ret = dao.queryAll(instrId.code);
         Interval target = Interval.valueOf(interval);
         if (ret.isEmpty()) {
@@ -123,7 +124,7 @@ public class MdStorageImpl implements MdStorage {
             System.out.println("updating symbols as they are stale");
             getGeneric().saveGeneric(SYMBOLS_TABLE, sources.values().stream()
                     .flatMap(s -> s.symbols().stream()).filter(s -> {
-                        return s.market.equals("1") || s.source.equals(VantageDownloader.SOURCE) || s.source.equals(IqFeedSource.SOURCE);
+                        return s.market.equals("1") || s.source.equals(VantageDownloader.SOURCE) || s.source.equals(IqFeedSource.Companion.getSOURCE());
                     }).collect(Collectors.toList()), s->s.code);
             Tables.PAIRS.writeSingle(getGeneric(), new Pair(SYMBOLS_LAST_UPDATED,"" + System.currentTimeMillis()));
         }else {
@@ -155,9 +156,10 @@ public class MdStorageImpl implements MdStorage {
 
 
     public void updateMarketData(InstrId instrId) {
-        MdDao dao = getDao(instrId.source, Interval.Min1.name());
+        Source source = sources.get(instrId.source);
+        MdDao dao = getDao(instrId.source, source.getDefaultInterval().name());
         LocalDateTime startTime = dao.queryLast(instrId.code).map(oh -> oh.dateTime.minusDays(2)).orElse(LocalDateTime.now().minusDays(600));
-        dao.insertJ(sources.get(instrId.source).load(instrId, startTime), instrId.code);
+        dao.insertJ(source.load(instrId, startTime), instrId.code);
     }
 
     public static void main(String[] args) {

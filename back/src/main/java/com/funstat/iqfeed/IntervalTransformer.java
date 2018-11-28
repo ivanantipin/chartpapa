@@ -10,6 +10,9 @@ import java.util.List;
 public class IntervalTransformer {
 
     public static List<Ohlc> transform(Interval interval, List<Ohlc> ohlcs){
+        if(ohlcs.isEmpty()){
+            return ohlcs;
+        }
         long start = System.currentTimeMillis();
         System.out.println(System.currentTimeMillis() - start + " number is " + ohlcs.size());
 

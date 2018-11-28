@@ -6,6 +6,7 @@ import com.funstat.vantage.Source;
 import com.google.common.util.concurrent.SettableFuture;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
+import firelib.common.interval.Interval;
 import org.apache.commons.io.IOUtils;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -147,7 +148,7 @@ public class FinamDownloader implements AutoCloseable, Source {
             }
         };
         StringBuilder url = new StringBuilder("http://export.finam.ru/table.csv?f=table");
-        params.put("p", "" + Period.DAILY.getId());
+        params.put("p", "" + Period.TEN_MINUTES.getId());
         params.put("em", "" + instrIdSpec.id);
         params.put("market", instrIdSpec.market);
 
@@ -198,6 +199,11 @@ public class FinamDownloader implements AutoCloseable, Source {
     @Override
     public String getName() {
         return SOURCE;
+    }
+
+    @Override
+    public Interval getDefaultInterval() {
+        return Interval.Min10;
     }
 }
 

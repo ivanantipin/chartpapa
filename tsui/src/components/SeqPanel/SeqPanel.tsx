@@ -9,7 +9,7 @@ import {fetchOhlcChart} from "../../repository";
 import HOhlcChart from "../OhlcChart/HOhlcChart";
 import {CandleStickChartProps} from "../OhlcChart/OhlcChart";
 import {connect} from "react-redux";
-import {Spin} from "antd";
+import {Spin, Row, Col} from "antd";
 import {InstrId} from "../../api";
 
 
@@ -70,6 +70,8 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
     render() {
         return (
             <div className="widget">
+                <Row>
+                    <Col span={4}>
                 <Select style={{width: 150}}
                         onChange={this.onSelect.bind(this)}
                     // @ts-ignore
@@ -77,6 +79,8 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
                         options={this.props.instruments.map(r => {
                             return SeqPanel.instrToOpt(r);
                         })}/>
+                    </Col>
+                    <Col span={4}>
                 <Select style={{width: 150}}
                         onChange={this.onTimeFrameChange.bind(this)}
                     // @ts-ignore
@@ -85,10 +89,13 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
                             {label : 'Day',value : 'Day'},
                             {label : 'Week',value : 'Week'},
                         ]}/>
+                    </Col>
+                </Row>
 
                 {
                     this.getSome.bind(this)()
                 }
+
 
             </div>
         )

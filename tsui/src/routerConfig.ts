@@ -10,7 +10,7 @@ export interface MenuConf {
 
 export const routerConfig : Array<MenuConf>=[
     {
-        name : "Indicators",
+        name : "Sequenta",
         path : '/indicators',
         component : SeqPanel,
         shown : true

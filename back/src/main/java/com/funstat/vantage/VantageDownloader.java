@@ -3,6 +3,7 @@ package com.funstat.vantage;
 import com.funstat.domain.Ohlc;
 import com.funstat.domain.InstrId;
 import com.funstat.store.MdDao;
+import firelib.common.interval.Interval;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -89,6 +90,11 @@ public class VantageDownloader implements Source{
     @Override
     public String getName() {
         return SOURCE;
+    }
+
+    @Override
+    public Interval getDefaultInterval() {
+        return Interval.Day;
     }
 
 
