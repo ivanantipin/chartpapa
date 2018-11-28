@@ -8,10 +8,11 @@ import {WidgetCallbacks, WidgetComponent, WidgetData} from "./WidgetComponent";
 import {Action, makeAmend} from "../../actions";
 import {MainStore} from "../types";
 import {fetchChart} from "../../repository";
+import {InstrId} from "api";
 
 const dispatchCallbacks = (dispatch: (s: Action) => void): WidgetCallbacks => {
     return {
-        onChange: (metaId: string, codes: Array<string>) => {
+        onChange: (metaId: string, codes: Array<InstrId>) => {
             fetchChart(codes).then(mapOfChart => {
                 dispatch(makeAmend((store: MainStore) => {
                     let widgets = store.widgets.map((wdata : WidgetData)=> {

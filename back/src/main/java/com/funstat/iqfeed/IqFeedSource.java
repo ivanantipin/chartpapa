@@ -1,7 +1,7 @@
 package com.funstat.iqfeed;
 
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
 import com.funstat.store.MdDao;
 import com.funstat.vantage.Source;
 

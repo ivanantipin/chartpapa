@@ -1,13 +1,18 @@
-package com.funstat.finam;
+package com.funstat.domain;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class InstrId {
-    public final String id;
-    public final String name;
-    public final String market;
-    public final String code;
-    public final String source;
+    @ApiModelProperty(required = true)
+    public String id;
+    @ApiModelProperty(required = true)
+    public String name;
+    @ApiModelProperty(required = true)
+    public String market;
+    @ApiModelProperty(required = true)
+    public String code;
+    @ApiModelProperty(required = true)
+    public String source;
 
     public InstrId(String id, String name, String market, String code, String source) {
         this.id = id;

@@ -1,5 +1,6 @@
 import {WidgetData} from "../WidgetsPanel/WidgetComponent";
-import {InstrId} from "../../repository";
+import {InstrId} from "api";
+
 
 export interface MainStore {
     widgets : Array<WidgetData>,

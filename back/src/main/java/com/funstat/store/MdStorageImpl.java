@@ -5,7 +5,7 @@ import com.funstat.Pair;
 import com.funstat.Tables;
 import com.funstat.domain.Ohlc;
 import com.funstat.finam.FinamDownloader;
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
 import com.funstat.iqfeed.IntervalTransformer;
 import com.funstat.iqfeed.IqFeedSource;
 import com.funstat.vantage.Source;
@@ -88,14 +88,16 @@ public class MdStorageImpl implements MdStorage {
         MdDao dao = getDao(instrId.source, Interval.Min1.name());
         List<Ohlc> ret = dao.queryAll(instrId.code);
         Interval target = Interval.valueOf(interval);
-
-
-
         if (ret.isEmpty()) {
             updateMarketData(instrId);
             ret = dao.queryAll(instrId.code);
         }
-        return IntervalTransformer.transform(target,ret);
+        long start = System.currentTimeMillis();
+        try{
+            return IntervalTransformer.transform(target,ret);
+        }finally {
+            System.out.println("transformed in " + (System.currentTimeMillis() - start)/1000.0 + " s. " + ret.size() + " min bars");
+        }
     }
 
     @Override
@@ -121,7 +123,7 @@ public class MdStorageImpl implements MdStorage {
             System.out.println("updating symbols as they are stale");
             getGeneric().saveGeneric(SYMBOLS_TABLE, sources.values().stream()
                     .flatMap(s -> s.symbols().stream()).filter(s -> {
-                        return s.market.equals("1") || s.source.equals(VantageDownloader.SOURCE);
+                        return s.market.equals("1") || s.source.equals(VantageDownloader.SOURCE) || s.source.equals(IqFeedSource.SOURCE);
                     }).collect(Collectors.toList()), s->s.code);
             Tables.PAIRS.writeSingle(getGeneric(), new Pair(SYMBOLS_LAST_UPDATED,"" + System.currentTimeMillis()));
         }else {

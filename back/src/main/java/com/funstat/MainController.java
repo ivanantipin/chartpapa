@@ -3,10 +3,13 @@ package com.funstat;
 import com.funstat.domain.Annotations;
 import com.funstat.domain.Ohlc;
 import com.funstat.domain.TimePoint;
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
 import com.funstat.ohlc.Metadata;
+import com.funstat.store.CachedStorage;
 import com.funstat.store.MdStorage;
 import com.funstat.store.MdStorageImpl;
+import com.funstat.vantage.VantageDownloader;
+import firelib.common.interval.Interval;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.builders.PathSelectors;
@@ -26,7 +29,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 public class MainController {
 
-    MdStorage storage = new MdStorageImpl("/ddisk/globaldatabase/md");
+    MdStorage storage = new CachedStorage(new MdStorageImpl("/ddisk/globaldatabase/md"));
 
     @PostConstruct
     void onStart(){
@@ -47,8 +50,14 @@ public class MainController {
 
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
     public Collection<InstrId> instruments(){
-        return storage.getMeta();
+        return storage.getMeta().stream().filter(s->!s.source.equals(VantageDownloader.SOURCE)).collect(Collectors.toList());
     }
+
+    @RequestMapping(value="/timeframes", method=RequestMethod.GET)
+    public Collection<String> timeframes(){
+        return Arrays.stream(Interval.values()).map(i->i.name()).collect(Collectors.toList());
+    }
+
 
     @PostMapping("/get_ohlcs")
     public Collection<Ohlc> getOhlcs(@RequestBody @Valid InstrId instrId, String interval){

@@ -1,6 +1,6 @@
 package com.funstat.ohlc;
 
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
 
 import java.util.List;
 

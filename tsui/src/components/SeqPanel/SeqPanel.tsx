@@ -5,32 +5,56 @@ import "react-select/dist/react-select.css";
 import "react-virtualized-select/styles.css";
 // import './static/style.css'
 import {MainStore} from "../types";
-import {fetchOhlcChart, InstrId} from "../../repository";
+import {fetchOhlcChart} from "../../repository";
 import HOhlcChart from "../OhlcChart/HOhlcChart";
 import {CandleStickChartProps} from "../OhlcChart/OhlcChart";
 import {connect} from "react-redux";
 import {Spin} from "antd";
+import {InstrId} from "../../api";
 
 
-class SeqPanel extends Component<MainStore, { inst?: string, loading: boolean, chart?: CandleStickChartProps }> {
+export interface Opt extends InstrId {
+    label : string,
+    value : string
+}
+
+class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, chart?: CandleStickChartProps, timeframe : string }> {
 
     constructor(props: MainStore) {
         super(props)
-        this.state = {loading: false}
+        this.state = {loading: false, timeframe : 'Day'}
     }
 
-    onSelect(sel: { label: string, value: string }) {
+    onSelect(sel: Opt) {
         if (!sel) {
             return
         }
+
         this.setState({...this.state, loading: true})
-        fetchOhlcChart(sel.value).then(ch => {
-            this.setState({inst: sel.value, loading: false, chart: ch})
+        fetchOhlcChart(sel, this.state.timeframe).then(ch => {
+            this.setState({...this.state, inst: sel, loading: false, chart: ch})
         }).catch(e => {
             console.log('err', e)
         })
         console.log('state', this.state)
     }
+
+    onTimeFrameChange(sel: {label : string, value : string}) {
+        if (!sel) {
+            return
+        }
+        if(!this.state.inst){
+            return
+        }
+        this.setState({...this.state, loading: true})
+        fetchOhlcChart(this.state.inst, sel.value).then(ch => {
+            this.setState({...this.state, loading: false, chart: ch, timeframe : sel.value})
+        }).catch(e => {
+            console.log('err', e)
+        })
+        console.log('state', this.state)
+    }
+
 
     getSome() {
         if (this.state.loading) {
@@ -43,18 +67,25 @@ class SeqPanel extends Component<MainStore, { inst?: string, loading: boolean, c
         }
     }
 
-
-
     render() {
-
         return (
             <div className="widget">
                 <Select style={{width: 150}}
                         onChange={this.onSelect.bind(this)}
-                        value={{value: this.state.inst, label: this.state.inst}}
+                    // @ts-ignore
+                        value={this.state.inst}
                         options={this.props.instruments.map(r => {
                             return SeqPanel.instrToOpt(r);
                         })}/>
+                <Select style={{width: 150}}
+                        onChange={this.onTimeFrameChange.bind(this)}
+                    // @ts-ignore
+                        value={{label: this.state.timeframe, value : this.state.timeframe}}
+                        options={[
+                            {label : 'Day',value : 'Day'},
+                            {label : 'Week',value : 'Week'},
+                        ]}/>
+
                 {
                     this.getSome.bind(this)()
                 }
@@ -63,9 +94,9 @@ class SeqPanel extends Component<MainStore, { inst?: string, loading: boolean, c
         )
     }
 
-    static instrToOpt(r: InstrId) {
-        return {
-            label: r.name,
+    static instrToOpt(r: InstrId) : Opt{
+        return {...r,
+            label: r.name + `(${r.source})`,
             value: r.code
         }
     }

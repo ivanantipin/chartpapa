@@ -5,29 +5,31 @@ import "react-select/dist/react-select.css";
 import "react-virtualized-select/styles.css";
 // import './static/style.css'
 import {MainStore} from "../types";
-import {InstrId, TimePointTr} from "../../repository";
+import {TimePointTr} from "../../repository";
 import HChart from "../HChart/HChart";
+import {InstrId} from 'api';
+import {Opt} from "../SeqPanel/SeqPanel";
 
 
 export interface WidgetData {
     period: number,
     id: string,
     chartData : Map<string, Array<TimePointTr>>,
-    selectedInstruments: Array<string>
+    selectedInstruments: Array<InstrId>
 }
 
 
 
 export interface WidgetCallbacks {
-    onChange: (metaId: string, codes: Array<string>) => void
+    onChange: (metaId: string, codes: Array<InstrId>) => void
 }
 
 
 export class WidgetComponent extends Component<WidgetData & WidgetCallbacks & MainStore, any> {
 
-    onSelect(opts: Array<{name : string,value : string}>) {
+    onSelect(opts: Array<Opt>) {
         console.log("on select",opts);
-        this.props.onChange(this.props.id, opts.map(o=>o.value))
+        this.props.onChange(this.props.id, opts)
     }
 
 
@@ -40,12 +42,7 @@ export class WidgetComponent extends Component<WidgetData & WidgetCallbacks & Ma
                 <Select
                     onChange={this.onSelect.bind(this)}
                     multi
-                    value={this.props.selectedInstruments.map(si=>{
-                        return {
-                            label : si,
-                            value : si
-                        }
-                    })} options={this.props.instruments.map(r => {
+                    value={this.props.selectedInstruments} options={this.props.instruments.map(r => {
                     return this.instrToOpt(r);
                 })}/>
 

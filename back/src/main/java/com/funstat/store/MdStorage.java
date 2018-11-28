@@ -1,7 +1,8 @@
 package com.funstat.store;
 
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
+import firelib.common.interval.Interval;
 
 import java.util.List;
 
@@ -14,3 +15,5 @@ public interface MdStorage {
 
     void updateSymbolsMeta();
 }
+
+

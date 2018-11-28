@@ -21,7 +21,8 @@ enum class Interval(val durationMs: Long) {
     Min60(60 * 60 * 1000),
     Min120(120 * 60 * 1000),
     Min240(240 * 60 * 1000),
-    Day(1440 * 60 * 1000);
+    Day(1440 * 60 * 1000),
+    Week(1440 * 60 * 1000*7);
 
     fun resolveFromMs(ms: Long): Interval? {
         return values().find { it.durationMs == ms }
@@ -42,5 +43,6 @@ enum class Interval(val durationMs: Long) {
         return LocalDateTime.ofInstant(ceilTime(dt.toInstant(ZoneOffset.UTC)), ZoneOffset.UTC)
     }
     fun truncTime(epochMs: Long): Long = (epochMs / durationMs) * durationMs
+
 }
 

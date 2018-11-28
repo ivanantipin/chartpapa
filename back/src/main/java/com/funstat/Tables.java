@@ -1,6 +1,6 @@
 package com.funstat;
 
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
 
 public class Tables{
     public static final PersistDescriptor<InstrId> REQUESTED = new PersistDescriptor<>("requested", InstrId.class, s->s.code);

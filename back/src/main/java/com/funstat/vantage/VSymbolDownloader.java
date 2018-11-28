@@ -1,7 +1,7 @@
 package com.funstat.vantage;
 
 import com.funstat.Tables;
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
 import com.funstat.store.GenericDao;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;

@@ -1,7 +1,7 @@
 package com.funstat.vantage;
 
 import com.funstat.domain.Ohlc;
-import com.funstat.finam.InstrId;
+import com.funstat.domain.InstrId;
 
 import java.time.LocalDateTime;
 import java.util.List;
