@@ -18,8 +18,8 @@ class CachedStorage(private val delegate: MdStorage) : MdStorage {
         throw RuntimeException("not implemented")
     }
 
-    override fun getMeta(): List<InstrId> {
-        return delegate.meta
+    override fun meta(): List<InstrId> {
+        return delegate.meta()
     }
 
     override fun updateSymbolsMeta() {

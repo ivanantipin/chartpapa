@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class DbPopulator {
 
     public static void main(String[] args) throws Exception {
-        MdStorageImpl syncer = new MdStorageImpl(MdStorageImpl.HOME_PATH);
+        MdStorageImpl syncer = new MdStorageImpl(MdStorageImpl.Companion.getHOME_PATH());
         ssync(syncer);
     }
 

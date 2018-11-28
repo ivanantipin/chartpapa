@@ -35,7 +35,7 @@ public class VSymbolDownloader {
                 if(rows.size() == 0){
                     System.out.println(entity.getBody());
                 }
-                Tables.SYMBOLS.write(mdDao, rows);
+                Tables.INSTANCE.getSYMBOLS().write(mdDao, rows);
             }
         }
     }

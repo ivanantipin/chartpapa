@@ -184,7 +184,7 @@ public class FinamDownloader implements AutoCloseable, Source {
 
         try {
             Stream<String> str = ret.get().stream();
-            return str.map(Ohlc::parse).flatMap(opt -> {
+            return str.map(Ohlc.Companion::parse).flatMap(opt -> {
                 if (opt.isPresent()) {
                     return Stream.of(opt.get());
                 } else {

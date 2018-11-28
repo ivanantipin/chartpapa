@@ -50,7 +50,7 @@ public class MainController {
 
     @RequestMapping(value="/instruments", method=RequestMethod.GET)
     public Collection<InstrId> instruments(){
-        return storage.getMeta().stream().filter(s->!s.source.equals(VantageDownloader.SOURCE)).collect(Collectors.toList());
+        return storage.meta().stream().filter(s->!s.source.equals(VantageDownloader.SOURCE)).collect(Collectors.toList());
     }
 
     @RequestMapping(value="/timeframes", method=RequestMethod.GET)
@@ -67,14 +67,14 @@ public class MainController {
     @PostMapping("/get_annotations")
     public Annotations getAnnotations(@RequestBody @Valid InstrId instrId, String interval){
         List<Ohlc> ohlcs = storage.read(instrId, interval);
-        return AnnotationCreator.createAnnotations(ohlcs);
+        return AnnotationCreator.INSTANCE.createAnnotations(ohlcs);
     }
 
     @PostMapping("/get_series")
     public Map<String,Collection<TimePoint>> getSeries(@RequestBody @Valid InstrId[] codes, String interval) {
         Map<String,Collection<TimePoint>> mm = new HashMap<>();
         Arrays.stream(codes).forEach(c->{
-            List<TimePoint> lst = storage.read(c,interval).stream().map(oh -> new TimePoint(oh.dateTime, oh.close)).collect(Collectors.toList());
+            List<TimePoint> lst = storage.read(c,interval).stream().map(oh -> new TimePoint(oh.getDateTime(), oh.getClose())).collect(Collectors.toList());
             Collections.sort(lst);
             mm.put(c.code, lst);
         });
