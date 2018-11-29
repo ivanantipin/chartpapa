@@ -21,56 +21,40 @@ import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicLong
 import java.util.stream.Collectors
 
-class IqFeedSource(val csvPath : Path) : Source {
+class IqFeedSource(val csvPath: Path) : Source {
 
     //val dir = Paths.get("/ddisk/globaldatabase/1MIN/STK")
 
     override fun symbols(): List<InstrId> {
-        try {
-            val lines = Files.readAllLines(Paths.get(IqFeedSource::class.java.getResource("/iqfeed_symbols.txt").toURI()))
-            return lines.stream().skip(1).map { l ->
-                val arr = l.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                InstrId(arr[0], arr[1], "NA", arr[0], SOURCE)
-            }.collect(Collectors.toList())
-
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+        val map = code2name()
+        return csvPath.toFile().list().map {
+            it.replace("_1.csv", "")
+        }.filter { map.containsKey(it) }.map { InstrId(it, map[it], "NA", it, SOURCE) }
     }
 
     override fun load(instrId: InstrId): List<Ohlc> {
+        return load(instrId, LocalDateTime.now().minusDays(600));
+    }
 
-
+    override fun load(instrId: InstrId, dateTime: LocalDateTime): List<Ohlc> {
         val cnt = AtomicLong()
-
         val iniFile = csvPath.resolve("common.ini").toAbsolutePath().toString()
-
-
         val load = LegacyMarketDataFormatLoader.load(iniFile)
         val producer = ParserHandlersProducer(load)
-
-
         val fname = csvPath.resolve(instrId.code + "_1.csv").toAbsolutePath().toString()
         val ohlcs = ArrayList<firelib.domain.Ohlc>()
         try {
             val parser = CsvParser<firelib.domain.Ohlc>(fname, producer.handlers as Array<out ParseHandler<firelib.domain.Ohlc>>?, { firelib.domain.Ohlc() }, 100000000)
-            println(parser.seek(LocalDateTime.now().minusDays(600).toInstant(ZoneOffset.UTC)))
-
-
+            println(parser.seek(dateTime.toInstant(ZoneOffset.UTC)))
             while (parser.read()) {
-
                 ohlcs.add(parser.current())
                 cnt.incrementAndGet()
-
             }
-        }catch (e : Exception){
+        } catch (e: Exception) {
         }
 
-        return  ohlcs.map { ohlc -> Ohlc(LocalDateTime.ofInstant(ohlc.dtGmtEnd, ZoneOffset.UTC), ohlc.O,ohlc.H,ohlc.L,ohlc.C) };
-    }
+        return ohlcs.map { ohlc -> Ohlc(LocalDateTime.ofInstant(ohlc.dtGmtEnd, ZoneOffset.UTC), ohlc.O, ohlc.H, ohlc.L, ohlc.C) };
 
-    override fun load(instrId: InstrId, dateTime: LocalDateTime): List<Ohlc> {
-        return load(instrId)
     }
 
     override fun getName(): String {
@@ -82,12 +66,19 @@ class IqFeedSource(val csvPath : Path) : Source {
     }
 
     companion object {
-
         val SOURCE = "IQFEED"
+        fun code2name(): Map<String, String> {
+            try {
+                val lines = Files.readAllLines(Paths.get(IqFeedSource::class.java.getResource("/iqfeed_symbols.txt").toURI()))
+                return lines.map { it.split(";") }.associateBy({ it[0] }, { it[1] })
+            } catch (e: Exception) {
+                throw RuntimeException(e)
+            }
+        }
 
         @JvmStatic
         fun main(args: Array<String>) {
-            IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).symbols().stream().forEach { s -> println("+ 1MIN/STK/" + s.code + "_*") }
+            println(IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).symbols())
         }
     }
 }

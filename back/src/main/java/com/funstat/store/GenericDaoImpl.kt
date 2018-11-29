@@ -1,6 +1,8 @@
 package com.funstat.store
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -13,25 +15,24 @@ class GenericDaoImpl(internal val ds: SQLiteDataSource) : GenericDao {
 
     private val manager: DataSourceTransactionManager
 
+    val mapper : ObjectMapper
+
     init {
         this.manager = DataSourceTransactionManager(ds)
+        mapper = ObjectMapper().registerModule(KotlinModule())
     }
 
-    internal fun write(obj: Any): String {
-        val mapper = ObjectMapper()
+    fun write(obj: Any): String {
         val str = ByteArrayOutputStream()
         try {
             mapper.writer().writeValue(str, obj)
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-
         return String(str.toByteArray())
-
     }
 
-    internal fun <T> deser(str: String, clazz: Class<T>): T {
-        val mapper = ObjectMapper()
+    fun <T> deser(str: String, clazz: Class<T>): T {
         try {
             return mapper.readValue(str, clazz)
         } catch (e: IOException) {

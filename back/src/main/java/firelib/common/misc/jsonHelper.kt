@@ -2,6 +2,7 @@ package firelib.common.misc
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.StringWriter
 import java.nio.file.Files
 import java.nio.file.Path
@@ -9,10 +10,11 @@ import java.nio.file.StandardOpenOption
 
 object jsonHelper {
 
-    val mapper = ObjectMapper()
+    var mapper = ObjectMapper()
 
     init {
         mapper.enable(SerializationFeature.INDENT_OUTPUT)
+        mapper.registerModule(KotlinModule())
     }
 
     fun toJsonString(obj: Any ): String {
