@@ -1,6 +1,6 @@
 package com.funstat.iqfeed
 
-import com.funstat.domain.Ohlc
+import firelib.domain.Ohlc
 import com.funstat.domain.InstrId
 import com.funstat.vantage.Source
 import firelib.common.interval.Interval
@@ -49,7 +49,7 @@ class IqFeedSource(val csvPath: Path) : Source {
         } catch (e: Exception) {
         }
 
-        return ohlcs.map { ohlc -> Ohlc(LocalDateTime.ofInstant(ohlc.dtGmtEnd, ZoneOffset.UTC), ohlc.O, ohlc.H, ohlc.L, ohlc.C) };
+        return ohlcs.map { ohlc -> Ohlc(ohlc.dtGmtEnd, ohlc.open, ohlc.high, ohlc.low, ohlc.close) };
 
     }
 

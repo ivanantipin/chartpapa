@@ -57,17 +57,17 @@ public class ParserHandlersProducer {
                     handlers.add(new StdHandler<Tick, Double>((oh, v) -> oh.setLast(v), (chs) -> TypeFormat.parseDouble(chs)));
                     break;
                 case "O":
-                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setO(v), (chs) -> TypeFormat.parseDouble(chs)));
+                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setOpen(v), (chs) -> TypeFormat.parseDouble(chs)));
                     break;
                 case "H":
-                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setH(v), (chs) -> TypeFormat.parseDouble(chs)));
+                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setHigh(v), (chs) -> TypeFormat.parseDouble(chs)));
                     break;
                 case "L":
-                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setL(v), (chs) -> TypeFormat.parseDouble(chs)));
+                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setLow(v), (chs) -> TypeFormat.parseDouble(chs)));
                     break;
 
                 case "C":
-                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setC(v), (chs) -> TypeFormat.parseDouble(chs)));
+                    handlers.add(new StdHandler<Ohlc, Double>((oh, v) -> oh.setClose(v), (chs) -> TypeFormat.parseDouble(chs)));
                     break;
 
                 case "V":

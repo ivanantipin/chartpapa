@@ -1,6 +1,6 @@
 package com.funstat.store
 
-import com.funstat.domain.Ohlc
+import firelib.domain.Ohlc
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -63,7 +63,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun insertJ(ohlcs: List<Ohlc>, table: String) {
         val conv = ohlcs
-                .map { (dateTime, open, high, low, close) -> firelib.domain.Ohlc(dateTime.toInstant(ZoneOffset.UTC), open, high, low, close, 0, 0) }
+                .map { (dateTime, open, high, low, close) -> firelib.domain.Ohlc(dateTime, open, high, low, close, 0, 0) }
         insert(conv, table)
     }
 
@@ -85,7 +85,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     @Throws(SQLException::class)
     private fun mapOhlc(rs: ResultSet): Ohlc {
-        return Ohlc(rs.getTimestamp("DT").toLocalDateTime(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"))
+        return Ohlc(rs.getTimestamp("DT").toInstant(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"))
     }
 
     fun queryLast(code: String): Optional<Ohlc> {

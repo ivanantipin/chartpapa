@@ -1,7 +1,7 @@
 package com.funstat.store
 
 import com.funstat.domain.InstrId
-import com.funstat.domain.Ohlc
+import firelib.domain.Ohlc
 import firelib.common.interval.Interval
 
 class CachedStorage(private val delegate: MdStorage) : MdStorage {

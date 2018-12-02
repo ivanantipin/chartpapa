@@ -2,10 +2,6 @@ package com.funstat
 
 import com.funstat.store.GenericDao
 
-import java.util.Collections
-import java.util.function.Function
-import java.util.stream.Collectors
-
 class PersistDescriptor<T>(internal var table: String, internal var clazz: Class<T>, internal var keyExtractor: (T)->String) {
 
     fun read(mdDao: GenericDao): List<T> {

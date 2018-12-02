@@ -19,7 +19,7 @@ class Ma(val period: Int, val ts: TimeSeries<Ohlc>, val calcSko: Boolean = false
 
     override fun invoke(ts: TimeSeries<Ohlc>): Unit {
         if (!ts[0].interpolated) {
-            maa.add(ts[0].C)
+            maa.add(ts[0].close)
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.funstat;
 
 import com.funstat.domain.Annotations;
-import com.funstat.domain.Ohlc;
+import firelib.domain.Ohlc;
 import com.funstat.domain.TimePoint;
 import com.funstat.domain.InstrId;
 import com.funstat.ohlc.Metadata;
@@ -74,7 +74,7 @@ public class MainController {
     public Map<String,Collection<TimePoint>> getSeries(@RequestBody @Valid InstrId[] codes, String interval) {
         Map<String,Collection<TimePoint>> mm = new HashMap<>();
         Arrays.stream(codes).forEach(c->{
-            List<TimePoint> lst = storage.read(c,interval).stream().map(oh -> new TimePoint(oh.getDateTime(), oh.getClose())).collect(Collectors.toList());
+            List<TimePoint> lst = storage.read(c,interval).stream().map(oh -> new TimePoint(oh.dateTime(), oh.getClose())).collect(Collectors.toList());
             Collections.sort(lst);
             mm.put(c.code, lst);
         });

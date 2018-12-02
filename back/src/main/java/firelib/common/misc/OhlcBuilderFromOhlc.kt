@@ -8,11 +8,11 @@ class OhlcBuilderFromOhlc() {
             return ohlc
         } else {
             return Ohlc(
-                    H = Math.max(ohlc.H, currOhlc.H),
-                    L = Math.min(ohlc.L, currOhlc.L),
-                    C = ohlc.C,
+                    high = Math.max(ohlc.high, currOhlc.high),
+                    low = Math.min(ohlc.low, currOhlc.low),
+                    close = ohlc.close,
                     Oi = currOhlc.Oi + ohlc.Oi,
-                    Volume = currOhlc.Volume + ohlc.Volume
+                    volume = currOhlc.volume + ohlc.volume
             )
         }
     }

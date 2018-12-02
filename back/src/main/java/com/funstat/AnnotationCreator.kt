@@ -3,7 +3,7 @@ package com.funstat
 import com.funstat.domain.Annotations
 import com.funstat.domain.HLine
 import com.funstat.domain.Label
-import com.funstat.domain.Ohlc
+import firelib.domain.Ohlc
 import com.funstat.sequenta.Sequenta
 import com.funstat.sequenta.Signal
 import com.funstat.sequenta.SignalType
@@ -56,7 +56,7 @@ labelOptions: {
 
                 val level = if (s.reference.up) oh.high else oh.low
 
-                val baseLabel = Label(level, oh.dateTime, base)
+                val baseLabel = Label(level, oh.dateTime(), base)
 
                 when (s.type) {
                     SignalType.Cdn -> {
@@ -78,7 +78,7 @@ labelOptions: {
 
                         labels.add(baseLabel.withAttribute("text", "" + s.reference.completedSignal + recycle))
                         val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]
-                        var hline = HLine(ohlcs[ci - 3].dateTime, endOh.dateTime, calcStopLine(ohlcs, ci, s))
+                        var hline = HLine(ohlcs[ci - 3].dateTime(), endOh.dateTime(), calcStopLine(ohlcs, ci, s))
 
 
                         hline = hline.withAttribute("color", if (s.reference.up) "red" else "green")
@@ -91,7 +91,7 @@ labelOptions: {
                                 .withAttribute("color", if (s.reference.up) "green" else "red")
                         lines.add(hhline)
                         while (curLine.get() < lines.size - 5) {
-                            lines[curLine.get()] = lines[curLine.get()].copy(end = oh.dateTime)
+                            lines[curLine.get()] = lines[curLine.get()].copy(end = oh.dateTime())
                             curLine.incrementAndGet()
                         }
                     }
@@ -107,7 +107,7 @@ labelOptions: {
             }
         }
         while (curLine.get() < lines.size) {
-            lines[curLine.get()] = lines[curLine.get()].copy(end = ohlcs[ohlcs.size - 1].dateTime)
+            lines[curLine.get()] = lines[curLine.get()].copy(end = ohlcs[ohlcs.size - 1].dateTime())
             curLine.incrementAndGet()
         }
         lines.addAll(lines0)
@@ -120,13 +120,13 @@ labelOptions: {
             curLevel = java.lang.Double.MIN_VALUE
             for (i in s.reference.start..ci) {
                 val ohh = ohlcs[i]
-                curLevel = Math.max(curLevel, ohh.high + ohh.range)
+                curLevel = Math.max(curLevel, ohh.high + ohh.range())
             }
         } else {
             curLevel = java.lang.Double.MAX_VALUE
             for (i in s.reference.start until ci) {
                 val ohh = ohlcs[i]
-                curLevel = Math.min(curLevel, ohh.low - ohh.range)
+                curLevel = Math.min(curLevel, ohh.low - ohh.range())
             }
         }
         return curLevel

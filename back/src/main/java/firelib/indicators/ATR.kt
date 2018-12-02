@@ -25,8 +25,8 @@ class ATR(val period: Int, val ts: TimeSeries<Ohlc>) : Indicator<Double>, (TimeS
             return Double.NaN;
         }
         if (ts.count() == 1)
-            return o.H - o.L;
-        return Math.max(o.H - o.L, Math.max(o.H - ts[-1].C, ts[-1].C - o.H));
+            return o.high - o.low;
+        return Math.max(o.high - o.low, Math.max(o.high - ts[-1].close, ts[-1].close - o.high));
     }
 
 }

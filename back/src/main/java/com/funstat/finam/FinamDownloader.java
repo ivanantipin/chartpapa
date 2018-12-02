@@ -1,7 +1,7 @@
 package com.funstat.finam;
 
 import com.funstat.domain.InstrId;
-import com.funstat.domain.Ohlc;
+import firelib.domain.Ohlc;
 import com.funstat.vantage.Source;
 import com.google.common.util.concurrent.SettableFuture;
 import com.opencsv.CSVParser;

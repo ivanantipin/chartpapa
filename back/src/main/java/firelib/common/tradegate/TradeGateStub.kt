@@ -22,16 +22,16 @@ class TradeGateStub(val marketDataDistributor : MarketDataDistributor, val model
 
             val b0 = BookStub(timeService, LimitOBook())
             secToBookLimit[ticker] = b0
-            marketDataDistributor.listenOhlc(i, {b0.updateBidAsk(it.C - 0.005,it.C + 0.005)} )
+            marketDataDistributor.listenOhlc(i, {b0.updateBidAsk(it.close - 0.005,it.close + 0.005)} )
 
 
             val b1 = BookStub(timeService, StopOBook())
             secToBookStop[ticker] = b1
-            marketDataDistributor.listenOhlc(i, {b1.updateBidAsk(it.C - 0.005,it.C + 0.005)})
+            marketDataDistributor.listenOhlc(i, {b1.updateBidAsk(it.close - 0.005,it.close + 0.005)})
 
             val b2 = MarketOrderStub(timeService)
             secToMarketOrderStub[ticker] = b2
-            marketDataDistributor.listenOhlc(i,{b2.updateBidAsk(it.C - 0.005,it.C + 0.005)})
+            marketDataDistributor.listenOhlc(i,{b2.updateBidAsk(it.close - 0.005,it.close + 0.005)})
         }
     }
 

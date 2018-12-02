@@ -1,6 +1,6 @@
 package com.funstat.vantage;
 
-import com.funstat.domain.Ohlc;
+import firelib.domain.Ohlc;
 import com.funstat.domain.InstrId;
 import com.funstat.store.MdDao;
 import firelib.common.interval.Interval;
@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,9 +37,9 @@ public class VantageDownloader implements Source{
     public static Optional<Ohlc> parse(String str) {
         try {
             String[] arr = str.split(",");
-            return Optional.of(new Ohlc(LocalDate.parse(arr[0], pattern).atStartOfDay(),
+            return Optional.of(new Ohlc(LocalDate.parse(arr[0], pattern).atStartOfDay().toInstant(ZoneOffset.UTC),
                     Double.parseDouble(arr[1]),
-                    Double.parseDouble(arr[2]), Double.parseDouble(arr[3]), Double.parseDouble(arr[4])
+                    Double.parseDouble(arr[2]), Double.parseDouble(arr[3]), Double.parseDouble(arr[4]),0,0
             ));
         }catch (Exception e){
             System.out.println("not valid entry "+ str + " because " + e.getMessage());

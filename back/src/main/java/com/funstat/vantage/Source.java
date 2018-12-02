@@ -1,6 +1,6 @@
 package com.funstat.vantage;
 
-import com.funstat.domain.Ohlc;
+import firelib.domain.Ohlc;
 import com.funstat.domain.InstrId;
 import firelib.common.interval.Interval;
 

@@ -3,7 +3,7 @@ package com.funstat.store
 
 import com.funstat.Pair
 import com.funstat.Tables
-import com.funstat.domain.Ohlc
+import firelib.domain.Ohlc
 import com.funstat.finam.FinamDownloader
 import com.funstat.domain.InstrId
 import com.funstat.iqfeed.IntervalTransformer
@@ -12,6 +12,7 @@ import com.funstat.vantage.Source
 import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
+import firelib.common.misc.toLondonTime
 import org.apache.commons.io.FileUtils
 import org.sqlite.SQLiteDataSource
 
@@ -135,7 +136,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
     fun updateMarketData(instrId: InstrId) {
         val source = sources[instrId.source]!!
         val dao = getDao(instrId.source, source.getDefaultInterval().name)
-        val startTime = dao.queryLast(instrId.code).map { (dateTime) -> dateTime.minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
+        val startTime = dao.queryLast(instrId.code).map { oh -> oh.dateTime().minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
         dao.insertJ(source.load(instrId, startTime), instrId.code)
     }
 

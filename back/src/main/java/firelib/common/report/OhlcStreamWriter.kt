@@ -13,10 +13,10 @@ class OhlcStreamWriter(val path: Path) : (Ohlc) -> Unit {
 
     val colsDef = listOf(
             make("DT", { o -> o.dtGmtEnd.toStandardString() }),
-            make("O", { o -> dbl2Str(o.O, 5) }),
-            make("H", { o -> dbl2Str(o.H, 5) }),
-            make("L", { o -> dbl2Str(o.L, 5) }),
-            make("C", { o -> dbl2Str(o.C, 5) })
+            make("O", { o -> dbl2Str(o.open, 5) }),
+            make("H", { o -> dbl2Str(o.high, 5) }),
+            make("L", { o -> dbl2Str(o.low, 5) }),
+            make("C", { o -> dbl2Str(o.close, 5) })
     )
 
 

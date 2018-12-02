@@ -15,7 +15,7 @@ interface TimeSeries<T> {
 }
 
 fun TimeSeries<Ohlc>.diff(len : Int) : Double{
-    return get(0).C - get(len - 1).C
+    return get(0).close - get(len - 1).close
 }
 
 
