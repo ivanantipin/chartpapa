@@ -44,7 +44,7 @@ class IqFeedSource(val csvPath: Path) : Source {
         val fname = csvPath.resolve(instrId.code + "_1.csv").toAbsolutePath().toString()
         val ohlcs = ArrayList<firelib.domain.Ohlc>()
         try {
-            val parser = CsvParser<firelib.domain.Ohlc>(fname, producer.handlers as Array<out ParseHandler<firelib.domain.Ohlc>>?, { firelib.domain.Ohlc() }, 100000000)
+            val parser = CsvParser<firelib.domain.Ohlc>(fname, producer.handlers as Array<out ParseHandler<firelib.domain.Ohlc>>?, { firelib.domain.Ohlc() }, 10_000_000)
             println(parser.seek(dateTime.toInstant(ZoneOffset.UTC)))
             while (parser.read()) {
                 ohlcs.add(parser.current())
