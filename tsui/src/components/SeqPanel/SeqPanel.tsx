@@ -88,6 +88,7 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
                         options={[
                             {label : 'Day',value : 'Day'},
                             {label : 'Week',value : 'Week'},
+                            {label : 'Min240',value : 'Min240'},
                         ]}/>
                     </Col>
                 </Row>

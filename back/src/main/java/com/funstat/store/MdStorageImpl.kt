@@ -12,7 +12,6 @@ import com.funstat.vantage.Source
 import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
-import firelib.common.misc.toLondonTime
 import org.apache.commons.io.FileUtils
 import org.sqlite.SQLiteDataSource
 
@@ -23,7 +22,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.HashMap
 import java.util.concurrent.*
-import java.util.stream.Collectors
 
 class MdStorageImpl(private val folder: String) : MdStorage {
 
@@ -69,11 +67,13 @@ class MdStorageImpl(private val folder: String) : MdStorage {
     override fun read(instrId: InstrId, interval: String): List<Ohlc> {
         Tables.REQUESTED.writeSingle(generic, instrId)
         val dao = getDao(instrId.source, sources[instrId.source]!!.getDefaultInterval().name)
-        var ret = dao.queryAll(instrId.code)
         val target = Interval.valueOf(interval)
+        val startTime = LocalDateTime.now().minusSeconds(target.durationMs * 600 / 1000)
+        var ret = dao.queryAll(instrId.code,startTime)
+
         if (ret.isEmpty()) {
             updateMarketData(instrId)
-            ret = dao.queryAll(instrId.code)
+            ret = dao.queryAll(instrId.code,startTime)
         }
         val start = System.currentTimeMillis()
         try {
@@ -137,7 +137,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
         val source = sources[instrId.source]!!
         val dao = getDao(instrId.source, source.getDefaultInterval().name)
         val startTime = dao.queryLast(instrId.code).map { oh -> oh.dateTime().minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
-        dao.insertJ(source.load(instrId, startTime), instrId.code)
+        dao.insert(source.load(instrId, startTime), instrId.code)
     }
 
     companion object {

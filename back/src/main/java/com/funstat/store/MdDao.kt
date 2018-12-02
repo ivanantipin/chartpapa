@@ -40,7 +40,8 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
 
-    fun insert(ohlcs: List<firelib.domain.Ohlc>, table: String) {
+    fun insert(ohlcs: List<firelib.domain.Ohlc>, tableIn: String) {
+        val table = normName(tableIn)
         ensureExist(table)
         val data = ohlcs.map {  (dtGmtEnd, O, H, L, C) ->
             object : HashMap<String, Any>() {
@@ -59,12 +60,6 @@ class MdDao(internal val ds: SQLiteDataSource) {
             e.printStackTrace()
         }
 
-    }
-
-    fun insertJ(ohlcs: List<Ohlc>, table: String) {
-        val conv = ohlcs
-                .map { (dateTime, open, high, low, close) -> firelib.domain.Ohlc(dateTime, open, high, low, close, 0, 0) }
-        insert(conv, table)
     }
 
     internal fun ensureExist(table: String) {
@@ -88,15 +83,27 @@ class MdDao(internal val ds: SQLiteDataSource) {
         return Ohlc(rs.getTimestamp("DT").toInstant(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"))
     }
 
-    fun queryLast(code: String): Optional<Ohlc> {
+    fun normName(name : String) : String{
+        return name.replace('-','_');
+    }
+
+    fun queryLast(codeIn: String): Optional<Ohlc> {
+        val code = normName(codeIn)
         ensureExist(code)
         val ret = NamedParameterJdbcTemplate(ds).query("select * from $code order by dt desc LIMIT 1 ") { rs, rowNum -> mapOhlc(rs) }
         return if (ret.size == 0) Optional.empty() else Optional.of(ret[0])
     }
 
-    fun queryAll(code: String): List<Ohlc> {
-        ensureExist(code)
-        return NamedParameterJdbcTemplate(ds).query("select * from $code order by dt asc ") { rs, rowNum -> mapOhlc(rs) }
+    fun queryAll(codeIn: String): List<Ohlc> {
+        return queryAll(codeIn, LocalDateTime.MIN)
     }
+
+    fun queryAll(codeIn: String, start : LocalDateTime): List<Ohlc> {
+        val code = normName(codeIn)
+        ensureExist(code)
+        val map = mapOf(Pair("DT", Timestamp.valueOf(start)))
+        return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc ", map,  { rs, rowNum -> mapOhlc(rs) })
+    }
+
 
 }

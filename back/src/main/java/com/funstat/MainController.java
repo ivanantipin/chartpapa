@@ -61,7 +61,8 @@ public class MainController {
 
     @PostMapping("/get_ohlcs")
     public Collection<Ohlc> getOhlcs(@RequestBody @Valid InstrId instrId, String interval){
-        return storage.read(instrId, interval);
+        List<Ohlc> ret = storage.read(instrId, interval);
+        return ret;
     }
 
     @PostMapping("/get_annotations")

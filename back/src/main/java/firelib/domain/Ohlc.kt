@@ -27,6 +27,7 @@ data class Ohlc(
         return this.dtGmtEnd.compareTo(other.dtGmtEnd)
     }
 
+
     //FIXME make immutable - require some core refactoring
 
     fun merge(ohlc: Ohlc): Ohlc {
@@ -37,6 +38,8 @@ data class Ohlc(
         )
     }
 
+    @get:ApiModelProperty(required = true)
+    val dateTimeMs = dtGmtEnd.toEpochMilli()
 
     fun dateTime() : LocalDateTime{
         return LocalDateTime.ofInstant(dtGmtEnd,ZoneOffset.UTC)

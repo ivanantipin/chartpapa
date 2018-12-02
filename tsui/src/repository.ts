@@ -39,15 +39,20 @@ export function fetchChart(codes: Array<InstrId>) :Promise<Map<string,Array<Time
 export function fetchOhlcChart(code: InstrId, timeframe : string): Promise<CandleStickChartProps> {
     let api = new MainControllerApi(config);
     return Promise.all([api.getOhlcsUsingPOST(code, timeframe), api.getAnnotationsUsingPOST(code, timeframe)]).then(arr => {
+
+        console.log('preohlc',arr[0])
+
         let ohlcs = arr[0].map((oh: Ohlc): OhlcTr => {
             return {
-                date: parseDate(oh.dateTime),
+                date: new Date(oh.dateTimeMs),
                 open: oh.open,
                 high: oh.high,
                 low: oh.low,
                 close: oh.close,
             }
         });
+
+        console.log('ohlcs ',ohlcs)
 
         const lb: Map<number, Label> = new Map<number, Label>();
 

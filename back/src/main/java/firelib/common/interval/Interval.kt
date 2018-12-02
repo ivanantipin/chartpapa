@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 
-enum class Interval(val durationMs: Long) {
+enum class Interval(val durationMs: Long, val offset : Long = (1440 * 60 * 1000) * 3) {
 
     Ms100(100),
     Sec1(1000),
@@ -22,7 +22,7 @@ enum class Interval(val durationMs: Long) {
     Min120(120 * 60 * 1000),
     Min240(240 * 60 * 1000),
     Day(1440 * 60 * 1000),
-    Week(1440 * 60 * 1000*7);
+    Week(Day.durationMs*7);
 
     fun resolveFromMs(ms: Long): Interval? {
         return values().find { it.durationMs == ms }
@@ -31,17 +31,18 @@ enum class Interval(val durationMs: Long) {
         return values().find { it.name == name }
     }
     val duration = Duration.ofMillis(durationMs)
-    fun roundTime(dt: Instant): Instant = Instant.ofEpochMilli(truncTime((dt.toEpochMilli())))
+
+    fun roundTime(dt: Instant): Instant = Instant.ofEpochMilli(truncTime((dt.toEpochMilli() + offset) - offset))
+
     fun ceilTime(dt: Instant): Instant {
-        var ret = (dt.toEpochMilli() / durationMs) * durationMs
-        if (dt.toEpochMilli() % durationMs > 0) {
+        val epochMs = dt.toEpochMilli() + offset
+        var ret = truncTime(epochMs)
+        if (epochMs % durationMs > 0) {
             ret += durationMs
         }
-        return Instant.ofEpochMilli(ret)
+        return Instant.ofEpochMilli(ret - offset)
     }
-    fun ceilTime(dt: LocalDateTime): LocalDateTime {
-        return LocalDateTime.ofInstant(ceilTime(dt.toInstant(ZoneOffset.UTC)), ZoneOffset.UTC)
-    }
+
     fun truncTime(epochMs: Long): Long = (epochMs / durationMs) * durationMs
 
 }
