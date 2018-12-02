@@ -3,11 +3,11 @@ package firelib.domain
 import firelib.common.misc.toStandardString
 import java.time.Instant
 
-data class Ohlc(var C: Double = .0,
-                var dtGmtEnd: Instant = Instant.ofEpochSecond(0),
+data class Ohlc(var dtGmtEnd: Instant = Instant.ofEpochSecond(0),
+                var O: Double = Double.NaN,
                 var H: Double = Double.MIN_VALUE,
                 var L: Double = Double.MAX_VALUE,
-                var O: Double = Double.NaN,
+                var C: Double = .0,
                 var Oi: Int = 0,
                 var Volume: Int = 0) : Timed {
 

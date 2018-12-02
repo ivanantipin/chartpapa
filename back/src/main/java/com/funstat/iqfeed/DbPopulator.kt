@@ -5,7 +5,6 @@ import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import firelib.parser.*
 
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
 import java.util.ArrayList

@@ -6,7 +6,7 @@ import firelib.domain.Ohlc
 class Ema(
           val period: Int,
           val ts: TimeSeries<Ohlc>,
-          val func: (Ohlc) -> Double = {it.C})
+          val func: (Ohlc) -> Double = {it.C })
   : Indicator<Double> , (TimeSeries<Ohlc>) -> Unit {
 
     fun koeffFunc() : Double{

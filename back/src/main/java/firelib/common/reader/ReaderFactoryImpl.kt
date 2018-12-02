@@ -40,7 +40,7 @@ class ReaderFactoryImpl(val modelConfig : ModelBacktestConfig) : ReadersFactory 
     }
 
     override fun invoke(t: InstrumentConfig, startDtGmt: Instant): MarketDataReader<Timed> {
-        val parser = createReader(t, {Ohlc()}, ohlcDescr)
+        val parser = createReader(t, {Ohlc() }, ohlcDescr)
         assert(parser.seek(startDtGmt), {"failed to find start date " + startDtGmt})
         return parser
     }

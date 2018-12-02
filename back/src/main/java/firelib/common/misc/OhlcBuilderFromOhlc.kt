@@ -11,8 +11,8 @@ class OhlcBuilderFromOhlc() {
                     H = Math.max(ohlc.H, currOhlc.H),
                     L = Math.min(ohlc.L, currOhlc.L),
                     C = ohlc.C,
-                    Volume = currOhlc.Volume + ohlc.Volume,
-                    Oi = currOhlc.Oi + ohlc.Oi
+                    Oi = currOhlc.Oi + ohlc.Oi,
+                    Volume = currOhlc.Volume + ohlc.Volume
             )
         }
     }

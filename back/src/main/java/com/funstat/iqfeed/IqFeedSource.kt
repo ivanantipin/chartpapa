@@ -2,10 +2,8 @@ package com.funstat.iqfeed
 
 import com.funstat.domain.Ohlc
 import com.funstat.domain.InstrId
-import com.funstat.store.MdDao
 import com.funstat.vantage.Source
 import firelib.common.interval.Interval
-import firelib.common.misc.toLondonTime
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler
@@ -14,12 +12,10 @@ import firelib.parser.ParserHandlersProducer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicLong
-import java.util.stream.Collectors
 
 class IqFeedSource(val csvPath: Path) : Source {
 

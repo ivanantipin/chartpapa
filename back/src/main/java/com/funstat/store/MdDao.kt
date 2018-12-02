@@ -15,7 +15,6 @@ import java.time.ZoneOffset
 import java.util.HashMap
 import java.util.Optional
 import java.util.concurrent.ConcurrentHashMap
-import java.util.stream.Collectors
 
 class MdDao(internal val ds: SQLiteDataSource) {
 
@@ -43,7 +42,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun insert(ohlcs: List<firelib.domain.Ohlc>, table: String) {
         ensureExist(table)
-        val data = ohlcs.map {  (C, dtGmtEnd, H, L, O) ->
+        val data = ohlcs.map {  (dtGmtEnd, O, H, L, C) ->
             object : HashMap<String, Any>() {
                 init {
                     put("DT", Timestamp.valueOf(LocalDateTime.ofInstant(dtGmtEnd, ZoneOffset.UTC)))
@@ -64,7 +63,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun insertJ(ohlcs: List<Ohlc>, table: String) {
         val conv = ohlcs
-                .map { (dateTime, open, high, low, close) -> firelib.domain.Ohlc(close, dateTime.toInstant(ZoneOffset.UTC), high, low, open, 0, 0) }
+                .map { (dateTime, open, high, low, close) -> firelib.domain.Ohlc(dateTime.toInstant(ZoneOffset.UTC), open, high, low, close, 0, 0) }
         insert(conv, table)
     }
 
