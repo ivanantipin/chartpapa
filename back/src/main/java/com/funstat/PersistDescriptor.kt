@@ -12,8 +12,8 @@ class PersistDescriptor<T>(internal var table: String, internal var clazz: Class
         return mdDao.readGeneric(table, clazz)
     }
 
-    fun readByKey(dao: GenericDao, key: String): T {
-        return readAsMap(dao)[key]!!
+    fun readByKey(dao: GenericDao, key: String): T? {
+        return readAsMap(dao)[key]
     }
 
 
