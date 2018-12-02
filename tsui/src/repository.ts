@@ -4,10 +4,8 @@ import {InstrId, Label, Ohlc} from "./api/api";
 import {CandleStickChartProps, OhlcTr} from "./components/OhlcChart/OhlcChart";
 
 
-const basePath = "http://localhost" + ":8080"
-
 const config : Configuration = {
-    basePath : basePath
+    basePath : "http://" + location.hostname + ":8080"
 }
 
 
