@@ -6,3 +6,4 @@ tail -n 100 nohup
 echo "========================="
 rm nohup
 nohup ./gradlew bootRun &
+
