@@ -55,7 +55,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
             }
         }
         try {
-            saveInTransaction("insert into $table(DT,O,H,L,C) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE)", data)
+            saveInTransaction("insert or replace into $table(DT,O,H,L,C) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE)", data)
         } catch (e: Exception) {
             e.printStackTrace()
         }
