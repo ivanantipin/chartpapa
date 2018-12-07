@@ -12,6 +12,8 @@ interface MdStorage {
     fun save(code: String, source: String, interval: String, data: List<firelib.domain.Ohlc>)
 
     fun updateSymbolsMeta()
+
+    fun start()
 }
 
 

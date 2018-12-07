@@ -34,6 +34,7 @@ public class MainController {
     @PostConstruct
     void onStart(){
         storage.updateSymbolsMeta();
+        storage.start();
     }
 
     List<Metadata> allMetas = new ArrayList<>();

@@ -87,7 +87,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
         getDao(source, interval).insert(data, code)
     }
 
-    fun start() {
+    override fun start() {
         executor.scheduleAtFixedRate({
             try {
                 Tables.REQUESTED.read(generic).forEach { symbol -> updateMarketData(symbol) }
