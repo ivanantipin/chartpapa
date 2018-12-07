@@ -5,6 +5,9 @@ import firelib.domain.Ohlc
 import firelib.common.interval.Interval
 
 class CachedStorage(private val delegate: MdStorage) : MdStorage {
+    override fun start() {
+        delegate.start()
+    }
 
     internal val container = SingletonsContainer()
 
