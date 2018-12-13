@@ -1,0 +1,4 @@
+notebooks/*.html
+published/*.html
+published/.ipynb_checkpoints
+

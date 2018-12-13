@@ -1,16 +1,18 @@
 package com.funstat;
 
 import com.funstat.domain.Annotations;
-import firelib.domain.Ohlc;
-import com.funstat.domain.TimePoint;
 import com.funstat.domain.InstrId;
+import com.funstat.domain.StringWrap;
+import com.funstat.domain.TimePoint;
 import com.funstat.ohlc.Metadata;
 import com.funstat.store.CachedStorage;
 import com.funstat.store.MdStorage;
 import com.funstat.store.MdStorageImpl;
 import com.funstat.vantage.VantageDownloader;
 import firelib.common.interval.Interval;
+import firelib.domain.Ohlc;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -19,6 +21,10 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,6 +49,26 @@ public class MainController {
     public List<Metadata> loadAllMetas(){
         return allMetas;
     }
+
+
+    @GetMapping(value = "/htmcontent")
+    public StringWrap loadHtmContent(String file){
+        byte[] bytes = new byte[0];
+        try {
+            bytes = Files.readAllBytes(Paths.get("/home/ivan/projects/fbackend/market_research/published/").resolve(file + ".html"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new StringWrap(new String(bytes));
+    }
+
+    @GetMapping(value = "/staticpages")
+    public List<String> getStaticPages(){
+        return Arrays.stream(new File("/home/ivan/projects/fbackend/market_research/published/").list((f, name) -> {
+            return name.endsWith("html");
+        })).map(s->s.replaceAll(".html","")).collect(Collectors.toList());
+    }
+
 
     @PutMapping("/put_meta")
     public void addMetadata(@Valid @RequestParam Metadata metadata){

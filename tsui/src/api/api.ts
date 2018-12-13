@@ -412,6 +412,20 @@ export interface Ohlc {
 /**
  * 
  * @export
+ * @interface StringWrap
+ */
+export interface StringWrap {
+    /**
+     * 
+     * @type {string}
+     * @memberof StringWrap
+     */
+    value: string;
+}
+
+/**
+ * 
+ * @export
  * @interface TimePoint
  */
 export interface TimePoint {
@@ -1058,6 +1072,29 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
         },
         /**
          * 
+         * @summary getStaticPages
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStaticPagesUsingGET(options: any = {}): FetchArgs {
+            const localVarPath = `/staticpages`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary instruments
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1091,6 +1128,34 @@ export const MainControllerApiFetchParamCreator = function (configuration?: Conf
             const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary loadHtmContent
+         * @param {string} [file] file
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        loadHtmContentUsingGET(file?: string, options: any = {}): FetchArgs {
+            const localVarPath = `/htmcontent`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'GET' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (file !== undefined) {
+                localVarQueryParameter['file'] = file;
+            }
 
             localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
             // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
@@ -1215,6 +1280,24 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary getStaticPages
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStaticPagesUsingGET(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<string>> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).getStaticPagesUsingGET(options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
          * @summary instruments
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1239,6 +1322,25 @@ export const MainControllerApiFp = function(configuration?: Configuration) {
          */
         loadAllMetasUsingGET(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Array<Metadata>> {
             const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).loadAllMetasUsingGET(options);
+            return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @summary loadHtmContent
+         * @param {string} [file] file
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        loadHtmContentUsingGET(file?: string, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<StringWrap> {
+            const localVarFetchArgs = MainControllerApiFetchParamCreator(configuration).loadHtmContentUsingGET(file, options);
             return (fetch: FetchAPI = portableFetch, basePath: string = BASE_PATH) => {
                 return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
                     if (response.status >= 200 && response.status < 300) {
@@ -1321,6 +1423,15 @@ export const MainControllerApiFactory = function (configuration?: Configuration,
         },
         /**
          * 
+         * @summary getStaticPages
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStaticPagesUsingGET(options?: any) {
+            return MainControllerApiFp(configuration).getStaticPagesUsingGET(options)(fetch, basePath);
+        },
+        /**
+         * 
          * @summary instruments
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1336,6 +1447,16 @@ export const MainControllerApiFactory = function (configuration?: Configuration,
          */
         loadAllMetasUsingGET(options?: any) {
             return MainControllerApiFp(configuration).loadAllMetasUsingGET(options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @summary loadHtmContent
+         * @param {string} [file] file
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        loadHtmContentUsingGET(file?: string, options?: any) {
+            return MainControllerApiFp(configuration).loadHtmContentUsingGET(file, options)(fetch, basePath);
         },
         /**
          * 
@@ -1409,6 +1530,17 @@ export class MainControllerApi extends BaseAPI {
 
     /**
      * 
+     * @summary getStaticPages
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MainControllerApi
+     */
+    public getStaticPagesUsingGET(options?: any) {
+        return MainControllerApiFp(this.configuration).getStaticPagesUsingGET(options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
      * @summary instruments
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1427,6 +1559,18 @@ export class MainControllerApi extends BaseAPI {
      */
     public loadAllMetasUsingGET(options?: any) {
         return MainControllerApiFp(this.configuration).loadAllMetasUsingGET(options)(this.fetch, this.basePath);
+    }
+
+    /**
+     * 
+     * @summary loadHtmContent
+     * @param {string} [file] file
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MainControllerApi
+     */
+    public loadHtmContentUsingGET(file?: string, options?: any) {
+        return MainControllerApiFp(this.configuration).loadHtmContentUsingGET(file, options)(this.fetch, this.basePath);
     }
 
     /**

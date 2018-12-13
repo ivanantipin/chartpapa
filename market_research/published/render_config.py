@@ -1,0 +1,1 @@
+c.Exporter.template_file = 'render.tpl'

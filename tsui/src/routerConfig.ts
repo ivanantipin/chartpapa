@@ -1,5 +1,6 @@
 import WidgetPanel from "./components/WidgetsPanel/WidgetPanel";
 import SeqPanel from "./components/SeqPanel/SeqPanel";
+import {StaticHtml} from "./components/StaticHtml/StaticHtml";
 
 export interface MenuConf {
     name : string,
@@ -20,5 +21,11 @@ export const routerConfig : Array<MenuConf>=[
         path : '/widgets',
         component : WidgetPanel,
         shown : false
+    },
+    {
+        name : "FunCharts",
+        path : '/funcharts',
+        component : StaticHtml,
+        shown : true
     }
 ]
