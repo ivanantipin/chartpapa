@@ -27,7 +27,7 @@ import javax.validation.Valid
 
 
 @RestController
-@CrossOrigin(origins = arrayOf("*"))
+@CrossOrigin(origins = ["*"])
 class MainController {
 
     internal var storage: MdStorage = CachedStorage(MdStorageImpl("/ddisk/globaldatabase/md"))
