@@ -94,7 +94,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }, 0, 10, TimeUnit.MINUTES)
+        }, 0, 10, TimeUnit.SECONDS)
     }
 
     override fun updateSymbolsMeta() {
@@ -134,10 +134,15 @@ class MdStorageImpl(private val folder: String) : MdStorage {
 
 
     fun updateMarketData(instrId: InstrId) {
-        val source = sources[instrId.source]!!
-        val dao = getDao(instrId.source, source.getDefaultInterval().name)
-        val startTime = dao.queryLast(instrId.code).map { oh -> oh.dateTime().minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
-        dao.insert(source.load(instrId, startTime), instrId.code)
+        try{
+            val source = sources[instrId.source]!!
+            val dao = getDao(instrId.source, source.getDefaultInterval().name)
+            val startTime = dao.queryLast(instrId.code).map { oh -> oh.dateTime().minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
+            dao.insert(source.load(instrId, startTime), instrId.code)
+        }catch (e : Exception){
+            System.err.println("failed to update "+ instrId + " " + e.message)
+            e.printStackTrace()
+        }
     }
 
     companion object {
