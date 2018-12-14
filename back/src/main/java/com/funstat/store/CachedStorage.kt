@@ -13,7 +13,7 @@ class CachedStorage(private val delegate: MdStorage) : MdStorage {
 
     override fun read(instrId: InstrId, interval: String): List<Ohlc> {
         val iv = Interval.valueOf(interval)
-        return container.getWithExpiration(instrId.toString() + "/" + interval, { delegate.read(instrId, interval) }, iv.duration.toMinutes() / 2)
+        return container.getWithExpiration(instrId.toString() + "/" + interval, { delegate.read(instrId, interval) }, Math.min(iv.duration.toMinutes() / 2, 30))
 
     }
 
