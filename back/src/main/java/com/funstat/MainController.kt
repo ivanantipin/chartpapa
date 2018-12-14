@@ -18,12 +18,10 @@ import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import java.util.stream.Collectors
 import javax.annotation.PostConstruct
 import javax.validation.Valid
 
@@ -36,22 +34,18 @@ class MainController {
 
     internal var allMetas: MutableList<Metadata> = ArrayList()
 
-    val rootDir: Path
-        get() = Paths.get(System.getProperty("user.dir"))
-
-    val noteBooksDir: Path
-        get() = rootDir.resolve("market_research").resolve("published")
+    val noteBooksDir = Paths.get(System.getProperty("notebooksDir"))
 
     init {
-        println("user dir is " + System.getProperty("user.dir"))
-        println("current notebook path is " + noteBooksDir)
-        println("static pages are " + loadStaticPages())
+        println("notebooks dir is " + noteBooksDir)
     }
 
 
     @GetMapping(value = "/staticpages")
     fun loadStaticPages(): List<String> {
-        return noteBooksDir.toFile().list({ f, name -> name.endsWith("html") }).map { it.replace(".html", "") }
+        return noteBooksDir.toFile()
+                .list { f, name -> name.endsWith("html") }
+                .map { it.replace(".html", "") }
     }
 
     @PostConstruct
