@@ -42,6 +42,12 @@ class MainController {
     val noteBooksDir: Path
         get() = rootDir.resolve("market_research").resolve("published")
 
+    init {
+        println("user dir is " + System.getProperty("user.dir"))
+        println("current notebook path is " + noteBooksDir)
+        println("static pages are " + loadStaticPages())
+    }
+
 
     @GetMapping(value = "/staticpages")
     fun loadStaticPages(): List<String> {
