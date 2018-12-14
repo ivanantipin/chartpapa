@@ -94,7 +94,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }, 0, 10, TimeUnit.SECONDS)
+        }, 0, 10, TimeUnit.MINUTES)
     }
 
     override fun updateSymbolsMeta() {
