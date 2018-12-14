@@ -49,8 +49,7 @@ class IqFeedSource(val csvPath: Path) : Source {
         } catch (e: Exception) {
         }
 
-        return ohlcs.map { ohlc -> Ohlc(ohlc.dtGmtEnd, ohlc.open, ohlc.high, ohlc.low, ohlc.close) };
-
+        return ohlcs
     }
 
     override fun getName(): String {

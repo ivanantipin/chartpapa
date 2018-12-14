@@ -36,16 +36,16 @@ class MainController {
 
     internal var allMetas: MutableList<Metadata> = ArrayList()
 
-    val rootDir : Path
-    get() = Paths.get(System.getProperty("user.dir"))
+    val rootDir: Path
+        get() = Paths.get(System.getProperty("user.dir"))
 
-    val noteBooksDir : Path
+    val noteBooksDir: Path
         get() = rootDir.resolve("market_research").resolve("published")
 
 
     @GetMapping(value = "/staticpages")
-    fun loadStaticPages() : List<String>{
-        return noteBooksDir.toFile().list({f,name->name.endsWith("html")}).map { it.replace(".html","") }
+    fun loadStaticPages(): List<String> {
+        return noteBooksDir.toFile().list({ f, name -> name.endsWith("html") }).map { it.replace(".html", "") }
     }
 
     @PostConstruct
