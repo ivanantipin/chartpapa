@@ -6,5 +6,5 @@ echo "======================"
 tail -n 100 nohup.out
 echo "========================="
 rm nohup.out
-nohup ./gradlew bootRun &
+nohup ./gradlew --stacktrace bootRun &
 
