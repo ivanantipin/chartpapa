@@ -8,9 +8,11 @@ const config : Configuration = {
     basePath : "http://" + location.hostname + ":8080"
 }
 
+export const mainControllerApi = new MainControllerApi(config);
+
 
 export function fetchInstruments(): Promise<Array<InstrId>> {
-    return new MainControllerApi(config).instrumentsUsingGET()
+    return mainControllerApi.instrumentsUsingGET()
 }
 
 export interface TimePointTr {
@@ -20,8 +22,7 @@ export interface TimePointTr {
 
 export function fetchChart(codes: Array<InstrId>) :Promise<Map<string,Array<TimePointTr>>> {
     console.log('fetching codes', codes)
-    return new MainControllerApi(config).getSeriesUsingPOST(codes).then(res=>{
-        console.log('receidev chart',res)
+    return mainControllerApi.getSeriesUsingPOST(codes).then(res=>{
         const ret = new Map<string,Array<TimePointTr>>()
         Object.keys(res).forEach(key=>{
             let nar = res[key].map(tp=>{
@@ -36,9 +37,10 @@ export function fetchChart(codes: Array<InstrId>) :Promise<Map<string,Array<Time
     });
 }
 
+
 export function fetchOhlcChart(code: InstrId, timeframe : string): Promise<CandleStickChartProps> {
-    let api = new MainControllerApi(config);
-    return Promise.all([api.getOhlcsUsingPOST(code, timeframe), api.getAnnotationsUsingPOST(code, timeframe)]).then(arr => {
+
+    return Promise.all([mainControllerApi.getOhlcsUsingPOST(code, timeframe), mainControllerApi.getAnnotationsUsingPOST(code, timeframe)]).then(arr => {
 
         console.log('preohlc',arr[0])
 

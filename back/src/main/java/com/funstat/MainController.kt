@@ -34,7 +34,7 @@ class MainController {
 
     internal var allMetas: MutableList<Metadata> = ArrayList()
 
-    val noteBooksDir = Paths.get(System.getProperty("notebooksDir"))
+    val noteBooksDir = Paths.get(System.getProperty("notebooksDir") ?: "/home/ivan/projects/fbackend/market_research/published" )
 
     init {
         println("notebooks dir is " + noteBooksDir)

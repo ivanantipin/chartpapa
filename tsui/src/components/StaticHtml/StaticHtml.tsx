@@ -1,10 +1,7 @@
 import * as React from 'react';
 import {Component} from 'react';
-import {MainControllerApi} from 'api';
 import {Select} from "antd";
-//var _ = require('lodash');
-
-
+import {mainControllerApi} from "../../repository";
 
 const Option = Select.Option;
 
@@ -12,8 +9,6 @@ const children = [];
 for (let i = 10; i < 36; i++) {
     children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
 }
-
-
 
 
 export class StaticHtml extends Component<any, { selected : Array<string>, available : Array<string>, fetched : { [key : string] : string} }> {
@@ -24,7 +19,7 @@ export class StaticHtml extends Component<any, { selected : Array<string>, avail
     }
 
     componentDidMount() {
-        new MainControllerApi().getStaticPagesUsingGET().then((files : Array<string>) => {
+        mainControllerApi.loadStaticPagesUsingGET().then((files : Array<string>) => {
             this.setState({...this.state, available: files})
         }).catch(e=>{
             console.log(e)
@@ -35,7 +30,7 @@ export class StaticHtml extends Component<any, { selected : Array<string>, avail
         console.log("selected", sel)
         this.setState({...this.state, selected : sel})
         sel.forEach(fl=>{
-            new MainControllerApi().loadHtmContentUsingGET(fl).then(wr=>{
+            mainControllerApi.loadHtmContentUsingGET(fl).then(wr=>{
                 console.log("content", wr)
                 const cp = {...this.state.fetched}
                 cp[fl] = wr.value
