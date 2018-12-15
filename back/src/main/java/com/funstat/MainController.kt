@@ -40,8 +40,7 @@ class MainController {
         println("notebooks dir is " + noteBooksDir)
     }
 
-
-    @GetMapping(value = "/staticpages")
+    @RequestMapping(value = "/staticpages", method = arrayOf(RequestMethod.GET))
     fun loadStaticPages(): List<String> {
         return noteBooksDir.toFile()
                 .list { f, name -> name.endsWith("html") }
@@ -60,7 +59,7 @@ class MainController {
     }
 
 
-    @GetMapping(value = "/htmcontent")
+    @RequestMapping(value = "/htmcontent", method = arrayOf(RequestMethod.GET))
     fun loadHtmContent(file: String): StringWrap {
         return StringWrap(String(Files.readAllBytes(noteBooksDir.resolve("$file.html"))))
     }
