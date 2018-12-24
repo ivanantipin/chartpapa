@@ -12,11 +12,11 @@ import java.nio.file.StandardOpenOption
 class OhlcStreamWriter(val path: Path) : (Ohlc) -> Unit {
 
     val colsDef = listOf(
-            make("DT", { o -> o.dtGmtEnd.toStandardString() }),
-            make("O", { o -> dbl2Str(o.open, 5) }),
-            make("H", { o -> dbl2Str(o.high, 5) }),
-            make("L", { o -> dbl2Str(o.low, 5) }),
-            make("C", { o -> dbl2Str(o.close, 5) })
+            make("DT") { it.dtGmtEnd.toStandardString() },
+            make("O") { dbl2Str(it.open, 5) },
+            make("H") { dbl2Str(it.high, 5) },
+            make("L") { dbl2Str(it.low, 5) },
+            make("C") { dbl2Str(it.close, 5) }
     )
 
 
@@ -32,7 +32,7 @@ class OhlcStreamWriter(val path: Path) : (Ohlc) -> Unit {
     }
 
 
-    override fun invoke(ohlc: Ohlc): Unit {
+    override fun invoke(ohlc: Ohlc) {
         stream.write(colsDef.map({ it.second }).map({ it(ohlc) }).joinToString(";", postfix = "\n"))
         stream.flush()
     }

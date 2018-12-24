@@ -13,6 +13,8 @@ interface Model {
 
     fun orderManagers(): List<OrderManager>
 
+    fun update()
+
     /**
      * called after backtest end
      */

@@ -5,7 +5,7 @@ import java.time.Instant
 
 import firelib.common.*
 import firelib.common.ordermanager.OrderManager
-import firelib.common.ordermanager.managePosTo
+import firelib.common.ordermanager.makePositionEqualsTo
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 
@@ -24,7 +24,7 @@ class PositionCloserByTimeOut(val stub: OrderManager, val duration : Duration) :
 
     fun closePositionIfTimeOut(dtGmt: Instant) {
         if (stub.position() != 0 &&  Duration.between(posOpenedDtGmt,dtGmt).compareTo(duration)  > 0) {
-            stub.managePosTo(0)
+            stub.makePositionEqualsTo(0)
         }
     }
 

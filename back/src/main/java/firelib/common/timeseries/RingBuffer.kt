@@ -3,12 +3,11 @@ package firelib.common.timeseries
 
 class RingBuffer<T>(val length: Int, val func: (i: Int) -> T) {
 
-    val data: ArrayList<T>
+    val data: ArrayList<T> = ArrayList(length)
     var count = 0
     var head = 0
 
     init {
-        data = ArrayList(length)
         for (i in 0..length) {
             data.add(func(i))
         }
@@ -17,7 +16,6 @@ class RingBuffer<T>(val length: Int, val func: (i: Int) -> T) {
     operator fun get(idx: Int): T = data[calcIdx(idx)]
 
     private fun calcIdx(idx: Int): Int {
-
         assert(idx >= 0 && idx < data.size)
         return (head - idx + length) % length
     }

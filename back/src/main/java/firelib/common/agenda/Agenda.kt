@@ -5,6 +5,6 @@ import java.time.Instant
 interface Agenda {
     fun next(): Unit
 
-    fun addEvent(time: Instant, act: () -> Unit, prio : Int): Unit
+    fun execute(time: Instant, act: () -> Unit, prio : Int): Unit
 
 }

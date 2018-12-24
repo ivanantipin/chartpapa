@@ -71,7 +71,7 @@ class BinaryReader<T : Timed>(val fileName : String, val desc : BinaryReaderReco
     override fun read(): Boolean {
         if(buffer.position() == buffer.limit()){
             if(fileChannel.position() == fileChannel.size()){
-                curr = null as T
+                curr = null
                 return false
             }
             buffer.clear()

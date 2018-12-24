@@ -22,7 +22,7 @@ class TimeSeriesContainer() {
         timeSeries.forEach({ it[0] = ohlcFromOhlc.mergeOhlc(it[0], ohlc) })
     }
 
-    fun addTs(interval: Interval, ts: TimeSeries<Ohlc>): Unit {
+    operator fun set(interval: Interval, ts: TimeSeries<Ohlc>): Unit {
         map[interval] = ts
         timeSeries += ts
     }
@@ -31,7 +31,7 @@ class TimeSeriesContainer() {
         return map.contains(interval)
     }
 
-    fun getTs(interval: Interval): TimeSeriesImpl<Ohlc> {
+    operator fun get(interval: Interval): TimeSeriesImpl<Ohlc> {
         return map[interval] as TimeSeriesImpl<Ohlc>
     }
 

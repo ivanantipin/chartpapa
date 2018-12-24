@@ -1,25 +1,26 @@
 package firelib.common.config
 
-import firelib.common.core.BacktestMode
 import firelib.common.report.StrategyMetric
+import java.time.Instant
+import java.time.LocalDateTime
 
 /**
  * configuration for model backtest
  */
-class ModelBacktestConfig {
+class ModelBacktestConfig (){
     /**
      * instruments configuration
      */
-    val instruments = ArrayList<InstrumentConfig>()
+    var instruments: List<InstrumentConfig> = emptyList()
 
-    var startDateGmt: String = ""
+    var startDateGmt: Instant = Instant.MIN
 
-    var endDate: String = ""
+    var endDate: Instant = Instant.MAX
 
     /**
-    * market data folder
+     * market data folder
      * all instrument configs related to that folder
-    */
+     */
     var dataServerRoot: String = ""
 
     /*
@@ -32,40 +33,32 @@ class ModelBacktestConfig {
     * translatest csv data to binary format to speedup backtest
     * that increase read speed from 300k msg/sec -> 10 mio msg/sec
      */
-    var precacheMarketData : Boolean = true
-
-    /*
-    * simulates roundtrip delay between market and strategy
-    */
-    var networkSimulatedDelayMs = 30L
+    var precacheMarketData: Boolean = true
 
     /**
-    * dump ohlc data for backtest reporting
-    */
+     * dump ohlc data for backtest reporting
+     */
     var dumpOhlcData = true
 
     /**
      * params passed to model apply method
      * can not be optimized
      */
-    val modelParams = HashMap<String, String>()
+    var modelParams : Map<String, String> = emptyMap()
 
     /*
     * optimization config, used only for BacktestMode.Optimize
      */
-    val optConfig : OptimizationConfig= OptimizationConfig()
-
-    var backtestMode = BacktestMode.SimpleRun
-
+    val optConfig: OptimizationConfig = OptimizationConfig()
 
     /*
     * this metrics will be available for optimization
      */
     val calculatedMetrics = listOf(
-        StrategyMetric.Pf,
-        StrategyMetric.Pnl,
-        StrategyMetric.Sharpe,
-        StrategyMetric.AvgPnl
+            StrategyMetric.Pf,
+            StrategyMetric.Pnl,
+            StrategyMetric.Sharpe,
+            StrategyMetric.AvgPnl
     )
 
 }

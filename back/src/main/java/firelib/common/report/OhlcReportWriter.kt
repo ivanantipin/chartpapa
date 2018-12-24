@@ -15,11 +15,11 @@ fun subscribeToDumpOhlc(model: Model, minsWindow: Int = 100, config : ModelBackt
     for(instrIdx in 0..config.instruments.size)
     {
         val slicer = WindowSlicer<Ohlc>(Duration.ofMinutes(minsWindow.toLong()))
-        model.orderManagers()[instrIdx]!!.tradesTopic().subscribe({slicer.updateWriteBefore()})
-        model.orderManagers()[instrIdx]!!.orderStateTopic().filter({it.status == OrderStatus.New}).subscribe({slicer.updateWriteBefore()})
-        val ts = marketDataDistributor.activateOhlcTimeSeries(instrIdx, Interval.Min1, minsWindow)
+        model.orderManagers()[instrIdx]!!.tradesTopic().subscribe {slicer.updateWriteBefore()}
+        model.orderManagers()[instrIdx]!!.orderStateTopic().filter {it.status == OrderStatus.New}.subscribe {slicer.updateWriteBefore()}
+        val ts = marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min1, minsWindow)
         val ohlcPath = Paths.get(config.reportTargetPath).resolve("ohlc_${config.instruments[instrIdx].ticker}.csv")
-        ts.onNewBar().map({it[0]}).lift(slicer).subscribe(OhlcStreamWriter (ohlcPath))
+        ts.subscribe { OhlcStreamWriter (ohlcPath)}
     }
 }
 

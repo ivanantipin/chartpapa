@@ -6,9 +6,12 @@ import firelib.domain.Ohlc
 
 class Ma(val period: Int, val ts: TimeSeries<Ohlc>, val calcSko: Boolean = false)
     : Indicator<Double>, (TimeSeries<Ohlc>) -> Unit {
+    override fun calculate() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     init {
-        ts.onNewBar().subscribe(this)
+        ts.subscribe(this)
     }
 
     val maa = SimpleMovingAverage(period, calcSko)

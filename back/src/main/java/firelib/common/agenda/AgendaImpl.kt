@@ -1,12 +1,18 @@
 package firelib.common.agenda
 
 
-import firelib.common.timeservice.TimeServiceManaged
+import firelib.common.timeservice.TimeService
 import java.time.Instant
 import java.util.*
 
 
-class AgendaImpl(val timeService : TimeServiceManaged) : Agenda{
+class AgendaImpl : Agenda, TimeService{
+
+    var time : Instant = Instant.MIN
+
+    override fun currentTime(): Instant {
+        return time
+    }
 
     data class Rec(val time : Instant, val prio : Int, val act : ()->Unit)
 
@@ -24,11 +30,11 @@ class AgendaImpl(val timeService : TimeServiceManaged) : Agenda{
 
     override fun next() : Unit {
         val ev = events.poll()
-        timeService.updateTime(ev.time)
+        time = ev.time
         ev.act()
     }
 
-    override fun addEvent(time : Instant, act : ()->Unit, prio : Int) {
+    override fun execute(time : Instant, act : ()->Unit, prio : Int) {
         events.add(Rec(time, prio,act))
     }
 }

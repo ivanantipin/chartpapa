@@ -46,7 +46,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
     }
 
     override fun hasPendingState(): Boolean {
-        return id2Order.values.any({o -> (o.status().isPending() || (o.order.orderType == OrderType.Market))})
+        return id2Order.values.any { (it.status().isPending() || (it.order.orderType == OrderType.Market))}
     }
 
 
@@ -78,17 +78,14 @@ class OrderManagerImpl(val tradeGate : TradeGate,
             orders.forEach({orderStateChannel.publish(OrderState(it,OrderStatus.Rejected, timeService.currentTime()))})
         }else{
             orders.forEach { order ->
-                run {
-                    val orderWithState: OrderWithState = OrderWithState(order)
-                    this.id2Order[order.id] = orderWithState
-                    orders.forEach({orderStateChannel.publish(OrderState(it, OrderStatus.New, timeService.currentTime()))})
-                    log.info("submitting order {}", order)
-                    order.tradeSubscription.subscribe({onTrade(it, orderWithState)})
-                    order.orderSubscription.subscribe(this::onOrderState)
-                    tradeGate.sendOrder(order)
-                }
+                val orderWithState: OrderWithState = OrderWithState(order)
+                this.id2Order[order.id] = orderWithState
+                orders.forEach {orderStateChannel.publish(OrderState(it, OrderStatus.New, timeService.currentTime()))}
+                log.info("submitting order {}", order)
+                order.tradeSubscription.subscribe {onTrade(it, orderWithState)}
+                order.orderSubscription.subscribe {onOrderState(it)}
+                tradeGate.sendOrder(order)
             }
-
         }
     }
 

@@ -4,8 +4,6 @@ import firelib.common.Order
 import firelib.common.OrderStatus
 import firelib.common.Side
 import firelib.common.Trade
-import firelib.common.misc.Channel
-import firelib.common.misc.DurableChannel
 import firelib.common.timeservice.TimeService
 import firelib.domain.OrderState
 
@@ -20,16 +18,15 @@ class MarketOrderStub(val timeService : TimeService,var bid : Double = Double.Na
     /**
      * just order send
      */
-    fun sendOrder(order: Order): Pair<Channel<Trade>,Channel<OrderState>> {
-        val ret = Pair(DurableChannel<Trade>(),DurableChannel<OrderState>())
+    fun sendOrder(order: Order){
         val trdPrice: Double = price(order.side)
+
         if(trdPrice.isNaN()){
-            ret.second.publish(OrderState(order, OrderStatus.Rejected, timeService.currentTime()))
+            order.orderSubscription.publish(OrderState(order, OrderStatus.Rejected, timeService.currentTime()))
         }else{
-            ret.first.publish(Trade(order.qty, trdPrice, order, timeService.currentTime()))
-            ret.second.publish(OrderState(order, OrderStatus.Done, timeService.currentTime()))
+            order.tradeSubscription.publish(Trade(order.qty, trdPrice, order, timeService.currentTime()))
+            order.orderSubscription.publish(OrderState(order, OrderStatus.Done, timeService.currentTime()))
         }
-        return ret
     }
 
 

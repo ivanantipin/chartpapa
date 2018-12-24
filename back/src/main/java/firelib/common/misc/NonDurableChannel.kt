@@ -10,7 +10,7 @@ class NonDurableChannel<T> : Channel<T>{
     val listeners = ArrayList<(T)->Unit>()
 
     override fun publish(t : T) : Unit {
-        listeners.forEach({it(t)})
+        listeners.forEach {it(t)}
     }
 
     override fun subscribe(lsn : (T)->Unit) : ChannelSubscription {

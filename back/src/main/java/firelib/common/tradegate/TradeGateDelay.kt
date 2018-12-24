@@ -9,7 +9,7 @@ class TradeGateDelay(val timeService: TimeService, val delayMillis: Long, val tr
      * just order send
      */
     override fun sendOrder(order: Order){
-        agenda.addEvent(timeService.currentTime().plusMillis(delayMillis), {
+        agenda.execute(timeService.currentTime().plusMillis(delayMillis), {
             tradeGate.sendOrder(order)
         }, 0)
     }
@@ -18,7 +18,7 @@ class TradeGateDelay(val timeService: TimeService, val delayMillis: Long, val tr
      * just order cancel
      */
     override fun cancelOrder(order: Order): Unit {
-        agenda.addEvent(timeService.currentTime().plusMillis(delayMillis), {
+        agenda.execute(timeService.currentTime().plusMillis(delayMillis), {
             tradeGate.cancelOrder(order)
         }, 0)
     }

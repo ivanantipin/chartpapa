@@ -15,6 +15,10 @@ class ParamsVariator(val optParams: List<OptimizedParameter>) : Iterator<Map<Str
         return ret!!
     }
 
+    init {
+        nxt = next0()
+    }
+
     fun next0(): Map<String, Int>? {
         if (!optParams[0].next()) {
             optParams[0].reset();

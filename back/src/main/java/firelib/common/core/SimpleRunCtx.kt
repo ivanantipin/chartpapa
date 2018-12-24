@@ -5,37 +5,35 @@ import firelib.common.config.ModelBacktestConfig
 import firelib.common.interval.IntervalServiceImpl
 import firelib.common.mddistributor.MarketDataDistributorImpl
 import firelib.common.model.Model
-import firelib.common.ordermanager.OrderManager
-import firelib.common.ordermanager.OrderManagerImpl
+import firelib.common.model.ModelContext
 import firelib.common.reader.ReaderFactoryImpl
 import firelib.common.timeboundscalc.TimeBoundsCalculatorImpl
-import firelib.common.timeservice.TimeServiceManaged
 import firelib.common.tradegate.TradeGateStub
 
 
-typealias ModelFactory = (params: Map<String, String>)->Model
+interface ModelFactory{
+    operator fun invoke(context : ModelContext, props : Map<String,String>) : Model
+}
+
 
 
 class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
 
     val tradeGate by lazy {
-        TradeGateStub(marketDataDistributor, modelConfig,timeService)
+        TradeGateStub(marketDataDistributor, modelConfig,agenda)
     }
 
-    val timeService by lazy {
-        TimeServiceManaged()
-    }
 
     val intervalService by lazy {
         IntervalServiceImpl()
     }
 
     val agenda by lazy {
-        AgendaImpl(timeService)
+        AgendaImpl()
     }
 
     val marketDataDistributor by lazy {
-        MarketDataDistributorImpl(modelConfig, intervalService)
+        MarketDataDistributorImpl(modelConfig)
     }
 
     val readersFactory by lazy {
@@ -44,7 +42,6 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
 
     val backtest by lazy {
         Backtest(intervalService,
-                timeService,
                 agenda,
                 marketDataDistributor,
                 modelConfig,
@@ -57,8 +54,12 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
 
     val boundModels = ArrayList<Model>()
 
+    val modelContext by lazy {
+        ModelContext(agenda,intervalService,marketDataDistributor,tradeGate,modelConfig.instruments.map { it.ticker })
+    }
+
     fun addModel(factory : ModelFactory, params : Map<String,String>){
-        boundModels += factory(params)
+        boundModels += factory(modelContext,params)
     }
 
 }

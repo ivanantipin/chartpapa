@@ -4,7 +4,7 @@ import firelib.common.Order
 import firelib.common.OrderType
 import firelib.common.Side
 
-fun OrderManager.managePosTo(pos: Int): Unit {
+fun OrderManager.makePositionEqualsTo(pos: Int): Unit {
     if(this.hasPendingState()){
         return
     }
@@ -40,7 +40,7 @@ fun OrderManager.getOrderForDiff(currentPosition: Int, targetPos: Int): Order? {
 
 fun OrderManager.flattenAll(reason: String? = null) {
     cancelAllOrders()
-    managePosTo(0)
+    makePositionEqualsTo(0)
 }
 
 fun OrderManager.cancelAllOrders() {cancelOrders(liveOrders().filter({o->o.orderType != OrderType.Market}))}

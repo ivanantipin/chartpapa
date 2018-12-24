@@ -13,7 +13,11 @@ import java.nio.file.StandardCopyOption
 
 fun clearReportDir(targetDir: String) : Unit {
 
-    FileUtils.deleteDirectory(Paths.get(targetDir).toFile())
+    try {
+        FileUtils.deleteDirectory(Paths.get(targetDir).toFile())
+    }catch (e : Exception){
+        error("failed to remove report dir " + e.message)
+    }
 
     FileUtils.forceMkdir(Paths.get(targetDir).toFile())
 }

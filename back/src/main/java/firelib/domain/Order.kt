@@ -15,15 +15,12 @@ data class Order(val orderType: OrderType,
                  val id: String,
                  val placementTime: Instant){
 
-    val tradeSubscription: DurableChannel<Trade> = DurableChannel<Trade>()
-    val orderSubscription: DurableChannel<OrderState> = DurableChannel<OrderState>()
+    val tradeSubscription: DurableChannel<Trade> = DurableChannel()
+    val orderSubscription: DurableChannel<OrderState> = DurableChannel()
 
     init {
         assert(qty > 0, {"order qty <= 0!!"})
         assert(price > 0 || orderType == OrderType.Market, {"price : $price <=  0!!"})
-        assert(id != null, {"id is null!!"})
-        assert(security != null, {"security is null!!"})
-        assert(placementTime != null, {"placement time is null!!"})
     }
     
 

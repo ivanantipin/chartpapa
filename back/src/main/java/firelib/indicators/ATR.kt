@@ -4,9 +4,12 @@ import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 
 class ATR(val period: Int, val ts: TimeSeries<Ohlc>) : Indicator<Double>, (TimeSeries<Ohlc>) -> Unit {
+    override fun calculate() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     init {
-        ts.onNewBar().subscribe(this)
+        ts.subscribe(this)
     }
 
     val avg = SimpleMovingAverage(period, false)

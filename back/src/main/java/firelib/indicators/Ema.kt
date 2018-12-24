@@ -8,13 +8,16 @@ class Ema(
           val ts: TimeSeries<Ohlc>,
           val func: (Ohlc) -> Double = {it.close })
   : Indicator<Double> , (TimeSeries<Ohlc>) -> Unit {
+    override fun calculate() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     fun koeffFunc() : Double{
         return 2.0 / (period + 1)
     }
 
     init{
-        ts.onNewBar().subscribe(this)
+        ts.subscribe(this)
     }
 
 

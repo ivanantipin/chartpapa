@@ -8,10 +8,6 @@ import firelib.domain.Ohlc
 
  */
 interface MarketDataDistributor {
-
-    fun activateOhlcTimeSeries(tickerId: Int, interval: Interval, len: Int): TimeSeries<Ohlc>
-
+    fun getOrCreateTs(tickerId: Int, interval: Interval, len: Int): TimeSeries<Ohlc>
     fun listenOhlc(idx : Int, lsn : (Ohlc)->Unit) : Unit
-
-    fun getTs(tickerId: Int, interval: Interval) : TimeSeries<Ohlc>
 }

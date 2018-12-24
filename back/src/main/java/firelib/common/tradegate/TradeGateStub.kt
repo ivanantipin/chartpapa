@@ -15,23 +15,22 @@ class TradeGateStub(val marketDataDistributor : MarketDataDistributor, val model
 
     val secToMarketOrderStub = HashMap<String,MarketOrderStub>()
 
-    //fixme have to be constructor
-    fun init(){
-        for(i in 0..modelConfig.instruments.size){
+    init{
+        for(i in 0 until modelConfig.instruments.size){
             val ticker =  modelConfig.instruments[i].ticker
 
-            val b0 = BookStub(timeService, LimitOBook())
-            secToBookLimit[ticker] = b0
-            marketDataDistributor.listenOhlc(i, {b0.updateBidAsk(it.close - 0.005,it.close + 0.005)} )
+            val limitStub = BookStub(timeService, LimitOBook())
+            secToBookLimit[ticker] = limitStub
+            marketDataDistributor.listenOhlc(i) {limitStub.updateBidAsk(it.close - 0.005,it.close + 0.005)}
 
 
-            val b1 = BookStub(timeService, StopOBook())
-            secToBookStop[ticker] = b1
-            marketDataDistributor.listenOhlc(i, {b1.updateBidAsk(it.close - 0.005,it.close + 0.005)})
+            val stopStub = BookStub(timeService, StopOBook())
+            secToBookStop[ticker] = stopStub
+            marketDataDistributor.listenOhlc(i) {stopStub.updateBidAsk(it.close - 0.005,it.close + 0.005)}
 
-            val b2 = MarketOrderStub(timeService)
-            secToMarketOrderStub[ticker] = b2
-            marketDataDistributor.listenOhlc(i,{b2.updateBidAsk(it.close - 0.005,it.close + 0.005)})
+            val marketStub = MarketOrderStub(timeService)
+            secToMarketOrderStub[ticker] = marketStub
+            marketDataDistributor.listenOhlc(i) {marketStub.updateBidAsk(it.close - 0.005,it.close + 0.005)}
         }
     }
 

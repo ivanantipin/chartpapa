@@ -1,6 +1,5 @@
 package firelib.common.timeseries
 
-import firelib.common.misc.SubChannel
 import firelib.domain.Ohlc
 
 interface TimeSeries<T> {
@@ -10,7 +9,7 @@ interface TimeSeries<T> {
     operator fun get(idx: Int): T
     operator fun set(idx: Int, value : T)
 
-    fun onNewBar() : SubChannel<TimeSeries<T>>
+    fun subscribe(listener : (TimeSeries<T>)->Unit)
 
 }
 
