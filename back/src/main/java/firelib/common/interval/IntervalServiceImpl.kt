@@ -1,6 +1,5 @@
 package firelib.common.interval
 
-import org.apache.commons.collections4.ListUtils
 import java.time.Instant
 import java.util.*
 
@@ -21,16 +20,12 @@ class IntervalServiceImpl : IntervalService {
             if (ms  % interval.durationMs == 0L) {
                 listeners.forEach {it(dt)}
                 if(childs.isNotEmpty())
-                    childs.forEach({it.onStep(ms,dt)})
+                    childs.forEach {it.onStep(ms,dt)}
             }
         }
     }
-    override fun addListener(interval: Interval, action: (Instant)  -> Unit, atTheBeginning : Boolean) {
-        if(atTheBeginning){
-            addOrGetIntervalNode(interval).listeners.add(0,action)
-        }else{
-            addOrGetIntervalNode(interval).listeners += action
-        }
+    override fun addListener(interval: Interval, action: (Instant)  -> Unit) {
+        addOrGetIntervalNode(interval).listeners += action
         rebuildTree()
     }
 
@@ -41,20 +36,21 @@ class IntervalServiceImpl : IntervalService {
 
         var nodesResult = listOf(nodes.first())
 
-        nodes.stream().skip(1).forEach({nd->
-            val find = nodesResult.find({ p -> depends(p.interval, nd.interval) })
+        nodes.stream().skip(1).forEach { nd->
+            nd.childs.clear()
+            val find = nodesResult.find { p -> depends(p.interval, nd.interval) }
             if(find != null){
                 find.childs += nd
             }else{
                 throw RuntimeException("no parent found!!")
             }
-            nodesResult = ListUtils.union(arrayListOf(nd),nodesResult)
-        })
+            nodesResult = arrayListOf(nd) + nodesResult
+        }
 
     }
 
-    fun addOrGetIntervalNode(interval: Interval): Node {
-        var ret = nodes.find({ n -> n.interval == interval })
+    private fun addOrGetIntervalNode(interval: Interval): Node {
+        var ret = nodes.find { n -> n.interval == interval }
         if(ret == null) {
             ret = Node(interval)
             nodes += ret

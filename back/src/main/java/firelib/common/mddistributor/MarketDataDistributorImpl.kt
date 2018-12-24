@@ -16,13 +16,9 @@ class MarketDataDistributorImpl(
 
     val DEFAULT_TIME_SERIES_HISTORY_LENGTH = 100
 
-    private val timeseries = Array(modelConfig.instruments.size) { TimeSeriesContainer() }
+    val timeseries = Array(modelConfig.instruments.size) { TimeSeriesContainer() }
 
     val intervalService = IntervalServiceImpl()
-
-    fun addOhlc(idx: Int, ohlc: Ohlc): Unit {
-        timeseries[idx].addOhlc(ohlc)
-    }
 
     override fun getOrCreateTs(idx: Int, interval: Interval, len: Int): TimeSeries<Ohlc> {
         if (!timeseries[idx].contains(interval)) {
@@ -38,15 +34,15 @@ class MarketDataDistributorImpl(
     }
 
     private fun createTimeSeries(idx: Int, interval: Interval, len: Int): TimeSeriesImpl<Ohlc> {
-        val lenn = if (len == -1) DEFAULT_TIME_SERIES_HISTORY_LENGTH else len
+        val length = if (len == -1) DEFAULT_TIME_SERIES_HISTORY_LENGTH else len
 
-        val timeSeries = TimeSeriesImpl(lenn) { Ohlc() }
+        val timeSeries = TimeSeriesImpl(length) { Ohlc() }
 
         timeseries[idx][interval] = timeSeries
 
-        intervalService.addListener(interval, {
+        intervalService.addListener(interval) {
             timeSeries += timeSeries[0].copy(dtGmtEnd = it.plusMillis(interval.durationMs))
-        })
+        }
         return timeSeries
     }
 

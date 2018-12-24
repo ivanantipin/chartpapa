@@ -35,11 +35,11 @@ class Backtest(
 
         val agenda = backtest.agenda
         val marketDataDistributor = backtest.marketDataDistributor
-
+        val timeSeriesContainer = marketDataDistributor.timeseries[index]
 
         override operator fun invoke() {
             agenda.execute(reader.current().time(), this, 0)
-            marketDataDistributor.addOhlc(index, reader.current())
+            timeSeriesContainer.addOhlc(reader.current())
             if (!reader.read()) {
                 backtest.readEnd = true
             }
@@ -70,11 +70,11 @@ class Backtest(
 
 
     fun stepFunc() {
-        intervalService.onStep(agenda.currentTime())
-        val nextTime = agenda.currentTime().plus(intervalService.rootInterval().duration)
-        bindedModels.forEach({it.update()})
-        marketDataDistributor.roll(agenda.currentTime())
-        agenda.execute(nextTime, this::stepFunc, 1)
+        val currentTime = agenda.currentTime()
+        intervalService.onStep(currentTime)
+        bindedModels.forEach {it.update()}
+        marketDataDistributor.roll(currentTime)
+        agenda.execute(currentTime + intervalService.rootInterval().duration, this::stepFunc, 1)
     }
 
 
