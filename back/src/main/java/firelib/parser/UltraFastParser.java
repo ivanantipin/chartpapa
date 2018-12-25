@@ -338,7 +338,7 @@ public class UltraFastParser<T extends Timed> implements MarketDataReader<T> {
             }
 
             //
-            // Only add non-zero length .csv files to results array (since we can not determine start/end date
+            // Only add non-zero capacity .csv files to results array (since we can not determine start/end date
             // for files that do not contain at least one line).
             //
             if (entry.utcStartDT.toEpochMilli() != 0 || entry.utcEndDT.toEpochMilli() != 0) {

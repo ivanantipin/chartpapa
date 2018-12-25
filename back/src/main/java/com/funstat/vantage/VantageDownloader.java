@@ -40,7 +40,7 @@ public class VantageDownloader implements Source{
             return Optional.of(new Ohlc(LocalDate.parse(arr[0], pattern).atStartOfDay().toInstant(ZoneOffset.UTC),
                     Double.parseDouble(arr[1]),
                     Double.parseDouble(arr[2]), Double.parseDouble(arr[3]), Double.parseDouble(arr[4]),0,0
-            ));
+            ,false));
         }catch (Exception e){
             System.out.println("not valid entry "+ str + " because " + e.getMessage());
             return Optional.empty();

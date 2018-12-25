@@ -19,14 +19,14 @@ fun subscribeToDumpOhlc(model: Model, minsWindow: Int = 100, config : ModelBackt
         model.orderManagers()[instrIdx]!!.orderStateTopic().filter {it.status == OrderStatus.New}.subscribe {slicer.updateWriteBefore()}
         val ts = marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min1, minsWindow)
         val ohlcPath = Paths.get(config.reportTargetPath).resolve("ohlc_${config.instruments[instrIdx].ticker}.csv")
-        ts.subscribe { OhlcStreamWriter (ohlcPath)}
+        ts.preRollSubscribe { OhlcStreamWriter (ohlcPath)}
     }
 }
 
 /*
 if(modelConfig.dumpOhlcData && modelConfig.backtestMode == BacktestMode.SimpleRun)
 {
-    onModelBinded.subscribe(m->{
+    onModelBinded.preRollSubscribe(m->{
     assert(mdWriter == null)
     mdWriter = OhlcReportWriter(m)
 })

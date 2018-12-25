@@ -7,7 +7,7 @@ import java.time.Duration
 
 fun Model.closePositionAfter(dur: Duration, idx: Int, checkEvery: Interval): PositionCloserByTimeOut {
     val ret = PositionCloserByTimeOut(orderManagers()[idx], dur)
-    //fixme enableOhlc(checkEvery)[idx].subscribe {ret}
+    //fixme enableOhlc(checkEvery)[idx].preRollSubscribe {ret}
     return ret
 }
 

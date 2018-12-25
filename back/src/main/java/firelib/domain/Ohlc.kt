@@ -21,7 +21,9 @@ data class Ohlc(
                 var close: Double = .0,
                 var Oi: Int = 0,
         @get:ApiModelProperty(required = true)
-                var volume: Int = 0) : Timed, Comparable<Ohlc> {
+                var volume: Int = 0,
+        var interpolated: Boolean = true
+        ) : Timed, Comparable<Ohlc> {
 
     override fun compareTo(other: Ohlc): Int {
         return this.dtGmtEnd.compareTo(other.dtGmtEnd)
@@ -45,7 +47,6 @@ data class Ohlc(
         return LocalDateTime.ofInstant(dtGmtEnd,ZoneOffset.UTC)
     }
 
-    var interpolated: Boolean = true
 
     fun nprice(): Double = (close + high + low) / 3
 

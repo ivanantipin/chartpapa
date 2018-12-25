@@ -11,16 +11,13 @@ import firelib.common.timeboundscalc.TimeBoundsCalculatorImpl
 import firelib.common.tradegate.TradeGateStub
 
 
-interface ModelFactory{
-    operator fun invoke(context : ModelContext, props : Map<String,String>) : Model
-}
-
+typealias ModelFactory = (context : ModelContext, props : Map<String,String>) -> Model
 
 
 class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
 
     val tradeGate by lazy {
-        TradeGateStub(marketDataDistributor, modelConfig,agenda)
+        TradeGateStub(modelConfig, agenda)
     }
 
 
@@ -45,7 +42,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
                 agenda,
                 marketDataDistributor,
                 modelConfig,
-                timeBoundsCalculator, boundModels,readersFactory)
+                timeBoundsCalculator, boundModels,readersFactory, tradeGate)
     }
 
     val timeBoundsCalculator by lazy {

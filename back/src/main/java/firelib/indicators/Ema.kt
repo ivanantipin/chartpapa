@@ -17,7 +17,7 @@ class Ema(
     }
 
     init{
-        ts.subscribe(this)
+        ts.preRollSubscribe(this)
     }
 
 

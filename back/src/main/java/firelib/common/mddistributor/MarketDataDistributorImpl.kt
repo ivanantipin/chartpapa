@@ -20,33 +20,38 @@ class MarketDataDistributorImpl(
 
     val intervalService = IntervalServiceImpl()
 
-    override fun getOrCreateTs(idx: Int, interval: Interval, len: Int): TimeSeries<Ohlc> {
+    private val rollQueue = ArrayList<()->Unit>()
+
+
+    override fun getOrCreateTs(idx: Int, interval: Interval, capacity: Int): TimeSeries<Ohlc> {
         if (!timeseries[idx].contains(interval)) {
-            createTimeSeries(idx, interval, len)
+            return createTimeSeries(idx, interval, capacity)
         }
         val hist = timeseries[idx][interval]
-        //fixme hist.adjustSizeIfNeeded(len)
+        if(capacity > hist.capacity() ){
+            hist.adjustCapacity(capacity)
+        }
         return hist
     }
 
     fun roll(dt : Instant){
         intervalService.onStep(dt)
+        rollQueue.forEach {it()}
+        rollQueue.clear()
     }
 
-    private fun createTimeSeries(idx: Int, interval: Interval, len: Int): TimeSeriesImpl<Ohlc> {
-        val length = if (len == -1) DEFAULT_TIME_SERIES_HISTORY_LENGTH else len
-
+    private fun createTimeSeries(idx: Int, interval: Interval, length: Int = DEFAULT_TIME_SERIES_HISTORY_LENGTH): TimeSeriesImpl<Ohlc> {
         val timeSeries = TimeSeriesImpl(length) { Ohlc() }
 
         timeseries[idx][interval] = timeSeries
 
-        intervalService.addListener(interval) {
-            timeSeries += timeSeries[0].copy(dtGmtEnd = it.plusMillis(interval.durationMs))
+        intervalService.addListener(interval) {time->
+            timeSeries.channel.publish(timeSeries)
+            rollQueue += {
+                timeSeries += timeSeries[0].copy(dtGmtEnd = time.plusMillis(interval.durationMs), interpolated = true)
+            }
         }
         return timeSeries
     }
 
-    override fun listenOhlc(idx: Int, lsn: (Ohlc) -> Unit): Unit {
-        //fixme ohlcListeners[idx].subscribe(lsn)
-    }
 }

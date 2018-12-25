@@ -4,13 +4,8 @@ import firelib.common.*
 import firelib.common.agenda.AgendaImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.interval.Interval
-import firelib.common.mddistributor.MarketDataDistributor
 import firelib.common.ordermanager.*
-import firelib.common.timeseries.TimeSeries
-import firelib.common.timeseries.TimeSeriesImpl
 import firelib.common.tradegate.TradeGateStub
-import firelib.domain.Ohlc
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant
@@ -18,9 +13,9 @@ import java.time.Instant
 class OrderManagerTest {
 
     fun  update(tg : TradeGateStub, bid : Double, ask : Double) : Unit {
-        tg.secToBookLimit.values.forEach {it.updateBidAsk(bid,ask)}
-        tg.secToBookStop.values.forEach {it.updateBidAsk(bid,ask)}
-        tg.secToMarketOrderStub.values.forEach {it.updateBidAsk(bid,ask)}
+        tg.limitBooks.forEach {it.updateBidAsk(bid,ask)}
+        tg.stopBooks.forEach {it.updateBidAsk(bid,ask)}
+        tg.marketSubs.forEach {it.updateBidAsk(bid,ask)}
     }
 
     @Test
@@ -144,15 +139,7 @@ class OrderManagerTest {
         val config = ModelBacktestConfig()
         config.instruments = listOf(InstrumentConfig("sec","/", MarketDataType.Ohlc))
 
-        val tg = TradeGateStub(object :MarketDataDistributor{
-            override fun getOrCreateTs(tickerId: Int, interval: Interval, len: Int): TimeSeries<Ohlc> {
-                return TimeSeriesImpl(len) {Ohlc()}
-            }
-
-            override fun listenOhlc(idx: Int, lsn: (Ohlc) -> Unit) {
-
-            }
-        },config,timeService)
+        val tg = TradeGateStub(config, timeService)
 
         timeService.time = Instant.now()
 

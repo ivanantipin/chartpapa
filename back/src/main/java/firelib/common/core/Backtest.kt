@@ -10,6 +10,7 @@ import firelib.common.model.Model
 import firelib.common.reader.MarketDataReader
 import firelib.common.reader.ReadersFactory
 import firelib.common.timeboundscalc.TimeBoundsCalculator
+import firelib.common.tradegate.TradeGateStub
 import firelib.domain.Ohlc
 import java.time.Instant
 
@@ -20,7 +21,8 @@ class Backtest(
         val modelConfig: ModelBacktestConfig,
         val timeBoundsCalculator: TimeBoundsCalculator,
         val bindedModels: List<Model>,
-        val readersFactory: ReadersFactory
+        val readersFactory: ReadersFactory,
+        val tradeGateStub: TradeGateStub
 
 ) {
 
@@ -73,6 +75,7 @@ class Backtest(
         val currentTime = agenda.currentTime()
         intervalService.onStep(currentTime)
         bindedModels.forEach {it.update()}
+        tradeGateStub.updateBidAsks(readers.map { it.current().close })
         marketDataDistributor.roll(currentTime)
         agenda.execute(currentTime + intervalService.rootInterval().duration, this::stepFunc, 1)
     }

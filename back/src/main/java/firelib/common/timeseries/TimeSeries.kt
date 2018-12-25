@@ -9,7 +9,9 @@ interface TimeSeries<T> {
     operator fun get(idx: Int): T
     operator fun set(idx: Int, value : T)
 
-    fun subscribe(listener : (TimeSeries<T>)->Unit)
+    fun capacity() : Int
+
+    fun preRollSubscribe(listener : (TimeSeries<T>)->Unit)
 
 }
 

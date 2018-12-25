@@ -11,7 +11,7 @@ class Ma(val period: Int, val ts: TimeSeries<Ohlc>, val calcSko: Boolean = false
     }
 
     init {
-        ts.subscribe(this)
+        ts.preRollSubscribe(this)
     }
 
     val maa = SimpleMovingAverage(period, calcSko)

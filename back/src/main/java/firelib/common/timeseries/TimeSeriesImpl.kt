@@ -1,20 +1,27 @@
 package firelib.common.timeseries
 
 import firelib.common.misc.NonDurableChannel
-import firelib.common.misc.SubChannel
 
-class TimeSeriesImpl<T>(val length: Int, val func: (Int) -> T) : TimeSeries<T> {
-
-    override fun subscribe(listener: (TimeSeries<T>) -> Unit) {
-        channel.subscribe(listener)
-    }
-
-    val data = RingBuffer<T>(length, func)
+class TimeSeriesImpl<T>(val capacity: Int, val func: (Int) -> T) : TimeSeries<T> {
 
     val channel = NonDurableChannel<TimeSeries<T>>()
 
+    override fun capacity(): Int {
+        return data.capacity
+    }
+
+    override fun preRollSubscribe(listener: (TimeSeries<T>) -> Unit) {
+        channel.subscribe(listener)
+    }
+
+    var data = RingBuffer<T>(capacity, func)
+
     override fun count(): Int {
         return data.count
+    }
+
+    fun adjustCapacity(ncapacity : Int){
+      data = data.copyWithAdjustedCapacity(ncapacity)
     }
 
     override operator fun get(idx: Int): T {
@@ -26,7 +33,6 @@ class TimeSeriesImpl<T>(val length: Int, val func: (Int) -> T) : TimeSeries<T> {
     }
 
     operator fun plusAssign(t: T) {
-        channel.publish(this)
         data.add(t)
     }
 }

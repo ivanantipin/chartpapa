@@ -9,7 +9,7 @@ class ATR(val period: Int, val ts: TimeSeries<Ohlc>) : Indicator<Double>, (TimeS
     }
 
     init {
-        ts.subscribe(this)
+        ts.preRollSubscribe(this)
     }
 
     val avg = SimpleMovingAverage(period, false)
