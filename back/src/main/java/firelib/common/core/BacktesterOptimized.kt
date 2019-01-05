@@ -38,10 +38,10 @@ fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
 
     while (variator.hasNext()) {
         val env = nextModelVariationsChunk(cfg, variator, optResourceParams.batchSize, factory)
-        executor.execute({
-            val outputs = env.backtest.backtestUntil(endOfOptimize)
+        executor.execute {
+            val outputs = env.backtest(endOfOptimize)
             reportExecutor.execute({reportProcessor.process(outputs)})
-        })
+        }
         println("models scheduled for optimization ${env.boundModels.size}")
 
     }
@@ -60,7 +60,7 @@ fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
 
     if(endOfOptimize.isBefore(endDtGmt)){
         val env = SimpleRunCtx(cfg)
-        val outputSeq= env.backtest.backtest()
+        val outputSeq= env.backtest(endOfOptimize)
         assert(outputSeq.size == 1)
         output = outputSeq[0]
     }

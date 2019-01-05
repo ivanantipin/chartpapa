@@ -2,25 +2,13 @@ package firelib.common.model
 
 import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
-import firelib.common.interval.IntervalService
-import firelib.common.mddistributor.MarketDataDistributor
 import firelib.common.ordermanager.OrderManager
 import firelib.common.ordermanager.OrderManagerImpl
 import firelib.common.ordermanager.flattenAll
 import firelib.common.ordermanager.makePositionEqualsTo
 import firelib.common.timeseries.TimeSeries
-import firelib.common.timeservice.TimeService
-import firelib.common.tradegate.TradeGate
 import firelib.domain.Ohlc
 import kotlin.math.abs
-
-
-class ModelContext(val timeService : TimeService,
-                   val intervalService : IntervalService,
-                   val mdDistributor : MarketDataDistributor,
-                   val tradeGate : TradeGate,
-                   val instruments : List<String>){
-}
 
 
 class SmaFactory : ModelFactory {
@@ -29,24 +17,37 @@ class SmaFactory : ModelFactory {
     }
 }
 
+
+
 class SpreadModel(val context: ModelContext, val props: Map<String, String>) : Model{
 
-    val ts0 : TimeSeries<Ohlc> = context.mdDistributor.getOrCreateTs(0, Interval.Day, props["period"]!!.toInt())
-    val ts1 : TimeSeries<Ohlc> = context.mdDistributor.getOrCreateTs(1, Interval.Day, props["period"]!!.toInt())
-    val period : Int = 10
+    val period = props["period"]!!.toInt()
+
+    val ts0 : TimeSeries<Ohlc> = context.mdDistributor.getOrCreateTs(0, Interval.Day, period + 1)
+    val ts1 : TimeSeries<Ohlc> = context.mdDistributor.getOrCreateTs(1, Interval.Day, period + 1)
+
+    var count = 0;
 
     override fun update() {
+        if(count++ % 1000_000 == 0){
+            println("count is ${count}" )
+        }
 
-        val r0 = (ts0[0].close - ts0[-10].close) / ts0[-10].close
-        val r1 = (ts1[0].close - ts1[-10].close) / ts1[-10].close
+        val r0 = (ts0[0].close - ts0[period].close) / ts0[period].close
+        val r1 = (ts1[0].close - ts1[period].close) / ts1[period].close
 
         val spread = r0 - r1
-        if(spread > 0.3){
+        if(spread > 0.03){
             omanagers[0].makePositionEqualsTo(-1)
             omanagers[1].makePositionEqualsTo(1)
         }
+        if(spread < -0.03){
+            omanagers[0].makePositionEqualsTo(1)
+            omanagers[1].makePositionEqualsTo(-1)
+        }
 
-        if(abs(spread) < 0.1){
+
+        if(abs(spread) < 0.005){
             this.omanagers.forEach {it.flattenAll()}
         }
 

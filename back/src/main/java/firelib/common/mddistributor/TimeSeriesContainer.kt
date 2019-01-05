@@ -1,11 +1,13 @@
 package firelib.common.mddistributor
 
 import firelib.common.interval.Interval
+import firelib.common.reader.MarketDataReader
 import firelib.common.timeseries.TimeSeries
 import firelib.common.timeseries.TimeSeriesImpl
 import firelib.domain.Ohlc
+import java.time.Instant
 
-class TimeSeriesContainer() {
+class TimeSeriesContainer(val reader : MarketDataReader<Ohlc>) {
 
     private val timeSeries = ArrayList<TimeSeries<Ohlc>>()
 
@@ -16,8 +18,15 @@ class TimeSeriesContainer() {
     }
 
 
-    fun addOhlc(ohlc: Ohlc) {
-        timeSeries.forEach { it[0] = mergeOhlc(it[0], ohlc) }
+    fun readUntil(time : Instant) : Boolean{
+        while (reader.current().time().isBefore(time)){
+            val ohlc = reader.current()
+            timeSeries.forEach { it[0] = mergeOhlc(it[0], ohlc) }
+            if(!reader.read()){
+                return false
+            }
+        }
+        return true
     }
 
     operator fun set(interval: Interval, ts: TimeSeries<Ohlc>) {
@@ -37,6 +46,7 @@ class TimeSeriesContainer() {
         assert(!ohlc.interpolated, {"should not be interpolated"})
 
         if (currOhlc.interpolated) {
+            assert(!ohlc.dtGmtEnd.isAfter(currOhlc.dtGmtEnd), {"shall not be after ${currOhlc.dtGmtEnd} < ${ohlc.dtGmtEnd}"})
             return ohlc.copy(dtGmtEnd = currOhlc.dtGmtEnd, interpolated = false)
         } else {
             return currOhlc.copy(high = Math.max(ohlc.high, currOhlc.high),

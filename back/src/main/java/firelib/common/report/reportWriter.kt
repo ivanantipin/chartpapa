@@ -41,18 +41,12 @@ fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig, targetDir: String)
 
     val orderWriter = StreamOrderWriter(Paths.get(targetDir, "orders.csv").toAbsolutePath())
     orderWriter.writeHeader()
-    model.orderStates.filter({it.status == OrderStatus.New}).map({it.order}).forEach(orderWriter)
+    model.orderStates.filter {it.status == OrderStatus.New}.map {it.order}.forEach(orderWriter)
 
-    copyJarFileToReal("/StdReport.ipynb", Paths.get(targetDir,"StdReport.ipynb").toAbsolutePath().toString())
-    copyJarFileToReal("/TradesReporter.py", Paths.get(targetDir,"TradesReporter.py").toAbsolutePath().toString())
+    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/StdReport.ipynb"),Paths.get(Paths.get(targetDir,"StdReport.ipynb").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
+    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/TradesReporter.py"),Paths.get(Paths.get(targetDir,"TradesReporter.py").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
 
     System.out.println("report written to $targetDir you can run it , command 'ipython notebook StdReport.ipynb'")
 
 }
 
-class Dummy{}
-
-fun copyJarFileToReal(jarFile : String, dest : String) : Unit {
-    val inputUrl = Dummy().javaClass.getResourceAsStream(jarFile);
-    Files.copy(inputUrl,Paths.get(dest),StandardCopyOption.REPLACE_EXISTING)
-}

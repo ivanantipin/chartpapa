@@ -31,6 +31,6 @@ class TradeSerializer : ReportConsts {
     fun getHeader(): List<String> = (colsDef.map {it.first})
 
     fun serialize(t : Pair<Trade,Trade>) : List<String> {
-        return colsDef.map({it.second}).map({it(t)})
+        return colsDef.map { it.second }.map { it(t) }
     }
 }

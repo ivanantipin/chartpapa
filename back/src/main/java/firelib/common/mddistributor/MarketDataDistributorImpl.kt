@@ -1,8 +1,8 @@
 package firelib.common.mddistributor
 
-import firelib.common.config.ModelBacktestConfig
 import firelib.common.interval.Interval
 import firelib.common.interval.IntervalServiceImpl
+import firelib.common.reader.MarketDataReader
 import firelib.common.timeseries.TimeSeries
 import firelib.common.timeseries.TimeSeriesImpl
 import firelib.domain.Ohlc
@@ -10,17 +10,26 @@ import java.time.Instant
 
 
 class MarketDataDistributorImpl(
-        val modelConfig: ModelBacktestConfig
-) : MarketDataDistributor {
+        readers: List<MarketDataReader<Ohlc>>
+        ) : MarketDataDistributor {
 
 
     val DEFAULT_TIME_SERIES_HISTORY_LENGTH = 100
 
-    val timeseries = Array(modelConfig.instruments.size) { TimeSeriesContainer() }
+    val timeseries =  readers.map { TimeSeriesContainer(it) }.toTypedArray()
 
     val intervalService = IntervalServiceImpl()
 
     private val rollQueue = ArrayList<()->Unit>()
+
+    fun initTimes(startTime : Instant){
+        timeseries.forEach {c->
+            for(ts in c.iterator()){
+                val start = ts.first.roundTime(startTime)
+                ts.second[0] = ts.second[0].copy(dtGmtEnd = start)
+            }
+        }
+    }
 
 
     override fun getOrCreateTs(idx: Int, interval: Interval, capacity: Int): TimeSeries<Ohlc> {
@@ -32,6 +41,10 @@ class MarketDataDistributorImpl(
             hist.adjustCapacity(capacity)
         }
         return hist
+    }
+
+    fun readUntil(dt : Instant) : Boolean{
+        return timeseries.all { it.readUntil(dt) }
     }
 
     fun roll(dt : Instant){

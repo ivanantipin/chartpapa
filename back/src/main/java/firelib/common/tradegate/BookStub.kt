@@ -4,8 +4,6 @@ import firelib.common.Order
 import firelib.common.OrderStatus
 import firelib.common.Side
 import firelib.common.Trade
-import firelib.common.misc.DurableChannel
-import firelib.common.misc.SubChannel
 import firelib.common.timeservice.TimeService
 import firelib.domain.OrderState
 import java.util.*

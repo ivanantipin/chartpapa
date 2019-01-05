@@ -1,0 +1,34 @@
+{
+  "instruments" : [ {
+    "ticker" : "aapl",
+    "path" : "1MIN/STK/AAPL_1.csv",
+    "mdType" : "Ohlc"
+  }, {
+    "ticker" : "goog",
+    "path" : "1MIN/STK/GOOG_1.csv",
+    "mdType" : "Ohlc"
+  } ],
+  "startDateGmt" : {
+    "epochSecond" : -31557014167219200,
+    "nano" : 0
+  },
+  "endDate" : {
+    "epochSecond" : 31556889864403199,
+    "nano" : 999999999
+  },
+  "dataServerRoot" : "/ddisk/globaldatabase/",
+  "reportTargetPath" : "./report",
+  "precacheMarketData" : false,
+  "dumpOhlcData" : true,
+  "modelParams" : {
+    "period" : "10"
+  },
+  "optConfig" : {
+    "params" : [ ],
+    "resourceStrategy" : { },
+    "minNumberOfTrades" : 50,
+    "optimizedPeriodDays" : -1,
+    "optimizedMetric" : "Pf"
+  },
+  "calculatedMetrics" : [ "Pf", "Pnl", "Sharpe", "AvgPnl" ]
+}

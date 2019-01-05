@@ -23,7 +23,7 @@ class ReportProcessor(val metricsCalculator : MetricsCalculator, val optimizedFu
 
         println("model processed ${models.size} models met min trades count criteria ${filtered.size}")
 
-        filtered.forEach({model ->
+        filtered.forEach { model ->
 
             val tradingCases = toTradingCases(model.trades)
 
@@ -37,7 +37,7 @@ class ReportProcessor(val metricsCalculator : MetricsCalculator, val optimizedFu
 
             estimates.add(ExecutionEstimates(extractOptParams(model.modelProps) , metrics))
 
-        })
+        }
         println("total model complete ${estimates.size}")
 
     }

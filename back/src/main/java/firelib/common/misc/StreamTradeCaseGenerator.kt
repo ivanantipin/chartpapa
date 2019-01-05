@@ -15,7 +15,7 @@ class StreamTradeCaseGenerator : ((Trade)->List<Pair<Trade,Trade>>){
 
         makeCaseWithPositionTrades(posTrades, tradingCases, trade)
 
-        tradingCases.forEach({tc->assert(tc.first.side() != tc.second.side(),{"trading must have different sides"})})
+        tradingCases.forEach { require(it.first.side() != it.second.side(),{"trading must have different sides"}) }
 
         tradingCases.sortBy {it.first.dtGmt.toEpochMilli()}
 

@@ -1,7 +1,6 @@
 package firelib.common
 
 import firelib.common.misc.DurableChannel
-import firelib.common.misc.SubChannel
 import firelib.common.misc.dbl2Str
 import firelib.common.misc.toStandardString
 import firelib.domain.OrderState
@@ -19,8 +18,8 @@ data class Order(val orderType: OrderType,
     val orderSubscription: DurableChannel<OrderState> = DurableChannel()
 
     init {
-        assert(qty > 0, {"order qty <= 0!!"})
-        assert(price > 0 || orderType == OrderType.Market, {"price : $price <=  0!!"})
+        require(qty > 0) {"order qty <= 0!!"}
+        require(price > 0 || orderType == OrderType.Market) {"price : $price <=  0!!"}
     }
     
 
