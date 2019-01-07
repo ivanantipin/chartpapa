@@ -9,7 +9,7 @@ class TradeStat(val price : Double, val side :Side){
     var maxHoldingPrice: Double = price
     var minHoldingPrice: Double = price
 
-    val factors =  HashMap<String,String>()
+    val factors =  HashMap<String,Any>()
 
     fun MAE(): Double {
         return if (this.side == Side.Sell) price - maxHoldingPrice else minHoldingPrice - price
@@ -25,7 +25,7 @@ class TradeStat(val price : Double, val side :Side){
         maxHoldingPrice = Math.max(pr, maxHoldingPrice)
     }
 
-    fun addFactor(name: String, value: String) {
+    fun addFactor(name: String, value: Any) {
         factors[name] = value
     }
 
@@ -34,11 +34,11 @@ class TradeStat(val price : Double, val side :Side){
 data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:Instant) {
 
     fun validate() {
-        assert(qty >= 0,{"amount can't be negative"})
+        require(qty >= 0,{"amount can't be negative"})
 
-        assert(order != null,{"order must be present"})
+        require(order != null,{"order must be present"})
 
-        assert(!price.isNaN() ,{"price must be valid"})
+        require(!price.isNaN() ,{"price must be valid"})
     }
 
     fun security ()= order.security

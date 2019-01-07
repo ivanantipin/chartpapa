@@ -38,7 +38,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
     private val executor = Executors.newScheduledThreadPool(1)
 
     internal val generic: GenericDao
-        get() = container.get<GenericDaoImpl>("generic dao") { GenericDaoImpl(getDsForFile("$folder/meta.db")) }
+        get() = container.get<GenericDaoImpl>("generic dao") { GenericDaoImpl(SqlUtils.getDsForFile("$folder/meta.db")) }
 
     init {
         try {
@@ -58,7 +58,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
                 throw RuntimeException(e)
             }
 
-            val ds = getDsForFile("$folder$interval.db")
+            val ds = SqlUtils.getDsForFile("$folder$interval.db")
             MdDao(ds)
         }
     }
@@ -84,7 +84,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
     }
 
     override fun save(code: String, source: String, interval: String, data: List<firelib.domain.Ohlc>) {
-        getDao(source, interval).insert(data, code)
+        getDao(source, interval).insertOhlc(data, code)
     }
 
     override fun start() {
@@ -138,7 +138,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
             val source = sources[instrId.source]!!
             val dao = getDao(instrId.source, source.getDefaultInterval().name)
             val startTime = dao.queryLast(instrId.code).map { oh -> oh.dateTime().minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
-            dao.insert(source.load(instrId, startTime), instrId.code)
+            dao.insertOhlc(source.load(instrId, startTime), instrId.code)
         }catch (e : Exception){
             System.err.println("failed to update "+ instrId + " " + e.message)
             e.printStackTrace()
@@ -154,11 +154,6 @@ class MdStorageImpl(private val folder: String) : MdStorage {
         val SYMBOLS_LAST_UPDATED = "SYMBOLS_LAST_UPDATED"
         private val VANTAGE_LAST_UPDATED = "VANTAGE_LAST_UPDATED"
 
-        fun getDsForFile(file: String): SQLiteDataSource {
-            val ds = SQLiteDataSource()
-            ds.url = "jdbc:sqlite:$file"
-            return ds
-        }
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -169,4 +164,13 @@ class MdStorageImpl(private val folder: String) : MdStorage {
         }
     }
 
+}
+
+
+object SqlUtils{
+    fun getDsForFile(file: String): SQLiteDataSource {
+        val ds = SQLiteDataSource()
+        ds.url = "jdbc:sqlite:$file"
+        return ds
+    }
 }

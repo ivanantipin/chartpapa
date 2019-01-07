@@ -28,6 +28,13 @@ class SpreadModel(val context: ModelContext, val props: Map<String, String>) : M
 
     var count = 0;
 
+    init {
+
+
+        context.mdDistributor.getOrCreateTs(0,Interval.Min10,2).preRollSubscribe {  }
+
+    }
+
     override fun update() {
         if(count++ % 1000_000 == 0){
             println("count is ${count}" )
@@ -37,11 +44,11 @@ class SpreadModel(val context: ModelContext, val props: Map<String, String>) : M
         val r1 = (ts1[0].close - ts1[period].close) / ts1[period].close
 
         val spread = r0 - r1
-        if(spread > 0.03){
+        if(spread > 0.13){
             omanagers[0].makePositionEqualsTo(-1)
             omanagers[1].makePositionEqualsTo(1)
         }
-        if(spread < -0.03){
+        if(spread < -0.13){
             omanagers[0].makePositionEqualsTo(1)
             omanagers[1].makePositionEqualsTo(-1)
         }

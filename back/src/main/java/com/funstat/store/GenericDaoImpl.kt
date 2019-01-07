@@ -13,14 +13,9 @@ import java.io.IOException
 
 class GenericDaoImpl(internal val ds: SQLiteDataSource) : GenericDao {
 
-    private val manager: DataSourceTransactionManager
+    private val manager = DataSourceTransactionManager(ds)
 
-    val mapper : ObjectMapper
-
-    init {
-        this.manager = DataSourceTransactionManager(ds)
-        mapper = ObjectMapper().registerModule(KotlinModule())
-    }
+    val mapper = ObjectMapper().registerModule(KotlinModule())
 
     fun write(obj: Any): String {
         val str = ByteArrayOutputStream()

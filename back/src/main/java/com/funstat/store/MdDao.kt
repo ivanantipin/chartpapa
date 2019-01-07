@@ -6,25 +6,19 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.sqlite.SQLiteDataSource
-
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.HashMap
-import java.util.Optional
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class MdDao(internal val ds: SQLiteDataSource) {
 
-    private val manager: DataSourceTransactionManager
+    private val manager: DataSourceTransactionManager = DataSourceTransactionManager(ds)
 
     internal var tableCreated = ConcurrentHashMap<String, Boolean>()
-
-    init {
-        this.manager = DataSourceTransactionManager(ds)
-    }
 
 
     private fun saveInTransaction(sql: String, data: List<Map<String, Any>>) {
@@ -40,7 +34,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
 
-    fun insert(ohlcs: List<firelib.domain.Ohlc>, tableIn: String) {
+    fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
         val table = normName(tableIn)
         ensureExist(table)
         val data = ohlcs.map {  (dtGmtEnd, O, H, L, C) ->

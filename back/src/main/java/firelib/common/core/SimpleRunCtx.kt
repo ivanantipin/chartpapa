@@ -52,8 +52,10 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
         ModelContext(timeService,marketDataDistributor,tradeGate,modelConfig.instruments.map { it.ticker })
     }
 
-    fun addModel(factory : ModelFactory, params : Map<String,String>){
-        boundModels += factory(modelContext,params)
+    fun addModel(factory : ModelFactory, params : Map<String,String>): Model {
+        val ret = factory(modelContext, params)
+        boundModels += ret
+        return ret
     }
 
     fun backtest(until : Instant): List<ModelOutput> {
