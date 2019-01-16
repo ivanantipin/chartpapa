@@ -23,10 +23,6 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
         TimeServiceManaged()
     }
 
-    val readersFactory by lazy {
-        ReaderFactoryImpl(modelConfig)
-    }
-
     val rootInterval = Interval.Min1
 
     val startTime by lazy {
@@ -35,7 +31,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
     }
 
     val readers by lazy {
-        modelConfig.instruments.map { readersFactory(it, startTime) }
+        modelConfig.instruments.map { it.fact(startTime) }
     }
 
     val marketDataDistributor by lazy {
@@ -43,7 +39,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
     }
 
     val timeBoundsCalculator by lazy {
-        TimeBoundsCalculatorImpl(readersFactory)
+        TimeBoundsCalculatorImpl()
     }
 
     val boundModels = ArrayList<Model>()

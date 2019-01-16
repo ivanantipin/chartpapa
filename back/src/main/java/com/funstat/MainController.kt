@@ -26,11 +26,15 @@ import javax.annotation.PostConstruct
 import javax.validation.Valid
 
 
+object GlobalConstants{
+    val mdFolder = Paths.get("/ddisk/globaldatabase/md")
+}
+
 @RestController
 @CrossOrigin(origins = ["*"])
 class MainController {
 
-    internal var storage: MdStorage = CachedStorage(MdStorageImpl("/ddisk/globaldatabase/md"))
+    internal var storage: MdStorage = CachedStorage(MdStorageImpl(GlobalConstants.mdFolder.toString()))
 
     internal var allMetas: MutableList<Metadata> = ArrayList()
 
@@ -40,7 +44,7 @@ class MainController {
         println("notebooks dir is " + noteBooksDir)
     }
 
-    @RequestMapping(value = "/staticpages", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = ["/staticpages"], method = arrayOf(RequestMethod.GET))
     fun loadStaticPages(): List<String> {
         return noteBooksDir.toFile()
                 .list { f, name -> name.endsWith("html") }
@@ -53,13 +57,13 @@ class MainController {
         storage.start()
     }
 
-    @GetMapping(value = "/metas")
+    @GetMapping(value = ["/metas"])
     fun loadAllMetas(): List<Metadata> {
         return allMetas
     }
 
 
-    @RequestMapping(value = "/htmcontent", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = ["/htmcontent"], method = arrayOf(RequestMethod.GET))
     fun loadHtmContent(file: String): StringWrap {
         return StringWrap(String(Files.readAllBytes(noteBooksDir.resolve("$file.html"))))
     }
@@ -70,12 +74,12 @@ class MainController {
         allMetas.add(metadata)
     }
 
-    @RequestMapping(value = "/instruments", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = ["/instruments"], method = arrayOf(RequestMethod.GET))
     fun instruments(): Collection<InstrId> {
         return storage.meta().filter { s -> s.source != VantageDownloader.SOURCE }
     }
 
-    @RequestMapping(value = "/timeframes", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = ["/timeframes"], method = arrayOf(RequestMethod.GET))
     fun timeframes(): List<String> {
         return Interval.values().map { it.name }
     }

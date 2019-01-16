@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {Icon, Layout, Menu} from 'antd';
 import {SelectParam} from "antd/lib/menu";
 import {MenuConf, routerConfig} from "./routerConfig";
-import {Route, RouteComponentProps, withRouter} from "react-router";
+import {Route, RouteComponentProps, Switch, withRouter} from "react-router";
 
 
 const { Header, Sider, Content } = Layout;
@@ -53,9 +53,11 @@ class MainMenu extends Component<HomeProps,any> {
                     />
                 </Header>
                 <Content style={{margin: '24px 16px', padding: 24, background: '#fff', minHeight: 700}}>
+                    <Switch>
 
                         {
                             routerConfig.filter(cfg=>cfg.shown).map(rc => {
+                                console.log('rc ' + rc.path)
                                 return (
                                 <Route
                                     path={rc.path}
@@ -64,13 +66,14 @@ class MainMenu extends Component<HomeProps,any> {
                             })
 
                         }
+                    </Switch>
                 </Content>
             </Layout>
         </Layout>;
     }
 
     private selectMenu(param : SelectParam ) {
-        console.log('pushing key', param.key)
+        console.log('hist ' + param.key)
         this.props.history.push(param.key)
     }
 }

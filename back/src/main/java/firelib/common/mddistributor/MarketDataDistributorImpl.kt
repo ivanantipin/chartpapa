@@ -10,7 +10,7 @@ import java.time.Instant
 
 
 class MarketDataDistributorImpl(
-        readers: List<MarketDataReader<Ohlc>>
+        val readers: List<MarketDataReader<Ohlc>>
         ) : MarketDataDistributor {
 
 
@@ -29,6 +29,10 @@ class MarketDataDistributorImpl(
                 ts.second[0] = ts.second[0].copy(dtGmtEnd = start)
             }
         }
+    }
+
+    override fun price(idx : Int) : Ohlc{
+        return readers[idx].current()
     }
 
 
@@ -51,6 +55,10 @@ class MarketDataDistributorImpl(
         intervalService.onStep(dt)
         rollQueue.forEach {it()}
         rollQueue.clear()
+    }
+
+    override fun addListener(interval : Interval, action : (Instant,MarketDataDistributor)->Unit){
+        intervalService.addListener(interval) {action(it,this)}
     }
 
     private fun createTimeSeries(idx: Int, interval: Interval, length: Int = DEFAULT_TIME_SERIES_HISTORY_LENGTH): TimeSeriesImpl<Ohlc> {

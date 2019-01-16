@@ -27,7 +27,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
             val start = System.currentTimeMillis()
             namedTemplate.batchUpdate(sql, data.toTypedArray())
             val dur = (System.currentTimeMillis() - start) / 1000.0
-            println("inserting " + data.size + " took " + dur + " sec ," + " rate is " +
+            println("MdDao: inserting " + data.size + " took " + dur + " sec ," + " rate is " +
                     data.size / dur + " per sec")
             null
         }
@@ -37,16 +37,12 @@ class MdDao(internal val ds: SQLiteDataSource) {
     fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
         val table = normName(tableIn)
         ensureExist(table)
-        val data = ohlcs.map {  (dtGmtEnd, O, H, L, C) ->
-            object : HashMap<String, Any>() {
-                init {
-                    put("DT", Timestamp.valueOf(LocalDateTime.ofInstant(dtGmtEnd, ZoneOffset.UTC)))
-                    put("OPEN", O)
-                    put("HIGH", H)
-                    put("LOW", L)
-                    put("CLOSE", C)
-                }
-            }
+        val data = ohlcs.map { (dtGmtEnd, O, H, L, C) ->
+            mapOf("DT" to dtGmtEnd.toEpochMilli(),
+                    "OPEN" to O,
+                    "HIGH" to H,
+                    "LOW" to L,
+                    "CLOSE" to C)
         }
         try {
             saveInTransaction("insert or replace into $table(DT,O,H,L,C) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE)", data)
@@ -61,7 +57,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
             val template = JdbcTemplate(ds)
             template
                     .execute("create table if not exists " + table +
-                            " (dt TIMESTAMPTZ, " +
+                            " (dt INTEGER not NULL, " +
                             "o DOUBLE PRECISION  not NULL," +
                             "h DOUBLE PRECISION  not NULL," +
                             "l DOUBLE PRECISION  not NULL," +
@@ -77,8 +73,8 @@ class MdDao(internal val ds: SQLiteDataSource) {
         return Ohlc(rs.getTimestamp("DT").toInstant(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"))
     }
 
-    fun normName(name : String) : String{
-        return name.replace('-','_');
+    fun normName(name: String): String {
+        return name.replace('-', '_');
     }
 
     fun queryLast(codeIn: String): Optional<Ohlc> {
@@ -89,14 +85,14 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     fun queryAll(codeIn: String): List<Ohlc> {
-        return queryAll(codeIn, LocalDateTime.MIN)
+        return queryAll(codeIn, LocalDateTime.ofEpochSecond(0,0, ZoneOffset.UTC))
     }
 
-    fun queryAll(codeIn: String, start : LocalDateTime): List<Ohlc> {
+    fun queryAll(codeIn: String, start: LocalDateTime): List<Ohlc> {
         val code = normName(codeIn)
         ensureExist(code)
-        val map = mapOf(Pair("DT", Timestamp.valueOf(start)))
-        return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc ", map,  { rs, rowNum -> mapOhlc(rs) })
+        val map = mapOf(Pair("DT", start.toInstant(ZoneOffset.UTC).toEpochMilli()))
+        return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc ", map, { rs, rowNum -> mapOhlc(rs) })
     }
 
 

@@ -1,6 +1,7 @@
 import datetime
 import inspect
 import os
+import sqlite3
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -136,6 +137,7 @@ class BacktestResults(object):
     Class that wraps backtest results (contains pandas.DataFrame with trades and some methods to calc stats, plot graphs e.t.c.)
     """
 
+
     def __init__(self):
         """
         public self.trades attribute contains a pandas.DataFrame with the following columns:
@@ -149,15 +151,24 @@ class BacktestResults(object):
            'Pnl'      - Pnl.
            'nContracts'  - number of contracts traded.
         """
-        self.trades = None
+        self.trades = pd.DataFrame()
         self.seasonalMapFunc = {'weekday': lambda x: x.weekday(), 'month': lambda x: x.month, 'hour': lambda x: x.hour}
         self.seasonalAggFunc = {'pf': MetricsCalculator.pf, 'cnt': len}
         self.seasonalAggColors = ['r', 'g']
         self.lastStaticColumnInTrades = 'MFE'
 
     def load(self, filename, tz=pytz.UTC):
-        self.trades = pd.read_csv(filename, index_col=False, sep=';', parse_dates=['EntryDate', 'ExitDate'],
-                                  date_parser=vect_str_to_datetime)
+
+        # Create your connection.
+        cnx = sqlite3.connect(filename)
+
+        self.trades = pd.read_sql_query(sql="SELECT * FROM trades",
+                                        con=cnx ,
+                                        parse_dates=['EntryDate', 'ExitDate'])
+
+        # print(self.trades)
+
+        # date_parser=vect_str_to_datetime)
         self.trades.dropna(inplace=True)
         self.trades['EntryDate'] = self.trades['EntryDate'].map(lambda x: x.tz_localize(tz))
         self.trades['ExitDate'] = self.trades['ExitDate'].map(lambda x: x.tz_localize(tz))
@@ -265,7 +276,7 @@ class BacktestResults(object):
     def plotFactors(self):
         cols = self.getFactorCols()
         if len(cols) > 0:
-            rn = len(cols) / 3
+            rn = int(len(cols) / 3)
             ncols = len(cols) if rn == 0 else 3
             if len(cols) % 3 != 0:
                 rn = rn + 1
@@ -308,22 +319,26 @@ class BacktestResults(object):
 def test():
     import sys
 
+
     sys.path.append('/home/ivan/projects/fbackend/market_research/report/')
-    # import TradesReporter as tr
+    #
     # importlib.reload(tr)
     bs = BacktestResults()
-    fname = '/home/ivan/projects/fbackend/market_research/report/trades.csv'
+    fname = '/home/ivan/projects/fbackend/market_research/report/report.db'
     bs.load(fname)
+
     print(bs.trades)
-    bs.plotSeasonalities()
-    plt.show()
-
-    import pandas as pd
 
 
-    pd.read_csv(fname, index_col=False, sep=';', parse_dates=[2, 4], date_parser=_str_to_datetime)
+    mc=MetricsCalculator()
+    # display(displayTitle('Overall stat '))
+    mc.statToHtml(bs.trades)
 
+    bs.plotFactors()
+    # bs.plotSeasonalities()
+    # plt.show()
 
+# test()
 
 # bs.plot_equity_d2d_for_ticker(ticker='RSX')
 # plt.show()

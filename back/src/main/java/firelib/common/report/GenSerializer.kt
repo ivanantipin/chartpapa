@@ -39,7 +39,7 @@ val tradeCaseColDefs : Array<ColDef<Pair<Trade,Trade>,out Any>> = arrayOf(
         makeMetric("Ticker", {it.first.security()}),
         makeMetric("OrderId0", {it.first.order.id}),
         makeMetric("OrderId1") {it.second.order.id},
-        makeMetric("BuySell") {if(it.first.side() == Side.Buy) "1" else "-1"},
+        makeMetric("BuySell") {if(it.first.side() == Side.Buy) 1 else -1},
 
         makeMetric("EntryDate") {it.first.dtGmt},
         makeMetric("EntryPrice") {it.first.price},

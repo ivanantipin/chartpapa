@@ -71,7 +71,7 @@ public class VantageDownloader implements Source{
 
         String request = url +
                 "?function=" + function
-                + "&instrId=" + instrId.code
+                + "&instrId=" + instrId.getCode()
                 + "&apikey=" + apiKey
                 + "&datatype=" + dataType;
 

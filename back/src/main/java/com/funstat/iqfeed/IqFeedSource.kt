@@ -25,7 +25,7 @@ class IqFeedSource(val csvPath: Path) : Source {
         val map = code2name()
         return csvPath.toFile().list().map {
             it.replace("_1.csv", "")
-        }.filter { map.containsKey(it) }.map { InstrId(it, map[it], "NA", it, SOURCE) }
+        }.filter { map.containsKey(it) }.map { InstrId(it, map!![it]!!, "NA", it, SOURCE) }
     }
 
     override fun load(instrId: InstrId): List<Ohlc> {

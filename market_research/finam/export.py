@@ -345,7 +345,7 @@ class Exporter(object):
     def download(self,
                  id_,
                  market,
-                 start_date=datetime.date(2007, 1, 1),
+                 start_date=datetime.date(2017, 1, 1),
                  end_date=None,
                  timeframe=Timeframe.DAILY):
 
@@ -379,6 +379,9 @@ class Exporter(object):
         }
 
         url = self._build_url(params)
+
+        print(url)
+
         # deliberately not using pd.read_csv's ability to fetch
         # urls to fully control what's happening
         data_cp1251 = self._fetch(url)

@@ -1,29 +1,32 @@
 package com.funstat.store
 
 
+import com.funstat.GlobalConstants
 import com.funstat.Pair
 import com.funstat.Tables
-import firelib.domain.Ohlc
-import com.funstat.finam.FinamDownloader
 import com.funstat.domain.InstrId
+import com.funstat.finam.FinamDownloader
 import com.funstat.iqfeed.IntervalTransformer
 import com.funstat.iqfeed.IqFeedSource
 import com.funstat.vantage.Source
 import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
+import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils
+import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
-
 import java.io.File
 import java.io.IOException
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.HashMap
-import java.util.concurrent.*
+import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
-class MdStorageImpl(private val folder: String) : MdStorage {
+
+class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toString()) : MdStorage {
 
     internal var container = SingletonsContainer()
 
@@ -49,7 +52,7 @@ class MdStorageImpl(private val folder: String) : MdStorage {
 
     }
 
-    internal fun getDao(source: String, interval: String): MdDao {
+    fun getDao(source: String, interval: String): MdDao {
         return container.get("$source/$interval") {
             val folder = this.folder + "/" + source + "/"
             try {
@@ -134,13 +137,14 @@ class MdStorageImpl(private val folder: String) : MdStorage {
 
 
     fun updateMarketData(instrId: InstrId) {
+        println("updating ${instrId}")
         try{
             val source = sources[instrId.source]!!
             val dao = getDao(instrId.source, source.getDefaultInterval().name)
             val startTime = dao.queryLast(instrId.code).map { oh -> oh.dateTime().minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
             dao.insertOhlc(source.load(instrId, startTime), instrId.code)
         }catch (e : Exception){
-            System.err.println("failed to update "+ instrId + " " + e.message)
+            println("failed to update "+ instrId + " " + e.message)
             e.printStackTrace()
         }
     }
@@ -169,7 +173,11 @@ class MdStorageImpl(private val folder: String) : MdStorage {
 
 object SqlUtils{
     fun getDsForFile(file: String): SQLiteDataSource {
-        val ds = SQLiteDataSource()
+
+        val sqLiteConfig = SQLiteConfig()
+        //sqLiteConfig.setPragma(Pragma.DATE_STRING_FORMAT, "yyyy-MM-dd HH:mm:ss")
+
+        val ds = SQLiteDataSource(sqLiteConfig)
         ds.url = "jdbc:sqlite:$file"
         return ds
     }

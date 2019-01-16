@@ -30,7 +30,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 //.authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/*").permitAll()
+                .antMatchers("/**").permitAll()
                 //.authenticated()
                 .and()
                 .formLogin()
@@ -39,5 +39,7 @@ public class SecurityJavaConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout();
     }
+
+
 
 }

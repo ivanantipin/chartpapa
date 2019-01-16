@@ -9,8 +9,8 @@
     "mdType" : "Ohlc"
   } ],
   "startDateGmt" : {
-    "epochSecond" : -31557014167219200,
-    "nano" : 0
+    "epochSecond" : 1520967948,
+    "nano" : 834000000
   },
   "endDate" : {
     "epochSecond" : 31556889864403199,

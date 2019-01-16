@@ -1,19 +1,17 @@
 package firelib.common.timeboundscalc
 
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.misc.parseTimeStandard
-import firelib.common.reader.ReadersFactory
 import java.time.Instant
 
 /**
 
  */
-class TimeBoundsCalculatorImpl(val factory : ReadersFactory) : TimeBoundsCalculator{
+class TimeBoundsCalculatorImpl() : TimeBoundsCalculator{
 
     fun calcStartDate(cfg: ModelBacktestConfig): Instant {
         val startDtGmt = if (cfg.startDateGmt == null) Instant.EPOCH else cfg.startDateGmt
 
-        val readers = cfg.instruments.map {factory.invoke(it, startDtGmt)}
+        val readers = cfg.instruments.map {it.fact(startDtGmt)}
 
         val maxReadersStartDate = readers.maxBy {it.current().time().getEpochSecond()}!!.current().time()
 

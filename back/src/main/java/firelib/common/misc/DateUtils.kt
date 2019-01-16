@@ -26,9 +26,6 @@ val nyZoneId = ZoneId.of("America/New_York")
 val londonZoneId = ZoneId.of("Europe/London")
 val moscowZoneId = ZoneId.of("Europe/Moscow")
 
-
-fun Instant.toNyTime (): ZonedDateTime = this.atZone(nyZoneId)
-fun Instant.toLondonTime (): ZonedDateTime = this.atZone(londonZoneId)
-fun Instant.toMoscowTime (): ZonedDateTime = this.atZone(moscowZoneId)
+fun Instant.atUtc (): LocalDateTime = LocalDateTime.ofInstant(this,ZoneOffset.UTC)
 
 fun Instant.toStandardString (): String = if(this == null) "null" else dateStringFormatOfDateUtils.format(this.atZone(ZoneOffset.UTC))

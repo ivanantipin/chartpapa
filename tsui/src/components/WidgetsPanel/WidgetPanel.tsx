@@ -15,7 +15,7 @@ import WContainer from "./WidgetComponentContainer";
 import {Action, makeAmend} from "../../actions";
 import {fetchInstruments} from "../../repository";
 import {WidgetData} from "./WidgetComponent";
-
+import {RouteComponentProps} from "react-router";
 
 
 // import type {ChartData, ChartMeta, MainStore} from "./types";
@@ -45,13 +45,14 @@ function chunk_array<T>(arr : Array<T>, chunk : number) : Array<Array<T>>{
 }
 
 
-class WidgetPanel extends Component<MainStore & AppCallBack, AppState> {
+class WidgetPanel extends Component<MainStore & AppCallBack & RouteComponentProps<any>, AppState> {
 
     componentDidMount() {
         this.props.onFetchInstr()
     }
 
     displayMetas(){
+    //    this.props.match
         return chunk_array(this.props.widgets, 2).map(row=>{
             return <Row>
                 {row.map(meta=>{

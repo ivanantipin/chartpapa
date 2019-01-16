@@ -5,7 +5,10 @@ import firelib.common.agenda.AgendaImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.ordermanager.*
+import firelib.common.reader.MarketDataReader
+import firelib.common.reader.MarketDataReaderSql
 import firelib.common.tradegate.TradeGateStub
+import firelib.domain.Ohlc
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant
@@ -137,7 +140,9 @@ class OrderManagerTest {
         val timeService = AgendaImpl()
 
         val config = ModelBacktestConfig()
-        config.instruments = listOf(InstrumentConfig("sec","/", MarketDataType.Ohlc))
+        config.instruments = listOf(InstrumentConfig("sec",{startTime->
+            MarketDataReaderSql(emptyList())
+        }))
 
         val tg = TradeGateStub(config, timeService)
 

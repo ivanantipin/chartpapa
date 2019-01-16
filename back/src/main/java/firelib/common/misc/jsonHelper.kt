@@ -3,6 +3,8 @@ package firelib.common.misc
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import firelib.common.config.InstrumentConfig
+import firelib.common.reader.MarketDataReaderSql
 import java.io.StringWriter
 import java.nio.file.Files
 import java.nio.file.Path
@@ -32,4 +34,8 @@ object jsonHelper {
 
     fun <T> deserialize(fileName: Path, clazz : Class<T>): T =
         mapper.readValue(fileName.toFile(), clazz)
+}
+
+fun main(args: Array<String>) {
+    print(jsonHelper.toJsonString(InstrumentConfig("some", {ff->MarketDataReaderSql(emptyList())})))
 }

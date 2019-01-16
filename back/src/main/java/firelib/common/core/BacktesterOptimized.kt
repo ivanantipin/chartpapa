@@ -26,7 +26,7 @@ fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
     val reportExecutor = ThreadExecutorImpl(1).start()
     val variator = ParamsVariator(cfg.optConfig.params)
 
-    val (startDtGmt, endDtGmt) = TimeBoundsCalculatorImpl(ReaderFactoryImpl(cfg))(cfg)
+    val (startDtGmt, endDtGmt) = TimeBoundsCalculatorImpl()(cfg)
 
     val endOfOptimize =  if(cfg.optConfig.optimizedPeriodDays < 0) endDtGmt.plusMillis(100) else startDtGmt.plus(cfg.optConfig.optimizedPeriodDays, ChronoUnit.DAYS)
 

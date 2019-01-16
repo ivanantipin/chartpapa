@@ -4,11 +4,14 @@ import firelib.common.MarketDataType
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.core.runSimple
+import firelib.common.reader.ReaderFactoryImpl
 import firelib.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler
 import firelib.parser.ParserHandlersProducer
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.junit.Assert
 import org.junit.Test
 import java.nio.file.Files
@@ -48,7 +51,7 @@ class BacktestIntegrationTest {
     fun IntegrationTestTestMins() {
 
 
-        val fileName: String = "MINS/XG_#.csv"
+        val fileName = "MINS/XG_#.csv"
         val fullFileName: Path = Paths.get(getDsRoot() + "/" + fileName)
         val iniPath: Path = fullFileName.getParent().resolve("common.ini")
 
@@ -90,13 +93,23 @@ class BacktestIntegrationTest {
         cfg.reportTargetPath = getReportDir()
 
 
-        cfg.instruments += InstrumentConfig("XG", fileName, MarketDataType.Ohlc)
+        val factoryImpl = ReaderFactoryImpl(cfg.dataServerRoot)
+
+        cfg.instruments += InstrumentConfig("XG", {startTime->
+            factoryImpl.create(fileName, startTime)
+        })
 
         cfg.startDateGmt = LocalDateTime.of(2013, Month.MARCH, 8, 5, 0, 0).toInstant(ZoneOffset.UTC)
 
+
         cfg.precacheMarketData = false
 
-        runSimple(cfg, { ctx, props -> OhlcTestModel(ctx) })
+        val launch = GlobalScope.launch { runSimple(cfg, { ctx, props -> OhlcTestModel(ctx) }) }
+
+        while (launch.isActive){
+            Thread.sleep(100)
+        }
+
 
         var idx = -1
         val modelBars = testHelper.instanceOhlc!!.bars

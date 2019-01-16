@@ -36,11 +36,6 @@ class ModelBacktestConfig (){
     var precacheMarketData: Boolean = true
 
     /**
-     * dump ohlc data for backtest reporting
-     */
-    var dumpOhlcData = true
-
-    /**
      * params passed to model apply method
      * can not be optimized
      */

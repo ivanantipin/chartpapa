@@ -14,20 +14,20 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
 
-class ReaderFactoryImpl(val modelConfig : ModelBacktestConfig) : ReadersFactory {
+class ReaderFactoryImpl(val dsPath : String, val precache: Boolean = false){
 
-    val cachedService = CachedService(modelConfig.dataServerRoot + "/cache")
+    val cachedService = CachedService("$dsPath/cache")
 
     private val ohlcDescr = OhlcDesc()
 
 
-    private fun createReader(cfg : InstrumentConfig, factory : ()->Ohlc, cacheDesc : BinaryReaderRecordDescriptor<Ohlc>) : MarketDataReader<Ohlc>{
-        val path: Path = Paths.get(modelConfig.dataServerRoot, cfg.path)
+    private fun createReader(path : String, factory : ()->Ohlc, cacheDesc : BinaryReaderRecordDescriptor<Ohlc>) : MarketDataReader<Ohlc>{
+        val path: Path = Paths.get(dsPath, path)
         //FIXME resolve format.properties first
         val iniFile: String = path.getParent().resolve("common.ini").toAbsolutePath().toString()
-        val generator: ParserHandlersProducer = ParserHandlersProducer(LegacyMarketDataFormatLoader.load(iniFile))
+        val generator = ParserHandlersProducer(LegacyMarketDataFormatLoader.load(iniFile))
         val ret: CsvParser<Ohlc> = CsvParser<Ohlc>(path.toAbsolutePath().toString(), generator.handlers as Array<ParseHandler<Ohlc>>, factory)
-        if(modelConfig.precacheMarketData){
+        if(precache){
             val reader = cachedService.checkPresent(path.toAbsolutePath().toString(), ret.startTime(), ret.endTime(), cacheDesc)
             if(reader != null){
                 return reader
@@ -39,9 +39,9 @@ class ReaderFactoryImpl(val modelConfig : ModelBacktestConfig) : ReadersFactory 
         }
     }
 
-    override fun invoke(t: InstrumentConfig, startDtGmt: Instant): MarketDataReader<Ohlc> {
+    fun create(t: String, startDtGmt: Instant): MarketDataReader<Ohlc> {
         val parser = createReader(t, {Ohlc() }, ohlcDescr)
-        assert(parser.seek(startDtGmt), {"failed to find start date " + startDtGmt})
+        assert(parser.seek(startDtGmt), { "failed to find start date $startDtGmt" })
         return parser
     }
 }

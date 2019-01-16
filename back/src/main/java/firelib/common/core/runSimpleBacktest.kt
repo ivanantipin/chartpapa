@@ -1,77 +1,65 @@
 package firelib.common.core
 
-import firelib.common.MarketDataType
-import firelib.common.OrderStatus
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.interval.Interval
 import firelib.common.mddistributor.MarketDataDistributor
 import firelib.common.model.Model
-import firelib.common.model.SmaFactory
 import firelib.common.report.OhlcStreamWriter
 import firelib.common.report.clearReportDir
 import firelib.common.report.writeReport
 import firelib.domain.Ohlc
+import kotlinx.coroutines.*
 import java.nio.file.Paths
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.util.concurrent.LinkedBlockingQueue
 
-fun runSimple(cfg: ModelBacktestConfig, fac : ModelFactory) {
+
+suspend fun runSimple(cfg: ModelBacktestConfig, fac : ModelFactory) {
+
     clearReportDir(cfg.reportTargetPath)
 
     val ctx = SimpleRunCtx(cfg)
 
     val model = ctx.addModel(fac, cfg.modelParams)
 
-    subscribeToDumpOhlc(model = model,config = cfg, marketDataDistributor = ctx.marketDataDistributor)
-
+    val persistJobs = subscribeToDumpOhlc(model = model, config = cfg, marketDataDistributor = ctx.marketDataDistributor)
     val outputs = ctx.backtest(Instant.MAX)
 
     require(outputs.size == 1)
 
+    persistJobs.forEach {it.cancelAndJoin()}
+
     writeReport(outputs[0], cfg, cfg.reportTargetPath)
+
+
 }
 
 
-fun subscribeToDumpOhlc(model: Model, minsWindow: Int = 10, config : ModelBacktestConfig, marketDataDistributor : MarketDataDistributor){
-    for(instrIdx in 0 until config.instruments.size)
-    {
-
+fun subscribeToDumpOhlc(model: Model, minsWindow: Int = 10, config : ModelBacktestConfig, marketDataDistributor : MarketDataDistributor) : List<Job> {
+    return config.instruments.mapIndexed{instrIdx, ins->
         val ohlcPath = Paths.get(config.reportTargetPath).resolve("report.db")
         val writer = OhlcStreamWriter(ohlcPath)
         val ts = marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min10, minsWindow)
 
         val ticker = config.instruments[instrIdx].ticker
 
+        val queue = LinkedBlockingQueue<Ohlc>()
 
-        val subs: (Any) -> Unit = {
+        ts.preRollSubscribe { queue.add(it[0]) }
 
-            val lst = ArrayList<Ohlc>();
-            for (i in 0 until minsWindow) {
-                lst += ts[i]
+        GlobalScope.launch {
+            while (isActive){
+                val list = ArrayList<Ohlc>()
+                queue.drainTo(list)
+                if(!list.isEmpty()){
+                    println("start inserting ${list.size}")
+                    writer.insertOhlcs("ohlc_$ticker", list)
+                }
+                delay(100)
             }
-            writer.insertOhlcs("ohlc_$ticker", lst)
         }
-        model.orderManagers()[instrIdx]!!.tradesTopic().subscribe(subs)
-        model.orderManagers()[instrIdx]!!.orderStateTopic().filter {it.status == OrderStatus.New}.subscribe {subs}
     }
 }
 
 
 
-fun main(args : Array<String>){
-    val conf = ModelBacktestConfig()
-    conf.dataServerRoot = "/ddisk/globaldatabase/"
-    conf.reportTargetPath = "./report"
-    conf.startDateGmt = LocalDateTime.now().minusDays(300).toInstant(ZoneOffset.UTC)
-    conf.instruments = listOf(
-            InstrumentConfig("aapl","1MIN/STK/AAPL_1.csv", MarketDataType.Ohlc),
-            InstrumentConfig("goog","1MIN/STK/GOOG_1.csv", MarketDataType.Ohlc)
-    )
-    conf.modelParams = mapOf("period" to "10")
-    //conf.startDateGmt = LocalDateTime.now().minusDays(600).toInstant(ZoneOffset.UTC)
-    conf.precacheMarketData = false
-    runSimple(conf, SmaFactory())
-    println("some")
-}

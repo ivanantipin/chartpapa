@@ -8,7 +8,11 @@ import firelib.common.misc.StreamTradeCaseGenerator
 import firelib.domain.Ohlc
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.datasource.DataSourceTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import java.nio.file.Path
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 fun makeSqlStatementFromHeader(table: String, header: Map<String, String>): String {
     val names = header.toList().map { it.first }
@@ -25,27 +29,31 @@ fun makeCreateSqlStmtFromHeader(table: String, header: Map<String, String>): Str
 class StreamTradeCaseWriter(val path: Path, val factors: Iterable<String>) {
 
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
+    val stmt : String
+    val tman = DataSourceTransactionManager(ds)
 
-    fun init(secName: String): String {
+    init {
         val header = getHeader(tradeCaseColDefs) + factors.associateBy({ it }, { "DOUBLE PRECISION" })
-        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader(secName, header))
-        return makeSqlStatementFromHeader(secName, header)
-
+        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader("trades", header))
+        this.stmt = makeSqlStatementFromHeader("trades", header)
     }
 
-
     fun insertTrades(trades: List<Trade>): Unit {
-        trades.groupBy { it.security() }.forEach { (sec, secTrades) ->
-            val stmt = init(sec)
-            val gen = StreamTradeCaseGenerator()
-            val cases = secTrades.flatMap(gen).map { toMapForSqlUpdate(it, tradeCaseColDefs) }.toTypedArray()
-            NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
+        GlobalLock.lock.withLock {
+            TransactionTemplate(tman).execute({ status ->
+                trades.groupBy { it.security() }.forEach { (sec, secTrades) ->
+                    val gen = StreamTradeCaseGenerator()
+                    val cases = secTrades.flatMap(gen).map { toMapForSqlUpdate(it, tradeCaseColDefs) }.toTypedArray()
+                    NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
+                }
+            })
         }
     }
 }
 
 class StreamOrderWriter(val path: Path) {
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
+    val tman = DataSourceTransactionManager(ds)
     private val stmt: String
 
     init {
@@ -55,11 +63,18 @@ class StreamOrderWriter(val path: Path) {
     }
 
     fun insertOrders(orders: List<Order>): Unit {
-        val cases = orders.map { toMapForSqlUpdate(it, orderColsDefs) }.toTypedArray()
-        NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
+        GlobalLock.lock.withLock {
+            TransactionTemplate(tman).execute({ status ->
+                val cases = orders.map { toMapForSqlUpdate(it, orderColsDefs) }.toTypedArray()
+                NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
+            })
+        }
     }
 }
 
+object GlobalLock{
+    val lock = ReentrantLock()
+}
 
 class OhlcStreamWriter(val path: Path) {
 
@@ -68,6 +83,9 @@ class OhlcStreamWriter(val path: Path) {
 
 
     fun insertOhlcs(secName : String, ohlcs: List<Ohlc>): Unit {
-        mdDao.insertOhlc(ohlcs,secName)
+        GlobalLock.lock.withLock {
+            mdDao.insertOhlc(ohlcs,secName)
+        }
+
     }
 }
