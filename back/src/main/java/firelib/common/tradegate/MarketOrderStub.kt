@@ -6,10 +6,13 @@ import firelib.common.Side
 import firelib.common.Trade
 import firelib.common.timeservice.TimeService
 import firelib.domain.OrderState
+import java.time.Instant
 
 
 class MarketOrderStub(val timeService : TimeService,var bid : Double = Double.NaN,
-                      var ask : Double = Double.NaN) {
+                      var ask : Double = Double.NaN,
+                      var priceTime: Instant = Instant.now()
+                      ) {
 
 
 
@@ -24,14 +27,17 @@ class MarketOrderStub(val timeService : TimeService,var bid : Double = Double.Na
         if(trdPrice.isNaN()){
             order.orderSubscription.publish(OrderState(order, OrderStatus.Rejected, timeService.currentTime()))
         }else{
-            order.tradeSubscription.publish(Trade(order.qty, trdPrice, order, timeService.currentTime()))
+            order.tradeSubscription.publish(Trade(order.qty, trdPrice, order, timeService.currentTime(), priceTime!!))
             order.orderSubscription.publish(OrderState(order, OrderStatus.Done, timeService.currentTime()))
         }
     }
 
 
-    fun updateBidAsk(bid: Double, ask: Double) {
+
+
+    fun updateBidAsk(bid: Double, ask: Double, priceTime : Instant) {
         this.bid = bid
         this.ask = ask
+        this.priceTime = priceTime
     }
 }

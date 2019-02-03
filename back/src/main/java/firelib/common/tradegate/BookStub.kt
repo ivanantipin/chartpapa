@@ -6,12 +6,14 @@ import firelib.common.Side
 import firelib.common.Trade
 import firelib.common.timeservice.TimeService
 import firelib.domain.OrderState
+import java.time.Instant
 import java.util.*
 
 class BookStub(val timeService : TimeService, val strategy : OrderStrategy) {
 
     protected var bid = Double.NaN
     protected var ask = Double.NaN
+    var priceTime : Instant = Instant.now()
 
     fun keyForOrder(order : Order) : OrderKey = OrderKey(order.longPrice, order.id)
 
@@ -43,9 +45,10 @@ class BookStub(val timeService : TimeService, val strategy : OrderStrategy) {
 
     }
 
-    fun updateBidAsk(bid: Double, ask: Double) {
+    fun updateBidAsk(bid: Double, ask: Double, first: Instant) {
         this.bid = bid
         this.ask = ask
+        this.priceTime = first
         checkOrders()
     }
 
@@ -61,7 +64,7 @@ class BookStub(val timeService : TimeService, val strategy : OrderStrategy) {
             val rec = iter.next().value
             if(whenFunc(rec.price)){
                 iter.remove()
-                rec.tradeSubscription.publish(Trade(rec.qty, priceFunc(rec.price), rec, timeService.currentTime()))
+                rec.tradeSubscription.publish(Trade(rec.qty, priceFunc(rec.price), rec, timeService.currentTime(),priceTime))
                 rec.orderSubscription.publish(OrderState(rec, OrderStatus.Done, timeService.currentTime()))
             }else{
                 flag = false

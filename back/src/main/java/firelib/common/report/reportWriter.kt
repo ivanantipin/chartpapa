@@ -11,7 +11,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
 
-fun clearReportDir(targetDir: String) : Unit {
+fun clearReportDir(targetDir: String) {
 
     try {
         FileUtils.deleteDirectory(Paths.get(targetDir).toFile())
@@ -23,7 +23,7 @@ fun clearReportDir(targetDir: String) : Unit {
 }
 
 
-fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig, targetDir: String) : Unit {
+fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig, targetDir: String) {
 
     jsonHelper.serialize(cfg,Paths.get(targetDir, "cfg.json"))
 
@@ -45,6 +45,7 @@ fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig, targetDir: String)
 
     Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/StdReport.ipynb"),Paths.get(Paths.get(targetDir,"StdReport.ipynb").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
     Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/TradesReporter.py"),Paths.get(Paths.get(targetDir,"TradesReporter.py").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
+    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/ShowTrade.ipynb"),Paths.get(Paths.get(targetDir,"ShowTrade.ipynb").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
 
     System.out.println("report written to $targetDir you can run it , command 'ipython notebook StdReport.ipynb'")
 

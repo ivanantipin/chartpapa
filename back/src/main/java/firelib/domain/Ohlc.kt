@@ -12,18 +12,18 @@ data class Ohlc(
         @get:ApiModelProperty(required = true)
         var dtGmtEnd: Instant = Instant.ofEpochSecond(0),
         @get:ApiModelProperty(required = true)
-                var open: Double = Double.NaN,
+        var open: Double = Double.NaN,
         @get:ApiModelProperty(required = true)
-                var high: Double = Double.MIN_VALUE,
+        var high: Double = Double.MIN_VALUE,
         @get:ApiModelProperty(required = true)
-                var low: Double = Double.MAX_VALUE,
+        var low: Double = Double.MAX_VALUE,
         @get:ApiModelProperty(required = true)
-                var close: Double = .0,
-                var Oi: Int = 0,
+        var close: Double = .0,
+        var Oi: Int = 0,
         @get:ApiModelProperty(required = true)
-                var volume: Int = 0,
+        var volume: Int = 0,
         var interpolated: Boolean = true
-        ) : Timed, Comparable<Ohlc> {
+) : Timed, Comparable<Ohlc> {
 
     override fun compareTo(other: Ohlc): Int {
         return this.dtGmtEnd.compareTo(other.dtGmtEnd)
@@ -42,10 +42,6 @@ data class Ohlc(
 
     @get:ApiModelProperty(required = true)
     val dateTimeMs = dtGmtEnd.toEpochMilli()
-
-    fun dateTime() : LocalDateTime{
-        return LocalDateTime.ofInstant(dtGmtEnd,ZoneOffset.UTC)
-    }
 
 
     fun nprice(): Double = (close + high + low) / 3
@@ -85,7 +81,7 @@ data class Ohlc(
 
         fun parseWithPattern(str: String, pattern: DateTimeFormatter): Optional<Ohlc> {
             try {
-                val arr = str.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val arr = str.split(";")
                 return Optional.of(Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1], pattern).toInstant(ZoneOffset.UTC),
                         java.lang.Double.parseDouble(arr[2]),
                         java.lang.Double.parseDouble(arr[3]),

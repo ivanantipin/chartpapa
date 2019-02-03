@@ -11,8 +11,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import java.nio.file.Path
+import java.nio.file.Paths
+import java.time.Instant
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 fun makeSqlStatementFromHeader(table: String, header: Map<String, String>): String {
     val names = header.toList().map { it.first }
@@ -76,6 +80,8 @@ object GlobalLock{
     val lock = ReentrantLock()
 }
 
+
+
 class OhlcStreamWriter(val path: Path) {
 
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
@@ -88,4 +94,33 @@ class OhlcStreamWriter(val path: Path) {
         }
 
     }
+}
+
+class GenericDumper<T : Any>(val name : String, val path : Path, val type : KClass<T>){
+    val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
+    val tman = DataSourceTransactionManager(ds)
+
+    val stmt : String
+
+    init {
+        val header = type.memberProperties.associateBy({ it.name }, { SqlTypeMapper.mapType(it.returnType) })
+        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader(name,header))
+        stmt = makeSqlStatementFromHeader(name, header)
+    }
+
+    fun write(rows : List<T>){
+        val rowsM = rows.map { row ->
+            type.memberProperties.associateBy({ it.name }, { it.get(row) })
+        }
+        TransactionTemplate(tman).execute({ status ->
+            NamedParameterJdbcTemplate(ds).batchUpdate(stmt, rowsM.toTypedArray())
+        })
+    }
+}
+
+
+data class Test(val name : String, val time : Instant)
+fun main(args: Array<String>) {
+    val dumper = GenericDumper("test", Paths.get("test.db"), Test::class)
+    dumper.write(listOf(Test("N0", Instant.now()), Test("N1", Instant.now())))
 }

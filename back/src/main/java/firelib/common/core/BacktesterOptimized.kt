@@ -21,8 +21,6 @@ fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
             cfg.optConfig.params.map {it.name},
     minNumberOfTrades = cfg.optConfig.minNumberOfTrades)
 
-    //FIXME investigate rejected tasks
-
     val reportExecutor = ThreadExecutorImpl(1).start()
     val variator = ParamsVariator(cfg.optConfig.params)
 

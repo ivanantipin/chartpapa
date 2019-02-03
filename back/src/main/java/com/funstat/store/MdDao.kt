@@ -37,12 +37,26 @@ class MdDao(internal val ds: SQLiteDataSource) {
     fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
         val table = normName(tableIn)
         ensureExist(table)
-        val data = ohlcs.map { (dtGmtEnd, O, H, L, C) ->
+        val data = ohlcs.filter {
+            if(it.open.isFinite()){
+                true
+            }else{
+                println("not correct ${it}")
+                false
+            }
+
+
+
+        }.map { (dtGmtEnd, open, high, low, close) ->
+
+
+
+
             mapOf("DT" to dtGmtEnd.toEpochMilli(),
-                    "OPEN" to O,
-                    "HIGH" to H,
-                    "LOW" to L,
-                    "CLOSE" to C)
+                    "OPEN" to open,
+                    "HIGH" to high,
+                    "LOW" to low,
+                    "CLOSE" to close)
         }
         try {
             saveInTransaction("insert or replace into $table(DT,O,H,L,C) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE)", data)
@@ -70,7 +84,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     @Throws(SQLException::class)
     private fun mapOhlc(rs: ResultSet): Ohlc {
-        return Ohlc(rs.getTimestamp("DT").toInstant(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"))
+        return Ohlc(rs.getTimestamp("DT").toInstant(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"), interpolated = false)
     }
 
     fun normName(name: String): String {

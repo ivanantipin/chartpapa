@@ -25,7 +25,7 @@ class MarketDataDistributorImpl(
     fun initTimes(startTime : Instant){
         timeseries.forEach {c->
             for(ts in c.iterator()){
-                val start = ts.first.roundTime(startTime)
+                val start = ts.first.ceilTime(startTime)
                 ts.second[0] = ts.second[0].copy(dtGmtEnd = start)
             }
         }

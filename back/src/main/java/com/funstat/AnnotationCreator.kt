@@ -7,6 +7,7 @@ import firelib.domain.Ohlc
 import com.funstat.sequenta.Sequenta
 import com.funstat.sequenta.Signal
 import com.funstat.sequenta.SignalType
+import firelib.common.misc.atUtc
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -56,7 +57,7 @@ labelOptions: {
 
                 val level = if (s.reference.up) oh.high else oh.low
 
-                val baseLabel = Label(level, oh.dateTime(), base)
+                val baseLabel = Label(level, oh.dtGmtEnd.atUtc(), base)
 
                 when (s.type) {
                     SignalType.Cdn -> {
@@ -78,7 +79,7 @@ labelOptions: {
 
                         labels.add(baseLabel.withAttribute("text", "" + s.reference.completedSignal + recycle))
                         val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]
-                        var hline = HLine(ohlcs[ci - 3].dateTime(), endOh.dateTime(), calcStopLine(ohlcs, ci, s))
+                        var hline = HLine(ohlcs[ci - 3].dtGmtEnd.atUtc(), endOh.dtGmtEnd.atUtc(), calcStopLine(ohlcs, ci, s))
 
 
                         hline = hline.withAttribute("color", if (s.reference.up) "red" else "green")
@@ -91,7 +92,7 @@ labelOptions: {
                                 .withAttribute("color", if (s.reference.up) "green" else "red")
                         lines.add(hhline)
                         while (curLine.get() < lines.size - 5) {
-                            lines[curLine.get()] = lines[curLine.get()].copy(end = oh.dateTime())
+                            lines[curLine.get()] = lines[curLine.get()].copy(end = oh.dtGmtEnd.atUtc())
                             curLine.incrementAndGet()
                         }
                     }
@@ -107,7 +108,7 @@ labelOptions: {
             }
         }
         while (curLine.get() < lines.size) {
-            lines[curLine.get()] = lines[curLine.get()].copy(end = ohlcs[ohlcs.size - 1].dateTime())
+            lines[curLine.get()] = lines[curLine.get()].copy(end = ohlcs[ohlcs.size - 1].dtGmtEnd.atUtc())
             curLine.incrementAndGet()
         }
         lines.addAll(lines0)

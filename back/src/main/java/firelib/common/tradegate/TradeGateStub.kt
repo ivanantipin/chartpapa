@@ -4,35 +4,36 @@ import firelib.common.Order
 import firelib.common.OrderType
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.timeservice.TimeService
+import java.time.Instant
 
 
-class TradeGateStub(val modelConfig: ModelBacktestConfig, val timeService: TimeService) : TradeGate {
+class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) : TradeGate {
 
-    val limitBooks = modelConfig.instruments.map {
+    val limitBooks = cfg.instruments.map {
         BookStub(timeService, LimitOBook())
     }.toTypedArray()
 
-    val stopBooks = modelConfig.instruments.map {
+    val stopBooks = cfg.instruments.map {
         BookStub(timeService, StopOBook())
     }.toTypedArray()
 
-    val marketSubs = modelConfig.instruments.map {
+    val marketSubs = cfg.instruments.map {
         MarketOrderStub(timeService)
     }.toTypedArray()
 
 
-    fun updateBidAsks(prices: List<Double>) {
+    fun updateBidAsks(prices: List<Pair<Instant,Double>>) {
+
         for (i in 0 until marketSubs.size) {
-            val bid = prices[i] - 0.005
-            val ask = prices[i] + 0.005
-            limitBooks[i].updateBidAsk(bid, ask)
-            stopBooks[i].updateBidAsk(bid, ask)
-            marketSubs[i].updateBidAsk(bid, ask)
+            val (bid,ask) = cfg.adjustSpread(prices[i].second,prices[i].second)
+            limitBooks[i].updateBidAsk(bid, ask,prices[i].first)
+            stopBooks[i].updateBidAsk(bid, ask,prices[i].first)
+            marketSubs[i].updateBidAsk(bid, ask,prices[i].first)
         }
     }
 
     fun getSecIdx(sec: String): Int {
-        return modelConfig.instruments.indexOfFirst { it.ticker == sec }
+        return cfg.instruments.indexOfFirst { it.ticker == sec }
     }
 
     /**

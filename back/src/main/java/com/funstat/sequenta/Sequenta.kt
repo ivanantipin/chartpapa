@@ -1,5 +1,6 @@
 package com.funstat.sequenta
 
+import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
 import java.time.LocalDateTime
 import java.util.*
@@ -58,11 +59,11 @@ class Sequenta {
         }
 
         fun getStart(): LocalDateTime {
-            return data[start].dateTime()
+            return data[start].dtGmtEnd.atUtc()
         }
 
         fun getEnd(): LocalDateTime {
-            return data[end].dateTime()
+            return data[end].dtGmtEnd.atUtc()
         }
 
         fun setupSize(): Int {

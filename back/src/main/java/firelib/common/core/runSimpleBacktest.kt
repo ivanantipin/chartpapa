@@ -22,12 +22,12 @@ suspend fun runSimple(cfg: ModelBacktestConfig, fac : ModelFactory) {
 
     val model = ctx.addModel(fac, cfg.modelParams)
 
-    val persistJobs = subscribeToDumpOhlc(model = model, config = cfg, marketDataDistributor = ctx.marketDataDistributor)
+    //val persistJobs = subscribeToDumpOhlc(model = model, config = cfg, marketDataDistributor = ctx.marketDataDistributor)
     val outputs = ctx.backtest(Instant.MAX)
 
     require(outputs.size == 1)
 
-    persistJobs.forEach {it.cancelAndJoin()}
+    //persistJobs.forEach {it.cancelAndJoin()}
 
     writeReport(outputs[0], cfg, cfg.reportTargetPath)
 
@@ -39,7 +39,7 @@ fun subscribeToDumpOhlc(model: Model, minsWindow: Int = 10, config : ModelBackte
     return config.instruments.mapIndexed{instrIdx, ins->
         val ohlcPath = Paths.get(config.reportTargetPath).resolve("report.db")
         val writer = OhlcStreamWriter(ohlcPath)
-        val ts = marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min10, minsWindow)
+        val ts = marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min240, minsWindow)
 
         val ticker = config.instruments[instrIdx].ticker
 

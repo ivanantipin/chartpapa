@@ -6,28 +6,41 @@ import firelib.common.Trade
 import firelib.common.misc.dbl2Str
 import firelib.common.misc.pnlForCase
 import firelib.common.misc.toStandardString
+import firelib.common.report.SqlTypeMapper.mapType
 import firelib.domain.Ohlc
 import java.time.Instant
+import kotlin.reflect.KType
 import kotlin.reflect.jvm.reflect
 
-class ColDef<I,T>(val name : String, val extract : (I)->T){
-    fun getSqlType(): String{
-        val retType = extract.reflect()!!.returnType
-        if(retType.classifier == String::class){
+
+object SqlTypeMapper{
+
+    fun mapType(retType: KType): String {
+        if (retType.classifier == String::class) {
             return "VARCHAR"
         }
-        if(retType.classifier == Double::class){
+        if (retType.classifier == Double::class) {
             return "DOUBLE PRECISION"
         }
-        if(retType.classifier == Int::class){
+        if (retType.classifier == Int::class) {
             return "INT"
         }
-        if(retType.classifier == Instant::class){
+        if (retType.classifier == Instant::class) {
             return "TIMESTAMPTZ"
         }
 
         throw RuntimeException("not supported type $retType")
     }
+
+
+}
+
+class ColDef<I,T>(val name : String, val extract : (I)->T){
+    fun getSqlType(): String{
+        val retType = extract.reflect()!!.returnType
+        return mapType(retType)
+    }
+
 }
 
 fun <I,T> makeMetric(name : String, funct: (I)->T): ColDef<I,T> {
@@ -39,6 +52,8 @@ val tradeCaseColDefs : Array<ColDef<Pair<Trade,Trade>,out Any>> = arrayOf(
         makeMetric("Ticker", {it.first.security()}),
         makeMetric("OrderId0", {it.first.order.id}),
         makeMetric("OrderId1") {it.second.order.id},
+        makeMetric("EntryPriceTime") {it.first.priceTime},
+        makeMetric("ExitPriceTime") {it.second.priceTime},
         makeMetric("BuySell") {if(it.first.side() == Side.Buy) 1 else -1},
 
         makeMetric("EntryDate") {it.first.dtGmt},

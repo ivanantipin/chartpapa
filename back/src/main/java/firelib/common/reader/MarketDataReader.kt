@@ -21,8 +21,8 @@ interface MarketDataReader<out T : Timed> : AutoCloseable{
     fun endTime() : Instant
 }
 
-class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Pair<LocalDateTime,Double>>) : MarketDataReader<Ohlc> by delegate{
-    var nextDt : LocalDateTime = LocalDateTime.MAX
+class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Pair<Instant,Double>>) : MarketDataReader<Ohlc> by delegate{
+    var nextDt : Instant = Instant.MAX
     var currentAdjustment : Double = 0.0
     init {
         reindex()
@@ -30,10 +30,10 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Pa
 
     fun reindex(){
         val curr = delegate.current()
-        val cidx = divs.indexOfFirst { it.first.isAfter(curr.dateTime()) }
+        val cidx = divs.indexOfFirst { it.first.isAfter(curr.dtGmtEnd) }
         if(cidx < 0){
             currentAdjustment = divs.last().second
-            nextDt = LocalDateTime.MAX
+            nextDt = Instant.MAX
             return
         }
         nextDt = divs[cidx].first
@@ -44,7 +44,7 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Pa
 
     override fun current(): Ohlc {
         val ret = delegate.current();
-        if(ret.dateTime().isAfter(nextDt)){
+        if(ret.dtGmtEnd.isAfter(nextDt)){
             reindex()
         }
         return ret.copy(open = ret.open + currentAdjustment, high = ret.high + currentAdjustment, low = ret.low + currentAdjustment,close = ret.close + currentAdjustment)

@@ -19,7 +19,7 @@ class TimeSeriesContainer(val reader : MarketDataReader<Ohlc>) {
 
 
     fun readUntil(time : Instant) : Boolean{
-        while (reader.current().time().isBefore(time)){
+        while (!reader.current().time().isAfter(time)){
             val ohlc = reader.current()
             timeSeries.forEach { it[0] = mergeOhlc(it[0], ohlc) }
             if(!reader.read()){
@@ -43,10 +43,10 @@ class TimeSeriesContainer(val reader : MarketDataReader<Ohlc>) {
     }
 
     fun mergeOhlc(currOhlc: Ohlc, ohlc: Ohlc): Ohlc {
-        assert(!ohlc.interpolated, {"should not be interpolated"})
+        require(!ohlc.interpolated, {"should not be interpolated"})
 
         if (currOhlc.interpolated) {
-            assert(!ohlc.dtGmtEnd.isAfter(currOhlc.dtGmtEnd), {"shall not be after ${currOhlc.dtGmtEnd} < ${ohlc.dtGmtEnd}"})
+            require(!ohlc.dtGmtEnd.isAfter(currOhlc.dtGmtEnd), {"shall not be after ${currOhlc.dtGmtEnd} < ${ohlc.dtGmtEnd}"})
             return ohlc.copy(dtGmtEnd = currOhlc.dtGmtEnd, interpolated = false)
         } else {
             return currOhlc.copy(high = Math.max(ohlc.high, currOhlc.high),

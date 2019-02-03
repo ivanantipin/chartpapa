@@ -6,7 +6,6 @@ import firelib.common.interval.Interval
 import firelib.common.mddistributor.MarketDataDistributorImpl
 import firelib.common.model.Model
 import firelib.common.model.ModelContext
-import firelib.common.reader.ReaderFactoryImpl
 import firelib.common.timeboundscalc.TimeBoundsCalculatorImpl
 import firelib.common.timeservice.TimeServiceManaged
 import firelib.common.tradegate.TradeGateStub
@@ -45,7 +44,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
     val boundModels = ArrayList<Model>()
 
     val modelContext by lazy {
-        ModelContext(timeService,marketDataDistributor,tradeGate,modelConfig.instruments.map { it.ticker })
+        ModelContext(timeService,marketDataDistributor,tradeGate,modelConfig.instruments.map { it.ticker }, modelConfig)
     }
 
     fun addModel(factory : ModelFactory, params : Map<String,String>): Model {
@@ -63,7 +62,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
             if(!marketDataDistributor.readUntil(ct)){
                 break
             }
-            tradeGate.updateBidAsks(readers.map { it.current().close })
+            tradeGate.updateBidAsks(readers.map { Pair(it.current().dtGmtEnd,it.current().close)})
             boundModels.forEach {it.update()}
             marketDataDistributor.roll(ct)
             ct += rootInterval.duration

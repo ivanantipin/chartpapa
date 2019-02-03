@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
-import datetime
+from datetime import  datetime
 
 def extr(row):
     dt=[i for i in list(row.children) if not isinstance(i, str)][0]
@@ -18,11 +18,13 @@ def getDivs(ticker : str):
     rows=list(filter(lambda x : not isinstance(x,str),rows))
     return [extr(x) for x in rows]
 
+epochStart=datetime(1970,1,1)
 
 def parseDiv(row):
     try:
-        return (datetime.datetime.strptime(row[0],'%d.%m.%Y').timestamp()*1000, float(row[1]))
+        return ((datetime.strptime(row[0],'%d.%m.%Y') - epochStart).days, float(row[1]))
     except:
+        print('problem parsing ' + str(sys.exc_info()))
         return None
 
 

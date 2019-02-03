@@ -13,6 +13,12 @@ class TimeBoundsCalculatorImpl() : TimeBoundsCalculator{
 
         val readers = cfg.instruments.map {it.fact(startDtGmt)}
 
+        if(cfg.verbose){
+            cfg.instruments.forEachIndexed({idx,cfg->
+                println("earliest start date for ${cfg} is ${readers[idx].startTime()}")
+            })
+        }
+
         val maxReadersStartDate = readers.maxBy {it.current().time().getEpochSecond()}!!.current().time()
 
         readers.forEach {it.close()}

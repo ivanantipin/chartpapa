@@ -10,6 +10,7 @@ import com.funstat.store.MdStorage
 import com.funstat.store.MdStorageImpl
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
+import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
 import org.springframework.context.annotation.Bean
 import org.springframework.web.bind.annotation.*
@@ -100,7 +101,7 @@ class MainController {
     fun getSeries(@RequestBody @Valid codes: Array<InstrId>, interval: String): Map<String, Collection<TimePoint>> {
         val mm = HashMap<String, Collection<TimePoint>>()
         Arrays.stream(codes).forEach { c ->
-            mm[c.code] = storage.read(c, interval).map { oh -> TimePoint(oh.dateTime(), oh.close) }.sorted()
+            mm[c.code] = storage.read(c, interval).map { oh -> TimePoint(oh.dtGmtEnd.atUtc(), oh.close) }.sorted()
         }
         return mm
     }

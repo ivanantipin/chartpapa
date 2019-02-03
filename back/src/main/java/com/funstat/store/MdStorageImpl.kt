@@ -12,6 +12,7 @@ import com.funstat.vantage.Source
 import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
+import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils
 import org.sqlite.SQLiteConfig
@@ -141,7 +142,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         try{
             val source = sources[instrId.source]!!
             val dao = getDao(instrId.source, source.getDefaultInterval().name)
-            val startTime = dao.queryLast(instrId.code).map { oh -> oh.dateTime().minusDays(2) }.orElse(LocalDateTime.now().minusDays(600))
+            val startTime =  dao.queryLast(instrId.code).map { oh -> oh.dtGmtEnd.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
             dao.insertOhlc(source.load(instrId, startTime), instrId.code)
         }catch (e : Exception){
             println("failed to update "+ instrId + " " + e.message)

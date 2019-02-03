@@ -1,8 +1,9 @@
 package firelib.common.ordermanager
 
-import java.util.Random
-
-import firelib.common.*
+import firelib.common.Order
+import firelib.common.OrderStatus
+import firelib.common.OrderType
+import firelib.common.Trade
 import firelib.common.misc.NonDurableChannel
 import firelib.common.misc.SubChannel
 import firelib.common.timeservice.TimeService
@@ -11,6 +12,16 @@ import firelib.domain.OrderState
 import firelib.domain.OrderWithState
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.util.Random
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.collections.HashMap
+import kotlin.collections.List
+import kotlin.collections.any
+import kotlin.collections.contains
+import kotlin.collections.forEach
+import kotlin.collections.map
+import kotlin.collections.plusAssign
+import kotlin.collections.set
 
 
 class OrderManagerImpl(val tradeGate : TradeGate,
@@ -37,7 +48,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
     override fun position(): Int = position_
 
-    var idCounter = System.currentTimeMillis()
+    var idCounter = AtomicLong(0)
 
     val uuid = Random().nextLong()
 
@@ -126,7 +137,6 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
 
     override fun nextOrderId(): String {
-        idCounter+= 1
-        return "${security}_${uuid}_${idCounter}"
+        return "${security}_${idCounter.incrementAndGet()}"
     }
 }

@@ -31,13 +31,11 @@ class TradeStat(val price : Double, val side :Side){
 
 }
 
-data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:Instant) {
+data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:Instant, val priceTime : Instant) {
 
-    fun validate() {
+    init {
         require(qty >= 0,{"amount can't be negative"})
-
         require(order != null,{"order must be present"})
-
         require(!price.isNaN() ,{"price must be valid"})
     }
 

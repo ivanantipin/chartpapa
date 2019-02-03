@@ -1,8 +1,12 @@
 package firelib.common.config
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import firelib.common.report.StrategyMetric
 import java.time.Instant
 import java.time.LocalDateTime
+
+
+
 
 /**
  * configuration for model backtest
@@ -17,6 +21,15 @@ class ModelBacktestConfig (){
 
     var endDate: Instant = Instant.MAX
 
+
+
+    fun makeSpreadAdjuster(koeff : Double) : (Double,Double)->Pair<Double,Double>{
+        return {bid : Double, ask : Double->Pair(bid - bid*koeff, ask + ask*koeff)}
+    }
+
+    @get:JsonIgnore
+    var adjustSpread = makeSpreadAdjuster(0.0)
+
     /**
      * market data folder
      * all instrument configs related to that folder
@@ -28,6 +41,9 @@ class ModelBacktestConfig (){
      */
     var reportTargetPath: String = ""
 
+
+
+    val verbose = false
 
     /*
     * translatest csv data to binary format to speedup backtest

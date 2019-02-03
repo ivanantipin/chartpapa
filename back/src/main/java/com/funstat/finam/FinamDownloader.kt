@@ -78,12 +78,22 @@ class FinamDownloader : AutoCloseable, Source {
     }
 
     override fun load(instrIdSpec: InstrId): List<Ohlc> {
-        return load(instrIdSpec, LocalDateTime.now().minusDays(600))
+        return load(instrIdSpec, LocalDateTime.now().minusDays(3000))
     }
 
     @Synchronized
     override fun load(instrId: InstrId, start: LocalDateTime): List<Ohlc> {
+        val ret = MutableList(0,{Ohlc()})
+        var mstart = start
+        while (mstart.isBefore(LocalDateTime.now())){
+            val finish = mstart.plusDays(1005)
+            ret += loadSome(instrId,mstart, finish)
+            mstart = finish.minusDays(2)
+        }
+        return ret
+    }
 
+    private fun loadSome(instrId: InstrId, start: LocalDateTime, finish : LocalDateTime): List<Ohlc> {
         while (System.currentTimeMillis() - lastFinamCall < 1100) {
             try {
                 Thread.sleep(100)
@@ -95,33 +105,31 @@ class FinamDownloader : AutoCloseable, Source {
 
         lastFinamCall = System.currentTimeMillis()
 
-
-        val finish = LocalDate.now()
         val params = listOf(
-            "d" to "d",
-            "f" to "table",
-            "e" to ".csv",
-            "dtf" to  "1",
-            "tmf" to  "3",
-            "MSOR" to "0",
-            "mstime" to "on",
-            "mstimever" to "1",
-            "sep" to "3",
-            "sep2" to "1",
-            "at" to "1",
-             "p" to "${Period.TEN_MINUTES.id}",
-             "em" to "${instrId.id}",
-             "market" to "${instrId.market}",
-             "df" to "${start.dayOfMonth}",
-             "mf" to "${(start.monthValue - 1)}",
-             "yf" to "${start.year}",
-             "dt" to "${finish.dayOfMonth}",
-             "mt" to "${(finish.monthValue - 1)}",
-             "yt" to "${finish.year}",
-             "code" to "${instrId.code}",
-             "cn" to "${instrId.code}"
+                "d" to "d",
+                "f" to "table",
+                "e" to ".csv",
+                "dtf" to "1",
+                "tmf" to "3",
+                "MSOR" to "0",
+                "mstime" to "on",
+                "mstimever" to "1",
+                "sep" to "3",
+                "sep2" to "1",
+                "at" to "1",
+                "p" to "${Period.TEN_MINUTES.id}",
+                "em" to "${instrId.id}",
+                "market" to "${instrId.market}",
+                "df" to "${start.dayOfMonth}",
+                "mf" to "${(start.monthValue - 1)}",
+                "yf" to "${start.year}",
+                "dt" to "${finish.dayOfMonth}",
+                "mt" to "${(finish.monthValue - 1)}",
+                "yt" to "${finish.year}",
+                "code" to "${instrId.code}",
+                "cn" to "${instrId.code}"
         )
-        
+
         val url = "http://export.finam.ru/table.csv?" + params.map { "${it.first}=${it.second}" }.joinToString(separator = "&")
 
         //http://export.finam.ru/table.csv?d=d&f=table&e=.csv&dtf=1&tmf=3&MSOR=0&mstime=on&mstimever=1&sep=3&sep2=1&at=1&p=4&em=81820&market=1&df=1&mf=0&yf=2017&dt=15&mt=0&yt=2019&cn=ALRS&code=ALRS&datf=5
@@ -142,11 +150,11 @@ class FinamDownloader : AutoCloseable, Source {
                 }
 
         try {
-            return ret.get().map{ Ohlc.parse(it) }.filter{it.isPresent}.map { it.get() }
+            val ret = ret.get().map { Ohlc.parse(it) }.filter { it.isPresent }.map { it.get() }
+            return ret
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
-
     }
 
     override fun getName(): String {

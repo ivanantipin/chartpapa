@@ -5,10 +5,8 @@ import firelib.common.agenda.AgendaImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.ordermanager.*
-import firelib.common.reader.MarketDataReader
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.tradegate.TradeGateStub
-import firelib.domain.Ohlc
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant
@@ -16,8 +14,8 @@ import java.time.Instant
 class OrderManagerTest {
 
     fun  update(tg : TradeGateStub, bid : Double, ask : Double) : Unit {
-        tg.limitBooks.forEach {it.updateBidAsk(bid,ask)}
-        tg.stopBooks.forEach {it.updateBidAsk(bid,ask)}
+        tg.limitBooks.forEach {it.updateBidAsk(bid, ask, prices[i].first)}
+        tg.stopBooks.forEach {it.updateBidAsk(bid, ask, prices[i].first)}
         tg.marketSubs.forEach {it.updateBidAsk(bid,ask)}
     }
 

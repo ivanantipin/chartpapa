@@ -338,7 +338,7 @@ def test():
     # bs.plotSeasonalities()
     # plt.show()
 
-# test()
+test()
 
 # bs.plot_equity_d2d_for_ticker(ticker='RSX')
 # plt.show()
