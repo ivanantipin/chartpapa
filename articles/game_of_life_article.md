@@ -1,7 +1,6 @@
 ###Game of Life in corporate universe.
 
-Do you know game called [Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) devised by the British mathematician John Horton 
-Conway in 1970?
+Have you heard about game called [Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) devised by the British mathematician John Horton Conway in 1970?
 
 Rules of the game are pretty simple ( extract from wikipedia) : 
 
@@ -13,12 +12,12 @@ Rules of the game are pretty simple ( extract from wikipedia) :
 
 * add here something about model development
 
-Lets draw some similiarities with corporate universe.
+I found it has some similiarities with corporate universe mechanics.
 
-Lets exclude rule #3 and assume that:
+Lets assume that:
 
-1. Alive cells are people with right incentives and qualification, who really likes those job and want to make a difference.
-2. Dead cells are people who just carry on and do not care whether those work bringing any value or not, they just sit working hours and go home.
+1. Alive cells are good employees - people with right incentives and qualification, who really likes those job and want to make a difference.
+2. Dead cells are bad employees - people who just carry on , do not care about what they do , sit working hours and go home etc
 
 Real life is not about black and white though, but lets take this definition as extreme - in the end all models are just rough 
 approximation of reality.
