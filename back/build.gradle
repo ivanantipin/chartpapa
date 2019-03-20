@@ -64,8 +64,10 @@ compileTestKotlin {
 }
 
 bootRun {
-    jvmArgs = ["-Xms512m","-Xmx512m", "-DnotebooksDir=/root/release/chartpapa/market_research/published", "-Dcom.sun.management.jmxremote", "-Dcom.sun.management.jmxremote.port=5555", "-Dcom.sun.management.jmxremote.authenticate=false", "-Dcom.sun.management.jmxremote.ssl=false", "-Dcom.sun.management.jmxremote.local.only=false"]
+    jvmArgs = ["-Xms728m","-Xmx728m", "-DnotebooksDir=/root/release/chartpapa/market_research/published", "-Dcom.sun.management.jmxremote", "-Dcom.sun.management.jmxremote.port=5555", "-Dcom.sun.management.jmxremote.authenticate=false", "-Dcom.sun.management.jmxremote.ssl=false", "-Dcom.sun.management.jmxremote.local.only=false"]
 }
+
+
 
 task populator(type:JavaExec) {
     main = "com.funstat.iqfeed.DbPopulator"
