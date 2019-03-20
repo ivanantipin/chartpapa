@@ -13,6 +13,7 @@ import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
+import firelib.common.model.DivHelper
 import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils
 import org.sqlite.SQLiteConfig
@@ -182,4 +183,13 @@ object SqlUtils{
         ds.url = "jdbc:sqlite:$file"
         return ds
     }
+}
+
+fun main(args: Array<String>) {
+
+    //MdStorageImpl().updateMarketData(FinamDownloader().symbols().find { it.code == "SBER" && it.market == "1" }!!)
+
+    DivHelper.getDivs().get("phor")!!.forEach {  println(it)}
+
+
 }

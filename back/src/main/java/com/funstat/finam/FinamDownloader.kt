@@ -26,22 +26,18 @@ import com.google.common.io.CharStreams.readLines
 
 class FinamDownloader : AutoCloseable, Source {
 
-    private val client: AsyncHttpClient
+    private val client = DefaultAsyncHttpClient(
+            DefaultAsyncHttpClientConfig.Builder()
+                    .setFollowRedirect(true)
+                    .setKeepAlive(true)
+                    .setConnectionTtl(5000)
+                    .setRequestTimeout(180000)
+                    .setMaxRequestRetry(3)
+                    .build()
+    )
 
     @Volatile
     internal var lastFinamCall: Long = 0
-
-    init {
-        this.client = DefaultAsyncHttpClient(
-                DefaultAsyncHttpClientConfig.Builder()
-                        .setFollowRedirect(true)
-                        .setKeepAlive(true)
-                        .setConnectionTtl(5000)
-                        .setRequestTimeout(180000)
-                        .setMaxRequestRetry(3)
-                        .build()
-        )
-    }
 
 
     override fun close() {

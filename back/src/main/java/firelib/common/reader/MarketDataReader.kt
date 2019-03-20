@@ -1,9 +1,11 @@
 package firelib.common.reader
 
+import firelib.common.misc.atUtc
+import firelib.common.model.Div
 import firelib.domain.Ohlc
 import firelib.domain.Timed
 import java.time.Instant
-import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
 
@@ -21,7 +23,7 @@ interface MarketDataReader<out T : Timed> : AutoCloseable{
     fun endTime() : Instant
 }
 
-class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Pair<Instant,Double>>) : MarketDataReader<Ohlc> by delegate{
+class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Div>) : MarketDataReader<Ohlc> by delegate{
     var nextDt : Instant = Instant.MAX
     var currentAdjustment : Double = 0.0
     init {
@@ -30,15 +32,15 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Pa
 
     fun reindex(){
         val curr = delegate.current()
-        val cidx = divs.indexOfFirst { it.first.isAfter(curr.dtGmtEnd) }
+        val cidx = divs.indexOfFirst { it.lastDayWithDivs.plusDays(1).atStartOfDay().isAfter(curr.dtGmtEnd.atUtc()) }
         if(cidx < 0){
-            currentAdjustment = divs.last().second
+            currentAdjustment = divs.sumByDouble { it.div }
             nextDt = Instant.MAX
             return
         }
-        nextDt = divs[cidx].first
+        nextDt = divs[cidx].lastDayWithDivs.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC)
         if(cidx > 0){
-            currentAdjustment = divs[cidx - 1].second
+            currentAdjustment = divs.subList(0,cidx).sumByDouble { it.div }
         }
     }
 

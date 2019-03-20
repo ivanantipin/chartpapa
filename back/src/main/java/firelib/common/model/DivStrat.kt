@@ -20,7 +20,7 @@ import java.nio.file.Paths
 import java.time.*
 
 
-data class Div(val ticker: String, val date: LocalDate, val div: Double)
+data class Div(val ticker: String, val lastDayWithDivs: LocalDate, val div: Double)
 
 class DivFac : ModelFactory {
     override fun invoke(context: ModelContext, props: Map<String, String>): Model {
@@ -29,12 +29,37 @@ class DivFac : ModelFactory {
 }
 
 object DivHelper {
+
+    val tSwitch = LocalDate.of(2013,Month.SEPTEMBER,2)
+
     fun getDivs(): Map<String, List<Div>> {
-        val dsForFile = SqlUtils.getDsForFile(GlobalConstants.mdFolder.resolve("meta.db").toAbsolutePath().toString())
+
+        val storage = MdStorageImpl()
+
+        val dao = storage.getDao(FinamDownloader.SOURCE, Interval.Min10.toString())
+
+        val trdDays= dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
+
+
+                val dsForFile = SqlUtils.getDsForFile(GlobalConstants.mdFolder.resolve("meta.db").toAbsolutePath().toString())
         val divs = JdbcTemplate(dsForFile).query("select * from dividends", { row, ind ->
-            Div(row.getString("ticker"), LocalDate.ofEpochDay(row.getLong("DT")), row.getDouble("div"))
+
+
+            var divDate = LocalDate.ofEpochDay(row.getLong("DT"))!!
+
+            var cntDif =  if (divDate.isAfter(tSwitch)) 2 else 0;
+
+            while (cntDif > 0){
+                divDate = divDate.minusDays(1)
+                if(trdDays.contains(divDate)){
+                    cntDif--
+                }
+            }
+
+
+            Div(row.getString("ticker"), divDate, row.getDouble("div"))
         })
-        return divs.groupBy { it.ticker }.mapValues { it.value.sortedBy { div -> div.date } }
+        return divs.groupBy { it.ticker }.mapValues { it.value.sortedBy { div -> div.lastDayWithDivs } }
     }
 }
 
@@ -54,7 +79,7 @@ class DivModel(val context: ModelContext, val props: Map<String, String>) : Mode
 
     init {
         val divMap = DivHelper.getDivs()
-        val divdivs = context.instruments.map { divMap[it]!!.sortedBy { it.date } }
+        val divdivs = context.instruments.map { divMap[it]!!.sortedBy { it.lastDayWithDivs } }
         val nextIdxes = context.instruments.map { -1 }.toIntArray()
 
         val dumper = GenericDumper<Stat>("divstat", Paths.get(context.config.reportTargetPath).resolve("stat.db"), Stat::class)
@@ -70,7 +95,7 @@ class DivModel(val context: ModelContext, val props: Map<String, String>) : Mode
 
 
                 nextIdxes[idx] = divs.indexOfFirst {
-                    it.date.atStartOfDay().isAfter(currentTime.atUtc())
+                    it.lastDayWithDivs.atStartOfDay().isAfter(currentTime.atUtc())
                 }
 
                 val nextIdx = nextIdxes[idx]
@@ -81,7 +106,7 @@ class DivModel(val context: ModelContext, val props: Map<String, String>) : Mode
                 if (nextIdx > 0 && nextIdx < divs.size && !ohlc.interpolated) {
 
                     val div = divs[nextIdx - 1]
-                    val divDate = div.date
+                    val divDate = div.lastDayWithDivs
 
                     var diff = (ohlc.dtGmtEnd.atUtc().toLocalDate().toEpochDay() - divDate.toEpochDay()).toInt()
 
@@ -92,7 +117,7 @@ class DivModel(val context: ModelContext, val props: Map<String, String>) : Mode
                                 .filter { !it.interpolated }
                                 .reversed()
 
-                        val divIdx = ff.indexOfLast { divDate.isAfter(it.dtGmtEnd.atUtc().toLocalDate()) } + 1
+                        val divIdx = ff.indexOfLast { it.dtGmtEnd.atUtc().toLocalDate() == divDate}
 
                         dumper.write(
                                 (1 until ff.size).map{idx->
@@ -143,8 +168,12 @@ suspend fun main() = coroutineScope {
     }
 
 
+
+    update()
+
+
     val conf = ModelBacktestConfig()
-    conf.reportTargetPath = "./report"
+    conf.reportTargetPath = "./report/divStrat0"
 
     val mdDao = storageImpl.getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
