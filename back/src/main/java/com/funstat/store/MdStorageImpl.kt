@@ -35,7 +35,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     internal var sources: Map<String, Source> = object : HashMap<String, Source>() {
         init {
             put(FinamDownloader.SOURCE, FinamDownloader())
-            //put(VantageDownloader.SOURCE, new VantageDownloader());
+            put(VantageDownloader.SOURCE, VantageDownloader());
             put(IqFeedSource.SOURCE, IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")))
         }
     }
@@ -144,7 +144,11 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             val source = sources[instrId.source]!!
             val dao = getDao(instrId.source, source.getDefaultInterval().name)
             val startTime =  dao.queryLast(instrId.code).map { oh -> oh.dtGmtEnd.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
-            dao.insertOhlc(source.load(instrId, startTime), instrId.code)
+
+            source.load(instrId, startTime).chunked(5000).forEach {
+                dao.insertOhlc(it, instrId.code)
+            }
+
         }catch (e : Exception){
             println("failed to update "+ instrId + " " + e.message)
             e.printStackTrace()

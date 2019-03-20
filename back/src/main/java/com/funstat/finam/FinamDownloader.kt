@@ -73,12 +73,12 @@ class FinamDownloader : AutoCloseable, Source {
 
     }
 
-    override fun load(instrIdSpec: InstrId): List<Ohlc> {
+    override fun load(instrIdSpec: InstrId): Sequence<Ohlc> {
         return load(instrIdSpec, LocalDateTime.now().minusDays(3000))
     }
 
     @Synchronized
-    override fun load(instrId: InstrId, start: LocalDateTime): List<Ohlc> {
+    override fun load(instrId: InstrId, start: LocalDateTime): Sequence<Ohlc> {
         val ret = MutableList(0,{Ohlc()})
         var mstart = start
         while (mstart.isBefore(LocalDateTime.now())){
@@ -86,7 +86,7 @@ class FinamDownloader : AutoCloseable, Source {
             ret += loadSome(instrId,mstart, finish)
             mstart = finish.minusDays(2)
         }
-        return ret
+        return ret.asSequence()
     }
 
     private fun loadSome(instrId: InstrId, start: LocalDateTime, finish : LocalDateTime): List<Ohlc> {

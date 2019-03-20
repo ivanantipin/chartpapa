@@ -30,7 +30,7 @@ public class VSymbolDownloader {
                 }
                 List<InstrId> rows = Arrays.asList(entity.getBody().split("\r\n")).stream().skip(1).map(oh -> {
                     String[] data = oh.split(",");
-                    return new InstrId(data[0], data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0], VantageDownloader.SOURCE);
+                    return new InstrId(data[0], data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0], VantageDownloader.Companion.getSOURCE());
                 }).collect(Collectors.toList());
                 if(rows.size() == 0){
                     System.out.println(entity.getBody());
