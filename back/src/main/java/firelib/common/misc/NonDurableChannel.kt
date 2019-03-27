@@ -1,5 +1,7 @@
 package firelib.common.misc
 
+import java.util.*
+
 
 interface ChannelSubscription{
     fun unsubscribe()
@@ -7,7 +9,7 @@ interface ChannelSubscription{
 
 class NonDurableChannel<T> : Channel<T>{
 
-    val listeners = ArrayList<(T)->Unit>()
+    val listeners = LinkedList<(T)->Unit>()
 
     override fun publish(t : T) : Unit {
         listeners.forEach {it(t)}

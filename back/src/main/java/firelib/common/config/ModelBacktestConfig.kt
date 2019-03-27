@@ -19,7 +19,7 @@ class ModelBacktestConfig (){
 
     var startDateGmt: Instant = Instant.MIN
 
-    var endDate: Instant = Instant.MAX
+    var endDate: Instant = Instant.now()
 
 
 

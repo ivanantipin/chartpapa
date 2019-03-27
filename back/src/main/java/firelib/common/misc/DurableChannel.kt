@@ -1,8 +1,10 @@
 package firelib.common.misc
 
+import java.util.*
+
 class DurableChannel<T> : Channel<T> {
-    val listeners = ArrayList<(T) -> Unit>()
-    val msgs = ArrayList<T>(2)
+    val listeners = LinkedList<(T) -> Unit>()
+    val msgs = LinkedList<T>()
 
     override fun publish(t: T): Unit {
         listeners.forEach { it(t) }

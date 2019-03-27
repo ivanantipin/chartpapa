@@ -11,7 +11,7 @@ class ReportProcessor(val metricsCalculator : MetricsCalculator, val optimizedFu
 
     data class ModelStat (val optMetric : Double, val output : ModelOutput, val metrics : Map<StrategyMetric, Double>)
 
-    private val bestModels_ = PriorityQueue<ModelStat>()//(Ordering.by((ms : ModelStat) -> ms.optMetric ).reverse)
+    private val bestModels_ = PriorityQueue<ModelStat>(Comparator<ModelStat> { p0, p1 -> p1.optMetric.compareTo(p0.optMetric) })//(Ordering.by((ms : ModelStat) -> ms.optMetric ).reverse)
 
     var estimates = ArrayList<ExecutionEstimates>()
 

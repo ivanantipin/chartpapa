@@ -30,7 +30,7 @@ class DivFac : ModelFactory {
 
 object DivHelper {
 
-    val tSwitch = LocalDate.of(2013,Month.SEPTEMBER,2)
+    val tSwitch = LocalDate.of(2013, Month.SEPTEMBER, 2)
 
     fun getDivs(): Map<String, List<Div>> {
 
@@ -38,20 +38,24 @@ object DivHelper {
 
         val dao = storage.getDao(FinamDownloader.SOURCE, Interval.Min10.toString())
 
-        val trdDays= dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
+        var trdDays = dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
 
+        if(trdDays.isEmpty()){
+            updateRussianStockSimple("sber")
+            trdDays = dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
+        }
 
-                val dsForFile = SqlUtils.getDsForFile(GlobalConstants.mdFolder.resolve("meta.db").toAbsolutePath().toString())
+        val dsForFile = SqlUtils.getDsForFile(GlobalConstants.mdFolder.resolve("meta.db").toAbsolutePath().toString())
         val divs = JdbcTemplate(dsForFile).query("select * from dividends", { row, ind ->
 
 
             var divDate = LocalDate.ofEpochDay(row.getLong("DT"))!!
 
-            var cntDif =  if (divDate.isAfter(tSwitch)) 2 else 0;
+            var cntDif = if (divDate.isAfter(tSwitch)) 2 else 0;
 
-            while (cntDif > 0){
+            while (cntDif > 0) {
                 divDate = divDate.minusDays(1)
-                if(trdDays.contains(divDate)){
+                if (trdDays.contains(divDate)) {
                     cntDif--
                 }
             }
@@ -71,8 +75,8 @@ data class Stat(val ticker: String,
                 val divDate: Instant,
                 val curDate: Instant,
                 val divSize: Double,
-                val lastMonthReturn : Double
-                )
+                val lastMonthReturn: Double
+)
 
 class DivModel(val context: ModelContext, val props: Map<String, String>) : Model {
     val oman = makeOrderManagers(context)
@@ -112,25 +116,24 @@ class DivModel(val context: ModelContext, val props: Map<String, String>) : Mode
 
                     if (diff == 20) {
 
-                        val ff = (0 until 40).
-                                map { ret[it] }
+                        val ff = (0 until 40).map { ret[it] }
                                 .filter { !it.interpolated }
                                 .reversed()
 
-                        val divIdx = ff.indexOfLast { it.dtGmtEnd.atUtc().toLocalDate() == divDate}
+                        val divIdx = ff.indexOfLast { it.dtGmtEnd.atUtc().toLocalDate() == divDate }
 
                         dumper.write(
-                                (1 until ff.size).map{idx->
+                                (1 until ff.size).map { idx ->
                                     val oh = ff[idx]
-                            Stat(instrument, idx - divIdx ,
-                                    intraPnl = (oh.close - oh.open)/oh.open,
-                                    gapPnl = (oh.open - ff[idx - 1].close) / ff[idx - 1].close,
-                                    curDate = oh.dtGmtEnd,
-                                    divDate = divDate.atStartOfDay().toInstant(ZoneOffset.UTC),
-                                    divSize = div.div/oh.open,
-                                    lastMonthReturn =  (ret[21].close - ret[51].close)/ret[51].close
-                            )
-                        })
+                                    Stat(instrument, idx - divIdx,
+                                            intraPnl = (oh.close - oh.open) / oh.open,
+                                            gapPnl = (oh.open - ff[idx - 1].close) / ff[idx - 1].close,
+                                            curDate = oh.dtGmtEnd,
+                                            divDate = divDate.atStartOfDay().toInstant(ZoneOffset.UTC),
+                                            divSize = div.div / oh.open,
+                                            lastMonthReturn = (ret[21].close - ret[51].close) / ret[51].close
+                                    )
+                                })
                     }
                 }
             }
@@ -153,36 +156,13 @@ class DivModel(val context: ModelContext, val props: Map<String, String>) : Mode
 }
 
 suspend fun main() = coroutineScope {
-    //conf.startDateGmt = LocalDateTime.now().minusDays(1500).toInstant(ZoneOffset.UTC)
-
-    val divs = DivHelper.getDivs()
-
-
     val storageImpl = MdStorageImpl()
-
-    fun update() {
-        val finamDownloader = FinamDownloader()
-        val symbols = finamDownloader.symbols().filter { divs.containsKey(it.code.toLowerCase()) && it.market == "1" }
-        symbols.forEach({ storageImpl.updateMarketData(it) })
-
-    }
-
-
-
-    update()
-
-
     val conf = ModelBacktestConfig()
     conf.reportTargetPath = "./report/divStrat0"
-
     val mdDao = storageImpl.getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-
     conf.instruments = DivHelper.getDivs().keys.map { InstrumentConfig(it, { time -> MarketDataReaderSql(mdDao.queryAll(it)) }) }
-
     conf.modelParams = mapOf("holdTimeDays" to "10")
-    //conf.startDateGmt = LocalDateTime.now().minusDays(600).toInstant(ZoneOffset.UTC)
     conf.precacheMarketData = false
     runSimple(conf, DivFac())
     println("done")
-
 }

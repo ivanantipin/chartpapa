@@ -44,12 +44,17 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Di
         }
     }
 
+    var cachedValue = Ohlc()
+
     override fun current(): Ohlc {
         val ret = delegate.current();
         if(ret.dtGmtEnd.isAfter(nextDt)){
             reindex()
         }
-        return ret.copy(open = ret.open + currentAdjustment, high = ret.high + currentAdjustment, low = ret.low + currentAdjustment,close = ret.close + currentAdjustment)
+        if(cachedValue.dtGmtEnd != ret.dtGmtEnd){
+            cachedValue = ret.copy(open = ret.open + currentAdjustment, high = ret.high + currentAdjustment, low = ret.low + currentAdjustment,close = ret.close + currentAdjustment)
+        }
+        return cachedValue
     }
 }
 

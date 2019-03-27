@@ -86,9 +86,13 @@ private fun nextModelVariationsChunk(cfg: ModelBacktestConfig, variator: ParamsV
 
     while (variator.hasNext()) {
         var opts = variator.next()
+
+        println("added params for opt ${opts}")
+
         val nm = HashMap(cfg.modelParams)
         nm.putAll(opts.entries.associateBy ({it.key},{it.value.toString()}))
         env.addModel(factory, nm)
+
         if (env.boundModels.size >= batchSize) {
             return env
         }

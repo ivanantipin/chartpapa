@@ -17,14 +17,14 @@ import firelib.common.reader.ReaderDivAdjusted
 import java.time.DayOfWeek
 
 
-class RealDivFac : ModelFactory {
+
+class RealDivModel(val context: ModelContext, val props: Map<String, String>) : Model, ModelFactory {
+
     override fun invoke(context: ModelContext, props: Map<String, String>): Model {
         return RealDivModel(context, props)
     }
-}
 
 
-class RealDivModel(val context: ModelContext, val props: Map<String, String>) : Model {
     val oman = makeOrderManagers(context)
 
     init {
@@ -151,7 +151,9 @@ suspend fun main(args: Array<String>) {
     }
 
     conf.precacheMarketData = false
-    runSimple(conf, RealDivFac())
+    runSimple(conf, {cfg,fac->
+        RealDivModel(cfg,fac)
+    })
     println("done")
 
 }

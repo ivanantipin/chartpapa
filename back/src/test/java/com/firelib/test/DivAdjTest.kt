@@ -1,5 +1,6 @@
 package com.firelib.test
 
+import firelib.common.model.Div
 import firelib.common.reader.MarketDataReader
 import firelib.common.reader.ReaderDivAdjusted
 import firelib.domain.Ohlc
@@ -15,16 +16,17 @@ class DivAdjTest{
     fun testDiv(){
 
         val start = Instant.now()
-        val startDt = LocalDateTime.ofInstant(start, ZoneOffset.UTC)
+        val startDt = LocalDateTime.ofInstant(start, ZoneOffset.UTC).toLocalDate()
         val data = arrayOf(
-                Ohlc(start,0.0,1.0,0.0,0.1),
-                Ohlc(start.plusSeconds(1*10),0.1,1.1,0.1,0.2),
+                Ohlc(startDt.atStartOfDay().toInstant(ZoneOffset.UTC),0.0,1.0,0.0,0.1),
+                Ohlc(startDt.plusDays(1*10).st,0.1,1.1,0.1,0.2),
                 Ohlc(start.plusSeconds(2*10),0.2,1.2,0.2,0.4),
                 Ohlc(start.plusSeconds(3*10),0.3,1.3,0.3,0.5)
         )
 
         val divSize = 1.0
-        val divs = listOf(startDt.plusSeconds(15) to divSize)
+        Div("some", startDt.plusSeconds(15). )
+        val divs = listOf( to divSize)
 
         var reader = object : MarketDataReader<Ohlc>{
             var idx = 0

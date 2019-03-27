@@ -22,7 +22,7 @@ class ParamsVariator(val optParams: List<OptimizedParameter>) : Iterator<Map<Str
     fun next0(): Map<String, Int>? {
         if (!optParams[0].next()) {
             optParams[0].reset();
-            for (i in 1..optParams.size) {
+            for (i in 1 until optParams.size) {
                 if (optParams[i].next()) {
                     break;
                 } else {

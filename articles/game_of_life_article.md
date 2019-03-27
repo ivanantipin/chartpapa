@@ -2,89 +2,84 @@
 
 Have you heard about game called [Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) devised by the British mathematician John Horton Conway in 1970?
 
-Rules of the game are pretty simple ( extract from wikipedia) : 
+>>The universe of the Game of Life is an infinite, two-dimensional orthogonal grid cells.
+>> 1. Any live cell with fewer than two live neighbours dies.
+>> 2. Any live cell with two or three live neighbours lives on to the next generation.
+>> 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
+>> 4. Any dead cell with exactly three live neighbours becomes a live cell. 
 
-##### The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells, each of which is in one of two possible states, alive or dead, (or populated and unpopulated, respectively). Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically, or diagonally adjacent. At each step in time, the following transitions occur:
-1. Any live cell with fewer than two live neighbors dies, as if by underpopulation.
-2. Any live cell with two or three live neighbors lives on to the next generation.
-3. Any live cell with more than three live neighbors dies, as if by overpopulation.
-4. Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+I think that some of these rules apply to mechanics of corporate universe.
+Lets exclude rule  3. from consideration though.
 
-* add here something about model development
+Lets make naive assumption that bad employes are 'dead' and good emploees are 'live' cells in our game.
 
-I found it has some similiarities with corporate universe mechanics.
+'Good' and 'bad' is actually multidimensional term whatever from enthusiasm and qualification to temper but we would collapse it to one dimension (good-bad), kind of extreme.
 
-Lets assume that:
 
-1. Alive cells are good employees - people with right incentives and qualification, who really likes those job and want to make a difference.
-2. Dead cells are bad employees - people who just carry on , do not care about what they do , sit working hours and go home etc
+### Case 1 'live'  surrounded by 'dead-s'
 
-Real life is not about black and white though, but lets take this definition as extreme - in the end all models are just rough 
-approximation of reality.
+So case one when you are a live cell and surrounded by 'dead' ones - you most probably would adjust or leave.
+By 'adjust' I mean your performance and behavior will be eventually aligned with rest of team because people are social animals.
+So you effectively become a 'dead' one or leave. 
 
-Imaging that you are a "live cell" according to definition and imagine that you are surrounded by "dead cells", 
-dudes without interest and probably with low qualification as these 2 qualities are positively correlated.
-When number of surrounding you 'live cells' reduced down to some threshold I bet your enthusiasm would not last long 
-and you either leave company or adjust to environment so essentially become 'dead cell' because human beans are social creatures. 
-Once you are dead cell you willingly or not will infect other people who are not yet 'dead' and so on and so forth.
+### Case 2 'dead' surrounded by 'live-s'
 
-In opposite case there is similar mechanics, 'dead cell' start feeling discomfort being surrounded by 
-good emploees and this motivates him/she to either adjust or resign.  
+If you are a dead cell and surrounded by good ones you would also feel uncomfortable for the very same reason
+which would motivate you for an action - leave or try harder or do something good to align with rest.
+So you effectively become 'live' or leave
+
+### Why 'dead-s' have an advantage
+
+Have you ever wondered why products of big corporates are often so shitty ?
+(windows, lotus notes, skype,remedy - and i am not talking about inhouse infra products which are even worse)
+
+Corps have tons of money to make them shiny but still cant do what small companies can.
+
+I think one of the reasons that in big corps 'dead' cells as a class have evolutional advantage
+though it sound counterintuitive.
+So they are eventualy spreaded over without external intervention to improve situation. 
+
+
+I have few reasons why:
+
+1.  'Dead cell' are usually more reluctant for adjusting or resigning than 'live',
+They could have less offers on the market so they prefer sit tight where they are
+2.  to be in comfort they prefer hire same quality people and those do the same, and so on and so forth. 
+Probably it would be better called 'game of death' instead or corporate cancer tumor.
+
+Some famous person ( could be even dreadful Steeve Jobs ) even said:  
+""Manager of class A tries to hire A+ manager and manager of B class tries to hire C class manager.""
+
+
+You can easily extrapolate what would happen with company after a few iterations in both cases... 
+
+Multiplication by number 1.01 tends to increase to infinity, multiplication by number 0.99 tends to decrease to zero - simple math.
  
-Bad part that dead cells usually win. Why?
+### Good tech companies know
 
-I noticed that low qualified stuff often stay longer in company.
-Less offer on the market so they stay sit.
+Good tech companies like Google, Facebook etc.  famous for those tough intervies 
+( author also tried it few times without big success)
 
-'Dead cell' are usually more reluctant for adjusting or resigning than 'live',
+They often hire overqualified people for particilar work just to avoid mentioned death spiral, influenca ( you name it)
 
+Ther know that sneaky dead cells are not issusional danger for company.
 
-
-*
-they start so they are like cancer tumor spread all over organization bringing and promoting same 
-type of persons as they are.
-
-
-
-They often mimic 'live' especially for upstream management and if upstream management is not qualified 
-enough to recognize this it tends to spread. 
-Still rule #4 applies to some extent.
-Also in the model 'dead' cell could become 'alive', but in real life some emploees 
-are really 'dead cells' and there is no such environment conditions that could possibly resurrect them, because they are what they are.
-*and if such a person hired by mistake it tends to stay long as 
-you need to have very serious reason to fire people and lack of enthusiasm hardly could be a reason for that.
-
-
-Good companies like Google, Facebook etc. are known for those tough interview process
-and apparently this is for the reason, as they understand how dangerous to let 'dead cells' get into the company.
-
-In my opinion combating for corporate culture, keeping qualification bar high is one of most important duties management shall take care of
-as it is much easier to prevent illness that treat it.
+Combating for corporate culture, keeping qualification bar high is one of most important duties management shall take care of
+as it is much easier to prevent illness that treat it. Seems that many top managers do not realise that maybe they do
+but this battle for culture is not a low hanging fruit it instead plant grow and get result in many years - which is hard to 
+project to bonuses. 
  
+## Chance for survival for infected company
 
-I witnessed few times in my life when teams/departments converted from pretty solid IT guilds 
-to programmers hospice and burocracy heavens.
-  
-I heard some famous person ( maybe it was Steeve Jobs though I am not sure) once said 
-that manager of class A tries to hire A+ manager and manager of B class tries to hire C class manager.
-My understanding of that is A class manager means here qualified person with incentives aligned with company prosperity,
-and incentive of B class manager is job security, so C class subordinate would mean for this type of manager less competition and risk.
- 
-You can easily extrapolate what would happen with company after a few iterations. 
-because multiplication by number 1.01 tends to increase, multiplication by number 0.99 tends to decrease.
+In opposite to the "game of life" company microcosm is open system
+people come and leave, also cells are not equally powerful - CEO and general
+programmer for sure have different impact on company.
 
+in game of life all cells are equals but in corporate Life game it is hierarchical so tops having much more impact to downstreams.
 
-Few things could save company though:
+So replacing CEO can have huge impact even for company in terminal stage. 
 
-1. Shareholders intervention as they are main interresants in company prosperity 
+Also I am more optimistic about companies with big shareholder(s) who also works in the same company. 
+Shareholders intervention as they are main interresants in company prosperity 
 but often on that high level there is no transparancy what is going on in company.
 So they can replace tops and this is still a litle bit of lottery.
-
-That is why I am more optimistic about companies with big shareholder who also works in the same company.
-
-2. in Life game all cells are equals but in corporate Life game it is hierarchical so tops having much more impact to downstreams.
-
-
-this model is just reduced in dimension projection of corparate jungles and just one side of mechanics.
-There is another super strong force not covered in this model called results dressing when people just concerned about making those 
-careers no matter what. but this is different story.

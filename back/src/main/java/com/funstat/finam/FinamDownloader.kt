@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter
 import java.util.HashMap
 
 import com.google.common.io.CharStreams.readLines
+import io.netty.util.concurrent.DefaultThreadFactory
 
 
 class FinamDownloader : AutoCloseable, Source {
@@ -30,6 +31,7 @@ class FinamDownloader : AutoCloseable, Source {
             DefaultAsyncHttpClientConfig.Builder()
                     .setFollowRedirect(true)
                     .setKeepAlive(true)
+                    .setThreadFactory(DefaultThreadFactory("download fac",true))
                     .setConnectionTtl(5000)
                     .setRequestTimeout(180000)
                     .setMaxRequestRetry(3)
@@ -164,6 +166,8 @@ class FinamDownloader : AutoCloseable, Source {
     companion object {
         private val log = LoggerFactory.getLogger(FinamDownloader::class.java)
         val SOURCE = "FINAM"
+
+        val SHARES_MARKET = "1"
 
         val parser = CSVParserBuilder().withQuoteChar('\'').build()
 

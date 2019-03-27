@@ -1,2 +1,9 @@
+blog
+
+notification about sequentas
+
 mobile version of site
 enable cryptos
+trending strategy
+
+
