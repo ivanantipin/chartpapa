@@ -29,7 +29,7 @@ suspend fun runSimple(cfg: ModelBacktestConfig, fac : ModelFactory) {
 
     //persistJobs.forEach {it.cancelAndJoin()}
 
-    writeReport(outputs[0], cfg, cfg.reportTargetPath)
+    writeReport(outputs[0], cfg)
 
 
 }

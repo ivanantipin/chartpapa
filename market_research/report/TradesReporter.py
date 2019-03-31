@@ -9,6 +9,8 @@ import pandas as pd
 import pytz
 from IPython.display import HTML
 from scipy.interpolate import griddata
+import ipywidgets as widgets
+import sys
 
 
 class BacktestStats(object):
@@ -138,7 +140,7 @@ class BacktestResults(object):
     """
 
 
-    def __init__(self):
+    def __init__(self,filename : str, tz=pytz.UTC):
         """
         public self.trades attribute contains a pandas.DataFrame with the following columns:
 
@@ -156,6 +158,9 @@ class BacktestResults(object):
         self.seasonalAggFunc = {'pf': MetricsCalculator.pf, 'cnt': len}
         self.seasonalAggColors = ['r', 'g']
         self.lastStaticColumnInTrades = 'MFE'
+        self.load(filename)
+
+
 
     def load(self, filename, tz=pytz.UTC):
 
@@ -174,10 +179,11 @@ class BacktestResults(object):
         self.trades['ExitDate'] = self.trades['ExitDate'].map(lambda x: x.tz_localize(tz))
         self.sort()
 
-    def loadOpts(self, filename):
-        self.opts = pd.read_csv(filename, index_col=False, sep=';')
+        self.opts = pd.read_sql_query(sql="SELECT * FROM opts",
+                                        con=cnx)
         self.opts.fillna(0, inplace=True)
         self.opts.sort_values(by=[self.opts.columns[0]], inplace=True)
+
 
     def sort(self):
         """
@@ -220,9 +226,11 @@ class BacktestResults(object):
     def tickers(self):
         return self.trades['Ticker'].unique()
 
+
     def plot_equity_d2d_for_ticker(self, ticker=None, figsize=(18, 7)):
-        plt.figure()
-        tr = self.trades.copy(True) if ticker == None else self.trades[self.trades.Ticker == ticker]
+        trades = self.trades
+        ret = plt.figure()
+        tr = trades.copy(True) if ticker == None else trades[trades.Ticker == ticker]
         title = 'All tickers' if ticker == None else 'Ticker=' + ticker
         assert len(tr) > 0, 'No trades for ticker present ' + ticker
         tr.set_index(keys='EntryDate', inplace=True)
@@ -236,45 +244,69 @@ class BacktestResults(object):
         currFigure = plt.gcf()
         currFigure.set_size_inches(figsize)
         plt.title(title)
+        return ret
 
+    
+    def makeTickersTab(self):
+        cont=[ widgets.Output() for i in range(1 + len(self.tickers()))]
+        
+        mc = MetricsCalculator()
+
+        tab = widgets.Tab(children = cont)
+        for i in range(len(self.tickers())):
+            tab.set_title(i + 1,self.tickers()[i])
+
+        tab.set_title(0,'Overall stat')
+
+        for idx,out in enumerate(cont):    
+            with out:
+                if idx == 0:
+                    display(HTML(mc.statToHtml(self.trades).to_html()))
+                    self.plot_equity_d2d_for_ticker()
+                    plt.show()
+                else:
+                    ticker=self.tickers()[idx - 1]
+                    self.plot_equity_d2d_for_ticker(ticker)        
+                    plt.show()
+                    display(HTML(mc.statToHtml(self.trades[self.trades.Ticker == ticker]).to_html()))
+        return tab
+    
     def plotSeasonalitiesPnls(self, pnls : pd.DataFrame):
         if pnls.size == 0:
             return
-        fig, axes = plt.subplots(nrows=len(self.seasonalMapFunc), ncols=1)
-        fig.set_size_inches(25, 25)
-        fig.subplots_adjust(right=0.75)
-        currAxes = 0
-        for mapTitle, mapFun in self.seasonalMapFunc.items():
+        
+        seasonalMapFunc = self.seasonalMapFunc
+
+        outputs=list([widgets.Output() for i in seasonalMapFunc])
+
+        tab = widgets.Tab(children = outputs)
+
+        for idx, mapTitle in enumerate(seasonalMapFunc):
+            tab.set_title(idx,mapTitle)
+            mapFun = seasonalMapFunc[mapTitle]
             grp = pnls.groupby(mapFun)
-            currAgg = 0
-            for aggTitle, aggFun in self.seasonalAggFunc.items():
-                if currAgg == 0:
-                    ax = axes[currAxes]
-                else:
-                    ax = axes[currAxes].twinx()
-                '''if currAgg == 2:
-                    ax.spines['right'].set_position(('axes', 1.2))
-                    ax.set_frame_on(True)
-                    ax.patch.set_visible(False)
-                    ax.set_ylim((0, 2))
-                '''
-                for tl in ax.get_yticklabels():
-                    tl.set_color(self.seasonalAggColors[currAgg])
-                    ax.set_ylabel(aggTitle, color=self.seasonalAggColors[currAgg])
-                grp.aggregate(aggFun).plot(ax=ax, title=mapTitle, color=self.seasonalAggColors[currAgg], marker='o')
-                currAgg += 1
-            currAxes += 1
+            with outputs[idx]:
+                grp.aggregate(len).plot(ax=plt.gca(), color='red', marker='o')
+                plt.gca().set_ylabel('Count',color='red')
+                grp.aggregate(MetricsCalculator.pf).plot(ax=plt.gca().twinx(), color='green', marker='o')
+                plt.gca().set_ylabel('Pf',color='green')
+                #             plt.gca().get_yticklabels().set_color('green')
+                plt.gcf().set_size_inches(15, 6)
+                plt.show()
+        return tab
+
 
     def plotSeasonalities(self):
         tr = self.trades.copy()
         tr.set_index(keys='EntryDate', inplace=True)
-        self.plotSeasonalitiesPnls(tr.Pnl)
+        return self.plotSeasonalitiesPnls(tr.Pnl)
 
     def getFactorCols(self):
         return list(self.trades.columns[self.trades.columns.get_loc(self.lastStaticColumnInTrades) + 1:].values)
 
     def plotFactors(self):
         cols = self.getFactorCols()
+        print(cols)
         if len(cols) > 0:
             rn = int(len(cols) / 3)
             ncols = len(cols) if rn == 0 else 3
@@ -285,15 +317,16 @@ class BacktestResults(object):
             g.set_size_inches(30, rn * 4)
             for i in range(0, len(cols)):
                 try:
-                    cat = pd.qcut(self.trades[cols[i]], 5)
+                    cat = pd.qcut(self.trades[cols[i]], 5, duplicates='drop')
                     self.trades['Pnl'].groupby(cat).aggregate(np.sum).plot(ax=axs[i])
-                except ValueError:
-                    print('error ' + cols[i])
+                except ValueError as ve:
+                    print(ve)
                     continue
 
     def plotOptimization(self):
-        optCols = [self.opts.columns[0]] if self.opts.columns[1] == 'Pf' else [self.opts.columns[0],
-                                                                               self.opts.columns[1]]
+
+        optCols = [i for i in self.opts.columns if i.startswith('opt_') ]
+
         # optCols=filter(lambda x : len(x) > 0,optCols.split(';'))
         dfOpt = self.opts
         if len(optCols) == 2:
@@ -313,6 +346,8 @@ class BacktestResults(object):
             Y1 = dfOpt['Pnl']
             fig.set_size_inches([20, 5])
             ax = plt.plot(X, Y1)
+
+
 
 
 
@@ -338,7 +373,8 @@ def test():
     # bs.plotSeasonalities()
     # plt.show()
 
-test()
+
+# test()
 
 # bs.plot_equity_d2d_for_ticker(ticker='RSX')
 # plt.show()

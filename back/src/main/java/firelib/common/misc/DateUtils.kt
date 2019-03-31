@@ -29,3 +29,7 @@ val moscowZoneId = ZoneId.of("Europe/Moscow")
 fun Instant.atUtc (): LocalDateTime = LocalDateTime.ofInstant(this,ZoneOffset.UTC)
 
 fun Instant.toStandardString (): String = if(this == null) "null" else dateStringFormatOfDateUtils.format(this.atZone(ZoneOffset.UTC))
+
+
+fun LocalDateTime.toInstantDefault() : Instant = this.toInstant(ZoneOffset.UTC)
+fun LocalDate.toInstantDefault() : Instant = this.atStartOfDay().toInstant(ZoneOffset.UTC)

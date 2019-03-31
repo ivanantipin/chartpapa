@@ -2,29 +2,33 @@
 
 Have you heard about game called [Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) devised by the British mathematician John Horton Conway in 1970?
 
+rules from wikipedia:
+
 >>The universe of the Game of Life is an infinite, two-dimensional orthogonal grid cells.
 >> 1. Any live cell with fewer than two live neighbours dies.
 >> 2. Any live cell with two or three live neighbours lives on to the next generation.
 >> 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
 >> 4. Any dead cell with exactly three live neighbours becomes a live cell. 
 
-I think that some of these rules apply to mechanics of corporate universe.
+I think that some of these rules apply to mechanics of corporate office universe.
 Lets exclude rule  3. from consideration though.
 
-Lets make naive assumption that bad employes are 'dead' and good emploees are 'live' cells in our game.
+Lets make funny naive assumption that bad employees are 'dead' and good employees are 'live' cells in our game.
 
-'Good' and 'bad' is actually multidimensional term whatever from enthusiasm and qualification to temper but we would collapse it to one dimension (good-bad), kind of extreme.
+'Good' and 'bad' are actually multidimensional term : from enthusiasm and qualification to temper, 
+but we would collapse it to one dimension (good-bad), kind of extreme.
 
 
 ### Case 1 'live'  surrounded by 'dead-s'
 
-So case one when you are a live cell and surrounded by 'dead' ones - you most probably would adjust or leave.
-By 'adjust' I mean your performance and behavior will be eventually aligned with rest of team because people are social animals.
-So you effectively become a 'dead' one or leave. 
+If you are a 'live' cell surrounded by 'dead' ones in our terminology you most probably would adjust or leave.
+By 'adjust' I mean your performance and behavior will be eventually 
+aligned with rest of team because people are social animals.
+So you will eventually become a 'dead' one or leave company. 
 
 ### Case 2 'dead' surrounded by 'live-s'
 
-If you are a dead cell and surrounded by good ones you would also feel uncomfortable for the very same reason
+If you are a 'dead' cell and surrounded by good ones you would also feel uncomfortable for the very same reason
 which would motivate you for an action - leave or try harder or do something good to align with rest.
 So you effectively become 'live' or leave
 
@@ -55,9 +59,9 @@ You can easily extrapolate what would happen with company after a few iterations
 
 Multiplication by number 1.01 tends to increase to infinity, multiplication by number 0.99 tends to decrease to zero - simple math.
  
-### Good tech companies know
+### Good tech companies know!
 
-Good tech companies like Google, Facebook etc.  famous for those tough intervies 
+Good tech companies like Google, Facebook etc.  famous for those tough interviews 
 ( author also tried it few times without big success)
 
 They often hire overqualified people for particilar work just to avoid mentioned death spiral, influenca ( you name it)

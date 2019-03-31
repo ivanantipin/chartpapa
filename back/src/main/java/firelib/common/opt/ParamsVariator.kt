@@ -7,37 +7,31 @@ package firelib.common.opt
  */
 class ParamsVariator(val optParams: List<OptimizedParameter>) : Iterator<Map<String,Int>> {
 
-    var nxt : Map<String,Int>? = null
+
+    var firstIter = true
+
+
 
     override fun next(): Map<String, Int> {
-        val ret = nxt
-        nxt = next0()
-        return ret!!
-    }
-
-    init {
-        nxt = next0()
-    }
-
-    fun next0(): Map<String, Int>? {
-        if (!optParams[0].next()) {
-            optParams[0].reset();
-            for (i in 1 until optParams.size) {
-                if (optParams[i].next()) {
-                    break;
-                } else {
-                    if(i == optParams.size - 1){
-                        return null;
-                    }
-                    optParams[i].reset()
-                }
+        if(firstIter){
+            firstIter = false
+            return optParams.associateBy({ it.name }, { it.value })
+        }
+        val idx = optParams.indexOfFirst { it.hasNext() }
+        if (idx >= 0) {
+            for (i in 0 until idx) {
+                optParams[i].reset()
             }
+            optParams[idx].next()
         }
         return optParams.associateBy({ it.name }, { it.value })
+
     }
 
+
+
     override fun hasNext(): Boolean {
-        return nxt != null
+        return optParams.indexOfFirst { it.hasNext() } >= 0
     }
 
 

@@ -23,31 +23,28 @@ fun clearReportDir(targetDir: String) {
 }
 
 
-fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig, targetDir: String) {
+fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig) {
 
-    jsonHelper.serialize(cfg,Paths.get(targetDir, "cfg.json"))
+    jsonHelper.serialize(cfg,Paths.get(cfg.reportTargetPath, "cfg.json"))
 
-    if (model.trades.size == 0) return
+    if (model.trades.size == 0) {
+        println("no trades generated")
+        return
+    }
 
-    writeRows(Paths.get(targetDir, "modelProps.properties").toAbsolutePath().toString(),model.modelProps.map({it.key + "=" + it.value}))
+    writeRows(Paths.get(cfg.reportTargetPath, "modelProps.properties").toAbsolutePath().toString(),model.modelProps.map({it.key + "=" + it.value}))
 
     val factors = model.trades[0].tradeStat.factors
 
-    val reportDbFile = Paths.get(targetDir).resolve("report.db").toAbsolutePath()
+    StreamTradeCaseWriter(cfg.getReportDbFile(), factors.map({it.key})).insertTrades(model.trades)
 
-    val tradeWriter = StreamTradeCaseWriter(reportDbFile, factors.map({it.key}))
+    StreamOrderWriter(cfg.getReportDbFile()).insertOrders(model.orderStates.filter {it.status == OrderStatus.New}.map {it.order})
 
-    tradeWriter.insertTrades(model.trades)
+    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/StdReport.ipynb"),Paths.get(Paths.get(cfg.reportTargetPath,"StdReport.ipynb").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
+    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/TradesReporter.py"),Paths.get(Paths.get(cfg.reportTargetPath,"TradesReporter.py").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
+    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/ShowTrade.ipynb"),Paths.get(Paths.get(cfg.reportTargetPath,"ShowTrade.ipynb").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
 
-    val orderWriter = StreamOrderWriter(reportDbFile)
-
-    orderWriter.insertOrders(model.orderStates.filter {it.status == OrderStatus.New}.map {it.order})
-
-    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/StdReport.ipynb"),Paths.get(Paths.get(targetDir,"StdReport.ipynb").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
-    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/TradesReporter.py"),Paths.get(Paths.get(targetDir,"TradesReporter.py").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
-    Files.copy(Paths.get("/home/ivan/projects/fbackend/market_research/report/ShowTrade.ipynb"),Paths.get(Paths.get(targetDir,"ShowTrade.ipynb").toAbsolutePath().toString()),StandardCopyOption.REPLACE_EXISTING)
-
-    System.out.println("report written to $targetDir you can run it , command 'ipython notebook StdReport.ipynb'")
+    println("report written to ${cfg.reportTargetPath} you can run it , command 'jupyter lab'")
 
 }
 

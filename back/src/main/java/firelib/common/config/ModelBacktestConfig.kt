@@ -2,6 +2,8 @@ package firelib.common.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import firelib.common.report.StrategyMetric
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDateTime
 
@@ -40,6 +42,11 @@ class ModelBacktestConfig (){
     * report will be written into this directory
      */
     var reportTargetPath: String = ""
+
+
+    fun getReportDbFile(): Path {
+        return Paths.get(reportTargetPath).resolve("report.db").toAbsolutePath()
+    }
 
 
 

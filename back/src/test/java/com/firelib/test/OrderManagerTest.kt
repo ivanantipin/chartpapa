@@ -14,9 +14,9 @@ import java.time.Instant
 class OrderManagerTest {
 
     fun  update(tg : TradeGateStub, bid : Double, ask : Double) : Unit {
-        tg.limitBooks.forEach {it.updateBidAsk(bid, ask, prices[i].first)}
-        tg.stopBooks.forEach {it.updateBidAsk(bid, ask, prices[i].first)}
-        tg.marketSubs.forEach {it.updateBidAsk(bid,ask)}
+        tg.limitBooks.forEach {it.updateBidAsk(bid, ask, Instant.now())}
+        tg.stopBooks.forEach {it.updateBidAsk(bid, ask, Instant.now())}
+        tg.marketSubs.forEach {it.updateBidAsk(bid,ask, Instant.now())}
     }
 
     @Test

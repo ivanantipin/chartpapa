@@ -17,12 +17,12 @@ class SplitTrdTest{
     fun TestSplittingToCases() {
 
         val trds = listOf(
-                Trade(1, 10.0, Order(OrderType.Market, 1.0, 10, Side.Buy,"sec","id", Instant.now()), Instant.now()),
-        Trade(2, 11.0, Order(OrderType.Market, 2.0, 11, Side.Buy,"sec","id", Instant.now()), Instant.now()),
-        Trade(3, 12.0, Order(OrderType.Market, 3.0, 12, Side.Buy,"sec","id", Instant.now()), Instant.now()),
-        Trade(1, 13.0, Order(OrderType.Market, 1.0, 13, Side.Sell,"sec","id", Instant.now()), Instant.now()),
-        Trade(2, 14.0, Order(OrderType.Market, 2.0, 14, Side.Sell,"sec","id", Instant.now()), Instant.now()),
-        Trade(3, 15.0, Order(OrderType.Market, 3.0, 15, Side.Sell,"sec","id", Instant.now()), Instant.now())
+                Trade(1, 10.0, Order(OrderType.Market, 1.0, 10, Side.Buy,"sec","id", Instant.now()), Instant.now(), Instant.now()),
+        Trade(2, 11.0, Order(OrderType.Market, 2.0, 11, Side.Buy,"sec","id", Instant.now()), Instant.now(), Instant.now()),
+        Trade(3, 12.0, Order(OrderType.Market, 3.0, 12, Side.Buy,"sec","id", Instant.now()), Instant.now(), Instant.now()),
+        Trade(1, 13.0, Order(OrderType.Market, 1.0, 13, Side.Sell,"sec","id", Instant.now()), Instant.now(), Instant.now()),
+        Trade(2, 14.0, Order(OrderType.Market, 2.0, 14, Side.Sell,"sec","id", Instant.now()), Instant.now(), Instant.now()),
+        Trade(3, 15.0, Order(OrderType.Market, 3.0, 15, Side.Sell,"sec","id", Instant.now()), Instant.now(), Instant.now())
         )
 
         var tcs = toTradingCases(trds)

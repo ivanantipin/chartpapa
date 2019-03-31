@@ -5,6 +5,9 @@ import com.funstat.store.SqlUtils
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.misc.StreamTradeCaseGenerator
+import firelib.common.misc.dbl2Str
+import firelib.common.misc.writeRows
+import firelib.common.opt.OptimizedParameter
 import firelib.domain.Ohlc
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -16,6 +19,7 @@ import java.time.Instant
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.memberProperties
 
 fun makeSqlStatementFromHeader(table: String, header: Map<String, String>): String {
@@ -76,6 +80,38 @@ class StreamOrderWriter(val path: Path) {
     }
 }
 
+object GenericMapWriter{
+    fun write(path : Path, rows: List<Map<String,Any>>, tableName : String) {
+
+        val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
+        val stmt: String
+
+        val colsDef = rows[0].map {
+            ColDef<Map<String,Any>, Any>(it.key, { v: Map<String, Any> ->
+                v[it.key]!!
+            }, it.value::class.createType())
+        }.toTypedArray()
+
+        val header = getHeader(colsDef as Array<ColDef<Map<String,Any>, out Any>>)
+        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader(tableName, header))
+        stmt = makeSqlStatementFromHeader(tableName, header)
+        NamedParameterJdbcTemplate(ds).batchUpdate(stmt, rows.toTypedArray())
+    }
+}
+
+object OptWriter{
+
+    fun write(path : Path, estimates: List<ExecutionEstimates>) {
+        var colsDef : List<ColDef<Map<String,Any>,out Any>>? = null
+        val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
+        val stmt: String
+        val rows = estimates.map {
+            it.metricToValue.mapKeys { it.key.name } + it.optParams.mapKeys { "opt_${it.key}" }
+        }
+        GenericMapWriter.write(path,rows, "opts")
+    }
+}
+
 object GlobalLock{
     val lock = ReentrantLock()
 }
@@ -83,11 +119,8 @@ object GlobalLock{
 
 
 class OhlcStreamWriter(val path: Path) {
-
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
     val mdDao = MdDao(ds)
-
-
     fun insertOhlcs(secName : String, ohlcs: List<Ohlc>): Unit {
         GlobalLock.lock.withLock {
             mdDao.insertOhlc(ohlcs,secName)
@@ -121,6 +154,7 @@ class GenericDumper<T : Any>(val name : String, val path : Path, val type : KCla
 
 data class Test(val name : String, val time : Instant)
 fun main(args: Array<String>) {
-    val dumper = GenericDumper("test", Paths.get("test.db"), Test::class)
-    dumper.write(listOf(Test("N0", Instant.now()), Test("N1", Instant.now())))
+
+    OptWriter.write(Paths.get("test.db"), listOf(ExecutionEstimates(mapOf("a" to 1), mapOf(StrategyMetric.AvgLoss to 1.0))))
+
 }

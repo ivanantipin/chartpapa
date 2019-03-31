@@ -35,10 +35,9 @@ object SqlTypeMapper{
 
 }
 
-class ColDef<I,T>(val name : String, val extract : (I)->T){
+class ColDef<I,T>(val name : String, val extract : (I)->T, val typeOverride : KType? = null){
     fun getSqlType(): String{
-        val retType = extract.reflect()!!.returnType
-        return mapType(retType)
+        return mapType(typeOverride ?: extract.reflect()!!.returnType)
     }
 
 }

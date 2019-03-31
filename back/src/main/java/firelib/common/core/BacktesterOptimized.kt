@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit
 
 
 fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
-    System.out.println("Starting")
+    println("Starting")
 
     val startTime = System.currentTimeMillis()
 
@@ -26,9 +26,10 @@ fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
 
     val (startDtGmt, endDtGmt) = TimeBoundsCalculatorImpl()(cfg)
 
-    val endOfOptimize =  if(cfg.optConfig.optimizedPeriodDays < 0) endDtGmt.plusMillis(100) else startDtGmt.plus(cfg.optConfig.optimizedPeriodDays, ChronoUnit.DAYS)
+    val endOfOptimize =  if(cfg.optConfig.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
+    else startDtGmt.plus(cfg.optConfig.optimizedPeriodDays, ChronoUnit.DAYS)
 
-    println("number of models " + variator.combinations())
+    println("total number of models to test : ${variator.combinations()}")
 
     val optResourceParams: OptResourceParams = cfg.optConfig.resourceStrategy.getParams(variator.combinations())
 
@@ -50,7 +51,7 @@ fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
     println("Model optimized in ${(System.currentTimeMillis() - startTime) / 1000} sec")
 
 
-    assert(reportProcessor.bestModels().size > 0, {"no models get produced!!"})
+    require(reportProcessor.bestModels().isNotEmpty(), {"no models get produced!!"})
 
     var output = reportProcessor.bestModels().last()
 
@@ -63,22 +64,15 @@ fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory): Unit {
         output = outputSeq[0]
     }
 
-    writeReport(output, cfg, cfg.reportTargetPath)
+    writeReport(output, cfg)
 
-    writeOptimizedReport(cfg, reportProcessor, endOfOptimize)
+    OptWriter.write(cfg.getReportDbFile(), reportProcessor.estimates)
+
 
     println("Finished")
 }
 
 
-private fun writeOptimizedReport(cfg: ModelBacktestConfig, reportProcessor: ReportProcessor, endOfOptimize: Instant) {
-    optParamsWriter.write(
-            cfg.reportTargetPath,
-            optEnd = endOfOptimize,
-            estimates = reportProcessor.estimates,
-            optParams = cfg.optConfig.params,
-            metrics = cfg.calculatedMetrics)
-}
 
 
 private fun nextModelVariationsChunk(cfg: ModelBacktestConfig, variator: ParamsVariator, batchSize: Int, factory: ModelFactory): SimpleRunCtx {

@@ -13,7 +13,7 @@ class VariatorTest {
     fun TestOptVariator()  {
         val variator = ParamsVariator(listOf(
                 OptimizedParameter("p0", 0, 2),
-        OptimizedParameter("p1", 0, 3)
+                OptimizedParameter("p1", 0, 3)
         ))
 
         assertEquals(6, variator.combinations())
@@ -35,7 +35,7 @@ class VariatorTest {
             Assert.assertTrue(set.contains(key))
             set.remove(key)
         }
-        assertEquals(0, set.size)
+        assertEquals("left ${set}!! ", 0, set.size)
     }
 
 }
