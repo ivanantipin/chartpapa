@@ -1,9 +1,10 @@
 First time when I heard about agile programming approach was in 2000x something,
-I had quick glance at it and it passed by without big impact on how I organized my work.
+I had quick glance at it and it passed along without big impact on how I organize my work.
 
-In the past few years, I noticed that scrumy-agility got the new momentum, maybe it is just my subjective perception,I do not know.
+In the past few years, I noticed that scrumy-agility got the new momentum,
+that could be just my subjective perception though.
 
-Scum mastering became a "profession", so people seriously do a full time work on this agenda.
+Scum mastering became a "profession", so people seriously do a full time work doing this.
 
 Personally I was always skeptical about the religion of scrum, especially if it was viewed as a silver bullet.
 

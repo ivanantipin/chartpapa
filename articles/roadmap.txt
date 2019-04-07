@@ -1,0 +1,8 @@
+architects
+scum-agile
+complexity
+oop
+spring - di frameworks
+game of life
+anology concurrency teams performance
+banks curse

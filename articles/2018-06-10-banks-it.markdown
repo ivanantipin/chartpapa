@@ -1,0 +1,131 @@
+---
+layout: post
+title:  "banks are endangered because of bad IT management"
+date:   2018-06-10 10:18:00
+---
+
+Some lyric before I start talking about broad things...
+
+Being proficient in IT become matter of survival for banks, because 
+monopoly of banks as financial services providers is being challenged by many 
+great IT companies. Apple, Google, Facebook, Uber, Yandex are just a few among them. 
+These companies have superior IT culture and software is those primary business 
+and they are working hard to get piece of banking pie.
+
+I am pretty sure that banks who will not be able to adapt will pass away 
+in horizon of maybe 10-20 year , I am just guessing here as world developed in non linear fashion, 
+but direction is clear. 
+For example why would I keep my money in bank if there would be 
+non volatile, government approved crypto currency and multiple service providers on top of this currency.
+
+By adapt I mean they need to fix those IT or even become proper IT company. 
+Banks historically have relatively mediocre IT culture and seems 
+that management of most banks still does not realize that fact. I worked in 3 of them 
+and have heard from my friends about 4 others - so this statistic covers good portion of major banks.
+
+I would like to put few words what is wrong with banks IT 
+and what needs to be done to fix it ( though I do not believe that management
+have enough courage to do that as transformation of this size is always a risk).
+
+///
+
+
+There is serious problem with middle management.
+
+It is quite common for middle management not having serious IT background 
+and this is crucial.
+ 
+These people often do not understand how software development works. 
+Steeve Jobs once told that best managers are those who were grown up in IT and never wanted to be 
+a manager. These guys are too frustrated being managed by "born to be a manager" managers.
+This is american model vs japan model. American model assumes that you can be trained to 
+be a manager right away japan one says you need to get programmer experience first.
+
+
+These kind of managers consider programmers as a resource
+and performance of team in those minds is just linear function from programmers head count.
+This misconception revealed many years ago ( you can read "mythycal man month" for example)
+but still this perception is not uncommon in banks. 
+ 
+As soon as they do not understand IT they like to have layers of architects and scrum masters 
+who in those opinion shapes herd of programmers.
+
+But scrum process work the way "shit in shit out" - I mean squad of mediocre programmers as "input"
+cant deliver anything than shit on "output" even with herd of running and dancing scrum masters around.
+
+ 
+but I often see super capable guys not appreciated because they
+cant make sweet talks, but they are great contributors. I see that these kind of guys often shadowed and
+those acheivements assigned to wrong person. This for sure descourage this kind of guys to work and they just move
+to different company with better culture. So qualification level of programmers decreased because of this process.
+Technical ability is disregarded.
+
+
+Responsibility.
+
+Banks often have 2 different hierachies IT and business.
+Business people put money on the table, IT provides solutions.
+
+Business in banks knows what they are doing and if they "fucked up" they fucked up,
+and they have IT department which they do not understand.
+They hire some sweet guy as head of this department who knows how to talk to business but 
+not how to make software and that is the issue. 
+
+This guy can sit in this position for years wasting budget and dressing up results 
+as soon as IT is not transparent at all to  business guy and they keep giving the money.
+
+And often they do not have direct dependency efforts - money.
+
+What you gonna do with deliveries if you are kind of not capable ?
+As soon as these guys report to next managers who do not understand IT either 
+they easily dressing up those deliveries as success. 
+Presentation becomes important not realization.
+
+
+a. they often pursue short term targets that is hacky and creates a lot of problems going further
+They choose short deliveries instead of shoosing long and righ from IT perspective processes.
+So they get bulky full of legacy system and operates with it with mediocre programmers
+where one programmer is just a resource...
+
+They are too concerned about securing those work positions.
+
+ 
+
+
+
+
+
+Vicious circle.
+
+There is another self maintaining inefficientcy.
+
+Banks generally do not have superior reputation among soft developing community 
+because they have a lot of burocracy, legacy systems etc.
+
+If bank does not provide solid good premia over average market rate
+you will only be able to hire mediocre programmers.
+
+Not sexy people create not sexy products, they are usually 
+unable to transform and shape legacy systems into proper ones.
+
+
+
+Hiring of mediocre programmers is another problem. I will describe why.
+
+
+
+As soon as banks guys do not have enough qualification managers 
+choose to run legacy systmes as long as possible this creates 
+huge tech debt that getting expensive every year.
+
+
+
+I know that google,facebook hiring process have a lot of false negative rejects,
+and I know why they are so picky even if those programmers sometime overqualified 
+for work they do. 
+The thing is simple - once you start lowering bar it will trend to that direction.
+
+Steeve Jobs once said that manager of A class tries to hire A+ and manager of B class 
+tries to hire C class.
+
+ 

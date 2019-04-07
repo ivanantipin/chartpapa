@@ -58,7 +58,7 @@ data class Ohlc(
 
     fun bodyLength(): Double = Math.abs(close - open)
 
-    fun ret(): Double = close - open
+    fun ret(): Double = (close - open)/open
 
     fun isInRange(vv: Double): Boolean = high > vv && vv > low
 

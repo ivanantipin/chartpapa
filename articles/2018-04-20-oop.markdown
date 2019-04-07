@@ -1,0 +1,53 @@
+---
+layout: post
+title:  "my reflection on OOP"
+date:   2018-05-19 10:18:00
+---
+
+There are quite a few articles from authoritative folks criticising OOP. Unfortunately those articles were not around when I started studying programming.
+That days everyone was obsessed with OOP, Straustrup book was bible of OOP and he was a god. Couple of my classmates who I lived with in student hostel
+were talked about c++/OOP all the time so I got infected.
+
+{% include base.html %}
+
+
+OOP was mysterious and attractive world for me, I did not have enough experience to have  critical eye on that 
+and it looked reasonable and attractive... until I started building relatively large applications. 
+
+So after 5 years of java programming, using "best OOP patterns and practices", 
+I still was not happy with quality of my code and blamed myself in vain for that. 
+Now I realize that this was actually an indicator that something wrong with OOP, not me, 
+and eventually I came up with following informal super subjective proof that OOP is not good :) :
+
+**Proof:** 
+
+1. My code was OK, but far from brilliant and it did not have promised features of OOP like flexibility, readability and other *ilities even though I spent quite some time staring at it trying to improve.
+2. I modestly estimate my skills in top 30% percentile of programmers population, at least, also, 5 years of experience shall be enough to start writing good code!
+3. Good practices should work for majority of developers and I am in the 50% percentile (see point 2).     
+4. Code of other OOP fans did not look better. I realised that doing code review and looking through source code of public libraries.
+5. When I started using Scala and watched Odersky course about functional programming 
+I started feeling much better about my code quality.
+I spent less time on application design and output code was much cleaner. 
+
+As I said points are very subjective so is the whole article.
+
+**Dimensional curse** <br/>
+So what is so wrong with OOP besides my informal proof?
+<br/>As I said there are quite a few good articles that describe why particular features of OOP does not work ( polymorphism, inheritance etc.), 
+but on high level,imo, there is only one reason : OOP suffers from dimensional curse.
+
+![Dimensional curse]({{ base }}/assets/images/curse-of-dimensionality.jpg)
+
+
+How come is that ? <br/> State is integral part of OOP in the form of fields and each field can be considered as dimension, so space of possible 
+states of your class/system grows exponentially together with complexity.  
+For example try to test all possible cases of class with *one* boolean variable and *three* you would get 1 and 8 possible combinations accordingly!!
+
+There is lame (imo) attempt to put some rules known as "OOP patterns" to fix the problem, but from my experience they are just little help.
+Also you can try to remediate some of OOP problems by forbidding mutable state, fields inheritance, functions overriding, but what would then left from OOP?
+On interview I often ask people OOP questions because experienced programmer must know dark side of OOP,
+I noticed that OOP fans often biased to over-designing.
+  
+**Conclusion**<br/>
+OOP is way too complex to use and, unfortunately, junior programmers often get fresh start in programming by studying this harmful concept.
+It is fine to study OOP after you get some background in functional programming then you would definitely be more prepared.

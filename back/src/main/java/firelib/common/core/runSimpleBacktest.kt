@@ -14,7 +14,7 @@ import java.time.Instant
 import java.util.concurrent.LinkedBlockingQueue
 
 
-suspend fun runSimple(cfg: ModelBacktestConfig, fac : ModelFactory) {
+fun runSimple(cfg: ModelBacktestConfig, fac : ModelFactory) {
 
     clearReportDir(cfg.reportTargetPath)
 
