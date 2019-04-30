@@ -27,9 +27,9 @@ class MainMenu extends Component<HomeProps,any> {
 
         return <Layout>
             <Sider
-                trigger={null}
+                // trigger={null}
                 collapsible
-                collapsed={this.state.collapsed}
+                // collapsed={this.state.collapsed}
             >
                 <div className="logo"/>
 
@@ -52,7 +52,7 @@ class MainMenu extends Component<HomeProps,any> {
                         onClick={this.toggle}
                     />
                 </Header>
-                <Content style={{margin: '24px 16px', padding: 24, background: '#fff', minHeight: 700}}>
+                <Content style={{margin: '24px 16px', padding: 24, background: '#fff', height: "100%"}}>
                     <Switch>
 
                         {

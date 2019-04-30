@@ -9,7 +9,7 @@ import {fetchOhlcChart} from "../../repository";
 import HOhlcChart from "../OhlcChart/HOhlcChart";
 import {CandleStickChartProps} from "../OhlcChart/OhlcChart";
 import {connect} from "react-redux";
-import {Spin, Row, Col} from "antd";
+import {Row, Spin} from "antd";
 import {InstrId} from "../../api";
 
 
@@ -61,7 +61,7 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
             return <Spin style={{top: '50%', left: '50%', position: 'absolute'}} size='large'/>
         }
         if (this.state.chart == null) {
-            return <div/>
+            return <div style={{width : "100%"}}/>
         } else {
             return <HOhlcChart {...this.state.chart}/>
         }
@@ -70,18 +70,17 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
     render() {
         return (
             <div className="widget">
-                <Row>
-                    <Col span={4}>
-                <Select style={{width: 150}}
+                    <Row>
+                <Select style={{minWidth: 100, width : 150}}
                         onChange={this.onSelect.bind(this)}
                     // @ts-ignore
                         value={this.state.inst}
                         options={this.props.instruments.map(r => {
                             return SeqPanel.instrToOpt(r);
                         })}/>
-                    </Col>
-                    <Col span={4}>
-                <Select style={{width: 150}}
+                    </Row>
+                    <Row>
+                <Select style={{minWidth: 100, width : 150}}
                         onChange={this.onTimeFrameChange.bind(this)}
                     // @ts-ignore
                         value={{label: this.state.timeframe, value : this.state.timeframe}}
@@ -90,8 +89,7 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
                             {label : 'Week',value : 'Week'},
                             {label : 'Min240',value : 'Min240'},
                         ]}/>
-                    </Col>
-                </Row>
+                    </Row>
 
                 {
                     this.getSome.bind(this)()
