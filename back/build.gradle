@@ -64,8 +64,12 @@ compileTestKotlin {
 }
 
 bootRun {
-    jvmArgs = ["-Xms728m","-Xmx728m", "-DnotebooksDir=/root/release/chartpapa/market_research/published", "-Dcom.sun.management.jmxremote", "-Dcom.sun.management.jmxremote.port=5555", "-Dcom.sun.management.jmxremote.authenticate=false", "-Dcom.sun.management.jmxremote.ssl=false", "-Dcom.sun.management.jmxremote.local.only=false"]
+    if ( project.hasProperty('jvmArgs') ) {
+        System.out.println(Arrays.toString(project.jvmArgs.split('\\s+')))
+        jvmArgs = (project.jvmArgs.split("\\s+") as List)
+    }
 }
+
 
 
 

@@ -4,8 +4,16 @@ import {InstrId, Label, Ohlc} from "./api/api";
 import {CandleStickChartProps, OhlcTr} from "./components/OhlcChart/OhlcChart";
 
 
+function getUrl() {
+    if(location.hostname.indexOf("chartpapa") >= 0){
+        return "http://" + location.hostname + ":80"
+    }else {
+        return "http://" + location.hostname + ":8080"
+    }
+}
+
 const config : Configuration = {
-    basePath : "http://" + location.hostname + ":8080"
+    basePath : getUrl()
 }
 
 export const mainControllerApi = new MainControllerApi(config);
