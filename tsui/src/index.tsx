@@ -28,9 +28,13 @@ fetchInstruments().then(inst => {
 });
 
 
-ReactDOM.render(<Provider store={store}>
+ReactDOM.render(<div style={{height : "100vh"}}><Provider  store={store}>
+
+
     <Router history={createHist()}>
-        <MainMenu/>
+            <MainMenu />
     </Router>
-</Provider>, document.getElementById('root'));
+
+
+</Provider></div>, document.getElementById('root'));
 registerServiceWorker();

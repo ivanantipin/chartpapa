@@ -22,4 +22,4 @@ args="-Xms728m -Xmx728m -DnotebooksDir=/root/release/chartpapa/market_research/p
 -Dserver.port=80 \
 -Dcom.sun.management.jmxremote.local.only=false"
 
-nohup ./gradlew --stacktrace bootRun -PjvmArgs="${args}" &
+nohup ./gradlew -Dorg.gradle.daemon=false --stacktrace bootRun -PjvmArgs="${args}" &

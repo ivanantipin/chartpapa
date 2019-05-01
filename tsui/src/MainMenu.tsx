@@ -25,10 +25,11 @@ class MainMenu extends Component<HomeProps,any> {
 
     render() {
 
-        return <Layout>
+        return <Layout style={{height : "100%"}}>
             <Sider
                 // trigger={null}
-                collapsible
+                //collapsible
+                breakpoint="lg"
                 // collapsed={this.state.collapsed}
             >
                 <div className="logo"/>
@@ -44,7 +45,7 @@ class MainMenu extends Component<HomeProps,any> {
                     }
                 </Menu>
             </Sider>
-            <Layout>
+            <Layout >
                 <Header style={{background: '#fff', padding: 0}}>
                     <Icon
                         className="trigger"
@@ -73,7 +74,6 @@ class MainMenu extends Component<HomeProps,any> {
     }
 
     private selectMenu(param : SelectParam ) {
-        console.log('hist ' + param.key)
         this.props.history.push(param.key)
     }
 }

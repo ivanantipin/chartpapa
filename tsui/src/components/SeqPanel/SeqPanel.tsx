@@ -69,7 +69,7 @@ class SeqPanel extends Component<MainStore, { inst?: Opt, loading: boolean, char
 
     render() {
         return (
-            <div className="widget">
+            <div style={{height : "100%"}}>
                     <Row>
                 <Select style={{minWidth: 100, width : 150}}
                         onChange={this.onSelect.bind(this)}

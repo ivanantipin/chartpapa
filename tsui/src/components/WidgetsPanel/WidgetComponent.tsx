@@ -36,7 +36,6 @@ export class WidgetComponent extends Component<WidgetData & WidgetCallbacks & Ma
 
 
     render() {
-        console.log('selected', this.props.selectedInstruments)
         return (
             <div className="widget">
                 <div>Panel</div>
