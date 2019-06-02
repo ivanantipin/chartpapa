@@ -91,15 +91,15 @@ class FinamDownloader : AutoCloseable, Source {
         return ret.asSequence()
     }
 
-    private fun loadSome(instrId: InstrId, start: LocalDateTime, finish : LocalDateTime): List<Ohlc> {
+    private fun loadSome(instrId: InstrId, start: LocalDateTime, finishI : LocalDateTime): List<Ohlc> {
         while (System.currentTimeMillis() - lastFinamCall < 1100) {
             try {
                 Thread.sleep(100)
             } catch (e: InterruptedException) {
                 throw RuntimeException(e)
             }
-
         }
+        val finish = if(finishI.isAfter(LocalDateTime.now())) LocalDateTime.now() else finishI;
 
         lastFinamCall = System.currentTimeMillis()
 
@@ -125,7 +125,9 @@ class FinamDownloader : AutoCloseable, Source {
                 "mt" to "${(finish.monthValue - 1)}",
                 "yt" to "${finish.year}",
                 "code" to "${instrId.code}",
-                "cn" to "${instrId.code}"
+                "cn" to "${instrId.code}",
+                "to" to "${finish.year}.${finish.monthValue}.${finish.dayOfMonth}",
+                "from" to "${start.year}.${start.monthValue}.${start.dayOfMonth}"
         )
 
         val url = "http://export.finam.ru/table.csv?" + params.map { "${it.first}=${it.second}" }.joinToString(separator = "&")
