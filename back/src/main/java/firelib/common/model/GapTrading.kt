@@ -5,8 +5,7 @@ import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ManualOptResourceStrategy
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.core.runOptimized
-import firelib.common.core.runSimple
+import firelib.common.core.Launcher.runOptimized
 import firelib.common.interval.Interval
 import firelib.common.misc.PositionCloserByTimeOut
 import firelib.common.opt.OptimizedParameter
@@ -39,7 +38,7 @@ class GapTrading(val context: ModelContext, val fac: Map<String, String>) : Mode
 
         val dayRolled = context.instruments.map { false }.toMutableList()
 
-        val tssDay = context.instruments.mapIndexed{idx,tick->
+        val tssDay = context.instruments.mapIndexed{ idx, _ ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Day, 10)
             ret.preRollSubscribe {
                 if(!ret[0].interpolated){
@@ -98,7 +97,7 @@ class GapTrading(val context: ModelContext, val fac: Map<String, String>) : Mode
 
 }
 
-fun main(args: Array<String>) {
+suspend fun main(args: Array<String>) {
 
 
     val tt = listOf(

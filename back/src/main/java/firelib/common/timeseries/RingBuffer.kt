@@ -10,7 +10,7 @@ class RingBuffer<T>(val capacity: Int, val func: (i: Int) -> T) {
     operator fun get(idx: Int): T = data[calcIdx(idx)] as T
 
     private fun calcIdx(idx: Int): Int {
-        assert(idx >= 0 && idx < data.size)
+        require(idx >= 0 && idx < data.size)
         return (head - idx + capacity) % capacity
     }
 

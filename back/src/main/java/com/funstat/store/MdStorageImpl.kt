@@ -97,6 +97,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             try {
                 Tables.REQUESTED.read(generic).forEach { symbol -> updateMarketData(symbol) }
             } catch (e: Exception) {
+                println("failed to ")
                 e.printStackTrace()
             }
         }, 0, 10, TimeUnit.MINUTES)
@@ -137,6 +138,10 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         return container.get(SYMBOLS_TABLE) { Tables.SYMBOLS.read(generic) }
     }
 
+    override fun updateRequested(code : String){
+        Tables.REQUESTED.read(generic).filter { it.code == code }. forEach { symbol -> updateMarketData(symbol) }
+    }
+
 
     fun updateMarketData(instrId: InstrId) {
         println("updating ${instrId}")
@@ -144,6 +149,8 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             val source = sources[instrId.source]!!
             val dao = getDao(instrId.source, source.getDefaultInterval().name)
             val startTime =  dao.queryLast(instrId.code).map { oh -> oh.dtGmtEnd.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
+
+            println("start time is ${startTime}")
 
             source.load(instrId, startTime).chunked(5000).forEach {
                 dao.insertOhlc(it, instrId.code)

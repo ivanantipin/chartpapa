@@ -106,6 +106,11 @@ class MainController {
         return mm
     }
 
+    @PostMapping
+    fun update(ticker : String){
+        storage.updateRequested(ticker)
+    }
+
     @Bean
     fun customImplementation(): Docket {
         return Docket(DocumentationType.SWAGGER_2)

@@ -25,6 +25,10 @@ object SqlTypeMapper{
         if (retType.classifier == Int::class) {
             return "INT"
         }
+        if (retType.classifier == Long::class) {
+            return "INT"
+        }
+
         if (retType.classifier == Instant::class) {
             return "TIMESTAMPTZ"
         }

@@ -150,7 +150,7 @@ class FinamDownloader : AutoCloseable, Source {
                 }
 
         try {
-            val ret = ret.get().map { Ohlc.parse(it) }.filter { it.isPresent }.map { it.get() }
+            val ret = ret.get().map { Ohlc.parse(it) }.filter { it != null }.map { it!! }
             return ret
         } catch (e: Exception) {
             throw RuntimeException(e)

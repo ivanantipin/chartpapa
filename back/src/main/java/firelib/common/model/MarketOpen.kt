@@ -4,7 +4,7 @@ import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.core.runSimple
+import firelib.common.core.Launcher.runSimple
 import firelib.common.interval.Interval
 import firelib.common.ordermanager.OrderManager
 import firelib.common.reader.MarketDataReaderSql
@@ -96,7 +96,7 @@ class MarketOpen(val context: ModelContext, val fac: Map<String, String>) : Mode
 
 }
 
-fun main(args: Array<String>) {
+suspend fun main(args: Array<String>) {
 
 
     val tt = listOf(

@@ -11,7 +11,7 @@ class OhlcDesc : BinaryReaderRecordDescriptor<Ohlc>{
         buffer.putDouble(tick.high)
         buffer.putDouble(tick.low)
         buffer.putDouble(tick.close)
-        buffer.putInt(tick.volume)
+        buffer.putLong(tick.volume)
         buffer.putLong(tick.dtGmtEnd.toEpochMilli())
         buffer.putChar(if(tick.interpolated) 'I' else 'R')
     }
@@ -24,7 +24,7 @@ class OhlcDesc : BinaryReaderRecordDescriptor<Ohlc>{
                 high = buff.getDouble(),
                 low = buff.getDouble(),
                 close = buff.getDouble(),
-                volume = buff.getInt()
+                volume = buff.getLong()
         )
         ret.interpolated = (buff.getChar() == 'I')
         return ret

@@ -12,6 +12,8 @@ from scipy.interpolate import griddata
 import ipywidgets as widgets
 import sys
 
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+
 
 class BacktestStats(object):
     """
@@ -107,7 +109,10 @@ class MetricsCalculator:
         self.metricsMap = {'sharpe': self.sharpe, 'mean': self.mean, 'pl': self.pl, 'pf': self.pf, 'cnt': self.cnt,
                            'max': self.maxStat, 'min': self.minStat, 'median': self.medianStat}
 
-    def statToHtml(self, tradesDF):
+    def statToHtml(self, tradesDF : pd.DataFrame):
+
+        tradesDF = tradesDF.copy()
+
         tradesDF['HoldTimeHours'] = (tradesDF['ExitDate'] - tradesDF['EntryDate']).map(
             lambda x: x / np.timedelta64(1, 'h'))
 
@@ -179,10 +184,13 @@ class BacktestResults(object):
         self.trades['ExitDate'] = self.trades['ExitDate'].map(lambda x: x.tz_localize(tz))
         self.sort()
 
-        self.opts = pd.read_sql_query(sql="SELECT * FROM opts",
-                                        con=cnx)
-        self.opts.fillna(0, inplace=True)
-        self.opts.sort_values(by=[self.opts.columns[0]], inplace=True)
+        try:
+            self.opts = pd.read_sql_query(sql="SELECT * FROM opts",
+                                            con=cnx)
+            self.opts.fillna(0, inplace=True)
+            self.opts.sort_values(by=[self.opts.columns[0]], inplace=True)
+        except:
+            print('no opts')
 
 
     def sort(self):
@@ -302,26 +310,25 @@ class BacktestResults(object):
         return self.plotSeasonalitiesPnls(tr.Pnl)
 
     def getFactorCols(self):
+        
         return list(self.trades.columns[self.trades.columns.get_loc(self.lastStaticColumnInTrades) + 1:].values)
 
     def plotFactors(self):
         cols = self.getFactorCols()
-        print(cols)
-        if len(cols) > 0:
-            rn = int(len(cols) / 3)
-            ncols = len(cols) if rn == 0 else 3
-            if len(cols) % 3 != 0:
-                rn = rn + 1
-            g, axs = plt.subplots(nrows=rn, ncols=ncols)
-            axs = np.reshape(axs, -1)
-            g.set_size_inches(30, rn * 4)
-            for i in range(0, len(cols)):
-                try:
-                    cat = pd.qcut(self.trades[cols[i]], 5, duplicates='drop')
-                    self.trades['Pnl'].groupby(cat).aggregate(np.sum).plot(ax=axs[i])
-                except ValueError as ve:
-                    print(ve)
-                    continue
+        cont=[ widgets.Output() for i in range(1 + len(cols))]
+
+        tab = widgets.Tab(children = cont)
+        for i in range(len(cols)):
+            tab.set_title(i,cols[i])
+
+        for idx,out in enumerate(cont):
+            with out:
+                ticker=cols[idx]
+                cat = pd.qcut(self.trades[ticker], 5, duplicates='drop')
+                self.trades['Pnl'].groupby(cat).aggregate(np.sum).plot()
+                plt.show()
+        return tab
+
 
     def plotOptimization(self):
 
@@ -358,9 +365,7 @@ def test():
     sys.path.append('/home/ivan/projects/fbackend/market_research/report/')
     #
     # importlib.reload(tr)
-    bs = BacktestResults()
-    fname = '/home/ivan/projects/fbackend/market_research/report/report.db'
-    bs.load(fname)
+    bs = BacktestResults("/home/ivan/projects/fbackend/market_research/report/report.db")
 
     print(bs.trades)
 
@@ -369,7 +374,8 @@ def test():
     # display(displayTitle('Overall stat '))
     mc.statToHtml(bs.trades)
 
-    bs.plotFactors()
+
+    bs.getFactorCols()
     # bs.plotSeasonalities()
     # plt.show()
 

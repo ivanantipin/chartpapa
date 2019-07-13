@@ -1,34 +1,89 @@
 {
   "instruments" : [ {
-    "ticker" : "aapl",
-    "path" : "1MIN/STK/AAPL_1.csv",
-    "mdType" : "Ohlc"
+    "ticker" : "sber"
   }, {
-    "ticker" : "goog",
-    "path" : "1MIN/STK/GOOG_1.csv",
-    "mdType" : "Ohlc"
+    "ticker" : "lkoh"
+  }, {
+    "ticker" : "gazp"
+  }, {
+    "ticker" : "alrs"
+  }, {
+    "ticker" : "moex"
+  }, {
+    "ticker" : "gmkn"
+  }, {
+    "ticker" : "mgnt"
+  }, {
+    "ticker" : "rosn"
+  }, {
+    "ticker" : "chmf"
+  }, {
+    "ticker" : "aflt"
+  }, {
+    "ticker" : "sberp"
+  }, {
+    "ticker" : "nvtk"
+  }, {
+    "ticker" : "vtbr"
+  }, {
+    "ticker" : "hydr"
+  }, {
+    "ticker" : "nlmk"
+  }, {
+    "ticker" : "mfon"
+  }, {
+    "ticker" : "mtss"
+  }, {
+    "ticker" : "magn"
+  }, {
+    "ticker" : "sngs"
+  }, {
+    "ticker" : "plzl"
+  }, {
+    "ticker" : "mtlr"
+  }, {
+    "ticker" : "fees"
+  }, {
+    "ticker" : "tatn"
+  }, {
+    "ticker" : "sibn"
+  }, {
+    "ticker" : "mrkp"
+  }, {
+    "ticker" : "rtkm"
+  }, {
+    "ticker" : "afks"
   } ],
   "startDateGmt" : {
-    "epochSecond" : 1520967948,
-    "nano" : 834000000
+    "epochSecond" : -31557014167219200,
+    "nano" : 0
   },
   "endDate" : {
-    "epochSecond" : 31556889864403199,
-    "nano" : 999999999
+    "epochSecond" : 1562191166,
+    "nano" : 137000000
   },
-  "dataServerRoot" : "/ddisk/globaldatabase/",
-  "reportTargetPath" : "./report",
+  "dataServerRoot" : "",
+  "reportTargetPath" : "/home/ivan/reports/trendVolumeModel",
+  "dumpOhlc" : true,
+  "verbose" : false,
   "precacheMarketData" : false,
-  "dumpOhlcData" : true,
-  "modelParams" : {
-    "period" : "10"
-  },
+  "modelParams" : { },
   "optConfig" : {
-    "params" : [ ],
-    "resourceStrategy" : { },
+    "params" : [ {
+      "name" : "holddays",
+      "start" : 2,
+      "end" : 50,
+      "step" : 1,
+      "value" : 49
+    } ],
+    "resourceStrategy" : {
+      "threadsNumber" : 1,
+      "batchSize" : 100
+    },
     "minNumberOfTrades" : 50,
     "optimizedPeriodDays" : -1,
     "optimizedMetric" : "Pf"
   },
-  "calculatedMetrics" : [ "Pf", "Pnl", "Sharpe", "AvgPnl" ]
+  "calculatedMetrics" : [ "Pf", "Pnl", "Sharpe", "AvgPnl" ],
+  "reportDbFile" : "file:///home/ivan/reports/trendVolumeModel/report.db"
 }

@@ -38,28 +38,23 @@ class MdDao(internal val ds: SQLiteDataSource) {
         val table = normName(tableIn)
         ensureExist(table)
         val data = ohlcs.filter {
-            if(it.open.isFinite()){
+            if (it.open.isFinite()) {
                 true
-            }else{
+            } else {
                 println("not correct ${it}")
                 false
             }
-
-
-
-        }.map { (dtGmtEnd, open, high, low, close) ->
-
-
-
-
-            mapOf("DT" to dtGmtEnd.toEpochMilli(),
-                    "OPEN" to open,
-                    "HIGH" to high,
-                    "LOW" to low,
-                    "CLOSE" to close)
+        }.map { it ->
+            mapOf("DT" to it.dtGmtEnd.toEpochMilli(),
+                    "OPEN" to it.open,
+                    "HIGH" to it.high,
+                    "LOW" to it.low,
+                    "CLOSE" to it.close,
+                    "VOLUME" to it.volume
+            )
         }
         try {
-            saveInTransaction("insert or replace into $table(DT,O,H,L,C) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE)", data)
+            saveInTransaction("insert or replace into $table(DT,O,H,L,C,V) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE,:VOLUME)", data)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -76,15 +71,15 @@ class MdDao(internal val ds: SQLiteDataSource) {
                             "h DOUBLE PRECISION  not NULL," +
                             "l DOUBLE PRECISION  not NULL," +
                             "c DOUBLE PRECISION  not NULL," +
+                            "v INT not NULL," +
                             "primary key (dt)) ;")
 
             true
         }
     }
 
-    @Throws(SQLException::class)
     private fun mapOhlc(rs: ResultSet): Ohlc {
-        return Ohlc(rs.getTimestamp("DT").toInstant(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"), interpolated = false)
+        return Ohlc(rs.getTimestamp("DT").toInstant(), rs.getDouble("o"), rs.getDouble("h"), rs.getDouble("l"), rs.getDouble("c"), volume = rs.getLong("v"), interpolated = false)
     }
 
     fun normName(name: String): String {
@@ -99,7 +94,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     fun queryAll(codeIn: String): List<Ohlc> {
-        return queryAll(codeIn, LocalDateTime.ofEpochSecond(0,0, ZoneOffset.UTC))
+        return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC))
     }
 
     fun queryAll(codeIn: String, start: LocalDateTime): List<Ohlc> {

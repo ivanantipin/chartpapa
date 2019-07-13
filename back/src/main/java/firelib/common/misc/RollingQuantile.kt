@@ -1,90 +1,46 @@
 package firelib.common.misc
 
+import firelib.common.misc.navmap.IndexedTreeSet
 import java.util.*
 
 
-class  RollingQuantile(val quantile: Double, val length: Int) {
+class Quantiles<T>(val window: Int) {
+    val set = IndexedTreeSet<T>()
 
-    data class Node(val value: Double, var isLeft: Boolean, val counter : Int)
+    val lst = LinkedList<T>()
 
-    class NodeComparator : Comparator<Node>{
-        override fun compare(o1: Node, o2: Node): Int {
-            val cmp = o1.value.compareTo(o2.value)
-            if (cmp != 0) {
-                return cmp;
-            }
-            return o1.counter - o2.counter
+    fun add(metric: T) {
+        set.add(metric)
+        lst.add(metric)
+        while (lst.size > window) {
+            set.remove(lst.poll())
         }
     }
 
-    private val queue = LinkedList<Node>()
-
-    private val left = TreeSet<Node>(NodeComparator())
-    private val right = TreeSet<Node>(NodeComparator())
-
-    private var cnt = 0
-
-    fun count ()= cnt
-
-    fun value(): Double {
-        if (left.isEmpty() && right.isEmpty()) {
-            return 0.0
+    fun getQuantile(metric: T): Double {
+        val ceiling = set.ceiling(metric)
+        if (ceiling != null) {
+            return set.entryIndex(ceiling) / set.size.toDouble()
         }
-        if (left.isEmpty()) {
-            return right.first().value
-        }
-        if (right.isEmpty()) {
-            return left.last().value
-        }
-        return (left.last().value + right.first().value) / 2
+        return Double.NaN
     }
+}
 
-    fun addMetric(m: Double) {
-        assert(!m.isNaN() && !m.isInfinite())
-        if (queue.size >= length) {
-            val node = queue.poll()
-            if (node.isLeft) {
-                assert(left.remove(node))
-            }
-            else {
-                assert(right.remove(node))
-            }
-        }
-        cnt += 1
+fun main() {
 
-        if (m > value()) {
-            val n = Node(m, false, cnt)
-            queue.add(n)
-            right.add(n)
-        }
-        else {
-            val n = Node(m, true, cnt)
-            queue.add(n)
-            left.add(n)
-        }
-        balance()
-    }
+    val set = Quantiles<Double>(10000)
 
-    private fun balance() {
-        val diff = left.size / quantile - right.size / (1 - quantile)
-        if (diff > 0) {
-            val amDiff = (left.size - 1) / quantile - (right.size + 1) / (1 - quantile)
-            if (Math.abs(amDiff) < Math.abs(diff)) {
-                val leftMax = left.last()
-                assert(left.remove(leftMax))
-                right.add(leftMax)
-                leftMax.isLeft = false
 
-            }
+    val arr = Random().doubles(1000_000, 0.0, 2.0).toArray()
+
+    arr.forEachIndexed({ idx, it ->
+        set.add(it)
+
+        if (idx % 1000 == 0) {
+            println(set.set.size)
+            println(set.getQuantile(1.5))
         }
-        else {
-            val amDiff = (left.size + 1) / quantile - (right.size - 1) / (1 - quantile)
-            if (Math.abs(amDiff) < Math.abs(diff)) {
-                val rightMin = right.first()
-                assert(right.remove(rightMin))
-                left.add(rightMin)
-                rightMin.isLeft = true
-            }
-        }
-    }
+    })
+
+
 }

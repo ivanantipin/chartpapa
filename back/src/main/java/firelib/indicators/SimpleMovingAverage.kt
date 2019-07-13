@@ -17,25 +17,30 @@ class SimpleMovingAverage(val period: Int, val calcSko: Boolean) {
         if (cc.isNaN()) {
             return
         }
-        currentSma -= closes[pos]
-        currentSma += cc
+        currentSma += (cc - closes[pos])
         closes[pos] = cc
-        pos += 1
-        if (pos == closes.size) {
-            pos = 0;
-        }
+        pos = (pos + 1)%closes.size
 
         if (calcSko) {
-            var sig = 0.0
-            var i = 0
-            while (i < period){
-                val cl = closes[i]
-                sig += (cl - value()) * (cl - value())
-                i+=1
-            }
-            sig /= period;
-            currentSko = Math.pow(sig, 0.5);
+            val value = value()
+            currentSko = Math.pow(closes.sumByDouble {
+                it - value
+            }/period, 0.5);
         }
     }
+
+}
+
+fun main() {
+    val ma = SimpleMovingAverage(20, false)
+    for(i in 0 until 10){
+        ma.add(5.0)
+    }
+    for(i in 0 until 10){
+        ma.add(10.0)
+    }
+
+    println(ma.value())
+
 
 }

@@ -14,6 +14,7 @@ interface MdStorage {
     fun updateSymbolsMeta()
 
     fun start()
+    fun updateRequested(code: String)
 }
 
 

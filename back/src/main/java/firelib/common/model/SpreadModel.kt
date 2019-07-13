@@ -1,13 +1,9 @@
 package firelib.common.model
 
-import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import firelib.common.MarketDataType
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.core.ModelFactory
-import firelib.common.core.runSimple
 import firelib.common.interval.Interval
 import firelib.common.ordermanager.OrderManager
 import firelib.common.ordermanager.OrderManagerImpl

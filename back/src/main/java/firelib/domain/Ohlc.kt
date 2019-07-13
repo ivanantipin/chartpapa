@@ -1,8 +1,10 @@
 package firelib.domain
 
+import firelib.common.misc.atUtc
 import firelib.common.misc.toStandardString
 import io.swagger.annotations.ApiModelProperty
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -21,7 +23,7 @@ data class Ohlc(
         var close: Double = .0,
         var Oi: Int = 0,
         @get:ApiModelProperty(required = true)
-        var volume: Int = 0,
+        var volume: Long = 0,
         var interpolated: Boolean = true
 ) : Timed, Comparable<Ohlc> {
 
@@ -36,7 +38,7 @@ data class Ohlc(
         return Ohlc(ohlc.dtGmtEnd, open,
                 Math.max(high, ohlc.high),
                 Math.min(low, ohlc.low),
-                ohlc.close
+                ohlc.close, volume = ohlc.volume + volume
         )
     }
 
@@ -70,27 +72,30 @@ data class Ohlc(
 
     override fun time(): Instant = dtGmtEnd
 
+    fun date() : LocalDate {
+        return dtGmtEnd.atUtc().toLocalDate()!!
+    }
 
     companion object {
 
         internal var pattern = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
 
-        fun parse(str: String): Optional<Ohlc> {
+        fun parse(str: String): Ohlc? {
             return parseWithPattern(str, pattern)
         }
 
-        fun parseWithPattern(str: String, pattern: DateTimeFormatter): Optional<Ohlc> {
+        fun parseWithPattern(str: String, pattern: DateTimeFormatter): Ohlc? {
             try {
                 val arr = str.split(";")
-                return Optional.of(Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1], pattern).toInstant(ZoneOffset.UTC),
-                        java.lang.Double.parseDouble(arr[2]),
-                        java.lang.Double.parseDouble(arr[3]),
-                        java.lang.Double.parseDouble(arr[4]),
-                        java.lang.Double.parseDouble(arr[5])
-                ))
+                return Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1], pattern).toInstant(ZoneOffset.UTC),
+                        arr[2].toDouble(),
+                        arr[3].toDouble(),
+                        arr[4].toDouble(),
+                        arr[5].toDouble(),
+                        volume = arr[6].toLong())
             } catch (e: Exception) {
                 println("not valid entry " + str + " because " + e.message)
-                return Optional.empty()
+                return null
             }
 
         }
@@ -99,3 +104,7 @@ data class Ohlc(
 
 }
 
+
+fun main() {
+    Ohlc.parse("20140821;11:30:00;0.0090000;0.0090300;0.0089100;0.0089900;5972800000")
+}

@@ -14,6 +14,7 @@ fun OrderManager.makePositionEqualsTo(pos: Int): Unit {
     }
 }
 
+
 fun OrderManager.buyAtLimit(price: Double, vol: Int = 1) {
     this.submitOrders(listOf(Order(OrderType.Limit, price, vol, Side.Buy, security(), nextOrderId(),currentTime())))
 }

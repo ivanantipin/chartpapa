@@ -6,8 +6,9 @@ import com.funstat.store.MdStorageImpl
 import com.funstat.store.SqlUtils
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
+import firelib.common.core.Launcher.runSimple
 import firelib.common.core.ModelFactory
-import firelib.common.core.runSimple
+
 import firelib.common.interval.Interval
 import firelib.common.misc.PositionCloserByTimeOut
 import firelib.common.misc.atUtc
@@ -46,13 +47,9 @@ object DivHelper {
         }
 
         val dsForFile = SqlUtils.getDsForFile(GlobalConstants.mdFolder.resolve("meta.db").toAbsolutePath().toString())
-        val divs = JdbcTemplate(dsForFile).query("select * from dividends", { row, ind ->
-
-
+        val divs = JdbcTemplate(dsForFile).query("select * from dividends", { row, _ ->
             var divDate = LocalDate.ofEpochDay(row.getLong("DT"))!!
-
             var cntDif = if (divDate.isAfter(tSwitch)) 2 else 0;
-
             while (cntDif > 0) {
                 divDate = divDate.minusDays(1)
                 if (trdDays.contains(divDate)) {
@@ -161,7 +158,7 @@ suspend fun main() = coroutineScope {
     conf.reportTargetPath = "./report/divStrat0"
     val mdDao = storageImpl.getDao(FinamDownloader.SOURCE, Interval.Min10.name)
     conf.instruments = DivHelper.getDivs().keys.map { InstrumentConfig(it, { time -> MarketDataReaderSql(mdDao.queryAll(it)) }) }
-    conf.modelParams = mapOf("holdTimeDays" to "10")
+    conf.modelParams = mapOf("holdTimeDays" to "10").toMutableMap()
     conf.precacheMarketData = false
     runSimple(conf, DivFac())
     println("done")

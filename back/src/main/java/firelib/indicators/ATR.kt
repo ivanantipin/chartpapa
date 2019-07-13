@@ -1,12 +1,10 @@
 package firelib.indicators
 
+import firelib.common.misc.Quantiles
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 
 class ATR(val period: Int, val ts: TimeSeries<Ohlc>) : Indicator<Double>, (TimeSeries<Ohlc>) -> Unit {
-    override fun calculate() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     init {
         ts.preRollSubscribe(this)
@@ -29,7 +27,26 @@ class ATR(val period: Int, val ts: TimeSeries<Ohlc>) : Indicator<Double>, (TimeS
         }
         if (ts.count() == 1)
             return o.high - o.low;
-        return Math.max(o.high - o.low, Math.max(o.high - ts[-1].close, ts[-1].close - o.high));
+        return Math.max(o.range(), Math.max(o.high - ts[1].close, ts[1].close - o.high));
     }
 
+}
+
+class Quantiled(val period: Int, val ts : TimeSeries<Ohlc>, val func : (TimeSeries<Ohlc>)->Double){
+
+    var value = 0.0
+
+    init {
+        val qq = Quantiles<Double>(period)
+
+        ts.preRollSubscribe {
+            val metric = func(it)
+            qq.add(metric)
+            value = qq.getQuantile(metric)
+        }
+    }
+
+    fun value() : Double{
+        return value
+    }
 }

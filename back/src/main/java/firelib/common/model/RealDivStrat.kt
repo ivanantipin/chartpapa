@@ -4,8 +4,8 @@ import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
+import firelib.common.core.Launcher.runSimple
 import firelib.common.core.ModelFactory
-import firelib.common.core.runSimple
 import firelib.common.interval.Interval
 import firelib.common.misc.StreamTradeCaseGenerator
 import firelib.common.misc.atUtc
@@ -14,8 +14,6 @@ import firelib.common.ordermanager.flattenAll
 import firelib.common.ordermanager.makePositionEqualsTo
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
-import java.time.DayOfWeek
-
 
 
 class RealDivModel(val context: ModelContext, val props: Map<String, String>) : Model, ModelFactory {

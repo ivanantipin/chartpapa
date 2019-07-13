@@ -52,7 +52,10 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Di
             reindex()
         }
         if(cachedValue.dtGmtEnd != ret.dtGmtEnd){
-            cachedValue = ret.copy(open = ret.open + currentAdjustment, high = ret.high + currentAdjustment, low = ret.low + currentAdjustment,close = ret.close + currentAdjustment)
+            cachedValue = ret.copy(open = ret.open + currentAdjustment,
+                    high = ret.high + currentAdjustment,
+                    low = ret.low + currentAdjustment,
+                    close = ret.close + currentAdjustment, volume = ret.volume)
         }
         return cachedValue
     }

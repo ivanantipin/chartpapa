@@ -5,7 +5,7 @@ import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ManualOptResourceStrategy
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.core.runOptimized
+import firelib.common.core.Launcher.runOptimized
 import firelib.common.interval.Interval
 import firelib.common.opt.OptimizedParameter
 import firelib.common.ordermanager.OrderManager

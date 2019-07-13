@@ -5,6 +5,10 @@ import firelib.domain.Ohlc
 import firelib.common.interval.Interval
 
 class CachedStorage(private val delegate: MdStorage) : MdStorage {
+    override fun updateRequested(code: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun start() {
         delegate.start()
     }

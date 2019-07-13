@@ -9,7 +9,7 @@ class TradeStat(val price : Double, val side :Side){
     var maxHoldingPrice: Double = price
     var minHoldingPrice: Double = price
 
-    val factors =  HashMap<String,Any>()
+    val factors =  HashMap<String,Double>()
 
     fun MAE(): Double {
         return if (this.side == Side.Sell) price - maxHoldingPrice else minHoldingPrice - price
@@ -25,13 +25,13 @@ class TradeStat(val price : Double, val side :Side){
         maxHoldingPrice = Math.max(pr, maxHoldingPrice)
     }
 
-    fun addFactor(name: String, value: Any) {
+    fun addFactor(name: String, value: Double) {
         factors[name] = value
     }
 
 }
 
-data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:Instant, val priceTime : Instant) {
+data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:Instant, val priceTime : Instant, val tradeStat: TradeStat = TradeStat(price, order.side)) {
 
     init {
         require(qty >= 0,{"amount can't be negative"})
@@ -42,8 +42,6 @@ data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:In
     fun security ()= order.security
 
     fun side ()= order.side
-
-    val tradeStat = TradeStat(price, side())
 
     fun adjustPositionByThisTrade(position: Int): Int = position + order.side.sign * qty
 

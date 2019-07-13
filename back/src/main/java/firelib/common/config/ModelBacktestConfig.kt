@@ -49,6 +49,9 @@ class ModelBacktestConfig (){
     }
 
 
+    var dumpOhlc = false
+
+
 
     val verbose = false
 
@@ -62,7 +65,7 @@ class ModelBacktestConfig (){
      * params passed to model apply method
      * can not be optimized
      */
-    var modelParams : Map<String, String> = emptyMap()
+    var modelParams : MutableMap<String, String> = mutableMapOf()
 
     /*
     * optimization config, used only for BacktestMode.Optimize

@@ -51,7 +51,7 @@ class StreamTradeCaseWriter(val path: Path, val factors: Iterable<String>) {
             TransactionTemplate(tman).execute({ status ->
                 trades.groupBy { it.security() }.forEach { (sec, secTrades) ->
                     val gen = StreamTradeCaseGenerator()
-                    val cases = secTrades.flatMap(gen).map { toMapForSqlUpdate(it, tradeCaseColDefs) }.toTypedArray()
+                    val cases = secTrades.flatMap(gen).map { toMapForSqlUpdate(it, tradeCaseColDefs) + it.first.tradeStat.factors}.toTypedArray()
                     NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
                 }
             })

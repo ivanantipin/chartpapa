@@ -1,8 +1,6 @@
-1. blog
-2. notification about sequentas
-3. mobile version of site
-4. enable crypto currencies from vantage
-5. enable fx
-6. trending strategy
-
-
+2. refactor old post
+4. flutter version of site
+5. sequenta notification
+6. check sequenta discrepancies
+7. mean rev strat on spy - buy dips
+8. trending strat on russian stocks
