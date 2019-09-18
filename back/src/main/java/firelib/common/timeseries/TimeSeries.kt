@@ -11,13 +11,22 @@ interface TimeSeries<T> {
 
     fun capacity() : Int
 
+    fun last() : T {
+        return this[0]
+    }
+
     fun preRollSubscribe(listener : (TimeSeries<T>)->Unit)
 
+
 }
 
-fun TimeSeries<Ohlc>.diff(len : Int) : Double{
-    return get(0).close - get(len - 1).close
+fun TimeSeries<Ohlc>.makeNonInterpolatedView() : TimeSeries<Ohlc>{
+    val ret = TimeSeriesImpl(this.capacity(), { Ohlc() })
+    this.preRollSubscribe {
+        if(!it[0].interpolated){
+            ret += it[0]
+            ret.channel.publish(ret)
+        }
+    }
+    return ret
 }
-
-
-

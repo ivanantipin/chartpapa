@@ -2,7 +2,7 @@ package firelib.common.tradegate
 
 import firelib.common.Order
 import firelib.common.OrderStatus
-import firelib.common.Side
+import firelib.domain.Side
 import firelib.common.Trade
 import firelib.common.timeservice.TimeService
 import firelib.domain.OrderState

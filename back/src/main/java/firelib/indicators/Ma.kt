@@ -5,7 +5,7 @@ import firelib.domain.Ohlc
 
 
 class Ma(val period: Int, val ts: TimeSeries<Ohlc>, val calcSko: Boolean = false)
-    : Indicator<Double>, (TimeSeries<Ohlc>) -> Unit {
+    : (TimeSeries<Ohlc>) -> Unit {
 
     init {
         ts.preRollSubscribe(this)
@@ -13,7 +13,7 @@ class Ma(val period: Int, val ts: TimeSeries<Ohlc>, val calcSko: Boolean = false
 
     val maa = SimpleMovingAverage(period, calcSko)
 
-    override fun value(): Double = maa.value()
+    fun value(): Double = maa.value()
 
     fun sko(): Double = maa.sko()
 

@@ -23,7 +23,7 @@ class PositionCloserByTimeOut(val stub: OrderManager, val duration : Duration, v
         posOpenedDtGmt = trd.dtGmt
     }
 
-    fun update(time : Instant, ts: MarketDataDistributor): Unit {
+    fun update(time : Instant, ts: MarketDataDistributor) {
         if (stub.position() != 0 && !ts.price(idx).interpolated &&
                 Duration.between(posOpenedDtGmt,time).compareTo(duration)  > 0) {
             stub.makePositionEqualsTo(0)

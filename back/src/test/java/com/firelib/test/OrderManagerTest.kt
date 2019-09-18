@@ -7,6 +7,8 @@ import firelib.common.config.ModelBacktestConfig
 import firelib.common.ordermanager.*
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.tradegate.TradeGateStub
+import firelib.domain.OrderType
+import firelib.domain.Side
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant

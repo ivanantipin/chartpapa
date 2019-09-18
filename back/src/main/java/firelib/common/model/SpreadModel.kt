@@ -3,6 +3,7 @@ package firelib.common.model
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.ModelBacktestConfig
+import firelib.common.config.runStrat
 import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
 import firelib.common.ordermanager.OrderManager
@@ -17,16 +18,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.math.abs
 
-
-class SmaFactory : ModelFactory {
-    override fun invoke(context: ModelContext, props: Map<String, String>): Model {
-        return SpreadModel(context,props)
-    }
-}
-
-
-
-class SpreadModel(val context: ModelContext, val props: Map<String, String>) : Model{
+class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model(context,props){
 
     val period = props["period"]!!.toInt()
 
@@ -35,11 +27,9 @@ class SpreadModel(val context: ModelContext, val props: Map<String, String>) : M
 
     var count = 0;
 
-    init {
-        context.mdDistributor.getOrCreateTs(0,Interval.Min10,2).preRollSubscribe {  }
-    }
 
     override fun update() {
+        val omanagers = orderManagers()
         if(count++ % 1000_000 == 0){
             println("count is ${count}" )
         }
@@ -58,42 +48,21 @@ class SpreadModel(val context: ModelContext, val props: Map<String, String>) : M
         }
 
         if(abs(spread) < 0.005){
-            this.omanagers.forEach {it.flattenAll()}
+            omanagers.forEach {it.flattenAll()}
         }
 
     }
 
-    private var omanagers: List<OrderManagerImpl> = context.instruments
-            .map { OrderManagerImpl(context.tradeGate,context.timeService,it)}
-
-
-    override fun name(): String {
-        return "Sma"
-    }
-
     init {
-        omanagers[0].tradesTopic().subscribe { println("trade ${it}") }
-        omanagers[1].tradesTopic().subscribe { println("trade ${it}") }
-    }
-
-    override fun orderManagers(): List<OrderManager> {
-        return this.omanagers
-    }
-
-    override fun onBacktestEnd() {
-        this.omanagers.forEach {it.flattenAll()}
-    }
-
-    override fun properties(): Map<String, String> {
-        return props
+        orderManagers()[0].tradesTopic().subscribe { println("trade ${it}") }
+        orderManagers()[1].tradesTopic().subscribe { println("trade ${it}") }
     }
 }
 
-suspend fun main() = coroutineScope {
+suspend fun main() {
     val conf = ModelBacktestConfig()
     conf.reportTargetPath = "./report"
     conf.startDateGmt = LocalDateTime.now().minusDays(1500).toInstant(ZoneOffset.UTC)
-    val factoryImpl = ReaderFactoryImpl("/ddisk/globaldatabase/")
 
 
     val storageImpl = MdStorageImpl()
@@ -106,22 +75,5 @@ suspend fun main() = coroutineScope {
         val symbols = finamDownloader.symbols().filter { divs.containsKey(it.code.toLowerCase()) && it.market == "1" }
         symbols.forEach({storageImpl.updateMarketData(it)})
     }
-
-/*
-    conf.instruments = listOf(
-            InstrumentConfig("aapl",{startTime->
-
-
-
-                factoryImpl.create("1MIN/STK/AAPL_1.csv",startTime)
-            }),
-            InstrumentConfig("goog", {startTime->
-                factoryImpl.create("1MIN/STK/GOOG_1.csv", startTime)
-            })
-    )
-    conf.modelParams = mapOf("period" to "10")
-    //conf.startDateGmt = LocalDateTime.now().minusDays(600).toInstant(ZoneOffset.UTC)
-    conf.precacheMarketData = false
-    runSimple(conf, SmaFactory())
-    println("some")*/
+    conf.runStrat{ctx,props->SpreadModel(ctx,props)}
 }

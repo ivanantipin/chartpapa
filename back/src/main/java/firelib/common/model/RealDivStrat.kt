@@ -4,6 +4,7 @@ import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
+import firelib.common.config.runStrat
 import firelib.common.core.Launcher.runSimple
 import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
@@ -16,17 +17,10 @@ import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
 
 
-class RealDivModel(val context: ModelContext, val props: Map<String, String>) : Model, ModelFactory {
-
-    override fun invoke(context: ModelContext, props: Map<String, String>): Model {
-        return RealDivModel(context, props)
-    }
-
-
-    val oman = makeOrderManagers(context)
+class RealDivModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
     init {
-        oman.forEach({
+        orderManagers().forEach({
             val gen = StreamTradeCaseGenerator()
             it.tradesTopic().subscribe {
                 val cases = gen(it)
@@ -42,10 +36,11 @@ class RealDivModel(val context: ModelContext, val props: Map<String, String>) : 
 
         val divMap = DivHelper.getDivs()
 
+        val tss = enableSeries(Interval.Min10)
 
         context.instruments.forEachIndexed({ idx, instrument ->
-            val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Min10, 100)
             val divs = divMap[instrument]!!
+            val ret = tss[idx]
 
             var nextIdx = -2
 
@@ -69,7 +64,7 @@ class RealDivModel(val context: ModelContext, val props: Map<String, String>) : 
                     val localTime = time.toLocalTime()
 
 
-                    if (context.config.verbose && oman[idx].position() != 0) {
+                    if (context.config.verbose && orderManagers()[idx].position() != 0) {
                         println("${ret[0]}")
                     }
 
@@ -84,7 +79,8 @@ class RealDivModel(val context: ModelContext, val props: Map<String, String>) : 
                                 println("t1 ${ret[1]}")
                             }
 
-                            oman[idx].makePositionEqualsTo((100_000.0 / ret[0].close).toInt())
+                            buyIfNoPosition(idx,100_000)
+
                             nextIdx = divs.indexOfFirst {
                                 it.lastDayWithDivs.isAfter(prevIdx.lastDayWithDivs) && it.lastDayWithDivs.atStartOfDay().isAfter(context.timeService.currentTime().atUtc())
                             }
@@ -95,14 +91,14 @@ class RealDivModel(val context: ModelContext, val props: Map<String, String>) : 
                         }
                     }
 
-                    if (localTime.hour == 18 && localTime.minute == 20 && oman[idx].position() != 0 && !ret[0].interpolated) {
+                    if (localTime.hour == 18 && localTime.minute == 20 && orderManagers()[idx].position() != 0 && !ret[0].interpolated) {
                         if (context.config.verbose) {
                             println("exit position for ${instrument} time is ${context.timeService.currentTime()}  price is ${ret[0].close}")
                             println("t0 ${ret[0]}")
                             println("t1 ${ret[1]}")
                         }
 
-                        oman[idx].flattenAll()
+                        orderManagers()[idx].flattenAll()
                     }
                 }
             } else {
@@ -119,39 +115,26 @@ class RealDivModel(val context: ModelContext, val props: Map<String, String>) : 
             }
         })
     }
-
-    override fun properties(): Map<String, String> {
-        return props
-    }
-
-    override fun orderManagers(): List<OrderManager> {
-        return oman
-    }
-
-    override fun update() {}
 }
 
-suspend fun main(args: Array<String>) {
+suspend fun main() {
 
     val divs = DivHelper.getDivs()
 
-    val conf = ModelBacktestConfig()
-    conf.reportTargetPath = "./report/divsStrats"
-
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
-    conf.instruments = DivHelper.getDivs().keys.map { instr ->
-        InstrumentConfig(instr, { time ->
-            val delegate = MarketDataReaderSql(mdDao.queryAll(instr))
-            delegate
-            ReaderDivAdjusted(delegate, divs[instr]!!)
-        })
+    val conf = ModelBacktestConfig().apply {
+        reportTargetPath = "./report/divsStrats"
+        instruments = DivHelper.getDivs().keys.map { instr ->
+            InstrumentConfig(instr, { time ->
+                val delegate = MarketDataReaderSql(mdDao.queryAll(instr))
+                delegate
+                ReaderDivAdjusted(delegate, divs[instr]!!)
+            })
+        }
     }
 
-    conf.precacheMarketData = false
-    runSimple(conf, {cfg,fac->
-        RealDivModel(cfg,fac)
-    })
-    println("done")
-
+    conf.runStrat { cfg, fac ->
+        RealDivModel(cfg, fac)
+    }
 }

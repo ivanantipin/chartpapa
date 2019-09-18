@@ -1,13 +1,15 @@
 package firelib.common.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import firelib.common.core.Launcher
+import firelib.common.core.ModelFactory
+import firelib.common.misc.toInstantDefault
+import firelib.common.opt.OptimizedParameter
 import firelib.common.report.StrategyMetric
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
-import java.time.LocalDateTime
-
-
+import java.time.LocalDate
 
 
 /**
@@ -23,6 +25,10 @@ class ModelBacktestConfig (){
 
     var endDate: Instant = Instant.now()
 
+
+    fun endDate(ed : LocalDate){
+        endDate = ed.toInstantDefault()
+    }
 
 
     fun makeSpreadAdjuster(koeff : Double) : (Double,Double)->Pair<Double,Double>{
@@ -59,18 +65,26 @@ class ModelBacktestConfig (){
     * translatest csv data to binary format to speedup backtest
     * that increase read speed from 300k msg/sec -> 10 mio msg/sec
      */
-    var precacheMarketData: Boolean = true
+    var precacheMarketData: Boolean = false
 
     /**
      * params passed to model apply method
      * can not be optimized
      */
-    var modelParams : MutableMap<String, String> = mutableMapOf()
+    val modelParams : MutableMap<String, String> = mutableMapOf()
 
     /*
     * optimization config, used only for BacktestMode.Optimize
      */
     val optConfig: OptimizationConfig = OptimizationConfig()
+
+    fun opt(name : String, start : Int, end : Int, step : Int){
+        optConfig.params += OptimizedParameter(name,start,end,step)
+    }
+
+    fun param(name : String, value : Int){
+        modelParams += (name to value.toString())
+    }
 
     /*
     * this metrics will be available for optimization
@@ -82,4 +96,12 @@ class ModelBacktestConfig (){
             StrategyMetric.AvgPnl
     )
 
+}
+
+suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory){
+    if(this.optConfig.params.isNotEmpty()){
+        Launcher.runOptimized(this,fac)
+    }else{
+        Launcher.runSimple(this,fac)
+    }
 }

@@ -29,7 +29,4 @@ object IntervalTransformer {
 
         return ret
     }
-
-
-
 }

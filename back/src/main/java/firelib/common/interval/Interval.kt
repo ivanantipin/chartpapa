@@ -24,11 +24,11 @@ enum class Interval(val durationMs: Long, val offset : Long = (1440 * 60 * 1000)
     Day(1440 * 60 * 1000),
     Week(Day.durationMs*7);
 
-    fun resolveFromMs(ms: Long): Interval? {
-        return values().find { it.durationMs == ms }
+    fun resolveFromMs(ms: Long): Interval {
+        return values().find { it.durationMs == ms }!!
     }
-    fun resolveFromName(name: String): Interval? {
-        return values().find { it.name == name }
+    fun resolveFromName(name: String): Interval {
+        return values().find { it.name == name }!!
     }
     val duration = Duration.ofMillis(durationMs)
 

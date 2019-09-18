@@ -29,7 +29,7 @@ class IntervalServiceImpl : IntervalService {
         rebuildTree()
     }
 
-    fun rebuildTree(): Unit {
+    fun rebuildTree() {
         nodes.forEach {it.childs.clear()}
 
         rootNode = nodes.first()

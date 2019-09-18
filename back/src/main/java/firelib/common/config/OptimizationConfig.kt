@@ -12,9 +12,9 @@ class OptimizationConfig{
     /**
      * optimization parameters
      */
-    val params = ArrayList<OptimizedParameter>()
+    val params = mutableListOf<OptimizedParameter>()
 
-    var resourceStrategy : OptResourceStrategy = DefaultOptResourceStrategy()
+    var resourceStrategy : OptResourceStrategy = ManualOptResourceStrategy(1,100)
 
     /**
     * minimum number of trades to validate strategy output

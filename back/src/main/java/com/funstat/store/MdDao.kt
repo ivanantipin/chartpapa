@@ -21,6 +21,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     internal var tableCreated = ConcurrentHashMap<String, Boolean>()
 
 
+
     private fun saveInTransaction(sql: String, data: List<Map<String, Any>>) {
         val namedTemplate = NamedParameterJdbcTemplate(ds)
         TransactionTemplate(manager).execute<Any> { status ->

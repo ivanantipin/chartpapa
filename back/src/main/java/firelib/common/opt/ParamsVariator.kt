@@ -10,8 +10,6 @@ class ParamsVariator(val optParams: List<OptimizedParameter>) : Iterator<Map<Str
 
     var firstIter = true
 
-
-
     override fun next(): Map<String, Int> {
         if(firstIter){
             firstIter = false

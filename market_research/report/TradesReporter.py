@@ -174,14 +174,17 @@ class BacktestResults(object):
 
         self.trades = pd.read_sql_query(sql="SELECT * FROM trades",
                                         con=cnx ,
-                                        parse_dates=['EntryDate', 'ExitDate'])
+                                        # 2013-04-08T10:00:00Z
+                                        parse_dates={'EntryDate' : '%Y-%m-%dT%H:%M:%SZ', 'ExitDate' : '%Y-%m-%dT%H:%M:%SZ'})
 
         # print(self.trades)
 
         # date_parser=vect_str_to_datetime)
-        self.trades.dropna(inplace=True)
-        self.trades['EntryDate'] = self.trades['EntryDate'].map(lambda x: x.tz_localize(tz))
-        self.trades['ExitDate'] = self.trades['ExitDate'].map(lambda x: x.tz_localize(tz))
+        # self.trades.dropna(inplace=True)
+        self.trades['EntryDate'] = self.trades['EntryDate']
+            # .map(lambda x: x.tz_localize(tz))
+        self.trades['ExitDate'] = self.trades['ExitDate']
+            # .map(lambda x: x.tz_localize(tz))
         self.sort()
 
         try:
@@ -324,8 +327,10 @@ class BacktestResults(object):
         for idx,out in enumerate(cont):
             with out:
                 ticker=cols[idx]
-                cat = pd.qcut(self.trades[ticker], 5, duplicates='drop')
-                self.trades['Pnl'].groupby(cat).aggregate(np.sum).plot()
+                cat = pd.qcut(self.trades[ticker], 10, duplicates='drop')
+                self.trades['Pnl'].groupby(cat).aggregate(MetricsCalculator.pf).plot()
+                currFigure = plt.gcf()
+                currFigure.set_size_inches((18,7))
                 plt.show()
         return tab
 
@@ -362,10 +367,10 @@ def test():
     import sys
 
 
-    sys.path.append('/home/ivan/projects/fbackend/market_research/report/')
+    sys.path.append('/home/ivan/projects/chartpapa/market_research/report_tmp/')
     #
     # importlib.reload(tr)
-    bs = BacktestResults("/home/ivan/projects/fbackend/market_research/report/report.db")
+    bs = BacktestResults("/home/ivan/projects/chartpapa/market_research/report_tmp/report.db")
 
     print(bs.trades)
 

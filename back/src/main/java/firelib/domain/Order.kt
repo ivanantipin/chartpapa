@@ -4,6 +4,8 @@ import firelib.common.misc.DurableChannel
 import firelib.common.misc.dbl2Str
 import firelib.common.misc.toStandardString
 import firelib.domain.OrderState
+import firelib.domain.OrderType
+import firelib.domain.Side
 import java.time.Instant
 
 data class Order(val orderType: OrderType,

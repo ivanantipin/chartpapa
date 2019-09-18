@@ -6,28 +6,20 @@ import com.funstat.store.MdStorageImpl
 import com.funstat.store.SqlUtils
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.core.Launcher.runSimple
-import firelib.common.core.ModelFactory
-
+import firelib.common.config.runStrat
 import firelib.common.interval.Interval
-import firelib.common.misc.PositionCloserByTimeOut
 import firelib.common.misc.atUtc
-import firelib.common.ordermanager.OrderManager
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.report.GenericDumper
-import kotlinx.coroutines.coroutineScope
 import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Paths
-import java.time.*
+import java.time.Instant
+import java.time.LocalDate
+import java.time.Month
+import java.time.ZoneOffset
 
 
 data class Div(val ticker: String, val lastDayWithDivs: LocalDate, val div: Double)
-
-class DivFac : ModelFactory {
-    override fun invoke(context: ModelContext, props: Map<String, String>): Model {
-        return DivModel(context, props)
-    }
-}
 
 object DivHelper {
 
@@ -75,8 +67,7 @@ data class Stat(val ticker: String,
                 val lastMonthReturn: Double
 )
 
-class DivModel(val context: ModelContext, val props: Map<String, String>) : Model {
-    val oman = makeOrderManagers(context)
+class DivModel( context: ModelContext,  props: Map<String, String>) : Model(context, props) {
 
     init {
         val divMap = DivHelper.getDivs()
@@ -136,30 +127,18 @@ class DivModel(val context: ModelContext, val props: Map<String, String>) : Mode
             }
             ret
         })
-        oman.forEachIndexed({ idx, om ->
-            PositionCloserByTimeOut(om, Duration.ofDays(5), context.mdDistributor, Interval.Min10, idx)
-        })
+        closePositionByTimeout(days = 5)
     }
-
-    override fun properties(): Map<String, String> {
-        return props
-    }
-
-    override fun orderManagers(): List<OrderManager> {
-        return oman
-    }
-
-    override fun update() {}
 }
 
-suspend fun main() = coroutineScope {
-    val storageImpl = MdStorageImpl()
-    val conf = ModelBacktestConfig()
-    conf.reportTargetPath = "./report/divStrat0"
-    val mdDao = storageImpl.getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-    conf.instruments = DivHelper.getDivs().keys.map { InstrumentConfig(it, { time -> MarketDataReaderSql(mdDao.queryAll(it)) }) }
-    conf.modelParams = mapOf("holdTimeDays" to "10").toMutableMap()
-    conf.precacheMarketData = false
-    runSimple(conf, DivFac())
-    println("done")
+suspend fun main() {
+
+    val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
+
+    val conf = ModelBacktestConfig().apply {
+        reportTargetPath = "./report/divStrat0"
+        instruments = DivHelper.getDivs().keys.map { InstrumentConfig(it, { time -> MarketDataReaderSql(mdDao.queryAll(it)) }) }
+        param("holdTimeDays", 10)
+    }
+    conf.runStrat({ctx, prop->DivModel(ctx,prop)})
 }

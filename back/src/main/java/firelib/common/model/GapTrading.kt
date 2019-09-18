@@ -2,9 +2,7 @@ package firelib.common.model
 
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import firelib.common.config.InstrumentConfig
-import firelib.common.config.ManualOptResourceStrategy
-import firelib.common.config.ModelBacktestConfig
+import firelib.common.config.*
 import firelib.common.core.Launcher.runOptimized
 import firelib.common.interval.Interval
 import firelib.common.misc.PositionCloserByTimeOut
@@ -17,11 +15,7 @@ import firelib.common.report.GenericDumper
 import java.time.Duration
 
 
-class GapTrading(val context: ModelContext, val fac: Map<String, String>) : Model{
-
-    val oms = makeOrderManagers(context)
-
-    enum class WriteState{ZERO,GAP_WRITTEN,HOUR_WRITTEN}
+class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(context, fac) {
 
     val stat = mutableListOf<GapStat>()
 
@@ -38,31 +32,27 @@ class GapTrading(val context: ModelContext, val fac: Map<String, String>) : Mode
 
         val dayRolled = context.instruments.map { false }.toMutableList()
 
-        val tssDay = context.instruments.mapIndexed{ idx, _ ->
-            val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Day, 10)
-            ret.preRollSubscribe {
-                if(!ret[0].interpolated){
+
+
+        val tssDay = enableSeries(Interval.Day)
+
+        tssDay.forEachIndexed{idx,it->
+            it.preRollSubscribe {
+                if (!it[0].interpolated) {
                     dayRolled[idx] = true
                 }
             }
-            ret
-        }
-
-        val tss10Min = context.instruments.mapIndexed{idx,tick->
-            context.mdDistributor.getOrCreateTs(idx, Interval.Min10, 100)
         }
 
 
-
-        context.instruments.forEachIndexed{idx,tick->
+        context.instruments.forEachIndexed { idx, tick ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Min60, 1000)
             ret.preRollSubscribe {
-                if(dayRolled[idx] && it[1].interpolated && !it[0].interpolated){
+                if (dayRolled[idx] && it[1].interpolated && !it[0].interpolated) {
                     dayRolled[idx] = false
-                    val gap = (it[0].open - tssDay[idx][1].close)/tssDay[idx][1].close
-
-                    if(gap < -0.02){
-                        oms[idx].makePositionEqualsTo(-1000000)
+                    val gap = (it[0].open - tssDay[idx][1].close) / tssDay[idx][1].close
+                    if (gap < -0.02) {
+                        sellIfNoPosition(idx, -1000_000)
                     }
                     println("written ${it[0].dtGmtEnd} ${tssDay[idx][1].dtGmtEnd} ")
                 }
@@ -70,29 +60,15 @@ class GapTrading(val context: ModelContext, val fac: Map<String, String>) : Mode
             ret
         }
 
-        oms.forEachIndexed({ idx, om ->
-            PositionCloserByTimeOut(om, Duration.ofHours(properties()["holdtime"]!!.toLong()), context.mdDistributor, Interval.Min10, idx)
-        })
+        closePositionByTimeout(hours = properties["holdtime"]!!.toInt())
 
 
-    }
-
-    override fun orderManagers(): List<OrderManager> {
-        return oms
     }
 
     override fun onBacktestEnd() {
         super.onBacktestEnd()
         val writer = GenericDumper<GapStat>("gaps", context.config.getReportDbFile(), GapStat::class)
         writer.write(stat)
-    }
-
-    override fun update() {
-
-    }
-
-    override fun properties(): Map<String, String> {
-        return fac
     }
 
 }
@@ -116,29 +92,21 @@ suspend fun main(args: Array<String>) {
             "magn"
     )
 
-    val divsMap = DivHelper.getDivs()
-
-    val divs = divsMap
-
-    val conf = ModelBacktestConfig()
-    conf.reportTargetPath = "./report/gapTrading"
+    val divs = DivHelper.getDivs()
 
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
-    conf.instruments = tt.map { instr ->
-        InstrumentConfig(instr, { time ->
-            ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
-        })
+    val conf = ModelBacktestConfig().apply {
+        reportTargetPath = "./report/gapTrading"
+        instruments = tt.map { instr ->
+            InstrumentConfig(instr, { time ->
+                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
+            })
+        }
+        opt("holdtime", 1, 3, 1)
     }
 
-    conf.optConfig.params += OptimizedParameter("holdtime", 1,3,1)
-    conf.optConfig.resourceStrategy = ManualOptResourceStrategy(1,100)
-
-    conf.precacheMarketData = false
-
-    runOptimized(conf, {cfg,fac->
-        GapTrading(cfg,fac)
-    })
-    println("done")
-
+    conf.runStrat{ cfg, fac ->
+        GapTrading(cfg, fac)
+    }
 }

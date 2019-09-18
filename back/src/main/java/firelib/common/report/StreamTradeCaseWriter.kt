@@ -5,9 +5,6 @@ import com.funstat.store.SqlUtils
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.misc.StreamTradeCaseGenerator
-import firelib.common.misc.dbl2Str
-import firelib.common.misc.writeRows
-import firelib.common.opt.OptimizedParameter
 import firelib.domain.Ohlc
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -106,7 +103,7 @@ object OptWriter{
         val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
         val stmt: String
         val rows = estimates.map {
-            it.metricToValue.mapKeys { it.key.name } + it.optParams.mapKeys { "opt_${it.key}" }
+            it.metricToValue.mapKeys { it.key.name } + it.optParams.mapKeys { "opt_${it.key.replace('.','_')}" }
         }
         GenericMapWriter.write(path,rows, "opts")
     }

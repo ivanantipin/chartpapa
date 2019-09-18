@@ -41,7 +41,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
         TimeBoundsCalculatorImpl()
     }
 
-    val boundModels = ArrayList<Model>()
+    val boundModels = mutableListOf<Model>()
 
     val modelContext by lazy {
         ModelContext(timeService,marketDataDistributor,tradeGate,modelConfig.instruments.map { it.ticker }, modelConfig)
@@ -73,13 +73,12 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
 
 
     fun bindModelsToOutputs(): List<ModelOutput> {
-        val ret = boundModels.map { model ->
+        return boundModels.map { model ->
             val modelOutput = ModelOutput(model.properties())
             model.orderManagers().forEach { om -> om.tradesTopic().subscribe { modelOutput.trades += it } }
             model.orderManagers().forEach { om-> om.orderStateTopic().filter { it.status == OrderStatus.New }.subscribe { modelOutput.orderStates += it } }
             modelOutput
         }
-        return ret
     }
 
 

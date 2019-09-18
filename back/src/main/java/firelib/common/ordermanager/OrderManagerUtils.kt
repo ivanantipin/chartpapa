@@ -1,8 +1,8 @@
 package firelib.common.ordermanager
 
 import firelib.common.Order
-import firelib.common.OrderType
-import firelib.common.Side
+import firelib.domain.OrderType
+import firelib.domain.Side
 
 fun OrderManager.makePositionEqualsTo(pos: Int): Unit {
     if(this.hasPendingState()){

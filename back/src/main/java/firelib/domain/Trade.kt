@@ -1,10 +1,11 @@
 package firelib.common
 
 import firelib.common.misc.dbl2Str
+import firelib.domain.Side
 import java.time.Instant
 
 
-class TradeStat(val price : Double, val side :Side){
+class TradeStat(val price : Double, val side : Side){
 
     var maxHoldingPrice: Double = price
     var minHoldingPrice: Double = price

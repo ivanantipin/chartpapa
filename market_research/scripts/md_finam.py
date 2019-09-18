@@ -1,5 +1,5 @@
-import finam.export as fe
-import utils as u
+import market_research.finam.export as fe
+import market_research.utils as u
 
 df=u.exporter.getMeta()
 

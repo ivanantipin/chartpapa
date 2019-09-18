@@ -1,8 +1,8 @@
 package com.firelib.test
 
 import firelib.common.Order
-import firelib.common.OrderType
-import firelib.common.Side
+import firelib.domain.OrderType
+import firelib.domain.Side
 import firelib.common.Trade
 import org.junit.Assert
 import org.junit.Test

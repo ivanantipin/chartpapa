@@ -1,9 +1,8 @@
 package com.firelib.test
 
-import firelib.common.MarketDataType
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.core.runSimple
+import firelib.common.config.runStrat
 import firelib.common.reader.ReaderFactoryImpl
 import firelib.domain.Ohlc
 import firelib.parser.CsvParser
@@ -104,7 +103,7 @@ class BacktestIntegrationTest {
 
         cfg.precacheMarketData = false
 
-        val launch = GlobalScope.launch { runSimple(cfg, { ctx, props -> OhlcTestModel(ctx) }) }
+        val launch = GlobalScope.launch { cfg.runStrat({ ctx, props -> OhlcTestModel(ctx) }) }
 
         while (launch.isActive){
             Thread.sleep(100)

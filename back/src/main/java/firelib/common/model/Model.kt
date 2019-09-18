@@ -7,22 +7,32 @@ import firelib.common.ordermanager.flattenAll
 /**
 
  */
-interface Model {
+open class Model(val context: ModelContext, val properties: Map<String, String>) {
 
-    fun properties(): Map<String, String>
+    val oms = makeOrderManagers(context)
+
+    fun properties(): Map<String, String>{
+        return properties
+    }
 
     fun name(): String{
         return this.javaClass.name
     }
 
-    fun orderManagers(): List<OrderManager>
+    fun orderManagers(): List<OrderManager>{
+        return oms
+    }
 
-    fun update()
+    open fun update(){}
+
+    fun modelContext() : ModelContext{
+        return context
+    }
 
     /**
      * called after backtest end
      */
-    fun onBacktestEnd(){
+    open fun onBacktestEnd(){
         orderManagers().forEach {it.flattenAll()}
     }
 

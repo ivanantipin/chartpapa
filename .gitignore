@@ -1,3 +1,7 @@
 .idea
 .gradle
 *iml
+/back/build/*
+/market_research/report_tmp
+*checkpoint.ipynb
+/**/vol_break_report/

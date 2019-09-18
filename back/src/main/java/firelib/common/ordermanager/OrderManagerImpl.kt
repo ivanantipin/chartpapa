@@ -2,7 +2,7 @@ package firelib.common.ordermanager
 
 import firelib.common.Order
 import firelib.common.OrderStatus
-import firelib.common.OrderType
+import firelib.domain.OrderType
 import firelib.common.Trade
 import firelib.common.misc.NonDurableChannel
 import firelib.common.misc.SubChannel
@@ -89,7 +89,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
             orders.forEach({orderStateChannel.publish(OrderState(it,OrderStatus.Rejected, timeService.currentTime()))})
         }else{
             orders.forEach { order ->
-                val orderWithState: OrderWithState = OrderWithState(order)
+                val orderWithState = OrderWithState(order)
                 this.id2Order[order.id] = orderWithState
                 orders.forEach {orderStateChannel.publish(OrderState(it, OrderStatus.New, timeService.currentTime()))}
                 log.info("submitting order {}", order)
@@ -102,7 +102,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
 
 
-    fun onOrderState(state : OrderState): Unit {
+    fun onOrderState(state : OrderState) {
         if (!id2Order.contains(state.order.id)) {
             log.error("order state received {} for nonexisting or finalized order", state)
             return

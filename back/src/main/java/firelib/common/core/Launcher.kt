@@ -112,7 +112,7 @@ object Launcher{
 
         val ctx = SimpleRunCtx(cfg)
 
-        val model = ctx.addModel(fac, cfg.modelParams)
+        ctx.addModel(fac, cfg.modelParams)
 
 
         var jobsList = emptyList<Job>()
@@ -129,10 +129,9 @@ object Launcher{
             jobsList.forEach {it.cancelAndJoin()}
         }
 
-
         writeReport(outputs[0], cfg)
 
-
+        println("done")
     }
 
 

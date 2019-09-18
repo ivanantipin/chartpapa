@@ -1,6 +1,5 @@
 package firelib.domain
 
-import firelib.common.Side
 import java.time.Instant
 
 

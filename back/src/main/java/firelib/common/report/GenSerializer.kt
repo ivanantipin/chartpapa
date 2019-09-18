@@ -1,11 +1,9 @@
 package firelib.common.report
 
 import firelib.common.Order
-import firelib.common.Side
+import firelib.domain.Side
 import firelib.common.Trade
-import firelib.common.misc.dbl2Str
 import firelib.common.misc.pnlForCase
-import firelib.common.misc.toStandardString
 import firelib.common.report.SqlTypeMapper.mapType
 import firelib.domain.Ohlc
 import java.time.Instant
