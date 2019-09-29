@@ -1,10 +1,10 @@
 package firelib.common.report
 
 import com.funstat.store.MdDao
-import com.funstat.store.SqlUtils
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.misc.StreamTradeCaseGenerator
+import firelib.common.misc.toTradingCases
 import firelib.common.report.SqlUtils.makeCreateSqlStmtFromHeader
 import firelib.common.report.SqlUtils.makeSqlStatementFromHeader
 import firelib.domain.Ohlc
@@ -15,7 +15,6 @@ import org.springframework.transaction.support.TransactionTemplate
 import java.nio.file.Path
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.reflect.full.createType
 
 
 class StreamTradeCaseWriter(val path: Path, val factors: Iterable<String>) {
@@ -30,14 +29,11 @@ class StreamTradeCaseWriter(val path: Path, val factors: Iterable<String>) {
         this.stmt = makeSqlStatementFromHeader("trades", header)
     }
 
-    fun insertTrades(trades: List<Trade>): Unit {
+    fun insertTrades(trades: List<Trade>) {
         GlobalLock.lock.withLock {
             TransactionTemplate(tman).execute({ status ->
-                trades.groupBy { it.security() }.forEach { (sec, secTrades) ->
-                    val gen = StreamTradeCaseGenerator()
-                    val cases = secTrades.flatMap(gen).map { toMapForSqlUpdate(it, tradeCaseColDefs) + it.first.tradeStat.factors}.toTypedArray()
-                    NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
-                }
+                val cases = trades.toTradingCases().map { toMapForSqlUpdate(it, tradeCaseColDefs) + it.first.tradeStat.factors }.toTypedArray()
+                NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
             })
         }
     }
@@ -54,7 +50,7 @@ class StreamOrderWriter(val path: Path) {
         stmt = makeSqlStatementFromHeader("orders", header)
     }
 
-    fun insertOrders(orders: List<Order>): Unit {
+    fun insertOrders(orders: List<Order>) {
         GlobalLock.lock.withLock {
             TransactionTemplate(tman).execute({ status ->
                 val cases = orders.map { toMapForSqlUpdate(it, orderColsDefs) }.toTypedArray()
@@ -64,35 +60,11 @@ class StreamOrderWriter(val path: Path) {
     }
 }
 
-object GenericMapWriter{
-    fun write(path : Path, rows: List<Map<String,Any>>, tableName : String) {
-
-        val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
-        val stmt: String
-
-        val colsDef = rows[0].map {
-            ColDef<Map<String,Any>, Any>(it.key, { v: Map<String, Any> ->
-                v[it.key]!!
-            }, it.value::class.createType())
-        }.toTypedArray()
-
-        val header = getHeader(colsDef as Array<ColDef<Map<String,Any>, out Any>>)
-        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader(tableName, header))
-        stmt = makeSqlStatementFromHeader(tableName, header)
-        NamedParameterJdbcTemplate(ds).batchUpdate(stmt, rows.toTypedArray())
-    }
-}
-
 object OptWriter{
-
     fun write(path : Path, estimates: List<ExecutionEstimates>) {
-        var colsDef : List<ColDef<Map<String,Any>,out Any>>? = null
-        val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
-        val stmt: String
-        val rows = estimates.map {
+        GenericMapWriter.write(path,estimates.map {
             it.metricToValue.mapKeys { it.key.name } + it.optParams.mapKeys { "opt_${it.key.replace('.','_')}" }
-        }
-        GenericMapWriter.write(path,rows, "opts")
+        }, "opts")
     }
 }
 

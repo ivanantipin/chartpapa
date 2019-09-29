@@ -19,10 +19,10 @@ private fun toTradingCasesInt(trades: List<Trade>): List<Pair<Trade, Trade>> {
     return trades.flatMap(generator)
 }
 
-fun pnlForCase(cas: Pair<Trade, Trade>): Double {
-    return cas.first.moneyFlow() + cas.second.moneyFlow()
+fun Pair<Trade, Trade>.pnl() : Double{
+    return this.first.moneyFlow() + this.second.moneyFlow()
 }
 
-fun toTradingCases(trades: List<Trade>): List<Pair<Trade, Trade>> {
-    return trades.groupBy(Trade::security).values.flatMap { toTradingCasesInt(it) }
+fun List<Trade>.toTradingCases() : List<Pair<Trade,Trade>>{
+    return this.groupBy(Trade::security).values.flatMap { toTradingCasesInt(it) }
 }

@@ -1,11 +1,11 @@
 package com.firelib.test
 
 import firelib.common.Order
+import firelib.common.Trade
+import firelib.common.misc.pnl
+import firelib.common.misc.toTradingCases
 import firelib.domain.OrderType
 import firelib.domain.Side
-import firelib.common.Trade
-import firelib.common.misc.pnlForCase
-import firelib.common.misc.toTradingCases
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant
@@ -35,7 +35,7 @@ class SplitTrdTest{
         Assert.assertEquals("Qty must be 1 but it is " + tcs[3].first.qty, tcs[3].first.qty, 1)
 
 
-        var pnls = tcs.map({pnlForCase(it)})
+        var pnls = tcs.map({it.pnl()})
 
         Assert.assertEquals("Pnl must be 1 but it is " + pnls[0], pnls[0], 1.0, 0.0001)
         Assert.assertEquals("Pnl must be 4 but it is " + pnls[1], pnls[1], 4.0, 0.0001)

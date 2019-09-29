@@ -1,11 +1,11 @@
 package firelib.common.report
 
 import firelib.common.Order
-import firelib.domain.Side
 import firelib.common.Trade
-import firelib.common.misc.pnlForCase
+import firelib.common.misc.pnl
 import firelib.common.report.SqlTypeMapper.mapType
 import firelib.domain.Ohlc
+import firelib.domain.Side
 import java.time.Instant
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.reflect
@@ -61,7 +61,7 @@ val tradeCaseColDefs : Array<ColDef<Pair<Trade,Trade>,out Any>> = arrayOf(
         makeMetric("EntryPrice") {it.first.price},
         makeMetric("ExitDate") {it.second.dtGmt},
         makeMetric("ExitPrice") {it.second.price},
-        makeMetric("Pnl") {pnlForCase(it)},
+        makeMetric("Pnl") {it.pnl()},
         makeMetric("Qty") { it.first.qty},
         makeMetric("MAE") { it.second.tradeStat.MAE()},
         makeMetric("MFE") { it.second.tradeStat.MFE()}

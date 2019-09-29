@@ -1,6 +1,5 @@
 package firelib.common.report
 
-import com.funstat.store.SqlUtils
 import firelib.common.report.SqlUtils.makeCreateSqlStmtFromHeader
 import firelib.common.report.SqlUtils.makeSqlStatementFromHeader
 import org.springframework.jdbc.core.JdbcTemplate

@@ -5,7 +5,7 @@ import firelib.common.core.ModelOutput
 import firelib.common.misc.toTradingCases
 import java.util.*
 
-class ReportProcessor(val metricsCalculator : MetricsCalculator, val optimizedFunctionName: StrategyMetric,
+class ReportProcessor(val optimizedFunctionName: StrategyMetric,
                       val optParams: List<String>, val topModelsToKeep: Int = 3, val minNumberOfTrades: Int = 1, val removeOutlierTrades: Int = 2) {
 
 
@@ -13,7 +13,7 @@ class ReportProcessor(val metricsCalculator : MetricsCalculator, val optimizedFu
 
     private val bestModels_ = PriorityQueue<ModelStat>(Comparator<ModelStat> { p0, p1 -> p0.optMetric.compareTo(p1.optMetric) })//(Ordering.by((ms : ModelStat) -> ms.optMetric ).reverse)
 
-    var estimates = ArrayList<ExecutionEstimates>()
+    var estimates = mutableListOf<ExecutionEstimates>()
 
     fun bestModels(): List<ModelOutput> { return bestModels_.map({it.output}).toList()}
 
@@ -25,9 +25,9 @@ class ReportProcessor(val metricsCalculator : MetricsCalculator, val optimizedFu
 
         filtered.forEach { model ->
 
-            val tradingCases = toTradingCases(model.trades)
+            val tradingCases = model.trades.toTradingCases()
 
-            val metrics = metricsCalculator(tradingCases)
+            val metrics = statCalculator(tradingCases)
 
             val est = metrics[optimizedFunctionName]!!
 
