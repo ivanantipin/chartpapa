@@ -86,17 +86,6 @@ class ModelBacktestConfig (){
     fun param(name : String, value : Int){
         modelParams += (name to value.toString())
     }
-
-    /*
-    * this metrics will be available for optimization
-     */
-    val calculatedMetrics = listOf(
-            StrategyMetric.Pf,
-            StrategyMetric.Pnl,
-            StrategyMetric.Sharpe,
-            StrategyMetric.AvgPnl
-    )
-
 }
 
 suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory){

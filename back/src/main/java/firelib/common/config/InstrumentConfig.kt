@@ -7,5 +7,5 @@ import java.time.Instant
 
 data class InstrumentConfig(val ticker: String,
                             @get:JsonIgnore
-                            val fact : (Instant)->MarketDataReader<Ohlc>) {}
+                            val fact : (Instant)->MarketDataReader<Ohlc>)
 

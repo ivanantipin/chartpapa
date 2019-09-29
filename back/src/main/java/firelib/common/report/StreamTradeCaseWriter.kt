@@ -60,13 +60,6 @@ class StreamOrderWriter(val path: Path) {
     }
 }
 
-object OptWriter{
-    fun write(path : Path, estimates: List<ExecutionEstimates>) {
-        GenericMapWriter.write(path,estimates.map {
-            it.metricToValue.mapKeys { it.key.name } + it.optParams.mapKeys { "opt_${it.key.replace('.','_')}" }
-        }, "opts")
-    }
-}
 
 object GlobalLock{
     val lock = ReentrantLock()

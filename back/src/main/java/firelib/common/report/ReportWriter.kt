@@ -5,10 +5,7 @@ import firelib.common.config.ModelBacktestConfig
 import firelib.common.core.ModelOutput
 import firelib.common.misc.jsonHelper
 import org.apache.commons.io.FileUtils
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
-import java.nio.file.StandardOpenOption
+import java.nio.file.*
 
 
 object ReportWriter{
@@ -52,6 +49,13 @@ object ReportWriter{
         println("report written to ${cfg.reportTargetPath} you can run it , command 'jupyter lab'")
 
     }
+
+    fun writeOpt(path : Path, estimates: List<ExecutionEstimates>) {
+        GenericMapWriter.write(path,estimates.map {
+            it.metricToValue.mapKeys { it.key.name } + it.optParams.mapKeys { "opt_${it.key.replace('.','_')}" }
+        }, "opts")
+    }
+
 
 
 }

@@ -17,7 +17,9 @@ object PositionCloser{
         model.orderManagers().forEachIndexed({idx,oms->
             var cnt = 0
 
-            model.context.mdDistributor.getOrCreateTs(idx, interval, 2).preRollSubscribe {
+            val context = model.context
+
+            context.mdDistributor.getOrCreateTs(idx, interval, 2).preRollSubscribe {
                 if(!it[0].interpolated)
                     cnt++
             }
@@ -27,11 +29,11 @@ object PositionCloser{
             })
 
 
-            model.context.mdDistributor.addListener(Interval.Min10, {inst, md->
+            context.mdDistributor.addListener(Interval.Min10, { inst, md->
                 if (oms.position() != 0
                         && !md.price(idx).interpolated
                         && cnt > periods
-                        && (afterTime == null || afterTime < model.context.timeService.currentTimeUtc().toLocalTime())
+                        && (afterTime == null || afterTime < context.timeService.currentTimeUtc().toLocalTime())
                 ) {
                     oms.makePositionEqualsTo(0)
                 }

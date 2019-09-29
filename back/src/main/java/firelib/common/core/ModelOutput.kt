@@ -5,6 +5,6 @@ import firelib.domain.OrderState
 
 
 class ModelOutput(val modelProps : Map<String,String>){
-    val trades = ArrayList<Trade>()
-    val orderStates = ArrayList<OrderState>()
+    val trades = mutableListOf<Trade>()
+    val orderStates = mutableListOf<OrderState>()
 }
