@@ -2,7 +2,7 @@ package firelib.domain
 
 import firelib.common.misc.atUtc
 import firelib.common.misc.toStandardString
-import io.swagger.annotations.ApiModelProperty
+
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,18 +11,18 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 data class Ohlc(
-        @get:ApiModelProperty(required = true)
+
         var dtGmtEnd: Instant = Instant.ofEpochSecond(0),
-        @get:ApiModelProperty(required = true)
+
         var open: Double = Double.NaN,
-        @get:ApiModelProperty(required = true)
+
         var high: Double = Double.MIN_VALUE,
-        @get:ApiModelProperty(required = true)
+
         var low: Double = Double.MAX_VALUE,
-        @get:ApiModelProperty(required = true)
+
         var close: Double = .0,
         var Oi: Int = 0,
-        @get:ApiModelProperty(required = true)
+
         var volume: Long = 0,
         var interpolated: Boolean = true
 ) : Timed, Comparable<Ohlc> {
@@ -42,7 +42,19 @@ data class Ohlc(
         )
     }
 
-    @get:ApiModelProperty(required = true)
+    fun merge(price : Double, vol: Long): Ohlc {
+        if(interpolated){
+            return Ohlc(dtGmtEnd,price,price,price,price,volume = vol, interpolated = false)
+        }
+        return Ohlc(dtGmtEnd, open,
+                high=Math.max(high, price),
+                low=Math.min(low, price),
+                close=price, volume = vol + volume
+        )
+    }
+
+
+
     val dateTimeMs = dtGmtEnd.toEpochMilli()
 
 

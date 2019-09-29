@@ -42,15 +42,13 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
     private val tradesChannel = NonDurableChannel<Trade>()
 
-    private var position_ = 0
+    private var position = 0
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun position(): Int = position_
+    override fun position(): Int = position
 
     var idCounter = AtomicLong(0)
-
-    val uuid = Random().nextLong()
 
     override fun liveOrders(): List<Order>{
         return  id2Order.values.map({it.order})
@@ -59,8 +57,6 @@ class OrderManagerImpl(val tradeGate : TradeGate,
     override fun hasPendingState(): Boolean {
         return id2Order.values.any { (it.status().isPending() || (it.order.orderType == OrderType.Market))}
     }
-
-
 
     override fun tradesTopic(): SubChannel<Trade> {
         return tradesChannel
@@ -129,8 +125,8 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         if(order.remainingQty() < 0){
             log.error("negative remaining amount order {}", order)
         }
-        val prevPos = position_
-        position_ = trd.adjustPositionByThisTrade(position_)
+        val prevPos = position
+        position = trd.adjustPositionByThisTrade(position)
         if(log.isInfoEnabled()) log.info("position adjusted for security $security :  $prevPos -> ${position()}")
         tradesChannel.publish(trd)
     }

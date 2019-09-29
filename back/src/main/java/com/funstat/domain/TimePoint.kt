@@ -1,12 +1,11 @@
 package com.funstat.domain
 
-import io.swagger.annotations.ApiModelProperty
 
 import java.time.LocalDateTime
 
-data class TimePoint(@get:ApiModelProperty(required = true)
+data class TimePoint(
                      val time: LocalDateTime,
-                     @get:ApiModelProperty(required = true)
+
                      val value: Double) : Comparable<TimePoint> {
 
     override fun compareTo(timePoint: TimePoint): Int {

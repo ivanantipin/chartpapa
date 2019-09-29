@@ -3,15 +3,12 @@ package firelib.common.timeboundscalc
 import firelib.common.config.ModelBacktestConfig
 import java.time.Instant
 
-/**
 
- */
-class TimeBoundsCalculatorImpl() : TimeBoundsCalculator{
+object BacktestPeriodCalc {
 
     fun calcStartDate(cfg: ModelBacktestConfig): Instant {
-        val startDtGmt = if (cfg.startDateGmt == null) Instant.EPOCH else cfg.startDateGmt
 
-        val readers = cfg.instruments.map {it.fact(startDtGmt)}
+        val readers = cfg.instruments.map {it.fact(cfg.startDateGmt)}
 
         if(cfg.verbose){
             cfg.instruments.forEachIndexed({idx,cfg->
@@ -19,17 +16,15 @@ class TimeBoundsCalculatorImpl() : TimeBoundsCalculator{
             })
         }
 
-        val maxReadersStartDate = readers.maxBy {it.current().time().getEpochSecond()}!!.current().time()
+        val maxReadersStartDate = readers.maxBy {it.startTime()}!!.current().time()
 
         readers.forEach {it.close()}
 
-        return if (maxReadersStartDate.isAfter(startDtGmt)) maxReadersStartDate else startDtGmt
+        return if (maxReadersStartDate.isAfter(cfg.startDateGmt)) maxReadersStartDate else cfg.startDateGmt
 
     }
 
-    override fun invoke(cfg : ModelBacktestConfig): Pair<Instant, Instant> {
-        val startDt: Instant = calcStartDate(cfg)
-        val endDt: Instant = if (cfg.endDate == null) Instant.now() else cfg.endDate
-        return Pair(startDt, endDt)
+    fun calcBounds(cfg : ModelBacktestConfig): Pair<Instant, Instant> {
+        return Pair(calcStartDate(cfg), cfg.endDate)
     }
 }

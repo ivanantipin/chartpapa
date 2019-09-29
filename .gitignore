@@ -5,3 +5,6 @@
 /market_research/report_tmp
 *checkpoint.ipynb
 /**/vol_break_report/
+/back/out
+/grpc-back/build
+/grpc-back/out

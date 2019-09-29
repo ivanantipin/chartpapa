@@ -63,7 +63,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
             }
         })
 
-        closePositionByTimeout(days = 3)
+        closePositionByTimeout(periods = 3, interval = Interval.Day)
     }
 
     private fun makeRet(it: TimeSeries<Ohlc>, end: Int, length: Int) = (it[end].close - it[end + length].close) / it[end + length].close

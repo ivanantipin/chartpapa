@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import firelib.common.core.Launcher
 import firelib.common.core.ModelFactory
 import firelib.common.misc.toInstantDefault
+import firelib.common.model.Model
 import firelib.common.opt.OptimizedParameter
 import firelib.common.report.StrategyMetric
 import java.nio.file.Path
@@ -21,7 +22,7 @@ class ModelBacktestConfig (){
      */
     var instruments: List<InstrumentConfig> = emptyList()
 
-    var startDateGmt: Instant = Instant.MIN
+    var startDateGmt: Instant = Instant.EPOCH
 
     var endDate: Instant = Instant.now()
 
@@ -99,9 +100,13 @@ class ModelBacktestConfig (){
 }
 
 suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory){
+    this.runStrat(fac,{})
+}
+
+suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory, modelListener : (Model)->Unit){
     if(this.optConfig.params.isNotEmpty()){
         Launcher.runOptimized(this,fac)
     }else{
-        Launcher.runSimple(this,fac)
+        Launcher.runSimple(this,fac,modelListener)
     }
 }

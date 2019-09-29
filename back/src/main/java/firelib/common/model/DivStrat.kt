@@ -127,7 +127,7 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
             }
             ret
         })
-        closePositionByTimeout(days = 5)
+        closePositionByTimeout(periods = 5, interval = Interval.Day)
     }
 }
 

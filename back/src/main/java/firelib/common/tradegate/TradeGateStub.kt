@@ -1,9 +1,9 @@
 package firelib.common.tradegate
 
 import firelib.common.Order
-import firelib.domain.OrderType
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.timeservice.TimeService
+import firelib.domain.OrderType
 import java.time.Instant
 
 

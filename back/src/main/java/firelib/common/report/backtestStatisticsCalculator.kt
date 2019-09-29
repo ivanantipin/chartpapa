@@ -8,9 +8,6 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean
 import org.apache.commons.math3.stat.descriptive.moment.Variance
 
 
-/**
-((List<Pair<Trade, Trade>>) -> Map<StrategyMetric, Double>)
- */
 fun statCalculator(tradingCases: List<Pair<Trade, Trade>>): Map<StrategyMetric, Double> {
     val ret = HashMap<StrategyMetric, Double>()
 

@@ -6,7 +6,7 @@ import firelib.common.interval.Interval
 import firelib.common.mddistributor.MarketDataDistributorImpl
 import firelib.common.model.Model
 import firelib.common.model.ModelContext
-import firelib.common.timeboundscalc.TimeBoundsCalculatorImpl
+import firelib.common.timeboundscalc.BacktestPeriodCalc
 import firelib.common.timeservice.TimeServiceManaged
 import firelib.common.tradegate.TradeGateStub
 import java.time.Instant
@@ -25,7 +25,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
     val rootInterval = Interval.Min1
 
     val startTime by lazy {
-        val bounds = timeBoundsCalculator(modelConfig)
+        val bounds = BacktestPeriodCalc.calcBounds(modelConfig)
         rootInterval.roundTime(bounds.first)
     }
 
@@ -35,10 +35,6 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
 
     val marketDataDistributor by lazy {
         MarketDataDistributorImpl(readers)
-    }
-
-    val timeBoundsCalculator by lazy {
-        TimeBoundsCalculatorImpl()
     }
 
     val boundModels = mutableListOf<Model>()

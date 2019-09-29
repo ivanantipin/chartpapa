@@ -1,11 +1,8 @@
 package firelib.common.reader
 
-import firelib.common.config.InstrumentConfig
-import firelib.common.config.ModelBacktestConfig
 import firelib.common.reader.binary.BinaryReaderRecordDescriptor
 import firelib.common.reader.binary.OhlcDesc
 import firelib.domain.Ohlc
-import firelib.domain.Timed
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler

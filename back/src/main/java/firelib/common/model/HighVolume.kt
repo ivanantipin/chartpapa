@@ -93,8 +93,8 @@ suspend fun main(args: Array<String>) {
         }
     }
 
-    conf.runStrat{ cfg, fac ->
+    conf.runStrat({ cfg, fac ->
         HighVolume(cfg, fac)
-    }
+    },{})
 
 }

@@ -14,7 +14,7 @@ class OptimizationConfig{
      */
     val params = mutableListOf<OptimizedParameter>()
 
-    var resourceStrategy : OptResourceStrategy = ManualOptResourceStrategy(1,100)
+    var resourceStrategy : OptResourceStrategy = ManualOptResourceStrategy(5,20)
 
     /**
     * minimum number of trades to validate strategy output
@@ -30,7 +30,7 @@ class OptimizationConfig{
     /**
      * optimized metric
      */
-    var optimizedMetric = StrategyMetric.Pf
+    var optimizedMetric = StrategyMetric.Sharpe
 
 
 }

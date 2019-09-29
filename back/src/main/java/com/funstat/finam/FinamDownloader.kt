@@ -83,7 +83,7 @@ class FinamDownloader : AutoCloseable, Source {
     override fun load(instrId: InstrId, start: LocalDateTime): Sequence<Ohlc> {
         val ret = MutableList(0,{Ohlc()})
         var mstart = start
-        while (mstart.isBefore(LocalDateTime.now())){
+        while (mstart < LocalDateTime.now()){
             val finish = mstart.plusDays(1005)
             ret += loadSome(instrId,mstart, finish)
             mstart = finish.minusDays(2)

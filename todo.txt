@@ -3,4 +3,4 @@
 5. sequenta notification
 6. check sequenta discrepancies
 7. mean rev strat on spy - buy dips
-8. trending strat on russian stocks
+

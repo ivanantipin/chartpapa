@@ -12,6 +12,7 @@ import firelib.parser.ParserHandlersProducer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path
@@ -47,6 +48,7 @@ class BacktestIntegrationTest {
 
 
     @Test
+    @Ignore
     fun IntegrationTestTestMins() {
 
 
@@ -103,7 +105,7 @@ class BacktestIntegrationTest {
 
         cfg.precacheMarketData = false
 
-        val launch = GlobalScope.launch { cfg.runStrat({ ctx, props -> OhlcTestModel(ctx) }) }
+        val launch = GlobalScope.launch { cfg.runStrat({ ctx, _ -> OhlcTestModel(ctx) }) }
 
         while (launch.isActive){
             Thread.sleep(100)

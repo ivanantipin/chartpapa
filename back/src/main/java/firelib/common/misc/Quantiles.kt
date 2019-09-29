@@ -26,6 +26,7 @@ class Quantiles<T>(val window: Int) {
     }
 }
 
+// fixme create test
 fun main() {
 
     val set = Quantiles<Double>(10000)

@@ -1,12 +1,12 @@
 package firelib.common.model
 
 import firelib.common.interval.Interval
-import firelib.common.misc.PositionCloserByTimeOut
+import firelib.common.misc.PositionCloser
 import firelib.common.ordermanager.makePositionEqualsTo
 import firelib.common.timeseries.TimeSeries
 import firelib.common.timeseries.makeNonInterpolatedView
 import firelib.domain.Ohlc
-import java.time.Duration
+import java.time.LocalTime
 
 
 fun Model.enableFactor(name: String, fact: (Int) -> Double) {
@@ -46,14 +46,8 @@ fun Model.sellIfNoPosition(idx : Int, money : Long){
 }
 
 
-fun Model.closePositionByTimeout(days : Int = 0, hours : Int = 0, minutes : Int = 0, seconds : Int = 0){
-    val dur = Duration.ofDays(days.toLong()) +
-            Duration.ofHours(hours.toLong()) +
-            Duration.ofMinutes(minutes.toLong()) +
-            Duration.ofSeconds(seconds.toLong())
-    val oms = this.orderManagers()
-    val context = this.modelContext()
-    oms.forEachIndexed({ idx, om ->
-        PositionCloserByTimeOut(om, dur, context.mdDistributor, Interval.Min10, idx)
-    })
+fun Model.closePositionByTimeout(afterTime : LocalTime? = null,
+                                 periods : Int,
+                                 interval: Interval){
+    PositionCloser.closePosByTimeoutAndTimeOfDay(this, afterTime,  periods, interval)
 }

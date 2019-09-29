@@ -11,7 +11,7 @@ class NonDurableChannel<T> : Channel<T>{
 
     val listeners = LinkedList<(T)->Unit>()
 
-    override fun publish(t : T) : Unit {
+    override fun publish(t : T) {
         listeners.forEach {it(t)}
     }
 

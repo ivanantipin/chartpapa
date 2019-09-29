@@ -5,31 +5,18 @@ import com.funstat.store.SqlUtils
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.misc.StreamTradeCaseGenerator
+import firelib.common.report.SqlUtils.makeCreateSqlStmtFromHeader
+import firelib.common.report.SqlUtils.makeSqlStatementFromHeader
 import firelib.domain.Ohlc
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import java.nio.file.Path
-import java.nio.file.Paths
-import java.time.Instant
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.reflect.KClass
 import kotlin.reflect.full.createType
-import kotlin.reflect.full.memberProperties
 
-fun makeSqlStatementFromHeader(table: String, header: Map<String, String>): String {
-    val names = header.toList().map { it.first }
-    val decl = names.joinToString(separator = ",")
-    val vals = names.joinToString(separator = ",") { ":${it}" }
-    return "insert into $table ($decl) values ( ${vals} )"
-}
-
-fun makeCreateSqlStmtFromHeader(table: String, header: Map<String, String>): String {
-    val t0 = header.toList().map { "${it.first} ${it.second} not NULL" }.joinToString(separator = ",")
-    return "create table if not exists $table ( ${t0} ) ;"
-}
 
 class StreamTradeCaseWriter(val path: Path, val factors: Iterable<String>) {
 
@@ -124,34 +111,4 @@ class OhlcStreamWriter(val path: Path) {
         }
 
     }
-}
-
-class GenericDumper<T : Any>(val name : String, val path : Path, val type : KClass<T>){
-    val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
-    val tman = DataSourceTransactionManager(ds)
-
-    val stmt : String
-
-    init {
-        val header = type.memberProperties.associateBy({ it.name }, { SqlTypeMapper.mapType(it.returnType) })
-        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader(name,header))
-        stmt = makeSqlStatementFromHeader(name, header)
-    }
-
-    fun write(rows : List<T>){
-        val rowsM = rows.map { row ->
-            type.memberProperties.associateBy({ it.name }, { it.get(row) })
-        }
-        TransactionTemplate(tman).execute({ status ->
-            NamedParameterJdbcTemplate(ds).batchUpdate(stmt, rowsM.toTypedArray())
-        })
-    }
-}
-
-
-data class Test(val name : String, val time : Instant)
-fun main(args: Array<String>) {
-
-    OptWriter.write(Paths.get("test.db"), listOf(ExecutionEstimates(mapOf("a" to 1), mapOf(StrategyMetric.AvgLoss to 1.0))))
-
 }

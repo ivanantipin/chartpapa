@@ -140,7 +140,7 @@ class OrderManagerTest {
         val timeService = AgendaImpl()
 
         val config = ModelBacktestConfig()
-        config.instruments = listOf(InstrumentConfig("sec",{startTime->
+        config.instruments = listOf(InstrumentConfig("sec",{_->
             MarketDataReaderSql(emptyList())
         }))
 
@@ -168,7 +168,7 @@ class OrderManagerTest {
 
         update(tg,1.0, 3.0)
 
-        Assert.assertEquals(1 as Int, trades.size)
+        Assert.assertEquals(1, trades.size)
         Assert.assertEquals(-sellQty, om.position())
 
         Assert.assertEquals(1, om.liveOrders().size)

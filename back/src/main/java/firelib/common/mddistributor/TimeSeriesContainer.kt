@@ -17,6 +17,10 @@ class TimeSeriesContainer(val reader : MarketDataReader<Ohlc>) {
         return map.map { Pair(it.key, it.value) }
     }
 
+    fun updatePrice(idx : Int, price : Double, vol : Long){
+        timeSeries.forEach{it[0] = it[0].merge(price,vol)}
+    }
+
 
     fun readUntil(time : Instant) : Boolean{
         while (!reader.current().time().isAfter(time)){

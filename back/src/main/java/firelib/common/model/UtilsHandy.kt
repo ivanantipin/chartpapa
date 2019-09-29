@@ -32,6 +32,6 @@ fun updateRussianStockSimple(ticker : String){
 }
 
 fun main(args: Array<String>) {
-    //updateRussianStockSimple("sber")
-    updateRussianDivStocks()
+    updateRussianStockSimple("sber")
+    //updateRussianDivStocks()
 }

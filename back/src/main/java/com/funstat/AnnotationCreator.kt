@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 object AnnotationCreator {
 
-    internal val displayedCounts = Arrays.asList(11, 12, 20)
+    internal val displayedCounts = arrayOf(11, 12, 20)
 
     /*
 labelOptions: {

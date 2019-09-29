@@ -21,8 +21,6 @@ import java.util.concurrent.atomic.AtomicLong
 
 class IqFeedSource(val csvPath: Path) : Source {
 
-    //val dir = Paths.get("/ddisk/globaldatabase/1MIN/STK")
-
     override fun symbols(): List<InstrId> {
         val map = code2name()
         return csvPath.toFile().list().map {
@@ -35,22 +33,16 @@ class IqFeedSource(val csvPath: Path) : Source {
     }
 
     override fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc> {
-        val cnt = AtomicLong()
         val iniFile = csvPath.resolve("common.ini").toAbsolutePath().toString()
         val load = LegacyMarketDataFormatLoader.load(iniFile)
         val producer = ParserHandlersProducer(load)
         val fname = csvPath.resolve(instrId.code + "_1.csv").toAbsolutePath().toString()
 
         return sequence({
-            try {
-                val parser = CsvParser<firelib.domain.Ohlc>(fname, producer.handlers as Array<out ParseHandler<firelib.domain.Ohlc>>?, { firelib.domain.Ohlc() }, 10_000_000)
-                println(parser.seek(dateTime.toInstant(ZoneOffset.UTC)))
-                while (parser.read()) {
-                    yield(parser.current())
-                    //ohlcs.add(parser.current())
-                    cnt.incrementAndGet()
-                }
-            } catch (e: Exception) {
+            val parser = CsvParser<Ohlc>(fname, producer.handlers as Array<out ParseHandler<Ohlc>>?, { Ohlc() }, 10_000_000)
+            println(parser.seek(dateTime.toInstant(ZoneOffset.UTC)))
+            while (parser.read()) {
+                yield(parser.current())
             }
         })
     }
@@ -112,11 +104,5 @@ fun main(args: Array<String>) {
         if(arr[idx].size > 30){
             arr[idx].removeAt(0);
         }
-
-
-
     })
-
-
-
 }

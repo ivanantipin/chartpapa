@@ -1,16 +1,28 @@
-subprojects {
-    apply plugin: 'java'
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version'1.3.50'
+    id 'idea'
+}
+
+ext{
+    kotlin_version=plugins.findPlugin("org.jetbrains.kotlin.jvm").kotlinPluginVersion
+}
+
+allprojects {
+
+    apply plugin: "idea"
+    apply plugin: "org.jetbrains.kotlin.jvm"
+
     group = 'com.funstat'
     version = '0.0.1-SNAPSHOT'
-    sourceCompatibility = 1.8
-
 
     repositories {
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    }
+        google()
+        jcenter()
+        mavenCentral()
+        mavenLocal()
 
-}
-repositories {
-    mavenCentral()
+    }
 }

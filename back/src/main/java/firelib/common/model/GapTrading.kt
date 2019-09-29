@@ -2,17 +2,13 @@ package firelib.common.model
 
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import firelib.common.config.*
-import firelib.common.core.Launcher.runOptimized
+import firelib.common.config.InstrumentConfig
+import firelib.common.config.ModelBacktestConfig
+import firelib.common.config.runStrat
 import firelib.common.interval.Interval
-import firelib.common.misc.PositionCloserByTimeOut
-import firelib.common.opt.OptimizedParameter
-import firelib.common.ordermanager.OrderManager
-import firelib.common.ordermanager.makePositionEqualsTo
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
 import firelib.common.report.GenericDumper
-import java.time.Duration
 
 
 class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(context, fac) {
@@ -60,8 +56,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
             ret
         }
 
-        closePositionByTimeout(hours = properties["holdtime"]!!.toInt())
-
+        closePositionByTimeout(periods = properties["holdtime"]!!.toInt(), interval = Interval.Min60)
 
     }
 

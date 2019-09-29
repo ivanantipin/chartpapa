@@ -11,10 +11,7 @@ import firelib.domain.Ohlc
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class OhlcTestModel(val context: ModelContext) : Model {
-    override fun name(): String {
-        return "OhlcModel"
-    }
+class OhlcTestModel(context: ModelContext) : Model(context, emptyMap()) {
 
     var endTime = Instant.MIN
 
@@ -46,16 +43,6 @@ class OhlcTestModel(val context: ModelContext) : Model {
     }
 
 
-    override fun orderManagers(): List<OrderManager> {
-        return omanagers
-    }
-
-    override fun update() {
-    }
-
-    override fun properties(): Map<String, String> {
-        return emptyMap()
-    }
 
     fun on5Min(ts: TimeSeries<Ohlc>): Unit {
         if (dayHist!!.count() > 0 && dayHist!![0].dtGmtEnd.truncatedTo(ChronoUnit.DAYS) != dayHist!![0].dtGmtEnd) {

@@ -4,40 +4,58 @@ import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.OptResourceParams
 import firelib.common.interval.Interval
 import firelib.common.mddistributor.MarketDataDistributor
+import firelib.common.model.Model
 import firelib.common.opt.ParamsVariator
-import firelib.common.report.*
-import firelib.common.threading.ThreadExecutorImpl
-import firelib.common.timeboundscalc.TimeBoundsCalculatorImpl
+import firelib.common.report.OhlcStreamWriter
+import firelib.common.report.OptWriter
+import firelib.common.report.ReportProcessor
+import firelib.common.report.ReportWriter.clearReportDir
+import firelib.common.report.ReportWriter.writeReport
+import firelib.common.report.statCalculator
+import firelib.common.timeboundscalc.BacktestPeriodCalc
 import firelib.domain.Ohlc
 import kotlinx.coroutines.*
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 object Launcher{
+
+    init{
+        Thread.setDefaultUncaughtExceptionHandler({thread, throwable ->
+            throwable.printStackTrace()
+        })
+    }
 
     suspend fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory) {
         println("Starting")
 
         val startTime = System.currentTimeMillis()
 
+        val optCfg = cfg.optConfig
         val reportProcessor = ReportProcessor(::statCalculator,
-                cfg.optConfig.optimizedMetric,
-                cfg.optConfig.params.map {it.name},
-                minNumberOfTrades = cfg.optConfig.minNumberOfTrades)
+                optCfg.optimizedMetric,
+                optCfg.params.map {it.name},
+                minNumberOfTrades = optCfg.minNumberOfTrades)
 
-        val variator = ParamsVariator(cfg.optConfig.params)
+        val variator = ParamsVariator(optCfg.params)
 
-        val (startDtGmt, endDtGmt) = TimeBoundsCalculatorImpl()(cfg)
+        val (startDtGmt, endDtGmt) = BacktestPeriodCalc.calcBounds(cfg)
 
-        val endOfOptimize =  if(cfg.optConfig.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
-        else startDtGmt.plus(cfg.optConfig.optimizedPeriodDays, ChronoUnit.DAYS)
+        val endOfOptimize =  if(optCfg.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
+        else startDtGmt.plus(optCfg.optimizedPeriodDays, ChronoUnit.DAYS)
 
         println("total number of models to test : ${variator.combinations()}")
 
-        val optResourceParams: OptResourceParams = cfg.optConfig.resourceStrategy.getParams(variator.combinations())
+        val optResourceParams: OptResourceParams = optCfg.resourceStrategy.getParams(variator.combinations())
 
-        val executor = ThreadExecutorImpl(optResourceParams.threadCount).start()
+
+        val executor = (Executors.newFixedThreadPool(optResourceParams.threadCount) as ThreadPoolExecutor).apply {
+            rejectedExecutionHandler = ThreadPoolExecutor.CallerRunsPolicy()
+        }
 
         clearReportDir(cfg.reportTargetPath)
 
@@ -54,15 +72,14 @@ object Launcher{
             }
 
             executor.execute {
-                val outputs = ctx.backtest(endOfOptimize)
-                reportProcessor.process(outputs)
-
+                reportProcessor.process(ctx.backtest(endOfOptimize))
             }
             println("models scheduled for optimization ${ctx.boundModels.size}")
 
         }
 
         executor.shutdown()
+        executor.awaitTermination(1,TimeUnit.DAYS)
 
         jobsList.forEach {it.cancelAndJoin()}
 
@@ -95,9 +112,7 @@ object Launcher{
 
             println("added params for opt ${opts}")
 
-            val nm = HashMap(cfg.modelParams)
-            nm.putAll(opts.entries.associateBy ({it.key},{it.value.toString()}))
-            env.addModel(factory, nm)
+            env.addModel(factory, cfg.modelParams + opts.mapValues { "${it.value}"})
 
             if (env.boundModels.size >= batchSize) {
                 return env
@@ -106,14 +121,14 @@ object Launcher{
         return env
     }
 
-    suspend fun runSimple(cfg: ModelBacktestConfig, fac : ModelFactory) {
+    suspend fun runSimple(cfg: ModelBacktestConfig, fac: ModelFactory, ctxListener: (Model) -> Unit = {}) {
 
         clearReportDir(cfg.reportTargetPath)
 
-        val ctx = SimpleRunCtx(cfg)
-
-        ctx.addModel(fac, cfg.modelParams)
-
+        val ctx = SimpleRunCtx(cfg).apply {
+            val model = addModel(fac, cfg.modelParams)
+            ctxListener(model)
+        }
 
         var jobsList = emptyList<Job>()
 
@@ -125,9 +140,7 @@ object Launcher{
 
         require(outputs.size == 1)
 
-        if(cfg.dumpOhlc ){
-            jobsList.forEach {it.cancelAndJoin()}
-        }
+        jobsList.forEach {it.cancelAndJoin()}
 
         writeReport(outputs[0], cfg)
 
@@ -160,5 +173,4 @@ object Launcher{
             }
         }
     }
-
 }

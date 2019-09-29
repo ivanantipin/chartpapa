@@ -5,6 +5,7 @@ import com.funstat.store.SqlUtils
 import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 import java.time.Instant
@@ -13,6 +14,7 @@ import java.time.Instant
 class TestMdDao{
 
     @Test
+    @Ignore
     fun testMdDao(){
 
         val file = "./test.db"

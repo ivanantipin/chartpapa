@@ -1,0 +1,6 @@
+1. login with google / user pass
+2. sequenta status after 12 and will last 3 days
+3. trading strategy signal will last for history purpose
+4. deploy
+5. backend grpc or rest
+

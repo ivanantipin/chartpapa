@@ -1,9 +1,7 @@
 package com.funstat.domain
 
-import io.swagger.annotations.ApiModelProperty
 
-data class Annotations(@get:ApiModelProperty(required = true)
-                       val labels: List<Label>,
-                       @get:ApiModelProperty(required = true)
+data class Annotations(val labels: List<Label>,
+
                        val lines: List<HLine>
 )

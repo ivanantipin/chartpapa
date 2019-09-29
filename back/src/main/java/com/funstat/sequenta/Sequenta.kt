@@ -3,11 +3,10 @@ package com.funstat.sequenta
 import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
 import java.time.LocalDateTime
-import java.util.*
 
 
 class Sequenta {
-     var counts = intArrayOf(13, 21)
+     var counts = arrayOf(13, 21)
 
      var data: MutableList<Ohlc> = ArrayList()
 
@@ -88,11 +87,10 @@ class Sequenta {
             return end - start
         }
 
-        fun recycleRatio(): Optional<Double> {
-
+        fun recycleRatio(): Double? {
             return if (recycleRef == null) {
-                Optional.empty()
-            } else Optional.of(recycleRef!!.range() / this.range())
+                null
+            } else recycleRef!!.range() / this.range()
         }
 
          fun reached(): Boolean {
@@ -162,8 +160,7 @@ class Sequenta {
             currentSetup = Setup(data.size - 1, data.size - 1, currentTrend)
             return emptyList()
         }
-        val ret = ArrayList<Signal>()
-        ret.addAll(runCurrent())
+        val ret = runCurrent().toMutableList()
 
         this.pendingSetups.forEach { ps -> ret.addAll(ps.checkCountDown()) }
         this.pendingSetups = this.pendingSetups.filter{ ps -> !ps.isCompleted && !ps.isExpired && !ps.invalidated() }.toMutableList()

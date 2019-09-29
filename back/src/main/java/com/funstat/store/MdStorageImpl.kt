@@ -14,6 +14,7 @@ import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
 import firelib.common.model.DivHelper
+import firelib.common.report.SqlUtils
 import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils
 import org.sqlite.SQLiteConfig
@@ -46,12 +47,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         get() = container.get<GenericDaoImpl>("generic dao") { GenericDaoImpl(SqlUtils.getDsForFile("$folder/meta.db")) }
 
     init {
-        try {
-            FileUtils.forceMkdir(File(folder))
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        }
-
+        FileUtils.forceMkdir(File(folder))
     }
 
     fun getDao(source: String, interval: String): MdDao {
@@ -180,27 +176,4 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
         }
     }
-
-}
-
-
-object SqlUtils{
-    fun getDsForFile(file: String): SQLiteDataSource {
-
-        val sqLiteConfig = SQLiteConfig()
-        //sqLiteConfig.setPragma(Pragma.DATE_STRING_FORMAT, "yyyy-MM-dd HH:mm:ss")
-
-        val ds = SQLiteDataSource(sqLiteConfig)
-        ds.url = "jdbc:sqlite:$file"
-        return ds
-    }
-}
-
-fun main(args: Array<String>) {
-
-    //MdStorageImpl().updateMarketData(FinamDownloader().symbols().find { it.code == "SBER" && it.market == "1" }!!)
-
-    DivHelper.getDivs().get("phor")!!.forEach {  println(it)}
-
-
 }

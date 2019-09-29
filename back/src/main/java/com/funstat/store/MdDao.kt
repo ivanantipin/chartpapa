@@ -101,6 +101,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     fun queryAll(codeIn: String, start: LocalDateTime): List<Ohlc> {
         val code = normName(codeIn)
         ensureExist(code)
+
         val map = mapOf(Pair("DT", start.toInstant(ZoneOffset.UTC).toEpochMilli()))
         return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc ", map, { rs, rowNum -> mapOhlc(rs) })
     }
