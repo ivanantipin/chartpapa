@@ -84,7 +84,6 @@ object Launcher{
 
         require(reportProcessor.bestModels().isNotEmpty(), {"no models get produced!!"})
 
-        var output = reportProcessor.bestModels().last()
 
 
 //        if(endOfOptimize.isBefore(endDtGmt)){
@@ -96,7 +95,7 @@ object Launcher{
 
         println("Model optimized in ${(System.currentTimeMillis() - startTime) / 1000} sec")
 
-        writeReport(output, cfg)
+        writeReport(reportProcessor.bestModels().last(), cfg)
 
         ReportWriter.writeOpt(cfg.getReportDbFile(), reportProcessor.estimates)
 

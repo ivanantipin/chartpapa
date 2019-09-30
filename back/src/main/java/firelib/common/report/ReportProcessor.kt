@@ -6,16 +6,16 @@ import firelib.common.misc.toTradingCases
 import java.util.*
 
 class ReportProcessor(val optimizedFunctionName: StrategyMetric,
-                      val optParams: List<String>, val topModelsToKeep: Int = 3, val minNumberOfTrades: Int = 1, val removeOutlierTrades: Int = 2) {
+                      val optParams: List<String>, val topModelsToKeep: Int = 3, val minNumberOfTrades: Int = 20, val removeOutlierTrades: Int = 2) {
 
 
     data class ModelStat (val optMetric : Double, val output : ModelOutput, val metrics : Map<StrategyMetric, Double>)
 
-    private val bestModels_ = PriorityQueue<ModelStat>(Comparator<ModelStat> { p0, p1 -> p0.optMetric.compareTo(p1.optMetric) })//(Ordering.by((ms : ModelStat) -> ms.optMetric ).reverse)
+    private val bestModels_ = PriorityQueue<ModelStat>({ p0, p1 -> p0.optMetric.compareTo(p1.optMetric) })//(Ordering.by((ms : ModelStat) -> ms.optMetric ).reverse)
 
     var estimates = mutableListOf<ExecutionEstimates>()
 
-    fun bestModels(): List<ModelOutput> { return bestModels_.map({it.output}).toList()}
+    fun bestModels(): List<ModelOutput> { return bestModels_.map{it.output}}
 
     fun process(models: List<ModelOutput>) {
 
@@ -43,6 +43,6 @@ class ReportProcessor(val optimizedFunctionName: StrategyMetric,
     }
 
     private fun extractOptParams(props : Map<String,String>): Map<String, Int> {
-        return optParams.associateBy({ it },{props[it]!!.toInt()})
+        return optParams.associateBy({ it },{ (props[it] ?: error("")).toInt()})
     }
 }
