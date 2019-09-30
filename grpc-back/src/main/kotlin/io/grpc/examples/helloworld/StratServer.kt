@@ -16,11 +16,19 @@
 
 package io.grpc.examples.helloworld
 
-import com.firelib.*
+import com.firelib.Empty
+import com.firelib.Signal
+import com.firelib.StratServiceGrpc
+import com.firelib.Tickers
 import firelib.common.model.VolatilityBreak
 import io.grpc.Server
 import io.grpc.ServerBuilder
 import io.grpc.stub.StreamObserver
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 class StratServer {
 
@@ -59,31 +67,47 @@ class StratServer {
 
         val observers = mutableListOf<StreamObserver<Signal>>()
 
+        val history = ConcurrentLinkedQueue<Signal>()
+
+        val queue = LinkedBlockingQueue<Signal>()
+
         override fun getTickers(request: Empty?, responseObserver: StreamObserver<Tickers>?) {
             val tickers = Tickers.newBuilder().addAllTickers(listOf("sber", "tatn")).build()
             responseObserver!!.onNext(tickers);
             responseObserver.onCompleted()
         }
 
-        override fun subscribe(request: Tickers?, responseObserver: StreamObserver<Signal>?) {
-            observers += responseObserver!!;
+        override fun subscribe(request: Tickers, responseObserver: StreamObserver<Signal>) {
+            try {
+                history.forEach({
+                    responseObserver.onNext(it);
+                })
+                observers += responseObserver;
+            }catch (e : Exception){
+                e.printStackTrace()
+            }
         }
 
-
-
+        fun startBroadcast(){
+            GlobalScope.launch {
+                while (true){
+                    val poll = queue.poll(1,TimeUnit.MINUTES)
+                    if(poll != null){
+                        history += poll
+                        observers.forEach{it.onNext(poll)}
+                    }
+                }
+            }
+        }
     }
 
     suspend fun startStrats(){
-
+        println("Starting strats")
         VolatilityBreak.runDefault( {
             it.orderManagers().forEach { om ->
                 om.tradesTopic().subscribe {trade->
-                    service.observers.forEach({obs->
-                        val signal = Signal.newBuilder()
-                                .setDescription("security ${trade.security()}  ${trade.order.side}").build()
-                        obs.onNext(signal)
-                    })
-
+                    service.queue.offer(Signal.newBuilder()
+                            .setDescription("security ${trade.security()}  ${trade.order.side}").build())
                 }
 
             }
@@ -96,7 +120,10 @@ class StratServer {
 suspend fun main() {
     val server = StratServer()
     server.start()
-    server.startStrats()
+    server.service.startBroadcast()
+    GlobalScope.launch {
+        server.startStrats()
+    }
     server.blockUntilShutdown()
 }
 

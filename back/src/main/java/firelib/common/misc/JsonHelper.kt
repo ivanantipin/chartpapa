@@ -10,19 +10,14 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
-object jsonHelper {
+object JsonHelper {
 
-    var mapper = ObjectMapper()
-
-    init {
-        mapper.enable(SerializationFeature.INDENT_OUTPUT)
-        mapper.registerModule(KotlinModule())
-    }
+    var mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).registerModule(KotlinModule())
 
     fun toJsonString(obj: Any ): String {
-        val writer = StringWriter()
-        mapper.writeValue(writer, obj)
-        return writer.toString()
+        return StringWriter().apply {
+            mapper.writeValue(this, obj)
+        }.toString()
     }
 
 
@@ -37,5 +32,5 @@ object jsonHelper {
 }
 
 fun main(args: Array<String>) {
-    print(jsonHelper.toJsonString(InstrumentConfig("some", {ff->MarketDataReaderSql(emptyList())})))
+    print(JsonHelper.toJsonString(InstrumentConfig("some", { ff->MarketDataReaderSql(emptyList())})))
 }

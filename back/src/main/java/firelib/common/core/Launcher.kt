@@ -7,8 +7,8 @@ import firelib.common.mddistributor.MarketDataDistributor
 import firelib.common.model.Model
 import firelib.common.opt.ParamsVariator
 import firelib.common.report.OhlcStreamWriter
-import firelib.common.report.OptWriter
 import firelib.common.report.ReportProcessor
+import firelib.common.report.ReportWriter
 import firelib.common.report.ReportWriter.clearReportDir
 import firelib.common.report.ReportWriter.writeReport
 import firelib.common.report.statCalculator
@@ -36,8 +36,7 @@ object Launcher{
         val startTime = System.currentTimeMillis()
 
         val optCfg = cfg.optConfig
-        val reportProcessor = ReportProcessor(::statCalculator,
-                optCfg.optimizedMetric,
+        val reportProcessor = ReportProcessor(optCfg.optimizedMetric,
                 optCfg.params.map {it.name},
                 minNumberOfTrades = optCfg.minNumberOfTrades)
 
@@ -99,7 +98,7 @@ object Launcher{
 
         writeReport(output, cfg)
 
-        OptWriter.write(cfg.getReportDbFile(), reportProcessor.estimates)
+        ReportWriter.writeOpt(cfg.getReportDbFile(), reportProcessor.estimates)
 
         println("Finished")
     }

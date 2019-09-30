@@ -3,7 +3,7 @@ package firelib.common.report
 import firelib.common.OrderStatus
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.core.ModelOutput
-import firelib.common.misc.jsonHelper
+import firelib.common.misc.JsonHelper
 import org.apache.commons.io.FileUtils
 import java.nio.file.*
 
@@ -26,7 +26,7 @@ object ReportWriter{
 
     fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig) {
 
-        jsonHelper.serialize(cfg,Paths.get(cfg.reportTargetPath, "cfg.json"))
+        JsonHelper.serialize(cfg,Paths.get(cfg.reportTargetPath, "cfg.json"))
 
         if (model.trades.size == 0) {
             println("no trades generated")

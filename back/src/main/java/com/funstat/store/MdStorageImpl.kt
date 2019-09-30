@@ -8,43 +8,37 @@ import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.iqfeed.IntervalTransformer
 import com.funstat.iqfeed.IqFeedSource
-import com.funstat.vantage.Source
 import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
-import firelib.common.model.DivHelper
 import firelib.common.report.SqlUtils
 import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils
-import org.sqlite.SQLiteConfig
-import org.sqlite.SQLiteDataSource
 import java.io.File
-import java.io.IOException
 import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
 class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toString()) : MdStorage {
 
-    internal var container = SingletonsContainer()
+    val container = SingletonsContainer()
 
-    internal var sources: Map<String, Source> = object : HashMap<String, Source>() {
-        init {
-            put(FinamDownloader.SOURCE, FinamDownloader())
-            put(VantageDownloader.SOURCE, VantageDownloader());
-            put(IqFeedSource.SOURCE, IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")))
-        }
-    }
+    val sources = mapOf(
+            FinamDownloader.SOURCE to FinamDownloader(),
+            VantageDownloader.SOURCE to VantageDownloader(),
+            IqFeedSource.SOURCE to IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))
+    )
 
     private val executor = Executors.newScheduledThreadPool(1)
 
-    internal val generic: GenericDao
-        get() = container.get<GenericDaoImpl>("generic dao") { GenericDaoImpl(SqlUtils.getDsForFile("$folder/meta.db")) }
+
+
+    val generic: GenericDao
+        get() = container.get("generic dao") { GenericDaoImpl(SqlUtils.getDsForFile("$folder/meta.db")) }
 
     init {
         FileUtils.forceMkdir(File(folder))
@@ -53,14 +47,8 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     fun getDao(source: String, interval: String): MdDao {
         return container.get("$source/$interval") {
             val folder = this.folder + "/" + source + "/"
-            try {
-                FileUtils.forceMkdir(File(folder))
-            } catch (e: IOException) {
-                throw RuntimeException(e)
-            }
-
-            val ds = SqlUtils.getDsForFile("$folder$interval.db")
-            MdDao(ds)
+            FileUtils.forceMkdir(File(folder))
+            MdDao(SqlUtils.getDsForFile("$folder$interval.db"))
         }
     }
 
@@ -70,11 +58,11 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         val dao = getDao(instrId.source, sources[instrId.source]!!.getDefaultInterval().name)
         val target = Interval.valueOf(interval)
         val startTime = LocalDateTime.now().minusSeconds(target.durationMs * 600 / 1000)
-        var ret = dao.queryAll(instrId.code,startTime)
+        var ret = dao.queryAll(instrId.code, startTime)
 
         if (ret.isEmpty()) {
             updateMarketData(instrId)
-            ret = dao.queryAll(instrId.code,startTime)
+            ret = dao.queryAll(instrId.code, startTime)
         }
         val start = System.currentTimeMillis()
         try {
@@ -103,9 +91,11 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         val lastUpdated = Tables.PAIRS.readByKey(generic, SYMBOLS_LAST_UPDATED)
         if (lastUpdated == null || System.currentTimeMillis() - java.lang.Long.parseLong(lastUpdated.value) > 24 * 3600000) {
             println("updating symbols as they are stale")
-            Tables.SYMBOLS.write(generic, sources.values.flatMap {  s -> s.symbols() }.filter { s -> s.market == "1"
-                    || s.source == VantageDownloader.SOURCE
-                    || s.source == IqFeedSource.SOURCE })
+            Tables.SYMBOLS.write(generic, sources.values.flatMap { s -> s.symbols() }.filter { s ->
+                s.market == "1"
+                        || s.source == VantageDownloader.SOURCE
+                        || s.source == IqFeedSource.SOURCE
+            })
             Tables.PAIRS.writeSingle(generic, Pair(SYMBOLS_LAST_UPDATED, "" + System.currentTimeMillis()))
         } else {
             println("not updating symbols as last update was " + LocalDateTime.ofEpochSecond(java.lang.Long.parseLong(lastUpdated.value) / 1000, 0, ZoneOffset.UTC))
@@ -134,17 +124,17 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         return container.get(SYMBOLS_TABLE) { Tables.SYMBOLS.read(generic) }
     }
 
-    override fun updateRequested(code : String){
-        Tables.REQUESTED.read(generic).filter { it.code == code }. forEach { symbol -> updateMarketData(symbol) }
+    override fun updateRequested(code: String) {
+        Tables.REQUESTED.read(generic).filter { it.code == code }.forEach { symbol -> updateMarketData(symbol) }
     }
 
 
     fun updateMarketData(instrId: InstrId) {
         println("updating ${instrId}")
-        try{
+        try {
             val source = sources[instrId.source]!!
             val dao = getDao(instrId.source, source.getDefaultInterval().name)
-            val startTime =  dao.queryLast(instrId.code).map { oh -> oh.dtGmtEnd.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
+            val startTime = dao.queryLast(instrId.code).map { oh -> oh.dtGmtEnd.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
 
             println("start time is ${startTime}")
 
@@ -152,8 +142,8 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
                 dao.insertOhlc(it, instrId.code)
             }
 
-        }catch (e : Exception){
-            println("failed to update "+ instrId + " " + e.message)
+        } catch (e: Exception) {
+            println("failed to update " + instrId + " " + e.message)
             e.printStackTrace()
         }
     }

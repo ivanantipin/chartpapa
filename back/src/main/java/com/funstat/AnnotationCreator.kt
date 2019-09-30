@@ -75,7 +75,8 @@ labelOptions: {
                     }
                     SignalType.Signal -> {
 
-                        val recycle = s.reference.recycleRatio().map { ratio -> "/R=" + formatDbl(ratio!!) }.orElse("")
+                        val ratio = s.reference.recycleRatio()
+                        val recycle = if(ratio != null) "/R=${formatDbl(ratio)}" else "";
 
                         labels.add(baseLabel.withAttribute("text", "" + s.reference.completedSignal + recycle))
                         val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]

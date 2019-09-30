@@ -20,13 +20,11 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     internal var tableCreated = ConcurrentHashMap<String, Boolean>()
 
-
-
     private fun saveInTransaction(sql: String, data: List<Map<String, Any>>) {
-        val namedTemplate = NamedParameterJdbcTemplate(ds)
-        TransactionTemplate(manager).execute<Any> { status ->
+
+        TransactionTemplate(manager).execute<Any> {
             val start = System.currentTimeMillis()
-            namedTemplate.batchUpdate(sql, data.toTypedArray())
+            NamedParameterJdbcTemplate(ds).batchUpdate(sql, data.toTypedArray())
             val dur = (System.currentTimeMillis() - start) / 1000.0
             println("MdDao: inserting " + data.size + " took " + dur + " sec ," + " rate is " +
                     data.size / dur + " per sec")
@@ -45,7 +43,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
                 println("not correct ${it}")
                 false
             }
-        }.map { it ->
+        }.map {
             mapOf("DT" to it.dtGmtEnd.toEpochMilli(),
                     "OPEN" to it.open,
                     "HIGH" to it.high,
@@ -54,6 +52,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
                     "VOLUME" to it.volume
             )
         }
+
         try {
             saveInTransaction("insert or replace into $table(DT,O,H,L,C,V) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE,:VOLUME)", data)
         } catch (e: Exception) {
@@ -63,10 +62,8 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     internal fun ensureExist(table: String) {
-        (tableCreated as java.util.Map<String, Boolean>).computeIfAbsent(table) { k ->
-            val template = JdbcTemplate(ds)
-            template
-                    .execute("create table if not exists " + table +
+        tableCreated.computeIfAbsent(table) { k ->
+            JdbcTemplate(ds).execute("create table if not exists ${table}"  +
                             " (dt INTEGER not NULL, " +
                             "o DOUBLE PRECISION  not NULL," +
                             "h DOUBLE PRECISION  not NULL," +
@@ -102,8 +99,8 @@ class MdDao(internal val ds: SQLiteDataSource) {
         val code = normName(codeIn)
         ensureExist(code)
 
-        val map = mapOf(Pair("DT", start.toInstant(ZoneOffset.UTC).toEpochMilli()))
-        return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc ", map, { rs, rowNum -> mapOhlc(rs) })
+        val map = mapOf("DT" to  start.toInstant(ZoneOffset.UTC).toEpochMilli())
+        return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc ", map, { rs, _ -> mapOhlc(rs) })
     }
 
 

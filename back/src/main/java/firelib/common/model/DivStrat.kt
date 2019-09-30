@@ -3,7 +3,6 @@ package firelib.common.model
 import com.funstat.GlobalConstants
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import com.funstat.store.SqlUtils
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
@@ -11,6 +10,7 @@ import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.report.GenericDumper
+import firelib.common.report.SqlUtils
 import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Paths
 import java.time.Instant
