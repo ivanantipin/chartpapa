@@ -48,6 +48,10 @@ data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:In
 
     fun moneyFlow () : Double { return - qty * price * order.side.sign}
 
+    fun pnl(aPrice : Double) : Double {
+        return moneyFlow() - qty * aPrice * order.side.opposite().sign
+    }
+
     fun split(amt: Int): Pair<Trade, Trade> {
         return Pair(copy(qty=amt), copy(qty=(qty - amt)))
     }

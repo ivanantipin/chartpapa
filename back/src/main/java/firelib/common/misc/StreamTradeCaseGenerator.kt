@@ -5,11 +5,15 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class StreamTradeCaseGenerator : ((Trade)->List<Pair<Trade,Trade>>){
+class StreamTradeCaseGenerator {
 
     val posTrades = Stack<Trade>()
 
-    override fun invoke(trade : Trade) : List<Pair<Trade,Trade>> {
+    fun getPosition() : List<Trade>{
+        return posTrades.toList()
+    }
+
+    fun addTrade(trade : Trade) : List<Pair<Trade,Trade>> {
 
         val tradingCases = ArrayList<Pair<Trade, Trade>>(2)
 

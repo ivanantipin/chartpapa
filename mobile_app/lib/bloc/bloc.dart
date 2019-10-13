@@ -1,30 +1,117 @@
+import 'dart:async';
+import 'dart:collection';
+import 'dart:io';
+
 import 'package:rxdart/rxdart.dart';
-import 'package:simple_material_app/models/item_model.dart';
-import 'package:simple_material_app/resources/movie_api.dart';
+import 'package:simple_material_app/client.dart';
+import 'package:simple_material_app/gen/alfa.pb.dart';
 
-class SimpleBloc<T> {
+import 'package:simple_material_app/domain/domain.dart';
 
-  final Future<List<T>> Function() provider;
+ApplicationBloc mainBloc = ApplicationBloc();
 
-  final _moviesFetcher = PublishSubject<List<T>>();
+Subser subser = Subser();
 
-  SimpleBloc(this.provider);
+class ApplicationBloc {
+  StreamController<List<StratItem>> topController = BehaviorSubject();
+  StreamController<Positions> positionsController = BehaviorSubject();
+  StreamController<List<Position>> histPositionController = BehaviorSubject();
 
-  Observable<List<T>> get allMovies => _moviesFetcher.stream;
+  Queue<Signal> lastTrades = Queue<Signal>();
+  Queue<Position> history = Queue();
 
-  fetch() async {
-    List<T> itemModel = await provider();
-    _moviesFetcher.sink.add(itemModel);
+  StratItem mapSignal(Signal it){
+    return StratItem(it.ticker, epochDateToStr(it), it.buySell.name);
   }
 
-  dispose() {
-    _moviesFetcher.close();
+  String epochDateToStr(Signal it) =>
+      new DateTime.fromMillisecondsSinceEpoch(it.timestamp.toInt()).toIso8601String();
+
+  void dispose() {
+    topController.close();
+    positionsController.close();
+    histPositionController.close();
+  }
+
+  void addPositions(Positions pos) {
+    positionsController.add(pos);
+  }
+
+  void addSignal(Signal signal){
+    lastTrades.add(signal);
+
+    if(lastTrades.length > 30){
+      lastTrades.removeFirst();
+    }
+
+    topController.add(lastTrades.map((f)=>mapSignal(f)).toList().reversed.toList());
+  }
+
+  void addClosedPos(Position pos) {
+    history.add(pos);
+
+    if (history.length > 30) {
+      history.removeFirst();
+    }
+    histPositionController.add(history.toList().reversed.toList());
   }
 }
 
-SimpleBloc<SequentaItem> seqBloc = SimpleBloc(()=>SequentaApiProvider.fetchSignals());
-SimpleBloc<StratItem> stratBloc = SimpleBloc(()=>StratApiProvider.fetchStrats());
+class Subser {
+  var client = Client();
 
+  Subser start() {
+    print("starting");
+    sub();
+    posSub();
+    closedPosSub();
+    return this;
+  }
 
+  Future sub() async {
+    Tickers tickers = await client.stub.getTickers(Empty.create());
+    client.stub
+        .subscribe(tickers)
+        .listen((sig) {
+          mainBloc.addSignal(sig);
+        })
+        .asFuture()
+        .catchError((e) async {
+          await Future.delayed(Duration(seconds: 5));
+          print("error ${e}");
+          sub();
+        });
+  }
 
+  Future posSub() async {
+    client.stub
+        .positionSubscribe(Empty.create())
+        .listen((pos) {
+          print("received poses ${pos}");
+          if (pos.poses.isNotEmpty) {
+            mainBloc.addPositions(pos);
+          }
+        })
+        .asFuture()
+        .catchError((e) async {
+          await Future.delayed(Duration(seconds: 5));
+          print("error ${e}");
+          posSub();
+        });
+  }
 
+  Future closedPosSub() async {
+    client.stub
+        .posHistorySubscribe(Empty.create())
+        .listen((pos) {
+          print("received closed pose ${pos}");
+          mainBloc.addClosedPos(pos);
+        })
+        .asFuture()
+        .catchError((e) async {
+          await Future.delayed(Duration(seconds: 5));
+          print("error ${e}");
+          closedPosSub();
+        });
+  }
+}

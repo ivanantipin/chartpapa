@@ -34,7 +34,7 @@ object DivHelper {
         var trdDays = dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
 
         if(trdDays.isEmpty()){
-            updateRussianStockSimple("sber")
+            UtilsHandy.updateRussianStockSimple("sber")
             trdDays = dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
         }
 

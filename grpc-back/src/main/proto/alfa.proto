@@ -13,6 +13,19 @@ message Tickers {
   repeated string tickers = 1;
 }
 
+message Position{
+  string ticker = 1;
+  int64 position  = 2;
+  double openPrice = 3;
+  double pnl = 4;
+  int64 timestamp = 5;
+  int64 closeTimestamp = 6;
+}
+
+message Positions{
+  repeated Position poses = 1;
+}
+
 message Snapshot {
   repeated Signal signals = 1;
 }
@@ -20,13 +33,20 @@ message Snapshot {
 service StratService {
   rpc GetTickers (Empty) returns (Tickers) {}
   rpc Subscribe (Tickers) returns (stream Signal) {}
+  rpc PositionSubscribe (Empty) returns (stream Positions) {}
+  rpc PosHistorySubscribe (Empty) returns (stream Position) {}
 }
 
 
+enum BuySell{
+  Buy = 0;
+  Sell = 1;
+}
 
 // The response message containing the greetings
 message Signal {
   string description = 1;
   int64 timestamp = 2;
   string ticker = 3;
+  BuySell buySell = 4;
 }

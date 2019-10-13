@@ -105,7 +105,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 //        opt("hold_hours", 10, 200, 3)
 
                 instruments = divs.keys.filter { it != "irao" }.map { instr ->
-                    InstrumentConfig(instr, { ReaderDivAdjusted(MarketDataReaderDb(mdDao, instr, Instant.now().plusSeconds(1000)), divs[instr]!!) })
+                    InstrumentConfig(instr, { ReaderDivAdjusted(MarketDataReaderDb(mdDao, instr, Instant.now().plusSeconds(1000), true), divs[instr]!!) })
                 }
             }
 
@@ -119,6 +119,5 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
 
 suspend fun main(args : Array<String>) {
-
-
+    VolatilityBreak.runDefault {  }
 }

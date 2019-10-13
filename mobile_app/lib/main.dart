@@ -1,161 +1,157 @@
 import 'package:flutter/material.dart';
-import 'package:simple_material_app/strats_refs.dart';
+import 'package:simple_material_app/domain/domain.dart';
+import 'package:simple_material_app/gen/alfa.pb.dart';
+import 'package:simple_material_app/ui/main_grid.dart';
+import 'package:simple_material_app/ui/my_table.dart';
 
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:http/http.dart' as http;
-
+import 'bloc/bloc.dart';
 
 void main() {
-
-
-
+  subser.start();
   runApp(MaterialApp(
+      title: "StratApp",
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/second" route, build the SecondScreen widget.
+        '/strat': (context) => StratPage(),
+        '/positions': (context) => PositionsPage(),
+        '/hist': (context) => PositionHist(),
+      },
 
-      // Title
-      title: "Simple Material App",
       // Home
       home: Scaffold(
         // Appbar
         appBar: AppBar(
           // Title
-          title: Text("Simple Material App"),
+          title: Text("Straaat app"),
         ),
         // Body
-        body: LoginPage(),
+        body: MainGrid(),
       )));
 }
 
-
-
-class LoginPage extends StatefulWidget {
+class PositionHist extends StatelessWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  Widget build(BuildContext context) {
+    var ret = Scaffold(
+      appBar: AppBar(
+        title: Text('hist'),
+      ),
+      body: StreamBuilder(
+        stream: mainBloc.histPositionController.stream,
+        builder: (context, AsyncSnapshot<List<Position>> snapshot) {
+          if (snapshot.hasData) {
+            return buildList(snapshot);
+          } else if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
+    return ret;
+  }
+
+  Widget buildList(AsyncSnapshot<List<Position>> snapshot) {
+    var headers = ["ticker", "pnl", "time"];
+    List<List<String>> data = snapshot.data.map((f) => [f.ticker, f.pnl.toStringAsFixed(0), fmtTs(f.timestamp.toInt())]).toList();
+    return MyTable(data, headers);
+  }
 }
 
-class _LoginPageState extends State<LoginPage> {
-  bool isLoggedIn = false;
-  var profileData;
 
-  var facebookLogin = FacebookLogin();
+String fmtTs(int ts){
+  return new DateTime.fromMillisecondsSinceEpoch(ts)
+      .toIso8601String();
+}
 
-  _LoginPageState(){
-    facebookLogin.loginBehavior = FacebookLoginBehavior.nativeOnly;
+
+class StratPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var ret = Scaffold(
+      appBar: AppBar(
+        title: Text('StratCards'),
+      ),
+      body: StreamBuilder(
+        stream: mainBloc.topController.stream,
+        builder: (context, AsyncSnapshot<List<StratItem>> snapshot) {
+          if (snapshot.hasData) {
+            return buildList(snapshot);
+          } else if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
+    return ret;
   }
 
-  void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
-    setState(() {
-      this.isLoggedIn = isLoggedIn;
-      this.profileData = profileData;
-    });
+  Widget buildList(AsyncSnapshot<List<StratItem>> snapshot) {
+    var headers = ["ticker", "buySell", "time"];
+    List<List<String>> data = snapshot.data.map((f) => [f.ticker, f.buySell, f.date]).toList();
+    return MyTable(data, headers);
+  }
+}
+
+
+class PositionsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var ret = Scaffold(
+      appBar: AppBar(
+        title: Text('Positions'),
+      ),
+      body: StreamBuilder(
+        stream: mainBloc.positionsController.stream,
+        builder: (context, AsyncSnapshot<Positions> snapshot) {
+          if (snapshot.hasData) {
+            return buildList(snapshot);
+          } else if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
+    return ret;
   }
 
+  Widget buildList(AsyncSnapshot<Positions> poses) {
+    var headers = ["ticker", "pnl", "position", "time"];
+    List<List<String>> data = poses.data.poses.map((f) => [f.ticker, f.pnl.toStringAsFixed(0), "${f.position}", fmtTs(f.timestamp.toInt())]).toList();
+    return MyTable(data, headers);
+  }
+
+
+}
+
+//MyTable(Iterable<int>.generate(20).map((f) {
+//return SequentaItem("tex", "sber", f);
+//}).toList()),
+
+class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Text("Facebook Login"),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.exit_to_app,
-                color: Colors.white,
-              ),
-              onPressed: () => facebookLogin.isLoggedIn
-                  .then((isLoggedIn) => isLoggedIn ? _logout() : {}),
-            ),
+        appBar: AppBar(title: Text('First app')),
+        body: ListView(
+          children: <Widget>[
+            ListTile(
+              title: Text('Seq'),
+              trailing: Icon(Icons.keyboard_arrow_right),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Text("")),
+                );
+              },
+            )
           ],
         ),
-        body: Container(
-          child: Center(
-            child: isLoggedIn
-                ? _displayUserData(profileData)
-                : _displayLoginButton(),
-          ),
-        ),
-      ),
-      theme: ThemeData(
-        fontFamily: 'Raleway',
-        textTheme: Theme.of(context).textTheme.apply(
-          bodyColor: Colors.black,
-          displayColor: Colors.grey[600],
-        ),
-        // This colors the [InputOutlineBorder] when it is selected
-        primaryColor: Colors.blue[500],
-        textSelectionHandleColor: Colors.blue[500],
       ),
     );
-  }
-
-  void initiateFacebookLogin() async {
-    var facebookLoginResult =
-    await facebookLogin.logInWithReadPermissions(['email']);
-
-    switch (facebookLoginResult.status) {
-      case FacebookLoginStatus.error:
-        onLoginStatusChanged(false);
-        break;
-      case FacebookLoginStatus.cancelledByUser:
-        onLoginStatusChanged(false);
-        break;
-      case FacebookLoginStatus.loggedIn:
-        var graphResponse = await http.get(
-            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email,picture.width(400)&access_token=${facebookLoginResult
-                .accessToken.token}');
-
-        var profile = json.decode(graphResponse.body);
-        print(profile.toString());
-
-        onLoginStatusChanged(true, profileData: profile);
-        break;
-    }
-  }
-
-  _displayUserData(profileData) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Container(
-          height: 200.0,
-          width: 200.0,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            image: DecorationImage(
-              fit: BoxFit.fill,
-              image: NetworkImage(
-                profileData['picture']['data']['url'],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: 28.0),
-        Text(
-          "FBID ${profileData['id']}\n${profileData['name']}\n${profileData['email']}",
-          style: TextStyle(
-            fontSize: 20.0,
-            letterSpacing: 1.1,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  _displayLoginButton() {
-    return RaisedButton(
-      child: Text("Login with Facebook"),
-      onPressed: () => initiateFacebookLogin(),
-      color: Colors.blue,
-      textColor: Colors.white,
-    );
-  }
-
-  _logout() async {
-    await facebookLogin.logOut();
-    onLoginStatusChanged(false);
-    print("Logged out");
   }
 }

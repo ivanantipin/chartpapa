@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
-import '../models/item_model.dart';
+
 import '../bloc/bloc.dart';
+import '../domain/domain.dart';
 
-class StdLst<T> extends StatelessWidget {
 
-  final SimpleBloc<T> bloc;
-  final Widget Function(T) ff;
+class StdList extends StatelessWidget {
 
-  StdLst(this.bloc, this.ff);
-  
+
+
   @override
   Widget build(BuildContext context) {
-    this.bloc.fetch();
-    return Scaffold(
+    var ret = Scaffold(
       appBar: AppBar(
         title: Text('StratCards'),
       ),
       body: StreamBuilder(
-        stream: bloc.allMovies,
-        builder: (context, AsyncSnapshot<List<T>> snapshot) {
+        stream: mainBloc.topController.stream,
+        builder: (context, AsyncSnapshot<List<StratItem>> snapshot) {
           if (snapshot.hasData) {
             return buildList(snapshot);
           } else if (snapshot.hasError) {
@@ -28,42 +26,25 @@ class StdLst<T> extends StatelessWidget {
         },
       ),
     );
+    return ret;
   }
 
-  Widget buildList(AsyncSnapshot<List<T>> snapshot) {
+
+  Widget buildList(AsyncSnapshot<List<StratItem>> snapshot) {
     return GridView.builder(
         itemCount: snapshot.data.length,
         gridDelegate:
-            new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         itemBuilder: (BuildContext context, int index) {
-          return  this.ff(snapshot.data[index]);
+          return StratCard(snapshot.data[index]);
         });
   }
-}
 
-class SeqCard extends StatelessWidget {
-  SequentaItem strat;
-
-  SeqCard(this.strat);
-
-  @override
-  Widget build(BuildContext context) {
-    print("fetching");
-    stratBloc.fetch();
-    return Card(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          ListTile(
-            leading: Icon(Icons.album),
-            title: Text("${strat.name}"),
-            subtitle: Text("ticker : ${strat.ticker}"),
-          ),
-        ],
-      ),
-    );
+  StdList(){
+    print("some");
   }
 }
+
 
 class StratCard extends StatelessWidget {
   StratItem strat;
@@ -72,7 +53,6 @@ class StratCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    stratBloc.fetch();
     return Card(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -87,4 +67,5 @@ class StratCard extends StatelessWidget {
     );
   }
 }
+
 

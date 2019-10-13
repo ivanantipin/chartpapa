@@ -16,7 +16,7 @@ fun dbl2Str(vv: Double, decPlaces: Int): String {
 
 private fun toTradingCasesInt(trades: List<Trade>): List<Pair<Trade, Trade>> {
     val generator = StreamTradeCaseGenerator()
-    return trades.flatMap(generator)
+    return trades.flatMap({generator.addTrade(it)})
 }
 
 fun Pair<Trade, Trade>.pnl() : Double{

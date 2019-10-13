@@ -1,6 +1,12 @@
 2. refactor old post
-4. flutter version of site
 5. sequenta notification
 6. check sequenta discrepancies
 7. mean rev strat on spy - buy dips
 
+
+
+mobile app:
+
+1. implement subscription per profile
+2. minimum viable product - deploy procedure
+3. reconnect

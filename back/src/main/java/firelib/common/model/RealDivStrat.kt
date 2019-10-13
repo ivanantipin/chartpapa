@@ -23,7 +23,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
         orderManagers().forEach({
             val gen = StreamTradeCaseGenerator()
             it.tradesTopic().subscribe {
-                val cases = gen(it)
+                val cases = gen.addTrade(it)
                 if (!cases.isEmpty()) {
                     cases.forEach({
                         println(it.first)

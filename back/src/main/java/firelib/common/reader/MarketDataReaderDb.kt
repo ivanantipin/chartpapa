@@ -5,7 +5,7 @@ import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
 import java.time.Instant
 
-class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Instant) : MarketDataReader<Ohlc> {
+class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Instant, val waitOnEnd : Boolean = true) : MarketDataReader<Ohlc> {
 
     var cind = 0;
 
@@ -27,14 +27,16 @@ class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Ins
 
     override fun read(): Boolean {
         if(++cind >= ohlcs.size){
-            while (true){
-                val add = dao.queryAll(ticker, ohlcs.last().dtGmtEnd.atUtc())
-                val ff = add.filter { ohlcs.last().time() <= it.time()  }
-                if(ff.isEmpty()){
-                    Thread.sleep(100000)
-                }else{
-                    ohlcs += ff
-                    break
+            if(waitOnEnd){
+                while (true){
+                    val add = dao.queryAll(ticker, ohlcs.last().dtGmtEnd.atUtc())
+                    val ff = add.filter { ohlcs.last().time() <= it.time()  }
+                    if(ff.isEmpty()){
+                        Thread.sleep(100000)
+                    }else{
+                        ohlcs += ff
+                        break
+                    }
                 }
             }
         }
