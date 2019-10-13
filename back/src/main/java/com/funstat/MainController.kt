@@ -15,7 +15,6 @@ import firelib.domain.Ohlc
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import javax.annotation.PostConstruct
 
 
 object GlobalConstants{
@@ -40,7 +39,6 @@ class MainController {
                 .map { it.replace(".html", "") }
     }
 
-    @PostConstruct
     internal fun onStart() {
         storage.updateSymbolsMeta()
         storage.start()
