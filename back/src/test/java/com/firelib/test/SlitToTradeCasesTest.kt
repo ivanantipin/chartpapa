@@ -25,7 +25,7 @@ class SplitTrdTest{
         Trade(3, 15.0, Order(OrderType.Market, 3.0, 15, Side.Sell,"sec","id", Instant.now()), Instant.now(), Instant.now())
         )
 
-        var tcs = toTradingCases(trds)
+        var tcs =trds.toTradingCases()
 
         Assert.assertEquals("must be 4 but it is " + tcs.size, tcs.size, 4)
 
