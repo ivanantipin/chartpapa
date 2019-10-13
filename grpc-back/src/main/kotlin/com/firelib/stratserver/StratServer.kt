@@ -5,6 +5,7 @@ import firelib.common.Trade
 import firelib.common.interval.Interval
 import firelib.common.misc.StreamTradeCaseGenerator
 import firelib.common.misc.pnl
+import firelib.common.model.UtilsHandy
 import firelib.common.model.VolatilityBreak
 import io.grpc.Server
 import io.grpc.ServerBuilder
@@ -197,16 +198,17 @@ class StratServer {
 suspend fun main() {
     val server = StratServer()
 
+    UtilsHandy.updateRussianDivStocks()
+
     GlobalScope.launch {
         server.runStrat();
     }
-//    GlobalScope.launch {
-//        println("updating stocks")
-//        UtilsHandy.updateRussianDivStocks()
-//        Thread.sleep(10000)
-//    }
-
-
+    GlobalScope.launch {
+        while (true){
+            println("updating stocks")
+            Thread.sleep(300000)
+        }
+    }
     server.blockUntilShutdown()
 }
 
