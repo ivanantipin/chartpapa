@@ -11,6 +11,7 @@ import firelib.common.misc.atUtc
 import firelib.common.reader.MarketDataReaderDb
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
+import firelib.common.report.ReportProcessor
 import firelib.indicators.ATR
 import firelib.indicators.Donchian
 import java.time.Instant
@@ -26,29 +27,32 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
     val period = 20
 
+    val daytss = enableSeries(interval = Interval.Day,interpolated = false)
+
+    val tenMins = enableSeries(interval = Interval.Min10,interpolated = false)
+
+    val quantiles = context.instruments.map {
+        Quantiles<Double>(1000);
+    }
+    val volumeQuantiles = context.instruments.map {
+        Quantiles<Double>(100);
+    }
+
+    val donchians = daytss.map { Donchian(period) }
+
+
+    val mas = daytss.mapIndexed { idx, it ->
+        val atr = ATR(period, it)
+        it.preRollSubscribe {
+            quantiles[idx].add(atr.value())
+        }
+        atr
+    }
+
+
+
+
     init {
-
-        val daytss = enableSeries(interval = Interval.Day,interpolated = false)
-
-        val tenMins = enableSeries(interval = Interval.Min10,interpolated = false)
-
-        val quantiles = context.instruments.map {
-            Quantiles<Double>(1000);
-        }
-        val volumeQuantiles = context.instruments.map {
-            Quantiles<Double>(100);
-        }
-
-        val mas = daytss.mapIndexed { idx, it ->
-            val atr = ATR(period, it)
-            it.preRollSubscribe {
-                quantiles[idx].add(atr.value())
-            }
-            atr
-        }
-
-        val donchians = daytss.map { Donchian(period) }
-
 
         enableFactor("volatility", {
             val ret = quantiles[it].getQuantile(mas[it].value())

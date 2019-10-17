@@ -11,7 +11,7 @@ import firelib.common.report.ReportProcessor
 import firelib.common.report.ReportWriter
 import firelib.common.report.ReportWriter.clearReportDir
 import firelib.common.report.ReportWriter.writeReport
-import firelib.common.report.statCalculator
+
 import firelib.common.timeboundscalc.BacktestPeriodCalc
 import firelib.domain.Ohlc
 import kotlinx.coroutines.*

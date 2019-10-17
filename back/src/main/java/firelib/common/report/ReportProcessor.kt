@@ -3,6 +3,7 @@ package firelib.common.report
 
 import firelib.common.core.ModelOutput
 import firelib.common.misc.toTradingCases
+import firelib.common.report.StatCalculator.statCalculator
 import java.util.*
 
 class ReportProcessor(val optimizedFunctionName: StrategyMetric,

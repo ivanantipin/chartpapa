@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simple_material_app/domain/domain.dart';
 import 'package:simple_material_app/gen/alfa.pb.dart';
+import 'package:simple_material_app/ui/chart.dart';
 import 'package:simple_material_app/ui/main_grid.dart';
 import 'package:simple_material_app/ui/my_table.dart';
 
@@ -16,6 +17,7 @@ void main() {
         '/strat': (context) => StratPage(),
         '/positions': (context) => PositionsPage(),
         '/hist': (context) => PositionHist(),
+        '/stats': (context) => StatsPage(),
       },
 
       // Home

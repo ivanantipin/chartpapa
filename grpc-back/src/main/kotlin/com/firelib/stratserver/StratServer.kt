@@ -14,8 +14,10 @@ import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
+import javax.management.modelmbean.ModelMBeanNotificationBroadcaster
 
 class StratServer {
 
@@ -56,11 +58,15 @@ class StratServer {
         val tradeBroadcaster = Brodcaster<Signal>("trade");
         val positionBroadcaster = Brodcaster<Positions>("postion");
         val positionHistoryBroadcaster = Brodcaster<Position>("posHistory");
+        val modelStatBroadCaster = Brodcaster<ModelStat>("modelStat");
+
+        val tradeStat = TradeStat(modelStatBroadCaster);
 
         init {
             tradeBroadcaster.start()
             positionBroadcaster.start()
             positionHistoryBroadcaster.start()
+            modelStatBroadCaster.start();
         }
 
         override fun getTickers(request: Empty, responseObserver: StreamObserver<Tickers>) {
@@ -78,7 +84,10 @@ class StratServer {
         override fun posHistorySubscribe(request: Empty, responseObserver: StreamObserver<Position>) {
             println("subscribing to positions histories")
             positionHistoryBroadcaster.addObserver(responseObserver);
+        }
 
+        override fun getModelStat(request: Empty, responseObserver: StreamObserver<ModelStat>) {
+            modelStatBroadCaster.addObserver(responseObserver);
         }
 
 
@@ -138,6 +147,37 @@ class StratServer {
         }
     }
 
+    class TradeStat(val broadcaster: ServiceImpl.Brodcaster<ModelStat>){
+        val geners = ConcurrentHashMap<String,StreamTradeCaseGenerator>();
+        val poses = ConcurrentHashMap<String,MutableList<Pair<Trade,Trade>>>();
+
+
+
+        fun addTrade(trade : Trade){
+            val gen = geners.computeIfAbsent(trade.security(),{StreamTradeCaseGenerator()})
+            val pos = poses.computeIfAbsent(trade.security(), { mutableListOf()})
+            pos += gen.addTrade(trade)
+
+            val flatten = poses
+                    .flatMap { it.value }
+                    .sortedBy { it.first.dtGmt }
+
+
+            var cumPnl = 0.0
+            val dots = flatten.map {
+                val ret = DatePoint.newBuilder()
+                ret.setTimestamp(it.first.dtGmt.toEpochMilli())
+                ret.setLabel(it.first.security())
+                cumPnl += it.pnl()
+                ret.setValue(cumPnl)
+                ret.build();
+            }
+
+            broadcaster.add(ModelStat.newBuilder().addCharts(Chart.newBuilder().setChartType(Chart.ChartType.Line)
+                    .addAllPoints(dots)).build());
+        }
+    }
+
 
     suspend fun runStrat() {
         println("Starting strats")
@@ -150,6 +190,8 @@ class StratServer {
 
                 om.tradesTopic().subscribe { trade ->
                     val closedPoses = gen.addTrade(trade)
+
+                    service.tradeStat.addTrade(trade)
 
                     closedPoses.map {
                         Position.newBuilder()
@@ -206,6 +248,12 @@ suspend fun main() {
     GlobalScope.launch {
         while (true){
             println("updating stocks")
+            try {
+                UtilsHandy.updateRussianDivStocks()
+            }catch (e : java.lang.Exception){
+                println("error updating stocks ${e}")
+            }
+
             Thread.sleep(300000)
         }
     }

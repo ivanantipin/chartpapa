@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:ffi';
 import 'dart:io';
 
+import 'package:fixnum/fixnum.dart' as prefix0;
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_material_app/client.dart';
 import 'package:simple_material_app/gen/alfa.pb.dart';
@@ -16,6 +18,10 @@ class ApplicationBloc {
   StreamController<List<StratItem>> topController = BehaviorSubject();
   StreamController<Positions> positionsController = BehaviorSubject();
   StreamController<List<Position>> histPositionController = BehaviorSubject();
+
+  StreamController<ModelStat> statController = BehaviorSubject();
+
+
 
   Queue<Signal> lastTrades = Queue<Signal>();
   Queue<Position> history = Queue();
@@ -65,6 +71,7 @@ class Subser {
     sub();
     posSub();
     closedPosSub();
+    subStat();
     return this;
   }
 
@@ -82,6 +89,22 @@ class Subser {
           sub();
         });
   }
+
+  Future subStat() async {
+
+    client.stub
+        .getModelStat(Empty.create())
+        .listen((sig) {
+      mainBloc.statController.add(sig);
+    })
+        .asFuture()
+        .catchError((e) async {
+      await Future.delayed(Duration(seconds: 5));
+      print("error ${e}");
+      subStat();
+    });
+  }
+
 
   Future posSub() async {
     client.stub
