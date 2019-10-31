@@ -9,7 +9,7 @@ class MainGrid extends StatelessWidget {
       // horizontal, this produces 2 rows.
       crossAxisCount: 2,
       // Generate 100 widgets that display their index in the List.
-      children: ["strat","positions","hist","stats"].map((name) {
+      children: ["positions","hist","stats"].map((name) {
         return GridTile(
           child: GestureDetector(
             onTap: (){
@@ -30,3 +30,5 @@ class MainGrid extends StatelessWidget {
     );
   }
 }
+
+

@@ -11,6 +11,7 @@ dependencies:
   charts_flutter: ^0.8.1
   tuple: ^1.0.3
   grpc: ^2.1.2
+  quiver: '>=2.0.0 <3.0.0'
   fixnum: 0.10.9
   protobuf: ^0.14.4
 dev_dependencies:

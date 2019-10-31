@@ -4,6 +4,7 @@ import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
+import firelib.common.config.instruments
 import firelib.common.config.runStrat
 import firelib.common.core.Launcher.runSimple
 import firelib.common.core.ModelFactory
@@ -119,19 +120,9 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
 suspend fun main() {
 
-    val divs = DivHelper.getDivs()
-
-    val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-
     val conf = ModelBacktestConfig().apply {
         reportTargetPath = "./report/divsStrats"
-        instruments = DivHelper.getDivs().keys.map { instr ->
-            InstrumentConfig(instr, { time ->
-                val delegate = MarketDataReaderSql(mdDao.queryAll(instr))
-                delegate
-                ReaderDivAdjusted(delegate, divs[instr]!!)
-            })
-        }
+        instruments(DivHelper.getDivs().keys, FinamDownloader.SOURCE)
     }
 
     conf.runStrat { cfg, fac ->

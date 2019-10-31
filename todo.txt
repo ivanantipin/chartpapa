@@ -3,8 +3,6 @@
 6. check sequenta discrepancies
 7. mean rev strat on spy - buy dips
 
-
-
 mobile app:
 
 1. implement subscription per profile

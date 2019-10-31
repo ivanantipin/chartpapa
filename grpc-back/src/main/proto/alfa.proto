@@ -2,76 +2,11 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 option java_package = "com.firelib";
-option java_outer_classname = "FirelibGrpc";
-option objc_class_prefix = "HLW";
 
 package com.firelib;
 
-message Empty{}
-
-message Tickers {
-  repeated string tickers = 1;
-}
-
-message Position{
-  string ticker = 1;
-  int64 position  = 2;
-  double openPrice = 3;
-  double pnl = 4;
-  int64 timestamp = 5;
-  int64 closeTimestamp = 6;
-}
-
-message Positions{
-  repeated Position poses = 1;
-}
-
-message Snapshot {
-  repeated Signal signals = 1;
-}
+import "domain.proto";
 
 service StratService {
-  rpc GetTickers (Empty) returns (Tickers) {}
-  rpc Subscribe (Tickers) returns (stream Signal) {}
-  rpc PositionSubscribe (Empty) returns (stream Positions) {}
-  rpc PosHistorySubscribe (Empty) returns (stream Position) {}
-  rpc GetChart(Empty) returns (Chart) {}
-  rpc GetModelStat(Empty) returns (stream ModelStat) {}
-}
-
-
-message Chart{
-  repeated DatePoint points = 1;
-  string name = 2;
-
-  enum ChartType {
-    Bar = 0;
-    Line = 1;
-  }
-
-  ChartType chartType = 3;
-}
-
-message DatePoint{
-  int64 timestamp = 1;
-  double value = 2;
-  string label = 3;
-}
-
-enum BuySell{
-  Buy = 0;
-  Sell = 1;
-}
-
-// The response message containing the greetings
-message Signal {
-  string description = 1;
-  int64 timestamp = 2;
-  string ticker = 3;
-  BuySell buySell = 4;
-}
-
-
-message ModelStat{
-  repeated Chart charts = 1;
+  rpc GetStrats(Empty) returns (stream StratDescription) {}
 }

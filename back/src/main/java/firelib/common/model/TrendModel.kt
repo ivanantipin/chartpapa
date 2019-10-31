@@ -17,7 +17,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
         val tss = enableSeries(Interval.Day)
 
-        context.mdDistributor.addListener(Interval.Day, { time, dist ->
+        context.mdDistributor.addListener(Interval.Day, { _, _ ->
             if (tss[0].count() > 40 && (tss[0].count() % 21) == 0) {
 
                 val back = props["period"]!!.toInt()
@@ -64,8 +64,7 @@ suspend fun main() {
     val conf = ModelBacktestConfig().apply {
         reportTargetPath = "./report/trendModel"
         instruments = tt.map { instr ->
-            InstrumentConfig(instr, { time ->
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
+            InstrumentConfig(instr, { ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
             })
         }
         opt("period", 7, 30, 1)

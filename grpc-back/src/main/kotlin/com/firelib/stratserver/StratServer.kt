@@ -1,23 +1,17 @@
 package com.firelib.stratserver
 
-import com.firelib.*
-import firelib.common.Trade
+import com.firelib.Empty
+import com.firelib.StratDescription
+import com.firelib.StratServiceGrpc
 import firelib.common.interval.Interval
-import firelib.common.misc.StreamTradeCaseGenerator
-import firelib.common.misc.pnl
 import firelib.common.model.UtilsHandy
 import firelib.common.model.VolatilityBreak
 import io.grpc.Server
 import io.grpc.ServerBuilder
-import io.grpc.StatusRuntimeException
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
-import javax.management.modelmbean.ModelMBeanNotificationBroadcaster
+
 
 class StratServer {
 
@@ -26,9 +20,7 @@ class StratServer {
     val service = ServiceImpl()
 
     init {
-        /* The port on which the server should run */
         val port = 50051
-
         server = ServerBuilder.forPort(port)
                 .addService(service)
                 .build()
@@ -55,192 +47,43 @@ class StratServer {
 
     class ServiceImpl : StratServiceGrpc.StratServiceImplBase() {
 
-        val tradeBroadcaster = Brodcaster<Signal>("trade");
-        val positionBroadcaster = Brodcaster<Positions>("postion");
-        val positionHistoryBroadcaster = Brodcaster<Position>("posHistory");
-        val modelStatBroadCaster = Brodcaster<ModelStat>("modelStat");
+        val strats = Brodcaster<StratDescription>("stratDescription");
 
-        val tradeStat = TradeStat(modelStatBroadCaster);
+        val tradeStat = TradeStat("volBreak", "empty", strats)
 
         init {
-            tradeBroadcaster.start()
-            positionBroadcaster.start()
-            positionHistoryBroadcaster.start()
-            modelStatBroadCaster.start();
+            strats.start()
         }
 
-        override fun getTickers(request: Empty, responseObserver: StreamObserver<Tickers>) {
-            println("getting tickers")
-            val tickers = Tickers.newBuilder().addAllTickers(listOf("sber", "tatn")).build()
-            responseObserver.onNext(tickers);
-            responseObserver.onCompleted()
-        }
-
-        override fun positionSubscribe(request: Empty, responseObserver: StreamObserver<Positions>) {
-            println("subscribing to positions")
-            positionBroadcaster.addObserver(responseObserver);
-        }
-
-        override fun posHistorySubscribe(request: Empty, responseObserver: StreamObserver<Position>) {
-            println("subscribing to positions histories")
-            positionHistoryBroadcaster.addObserver(responseObserver);
-        }
-
-        override fun getModelStat(request: Empty, responseObserver: StreamObserver<ModelStat>) {
-            modelStatBroadCaster.addObserver(responseObserver);
-        }
-
-
-
-        override fun subscribe(request: Tickers, responseObserver: StreamObserver<Signal>) {
-            println("subscribing to ${request}")
-            tradeBroadcaster.addObserver(responseObserver)
-        }
-
-        class Brodcaster<T>(p0: String, val maxSize : Int = 30 ) : Thread(p0) {
-            val observersQueue = LinkedBlockingQueue<StreamObserver<T>>()
-            val queue = LinkedBlockingQueue<T>()
-
-            fun add(t : T){
-                queue += t
-            }
-
-            fun addObserver(t : StreamObserver<T>){
-                observersQueue += t
-            }
-
-
-            override fun run(){
-                val history = LinkedList<T>()
-                val observers = mutableListOf<StreamObserver<T>>()
-                while (true) {
-                    try {
-                        val poll = queue.poll(1, TimeUnit.SECONDS)
-                        if (poll != null) {
-                            history += poll
-                            if(history.size > maxSize){
-                                history.removeFirst()
-                            }
-                            val removed = mutableListOf<StreamObserver<T>>();
-                            observers.forEach {
-                                try {
-                                    it.onNext(poll)
-                                } catch (e: StatusRuntimeException) {
-                                    print("status runtime ${e} happend on ${it} removing")
-                                    removed += it;
-                                }
-                            }
-                            observers -= removed
-                        }
-                        val obs = observersQueue.poll(1,TimeUnit.MILLISECONDS)
-                        if(obs != null){
-                            history.forEach({
-                                obs.onNext(it)
-                            })
-                            observers += obs
-                        }
-                    }catch (e : Exception){
-                        print("unexpected exception ${e}")
-                    }
-                }
-            }
+        override fun getStrats(request: Empty, responseObserver: StreamObserver<StratDescription>) {
+            println("subscribe to strats")
+            strats.addObserver(responseObserver)
         }
     }
-
-    class TradeStat(val broadcaster: ServiceImpl.Brodcaster<ModelStat>){
-        val geners = ConcurrentHashMap<String,StreamTradeCaseGenerator>();
-        val poses = ConcurrentHashMap<String,MutableList<Pair<Trade,Trade>>>();
-
-
-
-        fun addTrade(trade : Trade){
-            val gen = geners.computeIfAbsent(trade.security(),{StreamTradeCaseGenerator()})
-            val pos = poses.computeIfAbsent(trade.security(), { mutableListOf()})
-            pos += gen.addTrade(trade)
-
-            val flatten = poses
-                    .flatMap { it.value }
-                    .sortedBy { it.first.dtGmt }
-
-
-            var cumPnl = 0.0
-            val dots = flatten.map {
-                val ret = DatePoint.newBuilder()
-                ret.setTimestamp(it.first.dtGmt.toEpochMilli())
-                ret.setLabel(it.first.security())
-                cumPnl += it.pnl()
-                ret.setValue(cumPnl)
-                ret.build();
-            }
-
-            broadcaster.add(ModelStat.newBuilder().addCharts(Chart.newBuilder().setChartType(Chart.ChartType.Line)
-                    .addAllPoints(dots)).build());
-        }
-    }
-
 
     suspend fun runStrat() {
         println("Starting strats")
-        VolatilityBreak.runDefault{model->
+        VolatilityBreak.runDefault(waitOnEnd = true, ctxListener =  {model->
+            model.context.mdDistributor.addListener(Interval.Min10,{time,md->
+                val priceMap = model.context.instruments.mapIndexed({idx,tick-> Pair(tick,md.price(idx))}).toMap()
+                service.tradeStat.updatePrices(priceMap)
 
-            val poses = mutableMapOf<Int,List<Trade>>();
+            })
 
-            model.orderManagers().forEachIndexed({idx, om ->
-                val gen = StreamTradeCaseGenerator()
+            model.orderManagers().forEachIndexed({ idx, om ->
 
                 om.tradesTopic().subscribe { trade ->
-                    val closedPoses = gen.addTrade(trade)
-
                     service.tradeStat.addTrade(trade)
-
-                    closedPoses.map {
-                        Position.newBuilder()
-                                .setTicker(om.security())
-                                .setTimestamp(it.first.dtGmt.toEpochMilli())
-                                .setPosition(it.first.qty.toLong())
-                                .setOpenPrice(it.first.price)
-                                .setPnl(it.pnl())
-                                .build()
-                    }.forEach({
-                        service.positionHistoryBroadcaster.add(it)
-                    })
-
-                    poses.put(idx,gen.getPosition())
-
-                    service.tradeBroadcaster.add(Signal.newBuilder()
-                            .setTicker(trade.security())
-                            .setBuySell(if (trade.side().sign > 0) BuySell.Buy else BuySell.Sell)
-                            .setTimestamp(trade.dtGmt.toEpochMilli())
-                            .setDescription("security ${trade.security()}  ${trade.order.side}").build())
                 }
             })
-
-            model.context.mdDistributor.addListener(Interval.Min60, {time,md->
-
-                val positions = Positions.newBuilder().addAllPoses(
-                        poses.filter { it.value.isNotEmpty() }.map { (idx,value)->
-                            val trade = value.first()
-                            val oh = md.price(idx)
-                            Position.newBuilder()
-                                    .setTicker(trade.security())
-                                    .setTimestamp(trade.dtGmt.toEpochMilli())
-                                    .setPosition(trade.qty.toLong())
-                                    .setOpenPrice(trade.price)
-                                    .setPnl(trade.pnl(oh.close))
-                                    .build()
-                        }
-                ).build()
-                service.positionBroadcaster.add(positions);
-            })
-
-        }
+        })
     }
 }
 
 suspend fun main() {
     val server = StratServer()
 
-    UtilsHandy.updateRussianDivStocks()
+//    UtilsHandy.updateRussianDivStocks()
 
     GlobalScope.launch {
         server.runStrat();

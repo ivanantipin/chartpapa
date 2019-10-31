@@ -1,21 +1,15 @@
 package firelib.common.model
 
 import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
+import firelib.common.config.instruments
 import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.misc.atUtc
-import firelib.common.reader.MarketDataReaderDb
-import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.report.ReportProcessor
 import firelib.indicators.ATR
 import firelib.indicators.Donchian
-import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalTime
 
 
@@ -56,26 +50,27 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
         enableFactor("volatility", {
             val ret = quantiles[it].getQuantile(mas[it].value())
-            if (ret.isNaN()) 0.5 else ret
+            if (ret.isNaN()) -1.0 else ret
         })
         enableFactor("volume", {
             val ret = volumeQuantiles[it].getQuantile(daytss[it].last().volume.toDouble())
-            if (ret.isNaN()) 0.5 else ret
+            if (ret.isNaN()) -1.0 else ret
         })
 
         enableFactor("volume1", {
             val ret = volumeQuantiles[it].getQuantile(daytss[it][1].volume.toDouble())
-            if (ret.isNaN()) 0.5 else ret
+            if (ret.isNaN()) -1.0 else ret
         })
+
 
         tenMins.forEachIndexed({idx,it->
             it.preRollSubscribe {
                 val timeSeries = daytss[idx]
-                if(it[0].dtGmtEnd.atUtc().toLocalTime() == LocalTime.of(18,10) && timeSeries.count() > period){
+                if(it[0].dtGmtEnd.atUtc().toLocalTime() > LocalTime.of(13,10) && timeSeries.count() > period){
                     val vola = quantiles[idx].getQuantile(mas[idx].value())
                     val vol = volumeQuantiles[idx].getQuantile(timeSeries.last().volume.toDouble())
 
-                    if (it[0].close > donchians[idx].max && vola < 0.7 && vol > 0.75) {
+                    if (it[0].close > donchians[idx].max) {
                         buyIfNoPosition(idx, 1000_000)
                     }
                 }
@@ -93,24 +88,15 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
     }
 
     companion object {
-        suspend fun runDefault(ctxListener : (Model)->Unit){
-            val divs = DivHelper.getDivs()
-
-            val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-
+        suspend fun runDefault(ctxListener : (Model)->Unit, waitOnEnd : Boolean = false , divAdjusted: Boolean = false){
             val conf = ModelBacktestConfig().apply {
-
                 reportTargetPath = "/home/ivan/projects/chartpapa/market_research/vol_break_report"
-
-//        endDate(LocalDate.of(2016, 1, 1))
-
                 param("hold_hours", 30)
-
-//        opt("hold_hours", 10, 200, 3)
-
-                instruments = divs.keys.filter { it != "irao" }.map { instr ->
-                    InstrumentConfig(instr, { ReaderDivAdjusted(MarketDataReaderDb(mdDao, instr, Instant.now().plusSeconds(1000), true), divs[instr]!!) })
-                }
+                instruments = instruments(DivHelper.getDivs().keys.toList(),
+                        source = FinamDownloader.SOURCE,
+                        divAdjusted = divAdjusted,
+                        waitOnEnd = waitOnEnd)
+                adjustSpread = makeSpreadAdjuster(0.0005)
             }
 
             conf.runStrat ({ context, props ->
@@ -122,6 +108,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
 
 
-suspend fun main(args : Array<String>) {
-    VolatilityBreak.runDefault {  }
+
+suspend fun main() {
+    VolatilityBreak.runDefault ({  }, false)
 }

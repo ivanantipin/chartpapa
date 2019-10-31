@@ -44,6 +44,10 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         FileUtils.forceMkdir(File(folder))
     }
 
+    fun getSourceDefaultInterval(source : String) : Interval{
+        return sources[source]!!.defaultInterval
+    }
+
     fun getDao(source: String, interval: String): MdDao {
         return container.get("$source/$interval") {
             val folder = this.folder + "/" + source + "/"

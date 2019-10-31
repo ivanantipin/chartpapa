@@ -11,9 +11,6 @@ class MyTable<T> extends StatelessWidget {
     return Column(children: [
       new ListTile(
         onTap: null,
-        leading: new CircleAvatar(
-          backgroundColor: Colors.transparent,
-        ),
         title: Row(children: <Widget>[
           ...headers.map((f) => Expanded(child: new Text(f)))
         ]),
@@ -33,10 +30,6 @@ class MyTable<T> extends StatelessWidget {
                 child: new ListTile(
                     //return new ListTile(
                     onTap: null,
-                    leading: new CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      child: new Text(data[index][0]),
-                    ),
                     title: new Row(children: <Widget>[
                       ...data[index].map((f) => Expanded(child: new Text(f)))
                     ])),

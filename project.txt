@@ -1,6 +1,11 @@
 1. login with google / user pass
 2. sequenta status after 12 and will last 3 days
-3. trading strategy signal will last for history purpose
-4. deploy
-5. backend grpc or rest
+3. different strategies with backtest
+4. top increase by price
+5. by volume
+6. sequenta signal
+7. support/resistance reaching level signal
+8. dividend calendar - alert
+9. wish list - give possibility to enable strategy with backtest
+
 

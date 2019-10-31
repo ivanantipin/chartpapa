@@ -1,11 +1,16 @@
 package firelib.common.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.funstat.store.MdStorageImpl
 import firelib.common.core.Launcher
 import firelib.common.core.ModelFactory
+import firelib.common.interval.Interval
 import firelib.common.misc.toInstantDefault
+import firelib.common.model.DivHelper
 import firelib.common.model.Model
 import firelib.common.opt.OptimizedParameter
+import firelib.common.reader.MarketDataReaderDb
+import firelib.common.reader.ReaderDivAdjusted
 import firelib.common.report.StrategyMetric
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -30,6 +35,11 @@ class ModelBacktestConfig (){
     fun endDate(ed : LocalDate){
         endDate = ed.toInstantDefault()
     }
+
+    fun startDate(ed : LocalDate){
+        startDateGmt = ed.toInstantDefault()
+    }
+
 
 
     fun makeSpreadAdjuster(koeff : Double) : (Double,Double)->Pair<Double,Double>{
@@ -97,5 +107,28 @@ suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory, modelListener : (Mo
         Launcher.runOptimized(this,fac)
     }else{
         Launcher.runSimple(this,fac,modelListener)
+    }
+}
+
+fun ModelBacktestConfig.instruments(tickers : Iterable<String>, source : String,
+                                    interval: Interval? = null,
+                                    divAdjusted : Boolean = false,
+                                    waitOnEnd: Boolean = false) : List<InstrumentConfig>{
+
+    val storageImpl = MdStorageImpl()
+
+    val interval =  interval ?: storageImpl.getSourceDefaultInterval(source)
+    val mdDao = storageImpl.getDao(source,  interval.name)
+
+    if(divAdjusted){
+        val divs = DivHelper.getDivs()
+        return tickers.map { instr ->
+            InstrumentConfig(instr, { ReaderDivAdjusted(MarketDataReaderDb(mdDao, instr, Instant.now().plusSeconds(1000), waitOnEnd),divs[instr]!!) })
+        }
+
+    }else{
+        return tickers.map { instr ->
+            InstrumentConfig(instr, { MarketDataReaderDb(mdDao, instr, Instant.now().plusSeconds(1000), waitOnEnd) })
+        }
     }
 }
