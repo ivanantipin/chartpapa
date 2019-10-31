@@ -6,20 +6,10 @@ echo "======================"
 tail -n 100 nohup.out
 echo "========================="
 
-cd tsui && npm install && npm run build
+./gradlew clean build installDist
 
-cd ..
+nohup ./grpc-back/build/install/grpc-back/bin/startServer &
 
-cp -r tsui/build/* back/src/main/resources/static/
+sleep 10
 
-rm nohup.out
-
-args="-Xms728m -Xmx728m -DnotebooksDir=/root/release/chartpapa/market_research/published \
--Dcom.sun.management.jmxremote \
--Dcom.sun.management.jmxremote.port=5555 \
--Dcom.sun.management.jmxremote.authenticate=false \
--Dcom.sun.management.jmxremote.ssl=false \
--Dserver.port=80 \
--Dcom.sun.management.jmxremote.local.only=false"
-
-nohup ./gradlew -Dorg.gradle.daemon=false --stacktrace bootRun -PjvmArgs="${args}" &
+tail -n 100 nohup.out
