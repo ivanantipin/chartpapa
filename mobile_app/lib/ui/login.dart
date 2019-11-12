@@ -81,8 +81,6 @@ class _LoginPageState extends State<LoginPage> {
                 .accessToken.token}');
 
         var profile = json.decode(graphResponse.body);
-        print(profile.toString());
-
         onLoginStatusChanged(true, profileData: profile);
         break;
     }

@@ -14,6 +14,13 @@ dependencies:
   quiver: '>=2.0.0 <3.0.0'
   fixnum: 0.10.9
   protobuf: ^0.14.4
+  intl: ^0.16.0
+  syncfusion_flutter_charts: ^17.3.26
+  syncfusion_flutter_gauges: 17.3.14-beta.1
+  scoped_model: 1.0.1
+  flutter_gallery_assets: 0.1.8
+  url_launcher: ^5.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

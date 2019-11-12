@@ -19,6 +19,7 @@ class KeyValueStyled extends StatelessWidget{
     ];
     var l1 = <Widget>[Text(value, style: valueStyle, textAlign: TextAlign.center,)];
     return Container(
+
       margin: EdgeInsets.all(15.0),
 
       child: Row(
@@ -32,26 +33,24 @@ class KeyValueStyled extends StatelessWidget{
 
 class KeyValuesCard extends StatelessWidget {
 
-  final List<KeyValueStyled> cells;
+  final List<List<Widget>> cells;
 
   const KeyValuesCard(this.cells);
 
   @override
   Widget build(BuildContext context) {
-    var chunkSize = 2;
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
       ),
       color: Colors.white,
       elevation: 20,
-      child: Table(
-        children: partition(this.cells, chunkSize).map((lst){
-          var ll = List<Widget>.from(lst);
-          while(ll.length < chunkSize){
-            ll.add(Container());
-          }
-          return TableRow(children: ll);
+      child: Column(
+        children: cells.map((lst){
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: lst,
+          );
         }).toList(),
       ),
     );

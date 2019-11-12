@@ -1,11 +1,11 @@
 package com.firelib.stratserver
 
-import com.firelib.Empty
-import com.firelib.StratDescription
-import com.firelib.StratServiceGrpc
+import com.firelib.*
 import firelib.common.interval.Interval
 import firelib.common.model.UtilsHandy
 import firelib.common.model.VolatilityBreak
+import firelib.common.model.enableSeries
+import firelib.domain.Ohlc
 import io.grpc.Server
 import io.grpc.ServerBuilder
 import io.grpc.stub.StreamObserver
@@ -34,7 +34,6 @@ class StratServer {
                 System.err.println("*** server shut down")
             }
         })
-
     }
 
     private fun stop() {
@@ -47,31 +46,80 @@ class StratServer {
 
     class ServiceImpl : StratServiceGrpc.StratServiceImplBase() {
 
-        val strats = Brodcaster<StratDescription>("stratDescription");
+        val strats = Broadcaster<StratDescription>("stratDescription");
+
+        val levels = Broadcaster<Levels>("levels", historyKey = {l->l.ticker})
+
+        val historicalPrices = Broadcaster<OhlcTO>("prices", maxSize = 600, historyKey = { l->l.ticker})
+
+        val intraPrices = Broadcaster<OhlcTO>("intra prices", historyKey = {l->l.ticker})
 
         val tradeStat = TradeStat("volBreak", "empty", strats)
 
         init {
             strats.start()
+            levels.start()
         }
 
         override fun getStrats(request: Empty, responseObserver: StreamObserver<StratDescription>) {
-            println("subscribe to strats")
             strats.addObserver(responseObserver)
         }
+
+        override fun getLevels(request: Empty, responseObserver: StreamObserver<Levels>) {
+            levels.addObserver(responseObserver);
+        }
+
+        override fun priceSubscribe(request: HistoryRequest, responseObserver: StreamObserver<OhlcTO>) {
+            historicalPrices.addObserver(responseObserver)
+        }
+
+        override fun intradaySubscribe(request: Empty?, responseObserver: StreamObserver<OhlcTO>) {
+            intraPrices.addObserver(responseObserver);
+        }
+
+    }
+
+    fun convertOhlc(ohlc: Ohlc, tkr : String, op: OhlcPeriod) : OhlcTO{
+        return OhlcTO.newBuilder().apply {
+            open = ohlc.open
+            high = ohlc.high
+            low = ohlc.low
+            close = ohlc.close
+            timestamp = ohlc.dateTimeMs
+            ticker = tkr
+            period = op
+
+        }.build()
     }
 
     suspend fun runStrat() {
         println("Starting strats")
+        val defferer = Defferer()
         VolatilityBreak.runDefault(waitOnEnd = true, ctxListener =  {model->
-            model.context.mdDistributor.addListener(Interval.Min10,{time,md->
-                val priceMap = model.context.instruments.mapIndexed({idx,tick-> Pair(tick,md.price(idx))}).toMap()
-                service.tradeStat.updatePrices(priceMap)
+            val dayTss = model.enableSeries(Interval.Day, interpolated = false)
+            val weekTss = model.enableSeries(Interval.Week, interpolated = false)
+            model.context.instruments.forEachIndexed({idx,ticker->
+                val levelsGen = LevelsGen(service.levels,ticker)
+                dayTss[idx].preRollSubscribe {
+                    levelsGen.onOhlc(it[0], Interval.Day)
+                    service.historicalPrices.add(convertOhlc(it[0], ticker, OhlcPeriod.Day))
 
+                }
+                weekTss[idx].preRollSubscribe {
+                    levelsGen.onOhlc(it[0], Interval.Week)
+                }
             })
 
-            model.orderManagers().forEachIndexed({ idx, om ->
+            model.context.mdDistributor.addListener(Interval.Min10,{time,md->
+                dayTss.forEachIndexed({idx,ts->
+                    val ticker = model.context.instruments[idx]
+                    defferer.executeLater(ticker) {
+                        service.intraPrices.add(convertOhlc(ts[0], ticker, OhlcPeriod.Day))
+                    }
+                })
+            })
 
+            model.orderManagers().forEach({om ->
                 om.tradesTopic().subscribe { trade ->
                     service.tradeStat.addTrade(trade)
                 }
@@ -83,7 +131,7 @@ class StratServer {
 suspend fun main() {
     val server = StratServer()
 
-//    UtilsHandy.updateRussianDivStocks()
+    UtilsHandy.updateRussianDivStocks()
 
     GlobalScope.launch {
         server.runStrat();
@@ -92,7 +140,7 @@ suspend fun main() {
         while (true){
             println("updating stocks")
             try {
-                UtilsHandy.updateRussianDivStocks()
+//                UtilsHandy.updateRussianDivStocks()
             }catch (e : java.lang.Exception){
                 println("error updating stocks ${e}")
             }
@@ -102,4 +150,3 @@ suspend fun main() {
     }
     server.blockUntilShutdown()
 }
-

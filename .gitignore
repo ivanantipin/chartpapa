@@ -8,3 +8,8 @@
 /back/out
 /grpc-back/build
 /grpc-back/out
+/**/.filecache
+/**/.dart_tool
+/**/nohup.out
+*/build/**
+

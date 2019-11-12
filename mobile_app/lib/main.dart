@@ -1,26 +1,37 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:simple_material_app/ui/strat_page.dart';
+import 'package:simple_material_app/bloc/levels_bloc.dart';
+import 'package:simple_material_app/bloc/strat_bloc.dart';
+import 'package:simple_material_app/server/client.dart';
+import 'package:simple_material_app/ui/levels/async_levels_list.dart';
+import 'package:simple_material_app/ui/strats/strat_page_list.dart';
+import 'package:syncfusion_flutter_core/core.dart';
 
-import 'bloc/bloc.dart';
+import 'bloc/price_bloc.dart';
+
+var client = Client();
+
+var stratBloc = StratBloc(client);
+var levelsBloc = LevelsBloc(client);
+var priceBloc = PriceBloc(client);
 
 void main() {
-  subser.start();
+  SyncfusionLicense.registerLicense("NT8mJyc2IWhiZH1gfWN9YmdoYmF8YGJ8ampqanNiYmlmamlmanMDHmg6JTI9fTI9JzojOj0TND4yOj99MDw+");
+  stratBloc.stratSub();
+  levelsBloc.start();
+  priceBloc.start();
+
   runApp(MaterialApp(
       title: "FireApp",
       initialRoute: '/',
       routes: {
         // When navigating to the "/second" route, build the SecondScreen widget.
-        '/positions': (context) => AsyncStratList(),
+        '/positions': (context) => AsyncStratList(stratBloc),
       },
 
       // Home
-      home: BottomBar()
-  )
-  );
+      home: BottomBar()));
 }
-
-
 
 class BottomBar extends StatefulWidget {
   @override
@@ -32,7 +43,7 @@ class BottomBar extends StatefulWidget {
 class BottomBarState extends State {
   int _selectedIndex = 0;
   static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static List<Widget> _widgetOptions = <Widget>[AsyncStratList(), Text("nothing")];
+  static List<Widget> _widgetOptions = <Widget>[AsyncStratList(stratBloc), AsyncLevelsList(priceBloc,levelsBloc)];
 
   void _onItemTapped(int index) {
     setState(() {

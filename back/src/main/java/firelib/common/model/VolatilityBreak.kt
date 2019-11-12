@@ -32,7 +32,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         Quantiles<Double>(100);
     }
 
-    val donchians = daytss.map { Donchian(period) }
+    val donchians = daytss.map { Donchian({it.size <= period}) }
 
 
     val mas = daytss.mapIndexed { idx, it ->

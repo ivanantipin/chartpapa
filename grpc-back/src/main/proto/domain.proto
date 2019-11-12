@@ -7,6 +7,17 @@ package com.firelib;
 
 message Empty{}
 
+message HistoryRequest{
+    string ticker = 1;
+    OhlcPeriod period = 2;
+    int32 depth = 3;
+}
+
+enum OhlcPeriod{
+    Day = 0;
+    Week = 1;
+}
+
 message StratDescription{
     Chart benchmark = 1;
     string description = 2;
@@ -48,3 +59,23 @@ enum BuySell{
     Sell = 1;
 }
 
+message Level{
+    DatePoint level = 1;
+    OhlcPeriod levelType = 2;
+
+}
+
+message Levels{
+    string ticker = 1;
+    repeated Level levels = 2;
+}
+
+message OhlcTO{
+    double open = 1;
+    double high = 2;
+    double low = 3;
+    double close = 4;
+    string ticker = 5;
+    int64 timestamp = 6;
+    OhlcPeriod period = 7;
+}

@@ -9,4 +9,7 @@ import "domain.proto";
 
 service StratService {
   rpc GetStrats(Empty) returns (stream StratDescription) {}
+  rpc GetLevels(Empty) returns (stream Levels) {}
+  rpc PriceSubscribe(HistoryRequest) returns (stream OhlcTO) {}
+  rpc IntradaySubscribe(Empty) returns (stream OhlcTO) {}
 }

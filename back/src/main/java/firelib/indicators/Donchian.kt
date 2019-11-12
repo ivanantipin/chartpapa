@@ -3,7 +3,7 @@ package firelib.indicators
 import firelib.domain.Ohlc
 import java.util.*
 
-class Donchian(val windowBars: Int) {
+class Donchian(val tailCondition : (List<Ohlc>)->Boolean) {
 
     val list = LinkedList<Ohlc>()
 
@@ -19,25 +19,35 @@ class Donchian(val windowBars: Int) {
         max = if (max.isNaN()) 0.0 else max
         min = if (min.isNaN()) 0.0 else min
 
-        if (list.size > windowBars) {
-            val last = list.pollFirst()
+        var needToRecalc = false
+        while (!tailCondition(list)) {
+            val last = list.pollFirst() ?: break
+
             if (Math.abs(last.high - max) < 0.00001 ||
                     Math.abs(last.low - min) < 0.00001) {
-                recalcMinMax()
+                needToRecalc = true
             }
+        }
+        if(needToRecalc){
+            recalcMinMax()
         }
     }
 
     fun recalcMinMax() {
-        min = list.minBy { it.low }!!.low
-        max = list.maxBy { it.high }!!.high
+        if(list.isEmpty()){
+            min = Double.MAX_VALUE;
+            max = Double.MIN_VALUE;
+        }else{
+            min = list.minBy { it.low }!!.low
+            max = list.maxBy { it.high }!!.high
+        }
     }
 
 
 }
 
 fun main() {
-    val donchian = Donchian(2)
+    val donchian = Donchian({it.size <= 2})
     donchian.add(Ohlc(high = 10.0, low = 5.0))
     donchian.add(Ohlc(high = 11.0, low = 6.0))
     println("max ${donchian.max} min ${donchian.min}")
