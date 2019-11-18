@@ -79,7 +79,7 @@ class MainController {
     fun getSeries(codes: Array<InstrId>, interval: String): Map<String, Collection<TimePoint>> {
         val mm = HashMap<String, Collection<TimePoint>>()
         Arrays.stream(codes).forEach { c ->
-            mm[c.code] = storage.read(c, interval).map { oh -> TimePoint(oh.dtGmtEnd.atUtc(), oh.close) }.sorted()
+            mm[c.code] = storage.read(c, interval).map { oh -> TimePoint(oh.endTime.atUtc(), oh.close) }.sorted()
         }
         return mm
     }

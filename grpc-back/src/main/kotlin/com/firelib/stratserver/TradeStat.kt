@@ -7,12 +7,11 @@ import com.firelib.StratDescription
 import firelib.common.Trade
 import firelib.common.misc.StreamTradeCaseGenerator
 import firelib.common.misc.pnl
-import firelib.domain.Ohlc
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class TradeStat(val stratName : String, val description : String, val strats : Broadcaster<StratDescription>){
+class TradeStat(val stratName : String, val descr : String, val strats : Broadcaster<StratDescription>){
 
 
     val generators = ConcurrentHashMap<String, StreamTradeCaseGenerator>();
@@ -21,13 +20,13 @@ class TradeStat(val stratName : String, val description : String, val strats : B
 
     var stratBuilder = StratDescription.newBuilder().apply {
         name = stratName
-        description = description
+        description = descr
     }
 
     fun addTrade(trade : Trade){
         val gen = generators.computeIfAbsent(trade.security(),{ StreamTradeCaseGenerator() })
         val pos = closedPoses.computeIfAbsent(trade.security(), { ConcurrentLinkedQueue<Pair<Trade, Trade>>() })
-        pos += gen.addTrade(trade)
+        pos += gen.genClosedCases(trade)
 
         updateThings()
     }
@@ -54,22 +53,32 @@ class TradeStat(val stratName : String, val description : String, val strats : B
 
             stratBuilder.clearClosedPositions()
 
-            stratBuilder.addAllClosedPositions(closedPoses.values.flatMap { it.toList() }.sortedBy { it.first.dtGmt }.map {
-                Position.newBuilder()
-                        .setTicker(it.first.security())
-                        .setTimestamp(it.first.dtGmt.toEpochMilli())
-                        .setPosition(it.first.qty.toLong())
-                        .setOpenPrice(it.first.price)
-                        .setCloseTimestamp(it.second.dtGmt.toEpochMilli())
-                        .setClosePrice(it.second.price)
-                        .setPnl(it.pnl())
-                        .build()
-            })
+            val openPoses = generators.values.flatMap { it.getPosition() }.map { Pair(it,it) }.toList()
+
+            stratBuilder.addAllClosedPositions(doooo(closedPoses.values.flatMap { it.toList() }))
+
+            stratBuilder.clearOpenPositions()
+
+            stratBuilder.addAllOpenPositions(doooo(openPoses))
 
             println("publish strat to observers")
 
             strats.add(stratBuilder.build())
 
+        }
+    }
+
+    private fun doooo(casese : List<Pair<Trade,Trade>>): List<Position> {
+        return casese.sortedBy { it.first.dtGmt }.map {
+            Position.newBuilder()
+                    .setTicker(it.first.security())
+                    .setTimestamp(it.first.dtGmt.toEpochMilli())
+                    .setPosition(it.first.qty.toLong())
+                    .setOpenPrice(it.first.price)
+                    .setCloseTimestamp(it.second.dtGmt.toEpochMilli())
+                    .setClosePrice(it.second.price)
+                    .setPnl(it.pnl())
+                    .build()
         }
     }
 

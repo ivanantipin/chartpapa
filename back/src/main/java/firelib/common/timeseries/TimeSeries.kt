@@ -20,7 +20,7 @@ interface TimeSeries<T> {
 
 }
 
-fun TimeSeries<Ohlc>.makeNonInterpolatedView() : TimeSeries<Ohlc>{
+fun TimeSeries<Ohlc>.nonInterpolatedView() : TimeSeries<Ohlc>{
     val ret = TimeSeriesImpl(this.capacity(), { Ohlc() })
     this.preRollSubscribe {
         if(!it[0].interpolated){

@@ -2,6 +2,7 @@ package com.funstat.iqfeed
 
 import firelib.domain.Ohlc
 import firelib.common.interval.Interval
+import firelib.domain.merge
 
 import java.util.*
 
@@ -12,12 +13,12 @@ object IntervalTransformer {
             return ohlcs
         }
         var init = ohlcs[0]
-        var nextTime = interval.ceilTime(ohlcs[0].dtGmtEnd)
+        var nextTime = interval.ceilTime(ohlcs[0].endTime)
         val ret = ArrayList<Ohlc>()
         for (ohlc in ohlcs) {
-            if (ohlc.dtGmtEnd.isAfter(nextTime)) {
-                ret.add(init.copy(dtGmtEnd = nextTime))
-                while (ohlc.dtGmtEnd.isAfter(nextTime)){
+            if (ohlc.endTime.isAfter(nextTime)) {
+                ret.add(init.copy(endTime = nextTime))
+                while (ohlc.endTime.isAfter(nextTime)){
                     //ret.add(init.copy(dtGmtEnd = nextTime))
                     nextTime = nextTime.plus(interval.duration)
                 }
@@ -25,7 +26,7 @@ object IntervalTransformer {
             }
             init = init.merge(ohlc)
         }
-        ret.add(init.copy(dtGmtEnd = nextTime))
+        ret.add(init.copy(endTime = nextTime))
 
         return ret
     }

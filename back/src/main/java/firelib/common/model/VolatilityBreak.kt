@@ -7,7 +7,6 @@ import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.misc.atUtc
-import firelib.common.reader.ReaderDivAdjusted
 import firelib.indicators.ATR
 import firelib.indicators.Donchian
 import java.time.LocalTime
@@ -43,9 +42,6 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         atr
     }
 
-
-
-
     init {
 
         enableFactor("volatility", {
@@ -66,7 +62,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         tenMins.forEachIndexed({idx,it->
             it.preRollSubscribe {
                 val timeSeries = daytss[idx]
-                if(it[0].dtGmtEnd.atUtc().toLocalTime() > LocalTime.of(13,10) && timeSeries.count() > period){
+                if(it[0].endTime.atUtc().toLocalTime() > LocalTime.of(13,10) && timeSeries.count() > period){
                     val vola = quantiles[idx].getQuantile(mas[idx].value())
                     val vol = volumeQuantiles[idx].getQuantile(timeSeries.last().volume.toDouble())
 

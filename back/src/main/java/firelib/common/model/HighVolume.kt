@@ -5,15 +5,12 @@ import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
-import firelib.common.core.Launcher.runSimple
 import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
-import firelib.common.ordermanager.OrderManager
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
 import firelib.common.report.GenericDumper
 import firelib.common.timeseries.TimeSeries
-import firelib.common.timeseries.makeNonInterpolatedView
 import firelib.domain.Ohlc
 import java.nio.file.Paths
 

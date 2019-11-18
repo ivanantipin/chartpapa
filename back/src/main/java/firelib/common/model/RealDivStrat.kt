@@ -1,21 +1,13 @@
 package firelib.common.model
 
 import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.instruments
 import firelib.common.config.runStrat
-import firelib.common.core.Launcher.runSimple
-import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
 import firelib.common.misc.StreamTradeCaseGenerator
 import firelib.common.misc.atUtc
-import firelib.common.ordermanager.OrderManager
 import firelib.common.ordermanager.flattenAll
-import firelib.common.ordermanager.makePositionEqualsTo
-import firelib.common.reader.MarketDataReaderSql
-import firelib.common.reader.ReaderDivAdjusted
 
 
 class RealDivModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
@@ -24,7 +16,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
         orderManagers().forEach({
             val gen = StreamTradeCaseGenerator()
             it.tradesTopic().subscribe {
-                val cases = gen.addTrade(it)
+                val cases = gen.genClosedCases(it)
                 if (!cases.isEmpty()) {
                     cases.forEach({
                         println(it.first)
@@ -58,7 +50,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
                     }
 
-                    val time = ret[0].dtGmtEnd.atUtc()
+                    val time = ret[0].endTime.atUtc()
 
                     val date = time.toLocalDate()
 
@@ -105,7 +97,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
             } else {
                 ret.preRollSubscribe {
                     if (it[0].interpolated && !it[1].interpolated) {
-                        val time = ret[1].dtGmtEnd.atUtc()
+                        val time = ret[1].endTime.atUtc()
                         val date = time.toLocalDate()
                         val localTime = time.toLocalTime()
                         if (context.config.verbose) {

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:simple_material_app/bloc/strat_bloc.dart';
 import 'package:simple_material_app/gen/domain.pb.dart';
 import 'package:simple_material_app/ui/chart.dart';
@@ -60,18 +61,15 @@ class ChoiceCard extends StatelessWidget {
           children: <Widget>[
             new Container(
                 padding: const EdgeInsets.all(8.0),
-                height: 300,
-                child: StatsPage.buildChart(description.benchmark)),
+                height: 200,
+                child: StatsPage.buildChartSyncfusion(description.benchmark)),
             new Container(
+              height: 300,
               padding: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(description.name, style: Theme.of(context).textTheme.title),
-                  Text(description.description),
-                ],
-              ),
+                child: Markdown(
+                  data: description.description,
+                  imageDirectory: 'https://raw.githubusercontent.com',
+                ),
             )
           ],
           crossAxisAlignment: CrossAxisAlignment.start,

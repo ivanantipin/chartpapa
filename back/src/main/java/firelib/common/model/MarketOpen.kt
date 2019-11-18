@@ -5,12 +5,11 @@ import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
-import firelib.common.core.Launcher.runSimple
 import firelib.common.interval.Interval
-import firelib.common.ordermanager.OrderManager
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
 import firelib.common.report.GenericDumper
+import firelib.domain.ret
 
 
 class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(context, fac) {
@@ -56,7 +55,7 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
 
                     ))
 
-                    println("written ${it[0].dtGmtEnd} ${tssDay[idx][1].dtGmtEnd} ")
+                    println("written ${it[0].endTime} ${tssDay[idx][1].endTime} ")
                 }
             }
             ret

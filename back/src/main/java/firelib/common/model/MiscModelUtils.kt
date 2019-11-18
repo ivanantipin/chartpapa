@@ -4,7 +4,7 @@ import firelib.common.interval.Interval
 import firelib.common.misc.PositionCloser
 import firelib.common.ordermanager.makePositionEqualsTo
 import firelib.common.timeseries.TimeSeries
-import firelib.common.timeseries.makeNonInterpolatedView
+import firelib.common.timeseries.nonInterpolatedView
 import firelib.domain.Ohlc
 import java.time.LocalTime
 
@@ -25,7 +25,7 @@ fun Model.enableSeries(interval : Interval,
 
     }
     if(!interpolated){
-        return ret.map { it.makeNonInterpolatedView() }
+        return ret.map { it.nonInterpolatedView() }
     }
     return ret
 

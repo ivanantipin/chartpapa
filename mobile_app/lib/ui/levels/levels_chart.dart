@@ -15,7 +15,7 @@ class LSnap {
   final List<Level> levels;
   final List<OhlcTO> history;
   final OhlcTO currentPrice;
-  final Tuple2<double,double> range;
+  final Tuple2<double, double> range;
 
   LSnap(this.levels, this.history, this.currentPrice, this.range);
 }
@@ -31,13 +31,18 @@ class LevelsChartWidget extends StatelessWidget {
     var latestStream = priceBloc.getLatestPrice(ticker);
 
     var histPrice = priceBloc.getHistPrice(ticker).map((List<OhlcTO> hist) {
+      var start = DateTime.now().millisecondsSinceEpoch;
       var compare = (OhlcTO a, OhlcTO b) => a.close.compareTo(b.close);
       var minOh = prefix2.min(hist, compare);
       var maxOh = prefix2.max(hist, compare);
+      print("hist took ${(DateTime.now().millisecondsSinceEpoch - start)/1000.0}");
       return Tuple3(hist, minOh, maxOh);
     });
 
     Observable<List<Level>> processedLevels = levelsBloc.getLevelsForTickers(ticker).map((levels) {
+
+      var start = DateTime.now().millisecondsSinceEpoch;
+
       var compare = (Level a, Level b) {
         return a.level.value.compareTo(b.level.value);
       };
@@ -61,6 +66,8 @@ class LevelsChartWidget extends StatelessWidget {
         }
         return ret;
       }).toList();
+
+      print("heavy took ${(DateTime.now().millisecondsSinceEpoch - start)/1000.0}");
       return nl;
     });
 
@@ -79,7 +86,7 @@ class LevelsChartWidget extends StatelessWidget {
         });
       }).toList();
 
-      return LSnap(rangedLevels, histPrices, latest,  Tuple2(hist.item2.low, hist.item3.high));
+      return LSnap(rangedLevels, histPrices, latest, Tuple2(hist.item2.low, hist.item3.high));
     });
   }
 
@@ -96,10 +103,7 @@ class LevelsChartWidget extends StatelessWidget {
               child: SfCartesianChart(
                 plotAreaBorderWidth: 0,
                 title: ChartTitle(text: ticker.toUpperCase()),
-                legend: Legend(
-                  isVisible: true,
-                  overflowMode: LegendItemOverflowMode.wrap
-                ),
+                legend: Legend(isVisible: true, overflowMode: LegendItemOverflowMode.wrap),
                 primaryXAxis: DateTimeAxis(
                   majorGridLines: MajorGridLines(width: 0),
                   dateFormat: DateFormat.yMd(),
@@ -108,8 +112,8 @@ class LevelsChartWidget extends StatelessWidget {
                 primaryYAxis: NumericAxis(
                     rangePadding: ChartRangePadding.round,
                     decimalPlaces: 4,
-                    minimum: snapshot.data.range.item1*0.8,
-                    maximum: snapshot.data.range.item2*1.2,
+                    minimum: snapshot.data.range.item1 * 0.8,
+                    maximum: snapshot.data.range.item2 * 1.2,
                     axisLine: AxisLine(width: 0),
                     majorTickLines: MajorTickLines(color: Colors.transparent)),
                 series: getLineSeries(snapshot.data),
@@ -128,9 +132,10 @@ class LevelsChartWidget extends StatelessWidget {
   }
 
   List<LineSeries<dynamic, dynamic>> getLineSeries(LSnap snap) {
+    var start = DateTime.now().millisecondsSinceEpoch;
     var priceSer = LineSeries<OhlcTO, dynamic>(
       name: 'history',
-        color : Colors.black,
+      color: Colors.black,
       isVisibleInLegend: false,
       xValueMapper: (OhlcTO oh, _) => epochToDt(oh.timestamp.toInt()),
       yValueMapper: (OhlcTO oh, _) => oh.close,
@@ -144,8 +149,6 @@ class LevelsChartWidget extends StatelessWidget {
 
     var visibleLegends = ["Day level", "Week level"];
 
-
-
     for (int i = 0; i < snap.levels.length; i++) {
       var l = snap.levels[i];
 
@@ -153,27 +156,19 @@ class LevelsChartWidget extends StatelessWidget {
 
       var name = "Level ${i}";
 
-
-
-      if(l.levelType == OhlcPeriod.Day){
+      if (l.levelType == OhlcPeriod.Day) {
         color = Colors.green;
-        if(!dayLegendSet){
+        if (!dayLegendSet) {
           name = visibleLegends[0];
           dayLegendSet = true;
         }
-      }else{
+      } else {
         color = Colors.blue;
-        if(!weekLegendSet){
+        if (!weekLegendSet) {
           name = visibleLegends[1];
           weekLegendSet = true;
         }
-
       }
-
-
-
-
-
 
       var ds = [
         l.level,
@@ -204,14 +199,15 @@ class LevelsChartWidget extends StatelessWidget {
     var curPriceSer = LineSeries<OhlcTO, DateTime>(
       name: 'current price',
       isVisibleInLegend: true,
-      dashArray: <double>[5,5],
+      dashArray: <double>[5, 5],
       color: Colors.redAccent,
       xValueMapper: (oh, _) => epochToDt(oh.timestamp.toInt()),
       yValueMapper: (oh, _) => oh.close,
       dataSource: curDs,
     );
 
+    print("line series took ${(DateTime.now().millisecondsSinceEpoch - start)/1000.0}");
+
     return [priceSer, ...levelSer, curPriceSer];
   }
-
 }

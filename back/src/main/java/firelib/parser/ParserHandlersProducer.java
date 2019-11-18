@@ -45,7 +45,7 @@ public class ParserHandlersProducer {
             {
                 case "D":
                     if(isOhlc()){
-                        handlers.add(new DateTimeHandler<Ohlc>((oh, dt) -> oh.setDtGmtEnd(dt), zoneId, dateformat));
+                        handlers.add(new DateTimeHandler<Ohlc>((oh, dt) -> oh.setEndTime(dt), zoneId, dateformat));
                     }else{
                         handlers.add(new DateTimeHandler<Tick>((oh, dt) -> oh.setDtGmt(dt), zoneId, dateformat));
                     }

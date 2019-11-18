@@ -12,14 +12,14 @@ class OhlcDesc : BinaryReaderRecordDescriptor<Ohlc>{
         buffer.putDouble(tick.low)
         buffer.putDouble(tick.close)
         buffer.putLong(tick.volume)
-        buffer.putLong(tick.dtGmtEnd.toEpochMilli())
+        buffer.putLong(tick.endTime.toEpochMilli())
         buffer.putChar(if(tick.interpolated) 'I' else 'R')
     }
 
     override fun newInstance (): Ohlc = Ohlc()
 
     override fun read(buff: ByteBuffer): Ohlc {
-        val ret = Ohlc(dtGmtEnd = Instant.ofEpochMilli(buff.getLong()),
+        val ret = Ohlc(endTime = Instant.ofEpochMilli(buff.getLong()),
                 open = buff.getDouble(),
                 high = buff.getDouble(),
                 low = buff.getDouble(),

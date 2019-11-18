@@ -16,7 +16,7 @@ object BacktestPeriodCalc {
             })
         }
 
-        val maxReadersStartDate = readers.maxBy {it.startTime()}!!.current().time()
+        val maxReadersStartDate = readers.maxBy {it.startTime()}!!.current().endTime
 
         readers.forEach {it.close()}
 

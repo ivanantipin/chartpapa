@@ -58,11 +58,11 @@ class Sequenta {
         }
 
         fun getStart(): LocalDateTime {
-            return data[start].dtGmtEnd.atUtc()
+            return data[start].endTime.atUtc()
         }
 
         fun getEnd(): LocalDateTime {
-            return data[end].dtGmtEnd.atUtc()
+            return data[end].endTime.atUtc()
         }
 
         fun setupSize(): Int {

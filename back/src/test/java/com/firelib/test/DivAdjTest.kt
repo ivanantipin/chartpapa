@@ -46,11 +46,11 @@ class DivAdjTest{
             }
 
             override fun startTime(): Instant {
-                return data[0].dtGmtEnd
+                return data[0].endTime
             }
 
             override fun endTime(): Instant {
-                return data.last().dtGmtEnd
+                return data.last().endTime
             }
 
             override fun close() {

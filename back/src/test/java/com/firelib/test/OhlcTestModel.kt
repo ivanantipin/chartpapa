@@ -4,7 +4,6 @@ package com.firelib.test
 import firelib.common.interval.Interval
 import firelib.common.model.Model
 import firelib.common.model.ModelContext
-import firelib.common.ordermanager.OrderManager
 import firelib.common.ordermanager.OrderManagerImpl
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
@@ -45,31 +44,31 @@ class OhlcTestModel(context: ModelContext) : Model(context, emptyMap()) {
 
 
     fun on5Min(ts: TimeSeries<Ohlc>): Unit {
-        if (dayHist!!.count() > 0 && dayHist!![0].dtGmtEnd.truncatedTo(ChronoUnit.DAYS) != dayHist!![0].dtGmtEnd) {
+        if (dayHist!!.count() > 0 && dayHist!![0].endTime.truncatedTo(ChronoUnit.DAYS) != dayHist!![0].endTime) {
             throw Exception("time of day ts not correct");
         }
         val currentTime = context.timeService.currentTime()
-        if (currentTime != ts[0].time()) {
-            throw Exception("time is not equal $currentTime <> ${ts[0].time()}");
+        if (currentTime != ts[0].endTime) {
+            throw Exception("time is not equal $currentTime <> ${ts[0].endTime}");
         }
         bars += ts[0].copy()
 
         if (bars.size > 1) {
-            if ((ts[0].dtGmtEnd.toEpochMilli() - ts[1].dtGmtEnd.toEpochMilli()) != 5 * 60 * 1000L) {
-                throw Exception("not 5 min diff " + ts[0].dtGmtEnd + " -- " + ts[1].dtGmtEnd);
+            if ((ts[0].endTime.toEpochMilli() - ts[1].endTime.toEpochMilli()) != 5 * 60 * 1000L) {
+                throw Exception("not 5 min diff " + ts[0].endTime + " -- " + ts[1].endTime);
             }
         }
         addOhlc(ts[0]);
     }
 
     fun addOhlc(pQuote: Ohlc) {
-        if (uniqTimes.contains(pQuote.dtGmtEnd)) {
-            throw Exception("dupe time " + pQuote.dtGmtEnd);
+        if (uniqTimes.contains(pQuote.endTime)) {
+            throw Exception("dupe time " + pQuote.endTime);
         }
-        uniqTimes.add(pQuote.dtGmtEnd)
+        uniqTimes.add(pQuote.endTime)
 
-        if (startTimesGmt.size == 0 || startTimesGmt.last().truncatedTo(ChronoUnit.DAYS) != pQuote.time().truncatedTo(ChronoUnit.DAYS)) {
-            startTimesGmt += pQuote.time()
+        if (startTimesGmt.size == 0 || startTimesGmt.last().truncatedTo(ChronoUnit.DAYS) != pQuote.endTime.truncatedTo(ChronoUnit.DAYS)) {
+            startTimesGmt += pQuote.endTime
         }
     }
 

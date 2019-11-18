@@ -50,7 +50,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
                     if (gap < -0.02) {
                         sellIfNoPosition(idx, -1000_000)
                     }
-                    println("written ${it[0].dtGmtEnd} ${tssDay[idx][1].dtGmtEnd} ")
+                    println("written ${it[0].endTime} ${tssDay[idx][1].endTime} ")
                 }
             }
             ret

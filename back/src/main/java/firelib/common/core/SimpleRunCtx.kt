@@ -22,7 +22,7 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
         TimeServiceManaged()
     }
 
-    val rootInterval = Interval.Min1
+    val rootInterval = Interval.Min10
 
     val startTime by lazy {
         val bounds = BacktestPeriodCalc.calcBounds(modelConfig)
@@ -52,15 +52,17 @@ class SimpleRunCtx(val modelConfig : ModelBacktestConfig){
     fun backtest(until : Instant): List<ModelOutput> {
         marketDataDistributor.initTimes(startTime)
         val ret = bindModelsToOutputs()
-        var ct = startTime
+        var ct : Instant = startTime
+        var prevTime : Instant = startTime
         while (ct.isBefore(until)){
             timeService.updateTime(ct)
-            if(!marketDataDistributor.readUntil(ct)){
+            if(!marketDataDistributor.readTillIncluding(prevTime, ct)){
                 break
             }
-            tradeGate.updateBidAsks(readers.map { Pair(it.current().dtGmtEnd,it.current().close)})
+            tradeGate.updateBidAsks(readers.map { Pair(it.current().endTime,it.current().close)})
             boundModels.forEach {it.update()}
             marketDataDistributor.roll(ct)
+            prevTime = ct
             ct += rootInterval.duration
         }
         boundModels.forEach { it.onBacktestEnd() }

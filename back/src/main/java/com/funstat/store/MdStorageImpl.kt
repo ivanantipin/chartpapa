@@ -138,7 +138,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         try {
             val source = sources[instrId.source]!!
             val dao = getDao(instrId.source, source.getDefaultInterval().name)
-            val startTime = dao.queryLast(instrId.code).map { oh -> oh.dtGmtEnd.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
+            val startTime = dao.queryLast(instrId.code).map { oh -> oh.endTime.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
 
             println("start time is ${startTime}")
 

@@ -13,7 +13,7 @@ class StreamTradeCaseGenerator {
         return posTrades.toList()
     }
 
-    fun addTrade(trade : Trade) : List<Pair<Trade,Trade>> {
+    fun genClosedCases(trade : Trade) : List<Pair<Trade,Trade>> {
 
         val tradingCases = ArrayList<Pair<Trade, Trade>>(2)
 

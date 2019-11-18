@@ -31,11 +31,11 @@ object DivHelper {
 
         val dao = storage.getDao(FinamDownloader.SOURCE, Interval.Min10.toString())
 
-        var trdDays = dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
+        var trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
 
         if(trdDays.isEmpty()){
             UtilsHandy.updateRussianStockSimple("sber")
-            trdDays = dao.queryAll("sber").map { it.dtGmtEnd.atUtc().toLocalDate()!! }.toSet()
+            trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
         }
 
         val dsForFile = SqlUtils.getDsForFile(GlobalConstants.mdFolder.resolve("meta.db").toAbsolutePath().toString())
@@ -100,7 +100,7 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
                     val div = divs[nextIdx - 1]
                     val divDate = div.lastDayWithDivs
 
-                    var diff = (ohlc.dtGmtEnd.atUtc().toLocalDate().toEpochDay() - divDate.toEpochDay()).toInt()
+                    var diff = (ohlc.endTime.atUtc().toLocalDate().toEpochDay() - divDate.toEpochDay()).toInt()
 
                     if (diff == 20) {
 
@@ -108,7 +108,7 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
                                 .filter { !it.interpolated }
                                 .reversed()
 
-                        val divIdx = ff.indexOfLast { it.dtGmtEnd.atUtc().toLocalDate() == divDate }
+                        val divIdx = ff.indexOfLast { it.endTime.atUtc().toLocalDate() == divDate }
 
                         dumper.write(
                                 (1 until ff.size).map { idx ->
@@ -116,7 +116,7 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
                                     Stat(instrument, idx - divIdx,
                                             intraPnl = (oh.close - oh.open) / oh.open,
                                             gapPnl = (oh.open - ff[idx - 1].close) / ff[idx - 1].close,
-                                            curDate = oh.dtGmtEnd,
+                                            curDate = oh.endTime,
                                             divDate = divDate.atStartOfDay().toInstant(ZoneOffset.UTC),
                                             divSize = div.div / oh.open,
                                             lastMonthReturn = (ret[21].close - ret[51].close) / ret[51].close

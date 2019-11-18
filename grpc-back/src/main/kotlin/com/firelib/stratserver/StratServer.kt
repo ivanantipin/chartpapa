@@ -44,17 +44,28 @@ class StratServer {
         server.awaitTermination()
     }
 
+
     class ServiceImpl : StratServiceGrpc.StratServiceImplBase() {
+
+        val description = """
+# Стратегия "Волабрейк"
+## Описание логики 
+Является типичной пробойной стратегией ***"long-only"*** (только длинные позиции) с фильтрами которые повышают вероятность прибыльной сделки.
+<br/>
+Обыкновенно вы увидите оповещение о сигнали с этой стратегии в конце рабочего дня.
+<br/>
+Среднее удержание сделки **3 дня**
+    """.trimIndent()
 
         val strats = Broadcaster<StratDescription>("stratDescription");
 
-        val levels = Broadcaster<Levels>("levels", historyKey = {l->l.ticker})
+        val levels = Broadcaster<Levels>("levels", historyKey = { l -> l.ticker })
 
-        val historicalPrices = Broadcaster<OhlcTO>("prices", maxSize = 600, historyKey = { l->l.ticker})
+        val historicalPrices = Broadcaster<OhlcTO>("prices", maxSize = 600, historyKey = { l -> l.ticker })
 
-        val intraPrices = Broadcaster<OhlcTO>("intra prices", historyKey = {l->l.ticker})
+        val intraPrices = Broadcaster<OhlcTO>("intra prices", historyKey = { l -> l.ticker })
 
-        val tradeStat = TradeStat("volBreak", "empty", strats)
+        val tradeStat = TradeStat(stratName = "volBreak", descr = description, strats = strats)
 
         init {
             strats.start()
@@ -79,13 +90,13 @@ class StratServer {
 
     }
 
-    fun convertOhlc(ohlc: Ohlc, tkr : String, op: OhlcPeriod) : OhlcTO{
+    fun convertOhlc(ohlc: Ohlc, tkr: String, op: OhlcPeriod): OhlcTO {
         return OhlcTO.newBuilder().apply {
             open = ohlc.open
             high = ohlc.high
             low = ohlc.low
             close = ohlc.close
-            timestamp = ohlc.dateTimeMs
+            timestamp = ohlc.endTime.toEpochMilli()
             ticker = tkr
             period = op
 
@@ -95,11 +106,11 @@ class StratServer {
     suspend fun runStrat() {
         println("Starting strats")
         val defferer = Defferer()
-        VolatilityBreak.runDefault(waitOnEnd = true, ctxListener =  {model->
+        VolatilityBreak.runDefault(waitOnEnd = true, ctxListener = { model ->
             val dayTss = model.enableSeries(Interval.Day, interpolated = false)
             val weekTss = model.enableSeries(Interval.Week, interpolated = false)
-            model.context.instruments.forEachIndexed({idx,ticker->
-                val levelsGen = LevelsGen(service.levels,ticker)
+            model.context.instruments.forEachIndexed({ idx, ticker ->
+                val levelsGen = LevelsGen(service.levels, ticker)
                 dayTss[idx].preRollSubscribe {
                     levelsGen.onOhlc(it[0], Interval.Day)
                     service.historicalPrices.add(convertOhlc(it[0], ticker, OhlcPeriod.Day))
@@ -110,8 +121,8 @@ class StratServer {
                 }
             })
 
-            model.context.mdDistributor.addListener(Interval.Min10,{time,md->
-                dayTss.forEachIndexed({idx,ts->
+            model.context.mdDistributor.addListener(Interval.Min10, { time, md ->
+                dayTss.forEachIndexed({ idx, ts ->
                     val ticker = model.context.instruments[idx]
                     defferer.executeLater(ticker) {
                         service.intraPrices.add(convertOhlc(ts[0], ticker, OhlcPeriod.Day))
@@ -119,7 +130,7 @@ class StratServer {
                 })
             })
 
-            model.orderManagers().forEach({om ->
+            model.orderManagers().forEach({ om ->
                 om.tradesTopic().subscribe { trade ->
                     service.tradeStat.addTrade(trade)
                 }
@@ -137,11 +148,11 @@ suspend fun main() {
         server.runStrat();
     }
     GlobalScope.launch {
-        while (true){
+        while (true) {
             println("updating stocks")
             try {
-//                UtilsHandy.updateRussianDivStocks()
-            }catch (e : java.lang.Exception){
+                UtilsHandy.updateRussianDivStocks()
+            } catch (e: java.lang.Exception) {
                 println("error updating stocks ${e}")
             }
 

@@ -24,28 +24,34 @@ class StrategyWidget extends StatelessWidget {
     );
   }
 
-  CustomScrollView _sliverList(StratDescription description) {
+  Widget _sliverList(StratDescription description) {
     var ind = description.closedPositions.length;
     var closedPositions = description.closedPositions.sublist(ind - 30, ind);
     closedPositions = closedPositions.reversed.toList();
-    return CustomScrollView(slivers: <Widget>[
+    return Container(color: Colors.white, child: CustomScrollView(slivers: <Widget>[
       SliverAppBar(
         title: Text("Open positions"),
         pinned: false,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
       ),
       SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
-        return mapPosition(description.openPositions[index]);
-      }, childCount: description.openPositions.length)),
+            return mapPosition(description.openPositions[index]);
+          }, childCount: description.openPositions.length)),
       SliverAppBar(
         title: Text("Closed positions"),
         pinned: false,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
       ),
       SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
-        return mapPosition(closedPositions[index]);
-      }, childCount: closedPositions.length)),
-    ]);
+            return mapPosition(closedPositions[index]);
+          }, childCount: closedPositions.length)),
+    ]));
   }
 
   KeyValuesCard mapPosition(Position position) {

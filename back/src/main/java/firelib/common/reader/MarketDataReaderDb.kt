@@ -16,7 +16,7 @@ class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Ins
     }
 
     override fun seek(time: Instant): Boolean {
-        val idx = ohlcs.indexOfFirst { it.dtGmtEnd.isAfter(time) }
+        val idx = ohlcs.indexOfFirst { it.endTime.isAfter(time) }
         cind = idx
         return idx > 0
     }
@@ -29,8 +29,8 @@ class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Ins
         if(++cind >= ohlcs.size){
             if(waitOnEnd){
                 while (true){
-                    val add = dao.queryAll(ticker, ohlcs.last().dtGmtEnd.atUtc())
-                    val ff = add.filter { ohlcs.last().time() <= it.time()  }
+                    val add = dao.queryAll(ticker, ohlcs.last().endTime.atUtc())
+                    val ff = add.filter { ohlcs.last().endTime <= it.endTime }
                     if(ff.isEmpty()){
                         Thread.sleep(100000)
                     }else{
@@ -44,7 +44,7 @@ class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Ins
     }
 
     override fun startTime(): Instant {
-        return ohlcs[0].dtGmtEnd
+        return ohlcs[0].endTime
     }
 
     override fun endTime(): Instant {
@@ -53,5 +53,4 @@ class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Ins
 
     override fun close() {
     }
-
 }

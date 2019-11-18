@@ -117,13 +117,13 @@ class BacktestIntegrationTest {
 
         val size: Int = modelBars.filter({ !it.interpolated }).size
 
-        println("diff " + directBars.map { it.dtGmtEnd }.toSet().minus(modelBars.map { it.dtGmtEnd }))
+        println("diff " + directBars.map { it.endTime }.toSet().minus(modelBars.map { it.endTime }))
         //FIXME
         Assert.assertEquals("bars number", size, totalQuotesNumber - 1)
 
         var curTime = cfg.startDateGmt
         for (i in 0 until modelBars.size) {
-            Assert.assertEquals(curTime, modelBars[i].dtGmtEnd)
+            Assert.assertEquals(curTime, modelBars[i].endTime)
             curTime = curTime.plusSeconds(5 * 60)
             if (!modelBars[i].interpolated) {
                 idx += 1

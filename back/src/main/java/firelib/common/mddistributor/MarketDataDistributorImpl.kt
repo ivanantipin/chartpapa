@@ -11,27 +11,25 @@ import java.time.Instant
 
 class MarketDataDistributorImpl(
         val readers: List<MarketDataReader<Ohlc>>
-        ) : MarketDataDistributor {
+) : MarketDataDistributor {
 
 
-    val DEFAULT_TIME_SERIES_HISTORY_LENGTH = 100
-
-    val timeseries =  readers.map { TimeSeriesContainer(it) }.toTypedArray()
+    val timeseries = readers.map { TimeSeriesContainer(it) }.toTypedArray()
 
     val intervalService = IntervalServiceImpl()
 
-    private val rollQueue = ArrayList<()->Unit>()
+    private val finalUpdates = ArrayList<() -> Unit>()
 
-    fun initTimes(startTime : Instant){
-        timeseries.forEach {c->
-            for(ts in c.iterator()){
+    fun initTimes(startTime: Instant) {
+        timeseries.forEach { c ->
+            for (ts in c.iterator()) {
                 val start = ts.first.ceilTime(startTime)
-                ts.second[0] = ts.second[0].copy(dtGmtEnd = start)
+                ts.second[0] = ts.second[0].copy(endTime = start)
             }
         }
     }
 
-    override fun price(idx : Int) : Ohlc{
+    override fun price(idx: Int): Ohlc {
         return readers[idx].current()
     }
 
@@ -41,35 +39,35 @@ class MarketDataDistributorImpl(
             return createTimeSeries(idx, interval, capacity)
         }
         val hist = timeseries[idx][interval]
-        if(capacity > hist.capacity() ){
+        if (capacity > hist.capacity()) {
             hist.adjustCapacity(capacity)
         }
         return hist
     }
 
-    fun readUntil(dt : Instant) : Boolean{
-        return timeseries.all { it.readUntil(dt) }
+    fun readTillIncluding(prevTime: Instant, dt: Instant): Boolean {
+        return timeseries.all { it.readTillIncluding(prevTime, dt) }
     }
 
-    fun roll(dt : Instant){
+    fun roll(dt: Instant) {
         intervalService.onStep(dt)
-        rollQueue.forEach {it()}
-        rollQueue.clear()
+        finalUpdates.forEach { it() }
+        finalUpdates.clear()
     }
 
-    override fun addListener(interval : Interval, action : (Instant,MarketDataDistributor)->Unit){
-        intervalService.addListener(interval) {action(it,this)}
+    override fun addListener(interval: Interval, action: (Instant, MarketDataDistributor) -> Unit) {
+        intervalService.addListener(interval) { action(it, this) }
     }
 
-    private fun createTimeSeries(idx: Int, interval: Interval, length: Int = DEFAULT_TIME_SERIES_HISTORY_LENGTH): TimeSeriesImpl<Ohlc> {
+    private fun createTimeSeries(idx: Int, interval: Interval, length: Int = 100): TimeSeriesImpl<Ohlc> {
         val timeSeries = TimeSeriesImpl(length) { Ohlc() }
 
         timeseries[idx][interval] = timeSeries
 
-        intervalService.addListener(interval) {time->
+        intervalService.addListener(interval) { time ->
             timeSeries.channel.publish(timeSeries)
-            rollQueue += {
-                timeSeries += timeSeries[0].copy(dtGmtEnd = time.plusMillis(interval.durationMs), interpolated = true)
+            finalUpdates += {
+                timeSeries += timeSeries[0].copy(endTime = time.plusMillis(interval.durationMs), interpolated = true)
             }
         }
         return timeSeries

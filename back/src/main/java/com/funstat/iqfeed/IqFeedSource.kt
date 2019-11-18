@@ -4,8 +4,9 @@ import com.funstat.domain.InstrId
 import com.funstat.vantage.Source
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
-import firelib.common.report.GenericDumper
 import firelib.domain.Ohlc
+import firelib.domain.date
+import firelib.domain.ret
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler
@@ -16,8 +17,6 @@ import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
-import java.util.concurrent.atomic.AtomicLong
 
 class IqFeedSource(val csvPath: Path) : Source {
 
@@ -79,7 +78,7 @@ fun solve(data : Array<MutableList<Double>>) : Array<Double>{
 
 fun main(args: Array<String>) {
     val minBars = IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).load(InstrId(code = "SPY"))
-            .filter { it.dtGmtEnd.atUtc().toLocalTime().hour != 0 }
+            .filter { it.endTime.atUtc().toLocalTime().hour != 0 }
             .toList()
 
     val tenMins = IntervalTransformer.transform(Interval.Min10, minBars)
@@ -99,7 +98,7 @@ fun main(args: Array<String>) {
             currentDate = it.date()
         }
 
-        var idx = it.dtGmtEnd.atUtc().toLocalTime().toSecondOfDay()/600 - 100
+        var idx = it.endTime.atUtc().toLocalTime().toSecondOfDay()/600 - 100
         arr[idx].add(it.ret())
         if(arr[idx].size > 30){
             arr[idx].removeAt(0);

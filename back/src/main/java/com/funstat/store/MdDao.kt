@@ -7,8 +7,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.sqlite.SQLiteDataSource
 import java.sql.ResultSet
-import java.sql.SQLException
-import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -44,7 +42,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
                 false
             }
         }.map {
-            mapOf("DT" to it.dtGmtEnd.toEpochMilli(),
+            mapOf("DT" to it.endTime.toEpochMilli(),
                     "OPEN" to it.open,
                     "HIGH" to it.high,
                     "LOW" to it.low,

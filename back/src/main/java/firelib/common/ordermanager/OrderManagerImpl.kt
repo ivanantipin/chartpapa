@@ -36,7 +36,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         return security
     }
 
-    private val id2Order = HashMap<String,OrderWithState>()
+    private val id2Order = mutableMapOf<String,OrderWithState>()
 
     private val orderStateChannel = NonDurableChannel<OrderState>()
 
@@ -65,7 +65,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         return orderStateChannel
     }
 
-    override fun cancelOrders(orders: List<Order>): Unit {
+    override fun cancelOrders(orders: List<Order>) {
         for (order in orders) {
             val ord = id2Order.get(order.id)
             if(ord != null){

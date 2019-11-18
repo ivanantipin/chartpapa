@@ -5,6 +5,7 @@ import firelib.common.reader.MarketDataReader
 import firelib.common.timeseries.TimeSeries
 import firelib.common.timeseries.TimeSeriesImpl
 import firelib.domain.Ohlc
+import firelib.domain.merge
 import java.time.Instant
 
 class TimeSeriesContainer(val reader : MarketDataReader<Ohlc>) {
@@ -22,10 +23,19 @@ class TimeSeriesContainer(val reader : MarketDataReader<Ohlc>) {
     }
 
 
-    fun readUntil(time : Instant) : Boolean{
-        while (!reader.current().time().isAfter(time)){
-            val ohlc = reader.current()
-            timeSeries.forEach { it[0] = mergeOhlc(it[0], ohlc) }
+    fun readTillIncluding(prevTime : Instant, time : Instant) : Boolean{
+        while (true){
+
+            val current = reader.current()
+
+            if(current.endTime > prevTime && current.endTime <= time){
+                timeSeries.forEach { it[0] = mergeOhlc(it[0], current) }
+            }
+
+            if(current.endTime >= time){
+                break
+            }
+
             if(!reader.read()){
                 return false
             }
@@ -50,8 +60,8 @@ class TimeSeriesContainer(val reader : MarketDataReader<Ohlc>) {
         require(!ohlc.interpolated, {"should not be interpolated"})
 
         if (currOhlc.interpolated) {
-            require(!ohlc.dtGmtEnd.isAfter(currOhlc.dtGmtEnd), {"shall not be after ${currOhlc.dtGmtEnd} < ${ohlc.dtGmtEnd}"})
-            return ohlc.copy(dtGmtEnd = currOhlc.dtGmtEnd, interpolated = false)
+            require(!ohlc.endTime.isAfter(currOhlc.endTime), {"shall not be after ${currOhlc.endTime} < ${ohlc.endTime}"})
+            return ohlc.copy(endTime = currOhlc.endTime, interpolated = false)
         } else {
             return currOhlc.copy(high = Math.max(ohlc.high, currOhlc.high),
                     low = Math.min(ohlc.low, currOhlc.low),

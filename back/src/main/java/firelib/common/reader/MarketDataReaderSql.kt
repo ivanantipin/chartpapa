@@ -11,7 +11,7 @@ class MarketDataReaderSql(val ohlcs : List<Ohlc>) : MarketDataReader<Ohlc> {
     var cind = 0;
 
     override fun seek(time: Instant): Boolean {
-        val idx = ohlcs.indexOfFirst { it.dtGmtEnd.isAfter(time) }
+        val idx = ohlcs.indexOfFirst { it.endTime.isAfter(time) }
         cind = idx
         return idx > 0
     }
@@ -25,11 +25,11 @@ class MarketDataReaderSql(val ohlcs : List<Ohlc>) : MarketDataReader<Ohlc> {
     }
 
     override fun startTime(): Instant {
-        return ohlcs[0].dtGmtEnd
+        return ohlcs[0].endTime
     }
 
     override fun endTime(): Instant {
-        return ohlcs[ohlcs.size - 1].dtGmtEnd
+        return ohlcs[ohlcs.size - 1].endTime
     }
 
     override fun close() {

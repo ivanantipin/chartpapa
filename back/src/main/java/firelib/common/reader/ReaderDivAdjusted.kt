@@ -15,7 +15,7 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Di
 
     fun reindex(){
         val curr = delegate.current()
-        val cidx = divs.indexOfFirst { it.lastDayWithDivs.plusDays(1).atStartOfDay().isAfter(curr.dtGmtEnd.atUtc()) }
+        val cidx = divs.indexOfFirst { it.lastDayWithDivs.plusDays(1).atStartOfDay().isAfter(curr.endTime.atUtc()) }
         if(cidx < 0){
             currentAdjustment = divs.sumByDouble { it.div }
             nextDt = Instant.MAX
@@ -31,10 +31,10 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Di
 
     override fun current(): Ohlc {
         val ret = delegate.current();
-        if(ret.dtGmtEnd.isAfter(nextDt)){
+        if(ret.endTime.isAfter(nextDt)){
             reindex()
         }
-        if(cachedValue.dtGmtEnd != ret.dtGmtEnd){
+        if(cachedValue.endTime != ret.endTime){
             cachedValue = ret.copy(open = ret.open + currentAdjustment,
                     high = ret.high + currentAdjustment,
                     low = ret.low + currentAdjustment,

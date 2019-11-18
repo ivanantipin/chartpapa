@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
 import firelib.common.interval.Interval
 import org.apache.commons.io.IOUtils
-import org.asynchttpclient.AsyncHttpClient
 import org.asynchttpclient.DefaultAsyncHttpClient
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
 import org.slf4j.LoggerFactory
@@ -16,13 +15,13 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URL
 import java.nio.charset.Charset
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.HashMap
 
 import com.google.common.io.CharStreams.readLines
 import io.netty.util.concurrent.DefaultThreadFactory
+import java.time.ZoneOffset
 
 
 class FinamDownloader : AutoCloseable, Source {
@@ -31,7 +30,7 @@ class FinamDownloader : AutoCloseable, Source {
             DefaultAsyncHttpClientConfig.Builder()
                     .setFollowRedirect(true)
                     .setKeepAlive(true)
-                    .setThreadFactory(DefaultThreadFactory("download fac",true))
+                    .setThreadFactory(DefaultThreadFactory("download fac", true))
                     .setConnectionTtl(5000)
                     .setRequestTimeout(180000)
                     .setMaxRequestRetry(3)
@@ -65,8 +64,8 @@ class FinamDownloader : AutoCloseable, Source {
             val markets = map["varaEmitentMarkets"]
 
 
-            return codes.mapIndexed({i,code->
-                InstrId(id= ids!![i], name= names!![i], market =  markets!![i], code=codes[i].replace("'", ""), source = SOURCE)
+            return codes.mapIndexed({ i, code ->
+                InstrId(id = ids!![i], name = names!![i], market = markets!![i], code = codes[i].replace("'", ""), source = SOURCE)
             })
 
         } catch (e: IOException) {
@@ -81,17 +80,17 @@ class FinamDownloader : AutoCloseable, Source {
 
     @Synchronized
     override fun load(instrId: InstrId, start: LocalDateTime): Sequence<Ohlc> {
-        val ret = MutableList(0,{Ohlc()})
+        val ret = MutableList(0, { Ohlc() })
         var mstart = start
-        while (mstart < LocalDateTime.now()){
+        while (mstart < LocalDateTime.now()) {
             val finish = mstart.plusDays(1005)
-            ret += loadSome(instrId,mstart, finish)
+            ret += loadSome(instrId, mstart, finish)
             mstart = finish.minusDays(2)
         }
         return ret.asSequence()
     }
 
-    private fun loadSome(instrId: InstrId, start: LocalDateTime, finishI : LocalDateTime): List<Ohlc> {
+    private fun loadSome(instrId: InstrId, start: LocalDateTime, finishI: LocalDateTime): List<Ohlc> {
         while (System.currentTimeMillis() - lastFinamCall < 1100) {
             try {
                 Thread.sleep(100)
@@ -99,7 +98,7 @@ class FinamDownloader : AutoCloseable, Source {
                 throw RuntimeException(e)
             }
         }
-        val finish = if(finishI.isAfter(LocalDateTime.now())) LocalDateTime.now() else finishI;
+        val finish = if (finishI.isAfter(LocalDateTime.now())) LocalDateTime.now() else finishI;
 
         lastFinamCall = System.currentTimeMillis()
 
@@ -150,7 +149,7 @@ class FinamDownloader : AutoCloseable, Source {
                 }
 
         try {
-            val ret = ret.get().map { Ohlc.parse(it) }.filter { it != null }.map { it!! }
+            val ret = ret.get().map { parseOhlc(it) }.filter { it != null }.map { it!! }
             return ret
         } catch (e: Exception) {
             throw RuntimeException(e)
@@ -165,31 +164,53 @@ class FinamDownloader : AutoCloseable, Source {
         return Interval.Min10
     }
 
-    companion object {
+    companion object{
         private val log = LoggerFactory.getLogger(FinamDownloader::class.java)
         val SOURCE = "FINAM"
-
         val SHARES_MARKET = "1"
+    }
 
-        val parser = CSVParserBuilder().withQuoteChar('\'').build()
+    val parser = CSVParserBuilder().withQuoteChar('\'').build()
 
-        internal fun populate(inl: String, map: MutableMap<String, Array<String>>) {
-            if (inl.indexOf('[') < 0) return
-            val origStr = inl.substring(inl.indexOf('[') + 1, inl.indexOf(']'))
-            var data = origStr.split(",").dropLastWhile { it.isEmpty() }.toTypedArray()
-            val key = inl.substring(0, inl.indexOf('['))
-                    .replace(" ", "")
-                    .replace("=", "")
+    internal fun populate(inl: String, map: MutableMap<String, Array<String>>) {
+        if (inl.indexOf('[') < 0) return
+        val origStr = inl.substring(inl.indexOf('[') + 1, inl.indexOf(']'))
+        var data = origStr.split(",").dropLastWhile { it.isEmpty() }.toTypedArray()
+        val key = inl.substring(0, inl.indexOf('['))
+                .replace(" ", "")
+                .replace("=", "")
 
-            if (key == "varaEmitentNames") {
-                try {
-                    data = parser.parseLine(origStr)
-                } catch (e: IOException) {
-                    throw RuntimeException(e)
-                }
-
+        if (key == "varaEmitentNames") {
+            try {
+                data = parser.parseLine(origStr)
+            } catch (e: IOException) {
+                throw RuntimeException(e)
             }
-            map[key] = data
+
+        }
+        map[key] = data
+    }
+
+    internal var pattern = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
+
+    fun parseOhlc(str: String): Ohlc? {
+        return parseWithPattern(str, pattern)
+    }
+
+    val intervalDurationSeconds = defaultInterval.duration.toSeconds()
+
+    fun parseWithPattern(str: String, pattern: DateTimeFormatter): Ohlc? {
+        try {
+            val arr = str.split(";")
+            return Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1], pattern).toInstant(ZoneOffset.UTC).plusSeconds(intervalDurationSeconds),
+                    arr[2].toDouble(),
+                    arr[3].toDouble(),
+                    arr[4].toDouble(),
+                    arr[5].toDouble(),
+                    volume = arr[6].toLong())
+        } catch (e: Exception) {
+            println("not valid entry " + str + " because " + e.message)
+            return null
         }
     }
 }
