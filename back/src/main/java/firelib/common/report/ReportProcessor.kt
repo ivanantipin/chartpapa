@@ -24,19 +24,19 @@ class ReportProcessor(val optimizedFunctionName: StrategyMetric,
 
         println("model processed ${models.size} models met min trades count criteria ${filtered.size}")
 
-        filtered.forEach { model ->
+        filtered.forEach { output ->
 
-            val tradingCases = model.trades.toTradingCases()
+            val tradingCases = output.trades.toTradingCases()
 
             val metrics = statCalculator(tradingCases)
 
             val est = metrics[optimizedFunctionName]!!
 
-            bestModels_ += ModelStat(est, model, metrics)
+            bestModels_ += ModelStat(est, output, metrics)
             if(bestModels_.size> topModelsToKeep)
-                bestModels_.remove()
+                bestModels_.poll()
 
-            estimates.add(ExecutionEstimates(extractOptParams(model.modelProps) , metrics))
+            estimates.add(ExecutionEstimates(extractOptParams(output.modelProps) , metrics))
 
         }
         println("total model complete ${estimates.size}")

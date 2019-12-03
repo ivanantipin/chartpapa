@@ -27,7 +27,7 @@ object PositionCloser {
             })
 
 
-            context.mdDistributor.addListener(Interval.Min10, { inst, md ->
+            context.mdDistributor.addListener(interval, { inst, md ->
                 if (oms.position() != 0
                         && !md.price(idx).interpolated
                         && cnt > periods

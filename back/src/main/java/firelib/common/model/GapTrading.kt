@@ -8,7 +8,7 @@ import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.report.GenericDumper
+import firelib.common.report.GeGeWriter
 
 
 class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(context, fac) {
@@ -26,7 +26,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
     init {
 
 
-        val dayRolled = context.instruments.map { false }.toMutableList()
+        val dayRolled = context.tickers().map { false }.toMutableList()
 
 
 
@@ -41,7 +41,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
         }
 
 
-        context.instruments.forEachIndexed { idx, tick ->
+        context.tickers().forEachIndexed { idx, tick ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Min60, 1000)
             ret.preRollSubscribe {
                 if (dayRolled[idx] && it[1].interpolated && !it[0].interpolated) {
@@ -62,7 +62,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
 
     override fun onBacktestEnd() {
         super.onBacktestEnd()
-        val writer = GenericDumper<GapStat>("gaps", context.config.getReportDbFile(), GapStat::class)
+        val writer = GeGeWriter<GapStat>("gaps", context.config.getReportDbFile(), GapStat::class)
         writer.write(stat)
     }
 

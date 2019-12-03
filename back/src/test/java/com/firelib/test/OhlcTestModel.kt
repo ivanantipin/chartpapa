@@ -12,16 +12,13 @@ import java.time.temporal.ChronoUnit
 
 class OhlcTestModel(context: ModelContext) : Model(context, emptyMap()) {
 
-    var endTime = Instant.MIN
-
-
     val startTimesGmt = ArrayList<Instant>();
 
 
-    private var hist: TimeSeries<Ohlc>? = null
+    private var hist: TimeSeries<Ohlc>
 
 
-    var dayHist: TimeSeries<Ohlc>? = null
+    var dayHist: TimeSeries<Ohlc>
 
 
     val uniqTimes = HashSet<Instant>()
@@ -30,21 +27,16 @@ class OhlcTestModel(context: ModelContext) : Model(context, emptyMap()) {
     val bars = ArrayList<Ohlc>()
 
 
-    private var omanagers: List<OrderManagerImpl> = context.instruments
-            .map { OrderManagerImpl(context.tradeGate, context.timeService, it) }
-
-
     init {
         testHelper.instanceOhlc = this
         hist = context.mdDistributor.getOrCreateTs(0, Interval.Min5, 10)
-        hist!!.preRollSubscribe { it -> on5Min(it) }
+        hist.preRollSubscribe { on5Min(it) }
         dayHist = context.mdDistributor.getOrCreateTs(0, Interval.Day, 10)
     }
 
 
-
-    fun on5Min(ts: TimeSeries<Ohlc>): Unit {
-        if (dayHist!!.count() > 0 && dayHist!![0].endTime.truncatedTo(ChronoUnit.DAYS) != dayHist!![0].endTime) {
+    fun on5Min(ts: TimeSeries<Ohlc>) {
+        if (dayHist.count() > 0 && dayHist[0].endTime.truncatedTo(ChronoUnit.DAYS) != dayHist[0].endTime) {
             throw Exception("time of day ts not correct");
         }
         val currentTime = context.timeService.currentTime()

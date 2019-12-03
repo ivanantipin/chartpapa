@@ -1,6 +1,7 @@
 package firelib.common.core
 
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) : Thread(threadName) {
     val queue = LinkedBlockingQueue<T>()
@@ -14,10 +15,14 @@ class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) 
         val buffer = mutableListOf<T>()
         while (!isInterrupted){
             try {
-                buffer += queue.poll()
+                buffer += queue.poll(100, TimeUnit.DAYS)
+                println("polled ${buffer}")
                 queue.drainTo(buffer)
-                batchProcessor(buffer)
-                buffer.clear()
+                if(buffer.isNotEmpty()){
+                    println("processing ${buffer}")
+                    batchProcessor(buffer)
+                    buffer.clear()
+                }
             }catch (e : RuntimeException){
                 println(" ${threadName} : runtime exception in happened ${e}")
             } catch (e : InterruptedException){

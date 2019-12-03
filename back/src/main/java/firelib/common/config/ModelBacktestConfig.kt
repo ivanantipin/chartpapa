@@ -11,7 +11,6 @@ import firelib.common.model.Model
 import firelib.common.opt.OptimizedParameter
 import firelib.common.reader.MarketDataReaderDb
 import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.report.StrategyMetric
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
@@ -30,6 +29,8 @@ class ModelBacktestConfig (){
     var startDateGmt: Instant = Instant.EPOCH
 
     var endDate: Instant = Instant.now()
+
+    var rootInterval = Interval.Min5
 
 
     fun endDate(ed : LocalDate){
@@ -98,11 +99,11 @@ class ModelBacktestConfig (){
     }
 }
 
-suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory){
+fun ModelBacktestConfig.runStrat(fac : ModelFactory){
     this.runStrat(fac,{})
 }
 
-suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory, modelListener : (Model)->Unit){
+fun ModelBacktestConfig.runStrat(fac : ModelFactory, modelListener : (Model)->Unit){
     if(this.optConfig.params.isNotEmpty()){
         Launcher.runOptimized(this,fac)
     }else{
@@ -110,10 +111,10 @@ suspend fun ModelBacktestConfig.runStrat(fac : ModelFactory, modelListener : (Mo
     }
 }
 
-fun ModelBacktestConfig.instruments(tickers : Iterable<String>, source : String,
-                                    interval: Interval? = null,
-                                    divAdjusted : Boolean = false,
-                                    waitOnEnd: Boolean = false) : List<InstrumentConfig>{
+fun instruments(tickers: Iterable<String>, source: String,
+                interval: Interval? = null,
+                divAdjusted: Boolean = false,
+                waitOnEnd: Boolean = false) : List<InstrumentConfig>{
 
     val storageImpl = MdStorageImpl()
 

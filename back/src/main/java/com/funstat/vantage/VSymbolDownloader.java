@@ -1,8 +1,6 @@
 package com.funstat.vantage;
 
-import com.funstat.Tables;
 import com.funstat.domain.InstrId;
-import com.funstat.store.GenericDao;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class VSymbolDownloader {
 
-    public static void updateVantageSymbols(GenericDao mdDao) {
+    public static void updateVantageSymbols() {
         String url = "https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=<to_replace>&apikey=P28H4WI1MIPJPGBP&datatype=csv";
         //symbol,name,type,region,marketOpen,marketClose,timezone,currency,matchScore
         for (int i = 97; i <= 'z'; i++) {
@@ -35,7 +33,6 @@ public class VSymbolDownloader {
                 if(rows.size() == 0){
                     System.out.println(entity.getBody());
                 }
-                Tables.INSTANCE.getSYMBOLS().write(mdDao, rows);
             }
         }
     }

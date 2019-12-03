@@ -39,19 +39,16 @@ class BacktestIntegrationTest {
 
 
     fun getDsRoot(): String {
-        return Paths.get("/home/ivan/projects/fbackend/back/src/test/testresources/TestRoot/testDsRoot").toAbsolutePath().toString()
+        return Paths.get("/home/ivan/projects/chartpapa/back/src/test/testresources/TestRoot/testDsRoot").toAbsolutePath().toString()
     }
 
     fun getReportDir(): String {
-        return Paths.get("/home/ivan/projects/fbackend/back/src/test/testresources/TestRoot/testReportDir").toAbsolutePath().toString()
+        return Paths.get("/home/ivan/projects/chartpapa/back/src/test/testresources/TestRoot/testReportDir").toAbsolutePath().toString()
     }
 
 
     @Test
-    @Ignore
     fun IntegrationTestTestMins() {
-
-
         val fileName = "MINS/XG_#.csv"
         val fullFileName: Path = Paths.get(getDsRoot() + "/" + fileName)
         val iniPath: Path = fullFileName.getParent().resolve("common.ini")
@@ -66,17 +63,13 @@ class BacktestIntegrationTest {
         var d2 = getUsTime(2013, 3, 11, 0, 0, 0, 0)
         var d3 = getUsTime(2013, 3, 12, 0, 0, 0, 0)
 
-
-
-
-        val quotesNumbers: Pair<Int, Int> = createFiles(fullFileName, Pair(d0,d1), Pair(d2,d3), this::ohlcGen, 5 * 60 * 1000)
+        val quotesNumbers: Pair<Int, Int> = createFiles(fullFileName, Pair(d0, d1), Pair(d2, d3), this::ohlcGen, 5 * 60 * 1000)
 
         var totalQuotesNumber = quotesNumbers.first + quotesNumbers.second;
 
+        val generator = ParserHandlersProducer(LegacyMarketDataFormatLoader.load(iniPath.toString()))
 
-        val generator: ParserHandlersProducer = ParserHandlersProducer(LegacyMarketDataFormatLoader.load(iniPath.toString()))
-
-        val pp = CsvParser<Ohlc>(fullFileName.toString(), generator.handlers as Array<ParseHandler<Ohlc>>) { Ohlc() }
+        val pp = CsvParser<Ohlc>(fullFileName.toString(), generator.handlers as Array<ParseHandler<Ohlc>>) { Ohlc(interpolated = false) }
 
         pp.seek(d0)
 
@@ -87,29 +80,20 @@ class BacktestIntegrationTest {
         } while (pp.read())
 
 
-        val cfg = ModelBacktestConfig()
+        val cfg = ModelBacktestConfig().apply {
+            dataServerRoot = getDsRoot()
+            reportTargetPath = getReportDir()
 
+            val factoryImpl = ReaderFactoryImpl(dataServerRoot)
 
-        cfg.dataServerRoot = getDsRoot()
-        cfg.reportTargetPath = getReportDir()
-
-
-        val factoryImpl = ReaderFactoryImpl(cfg.dataServerRoot)
-
-        cfg.instruments += InstrumentConfig("XG", {startTime->
-            factoryImpl.create(fileName, startTime)
-        })
-
-        cfg.startDateGmt = LocalDateTime.of(2013, Month.MARCH, 8, 5, 0, 0).toInstant(ZoneOffset.UTC)
-
-
-        cfg.precacheMarketData = false
-
-        val launch = GlobalScope.launch { cfg.runStrat({ ctx, _ -> OhlcTestModel(ctx) }) }
-
-        while (launch.isActive){
-            Thread.sleep(100)
+            instruments += InstrumentConfig("XG", { startTime ->
+                factoryImpl.create(fileName, startTime)
+            })
+            startDateGmt = LocalDateTime.of(2013, Month.MARCH, 8, 5, 0, 0).toInstant(ZoneOffset.UTC)
+            precacheMarketData = false
         }
+
+        cfg.runStrat{ ctx, _ -> OhlcTestModel(ctx) }
 
 
         var idx = -1
@@ -117,9 +101,9 @@ class BacktestIntegrationTest {
 
         val size: Int = modelBars.filter({ !it.interpolated }).size
 
-        println("diff " + directBars.map { it.endTime }.toSet().minus(modelBars.map { it.endTime }))
-        //FIXME
-        Assert.assertEquals("bars number", size, totalQuotesNumber - 1)
+        Assert.assertTrue("same times", directBars.map { it.endTime }.toSet().minus(modelBars.map { it.endTime }).isEmpty())
+
+        Assert.assertEquals("bars number", totalQuotesNumber - 1, size)
 
         var curTime = cfg.startDateGmt
         for (i in 0 until modelBars.size) {
@@ -137,11 +121,13 @@ class BacktestIntegrationTest {
             }
         }
 
-        Assert.assertTrue("days number", testHelper.instanceOhlc!!.startTimesGmt.size == 5)
+        Assert.assertEquals("days number", 5, testHelper.instanceOhlc!!.startTimesGmt.size)
     }
 
 
-    fun createFiles(fullFileName: Path, iterval0 : Pair<Instant,Instant>,  interval1 : Pair<Instant,Instant>, strGen: (LocalDateTime) -> String, interval: Long, writeToDisk: Boolean = false): Pair<Int, Int> {
+    fun createFiles(fullFileName: Path, iterval0: Pair<Instant, Instant>,
+                    interval1: Pair<Instant, Instant>, strGen: (LocalDateTime) -> String, interval: Long,
+                    writeToDisk: Boolean = false): Pair<Int, Int> {
 
         if (writeToDisk) {
             Files.deleteIfExists(fullFileName)
@@ -166,7 +152,7 @@ class BacktestIntegrationTest {
 
     val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy,HHmmss.SSS")
 
-    fun generateInterval(period : Pair<Instant,Instant> , stepMillis: Long, strGen: (LocalDateTime) -> String): List<String> {
+    fun generateInterval(period: Pair<Instant, Instant>, stepMillis: Long, strGen: (LocalDateTime) -> String): List<String> {
         var cnt = 0
         var cursor = period.first.atZone(zoneId).toLocalDateTime()
         val lst = ArrayList<String>()
@@ -188,6 +174,4 @@ class BacktestIntegrationTest {
         val dt = formatter.format(cursor)
         return "$dt,$open,$high,$low,$close,1000,1"
     }
-
-
 }

@@ -1,72 +1,33 @@
 package firelib.common.interval
 
 import java.time.Instant
-import java.util.*
 
 
 class IntervalServiceImpl : IntervalService {
 
-    val nodes = TreeSet<Node> { a, b->a.interval.durationMs.compareTo(b.interval.durationMs)}
+    var interval2listeners = listOf<Pair<Interval, List<(Instant) -> Unit>>>()
 
-    var rootNode : Node = Node(Interval.Min1)
-
-    override fun rootInterval (): Interval = rootNode.interval
-
-    class Node(val interval : Interval){
-        val childs = ArrayList<Node>(3)
-        val listeners = ArrayList<(Instant) -> Unit>(3)
-
-        fun onStep(ms : Long, dt : Instant) : Unit {
-            if (ms  % interval.durationMs == 0L) {
-                listeners.forEach {it(dt)}
-                if(childs.isNotEmpty())
-                    childs.forEach {it.onStep(ms,dt)}
+    override fun addListener(interval: Interval, action: (Instant) -> Unit) {
+        if(!interval2listeners.any { it.first == interval }){
+            interval2listeners += Pair(interval, emptyList())
+        }
+        interval2listeners = interval2listeners.map {
+            if (it.first == interval) {
+                Pair(it.first, it.second + action)
+            } else {
+                it
             }
         }
     }
-    override fun addListener(interval: Interval, action: (Instant)  -> Unit) {
-        addOrGetIntervalNode(interval).listeners += action
-        rebuildTree()
-    }
 
-    fun rebuildTree() {
-        nodes.forEach {it.childs.clear()}
-
-        rootNode = nodes.first()
-
-        var nodesResult = listOf(nodes.first())
-
-        nodes.stream().skip(1).forEach { nd->
-            nd.childs.clear()
-            val find = nodesResult.find { p -> depends(p.interval, nd.interval) }
-            if(find != null){
-                find.childs += nd
-            }else{
-                throw RuntimeException("no parent found!!")
+    fun onStep(dt: Instant) : List<Interval>{
+        val ret = ArrayList<Interval>(0)
+        for (i in interval2listeners) {
+            if (dt.toEpochMilli() % i.first.durationMs == 0L) {
+                i.second.forEach({ it(dt) })
+                ret += i.first
             }
-            nodesResult = arrayListOf(nd) + nodesResult
         }
-
-    }
-
-    private fun addOrGetIntervalNode(interval: Interval): Node {
-        var ret = nodes.find { n -> n.interval == interval }
-        if(ret == null) {
-            ret = Node(interval)
-            nodes += ret
-        }
-        return ret;
-    }
-
-    fun depends(parent : Interval, child : Interval) : Boolean {
-        return child.durationMs % parent.durationMs == 0L
-    }
-
-    fun removeListener(interval: Interval, action: (Instant)  -> Unit): Unit {
-        addOrGetIntervalNode(interval).listeners -= action
-    }
-
-    fun onStep(dt:Instant) {
-        rootNode.onStep(dt.toEpochMilli(),dt)
+        return ret
     }
 }

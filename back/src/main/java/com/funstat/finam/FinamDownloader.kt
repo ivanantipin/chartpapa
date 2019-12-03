@@ -2,7 +2,7 @@ package com.funstat.finam
 
 import com.funstat.domain.InstrId
 import firelib.domain.Ohlc
-import com.funstat.vantage.Source
+import firelib.common.core.Source
 import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
 import firelib.common.interval.Interval

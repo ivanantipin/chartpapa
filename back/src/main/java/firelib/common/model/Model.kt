@@ -38,8 +38,7 @@ open class Model(val context: ModelContext, val properties: Map<String, String>)
 
 
     fun makeOrderManagers(ctx: ModelContext): List<OrderManager> {
-        return ctx.instruments
-                .map { OrderManagerImpl(ctx.tradeGate, ctx.timeService, it) }
+        return ctx.tickers().map { OrderManagerImpl(ctx.tradeGate, ctx.timeService, it) }
     }
 
 }

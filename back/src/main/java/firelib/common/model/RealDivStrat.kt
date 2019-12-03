@@ -31,7 +31,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
         val tss = enableSeries(Interval.Min10)
 
-        context.instruments.forEachIndexed({ idx, instrument ->
+        context.tickers().forEachIndexed({ idx, instrument ->
             val divs = divMap[instrument]!!
             val ret = tss[idx]
 

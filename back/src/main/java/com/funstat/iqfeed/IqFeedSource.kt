@@ -1,7 +1,7 @@
 package com.funstat.iqfeed
 
 import com.funstat.domain.InstrId
-import com.funstat.vantage.Source
+import firelib.common.core.Source
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
 import firelib.domain.Ohlc

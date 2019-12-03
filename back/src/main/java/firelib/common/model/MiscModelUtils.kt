@@ -20,7 +20,7 @@ fun Model.enableFactor(name: String, fact: (Int) -> Double) {
 fun Model.enableSeries(interval : Interval,
                        historyLen : Int = 100, interpolated: Boolean = true) : List<TimeSeries<Ohlc>>{
     val context = this.modelContext()
-    val ret = context.instruments.mapIndexed { idx, _ ->
+    val ret = context.tickers().mapIndexed { idx, _ ->
         context.mdDistributor.getOrCreateTs(idx, interval, historyLen)
 
     }
@@ -32,14 +32,14 @@ fun Model.enableSeries(interval : Interval,
 }
 
 fun Model.buyIfNoPosition(idx : Int, money : Long){
-    if(orderManagers()[idx].position() <= 0){
+    if(orderManagers()[idx].position() <= 0 && !orderManagers()[idx].hasPendingState()){
         val mm = money/this.context.mdDistributor.price(idx).close
         orderManagers()[idx].makePositionEqualsTo(mm.toInt())
     }
 }
 
 fun Model.sellIfNoPosition(idx : Int, money : Long){
-    if(orderManagers()[idx].position() >= 0){
+    if(orderManagers()[idx].position() >= 0 && !orderManagers()[idx].hasPendingState()){
         val mm = money/this.context.mdDistributor.price(idx).close
         orderManagers()[idx].makePositionEqualsTo(-mm.toInt())
     }

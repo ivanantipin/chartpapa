@@ -25,7 +25,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
     init {
 
-        val quantiles = context.instruments.map {
+        val quantiles = context.tickers().map {
             Quantiles<Double>(100);
         }
 
@@ -35,7 +35,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
         // periods of previos price as factors
         val factors = setOf(3, 5, 8, 13).associateBy({ it }, {
-            context.instruments.map {
+            context.tickers().map {
                 Quantiles<Double>(200);
             }
         })

@@ -18,8 +18,6 @@ class VariatorTest {
 
         assertEquals(6, variator.combinations())
 
-
-
         var set = mutableSetOf(
                 Pair(0, 0),
                 Pair(0, 1),

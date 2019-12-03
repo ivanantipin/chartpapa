@@ -9,7 +9,7 @@ import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
 import firelib.common.reader.MarketDataReaderSql
-import firelib.common.report.GenericDumper
+import firelib.common.report.GeGeWriter
 import firelib.common.report.SqlUtils
 import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Paths
@@ -71,12 +71,12 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
 
     init {
         val divMap = DivHelper.getDivs()
-        val divdivs = context.instruments.map { divMap[it]!!.sortedBy { it.lastDayWithDivs } }
-        val nextIdxes = context.instruments.map { -1 }.toIntArray()
+        val divdivs = context.tickers().map { divMap[it]!!.sortedBy { it.lastDayWithDivs } }
+        val nextIdxes = context.tickers().map { -1 }.toIntArray()
 
-        val dumper = GenericDumper<Stat>("divstat", Paths.get(context.config.reportTargetPath).resolve("stat.db"), Stat::class)
+        val dumper = GeGeWriter<Stat>("divstat", Paths.get(context.config.reportTargetPath).resolve("stat.db"), Stat::class)
 
-        context.instruments.forEachIndexed({ idx, instrument ->
+        context.tickers().forEachIndexed({ idx, instrument ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Day, 100)
 
             ret.preRollSubscribe {

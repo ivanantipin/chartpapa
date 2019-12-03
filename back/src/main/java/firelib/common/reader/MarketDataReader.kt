@@ -1,5 +1,6 @@
 package firelib.common.reader
 
+import firelib.domain.Ohlc
 import firelib.domain.Timed
 import java.time.Instant
 
@@ -19,3 +20,13 @@ interface MarketDataReader<out T : Timed> : AutoCloseable{
     fun endTime() : Instant
 }
 
+fun MarketDataReader<Ohlc>.pollOhlcsTill(time: Instant): Sequence<Ohlc> {
+    return sequence({
+        while (current() != null && current().time() <= time) {
+            yield(current())
+            if (!read()) {
+                break
+            }
+        }
+    })
+}

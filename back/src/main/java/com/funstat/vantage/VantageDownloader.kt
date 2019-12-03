@@ -2,6 +2,7 @@ package com.funstat.vantage
 
 import com.funstat.domain.InstrId
 import com.funstat.store.MdDao
+import firelib.common.core.Source
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import org.springframework.web.client.RestTemplate

@@ -9,7 +9,7 @@ import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.report.GenericDumper
+import firelib.common.report.GeGeWriter
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 import java.nio.file.Paths
@@ -40,12 +40,12 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
     init {
         val daytss = enableSeries(Interval.Day, interpolated = false)
 
-        val quantiles = context.instruments.map {
+        val quantiles = context.tickers().map {
             Quantiles<Double>(1000);
         }
 
-        val dumper = GenericDumper("highvolume", Paths.get(context.config.reportTargetPath).resolve("stat.db"), HVStat::class)
 
+        val dumper = GeGeWriter("highvolume", Paths.get(context.config.reportTargetPath).resolve("stat.db"), HVStat::class)
         daytss.forEachIndexed{ idx, it ->
             it.preRollSubscribe {
                 if (it.count() > 20) {
@@ -61,7 +61,7 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
                                 makeRet(it, 3, 8),
                                 makeRet(it, 3, 11),
                                 makeRet(it, 3, 18),
-                                context.instruments[idx]
+                                context.tickers()[idx]
                         )
                         dumper.write(listOf(hvStat))
                     }

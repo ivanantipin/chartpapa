@@ -8,7 +8,7 @@ object BacktestPeriodCalc {
 
     fun calcStartDate(cfg: ModelBacktestConfig): Instant {
 
-        val readers = cfg.instruments.map {it.fact(cfg.startDateGmt)}
+        val readers = cfg.instruments.map {it.factory(cfg.startDateGmt)}
 
         if(cfg.verbose){
             cfg.instruments.forEachIndexed({idx,cfg->

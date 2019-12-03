@@ -22,15 +22,13 @@ class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) 
     }.toTypedArray()
 
 
-    fun updateBidAsks(prices: List<Pair<Instant,Double>>) {
-
-        for (i in 0 until marketSubs.size) {
-            val (bid,ask) = cfg.adjustSpread(prices[i].second,prices[i].second)
-            limitBooks[i].updateBidAsk(bid, ask,prices[i].first)
-            stopBooks[i].updateBidAsk(bid, ask,prices[i].first)
-            marketSubs[i].updateBidAsk(bid, ask,prices[i].first)
-        }
+    fun updateBidAsks(i : Int, time : Instant, price : Double) {
+        val (bid,ask) = cfg.adjustSpread(price,price)
+        limitBooks[i].updateBidAsk(bid, ask,time)
+        stopBooks[i].updateBidAsk(bid, ask,time)
+        marketSubs[i].updateBidAsk(bid, ask,time)
     }
+
 
     fun getSecIdx(sec: String): Int {
         return cfg.instruments.indexOfFirst { it.ticker == sec }

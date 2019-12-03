@@ -1,9 +1,8 @@
 package firelib.common.report.dao
 
-import firelib.common.Order
+import firelib.common.report.ColDef
 import firelib.common.report.SqlUtils
 import firelib.common.report.getHeader
-import firelib.common.report.orderColsDefs
 import firelib.common.report.toMapForSqlUpdate
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -11,21 +10,16 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import java.nio.file.Path
 
-class StreamOrderWriter(val path: Path) {
+class ColDefDao<T>(val path: Path, val colDefs : Array<ColDef<T, out Any>>, val tableName : String) {
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
     val tman = DataSourceTransactionManager(ds)
-    private val stmt: String
-
+    private val stmt = SqlUtils.makeSqlStatementFromHeader(tableName, getHeader(colDefs))
     init {
-        val header = getHeader(orderColsDefs)
-        JdbcTemplate(ds).execute(SqlUtils.makeCreateSqlStmtFromHeader("orders", header))
-        stmt = SqlUtils.makeSqlStatementFromHeader("orders", header)
+        JdbcTemplate(ds).execute(SqlUtils.makeCreateSqlStmtFromHeader(tableName, getHeader(colDefs)))
     }
-
-    fun insertOrders(orders: List<Order>) {
+    fun upsert(entities: List<T>) {
         TransactionTemplate(tman).execute{
-            val cases = orders.map { toMapForSqlUpdate(it, orderColsDefs) }.toTypedArray()
-            NamedParameterJdbcTemplate(ds).batchUpdate(stmt, cases)
+            NamedParameterJdbcTemplate(ds).batchUpdate(stmt, entities.map { toMapForSqlUpdate(it, colDefs) }.toTypedArray())
         }
     }
 }

@@ -4,6 +4,7 @@ import com.funstat.finam.FinamDownloader
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.instruments
 import firelib.common.config.runStrat
+import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.misc.atUtc
@@ -24,10 +25,10 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
     val tenMins = enableSeries(interval = Interval.Min10,interpolated = false)
 
-    val quantiles = context.instruments.map {
+    val quantiles = context.tickers().map {
         Quantiles<Double>(1000);
     }
-    val volumeQuantiles = context.instruments.map {
+    val volumeQuantiles = context.tickers().map {
         Quantiles<Double>(100);
     }
 
@@ -83,27 +84,32 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         closePositionByTimeout(periods = properties["hold_hours"]!!.toInt(), interval = Interval.Min60, afterTime = LocalTime.of(10,5))
     }
 
+
+
     companion object {
-        suspend fun runDefault(ctxListener : (Model)->Unit, waitOnEnd : Boolean = false , divAdjusted: Boolean = false){
-            val conf = ModelBacktestConfig().apply {
+
+        val modelFactory : ModelFactory = { context, props ->
+            VolatilityBreak(context, props)
+        }
+
+        fun modelConfig (waitOnEnd : Boolean = false , divAdjusted: Boolean = false) : ModelBacktestConfig{
+            return ModelBacktestConfig().apply {
                 reportTargetPath = "/home/ivan/projects/chartpapa/market_research/vol_break_report"
                 param("hold_hours", 30)
-                instruments = instruments(DivHelper.getDivs().keys.toList(),
+                instruments = instruments(listOf("sber"),
                         source = FinamDownloader.SOURCE,
                         divAdjusted = divAdjusted,
                         waitOnEnd = waitOnEnd)
                 adjustSpread = makeSpreadAdjuster(0.0005)
             }
+        }
 
-            conf.runStrat ({ context, props ->
-                VolatilityBreak(context, props)
-            }, ctxListener)
+        fun runDefault(ctxListener : (Model)->Unit, waitOnEnd : Boolean = false , divAdjusted: Boolean = false){
+            val conf = modelConfig(waitOnEnd,divAdjusted)
+            conf.runStrat (modelFactory, ctxListener)
         }
     }
 }
-
-
-
 
 suspend fun main() {
     VolatilityBreak.runDefault ({  }, false)

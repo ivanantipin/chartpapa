@@ -8,7 +8,7 @@ import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.report.GenericDumper
+import firelib.common.report.GeGeWriter
 import firelib.domain.ret
 
 
@@ -27,9 +27,9 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
     init {
 
 
-        val dayRolled = context.instruments.map { false }.toMutableList()
+        val dayRolled = context.tickers().map { false }.toMutableList()
 
-        val tssDay = context.instruments.mapIndexed { idx, tick ->
+        val tssDay = context.tickers().mapIndexed { idx, tick ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Day, 10)
             ret.preRollSubscribe {
                 if (!ret[0].interpolated) {
@@ -39,7 +39,7 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
             ret
         }
 
-        context.instruments.forEachIndexed { idx, tick ->
+        context.tickers().forEachIndexed { idx, tick ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Min60, 1000)
             ret.preRollSubscribe {
                 if (dayRolled[idx] && it[5].interpolated && !it[4].interpolated) {
@@ -64,7 +64,7 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
 
     override fun onBacktestEnd() {
         super.onBacktestEnd()
-        val writer = GenericDumper<GapStat>("gaps", context.config.getReportDbFile(), GapStat::class)
+        val writer = GeGeWriter<GapStat>("gaps", context.config.getReportDbFile(), GapStat::class)
         writer.write(stat)
     }
 

@@ -1,4 +1,4 @@
-package com.funstat.vantage;
+package firelib.common.core;
 
 import firelib.domain.Ohlc;
 import com.funstat.domain.InstrId;

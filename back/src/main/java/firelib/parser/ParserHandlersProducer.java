@@ -15,7 +15,7 @@ public class ParserHandlersProducer {
     private final MarketDataFormatMetadata settings;
 
     public boolean isOhlc(){
-        return new ArrayList<String>(Arrays.asList(settings.columnsMetadata)).contains("O");
+        return new ArrayList<>(Arrays.asList(settings.columnsMetadata)).contains("O");
     }
 
 

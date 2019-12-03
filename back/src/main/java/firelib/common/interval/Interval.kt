@@ -47,3 +47,4 @@ enum class Interval(val durationMs: Long, val offset : Long = (1440 * 60 * 1000)
 
 }
 
+

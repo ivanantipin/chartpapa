@@ -5,7 +5,7 @@ import firelib.common.config.ModelBacktestConfig
 import firelib.common.core.ModelOutput
 import firelib.common.misc.JsonHelper
 import firelib.common.misc.toTradingCases
-import firelib.common.report.dao.StreamOrderWriter
+import firelib.common.report.dao.ColDefDao
 import firelib.common.report.dao.StreamTradeCaseWriter
 import org.apache.commons.io.FileUtils
 import java.nio.file.*
@@ -48,7 +48,7 @@ object ReportWriter{
             })
         }
 
-        StreamOrderWriter(cfg.getReportDbFile()).insertOrders(model.orderStates.filter { it.status == OrderStatus.New }.map { it.order })
+        ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates.filter { it.status == OrderStatus.New }.map { it.order })
     }
 
     fun copyPythonFiles(cfg: ModelBacktestConfig) {

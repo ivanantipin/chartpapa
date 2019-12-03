@@ -7,7 +7,7 @@ import kotlin.collections.ArrayList
 
 class StreamTradeCaseGenerator {
 
-    val posTrades = Stack<Trade>()
+    val posTrades = LinkedList<Trade>()
 
     fun getPosition() : List<Trade>{
         return posTrades.toList()
@@ -27,17 +27,17 @@ class StreamTradeCaseGenerator {
 
     }
 
-    fun makeCaseWithPositionTrades(posTrades: Stack<Trade>, tradingCases: ArrayList<Pair<Trade, Trade>>, trade: Trade) {
+    fun makeCaseWithPositionTrades(posTrades: LinkedList<Trade>, tradingCases: ArrayList<Pair<Trade, Trade>>, trade: Trade) {
         if(posTrades.isEmpty() || posTrades.peek().side() == trade.side()){
-            posTrades.push(trade)
+            posTrades.add(trade)
             return
         }
         var residualAmt = trade.qty
-        val lastPositionTrade = posTrades.pop()
+        val lastPositionTrade = posTrades.poll()
         if (lastPositionTrade.qty >= residualAmt) {
             val tradeSplit = lastPositionTrade.split(residualAmt)
             tradingCases += Pair(tradeSplit.first, trade.split(residualAmt).first)
-            if (tradeSplit.second.qty != 0) posTrades.push(tradeSplit.second)
+            if (tradeSplit.second.qty != 0) posTrades.add(tradeSplit.second)
         }else{
             residualAmt -= lastPositionTrade.qty
             val tradeSplit = trade.split(lastPositionTrade.qty)

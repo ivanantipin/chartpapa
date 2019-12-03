@@ -1,6 +1,7 @@
 package firelib.common.report
 
 import firelib.common.report.SqlTypeMapper.mapType
+import java.sql.Timestamp
 import java.time.Instant
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.reflect
@@ -28,6 +29,50 @@ object SqlTypeMapper{
 
         throw RuntimeException("not supported type $retType")
     }
+
+    fun mapMapper(retType: KType): (Any)->(Any) {
+        if (retType.classifier == String::class) {
+            return {it}
+        }
+        if (retType.classifier == Double::class) {
+            return {it}
+        }
+        if (retType.classifier == Int::class) {
+            return {it}
+        }
+        if (retType.classifier == Long::class) {
+            return { (it as Number).toLong() }
+        }
+
+        if (retType.classifier == Instant::class) {
+            return {Instant.ofEpochMilli ((it as Int).toLong()*1000)}
+        }
+
+        throw RuntimeException("not supported type $retType")
+    }
+
+    fun mapMapperTo(retType: KType): (Any)->(Any) {
+        if (retType.classifier == String::class) {
+            return {it}
+        }
+        if (retType.classifier == Double::class) {
+            return {it}
+        }
+        if (retType.classifier == Int::class) {
+            return {it}
+        }
+        if (retType.classifier == Long::class) {
+            return { it  }
+        }
+
+        if (retType.classifier == Instant::class) {
+            return {(it as Instant).toEpochMilli()/1000}
+        }
+
+        throw RuntimeException("not supported type $retType")
+    }
+
+
 
 
 }

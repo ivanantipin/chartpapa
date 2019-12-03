@@ -32,7 +32,7 @@ val tradeCaseColDefs: Array<ColDef<Pair<Trade, Trade>, out Any>> = arrayOf(
 )
 
 
-class StreamTradeCaseWriter(val path: Path) {
+class StreamTradeCaseWriter(val path: Path, val tableName : String = "trades") {
 
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
     var stmt: String? = null
@@ -41,8 +41,8 @@ class StreamTradeCaseWriter(val path: Path) {
 
     fun initTableIfNeeded(trade: Trade) {
         val header = getHeader(tradeCaseColDefs) + trade.tradeStat.factors.mapValues { "DOUBLE PRECISION" }
-        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader("trades", header))
-        this.stmt = makeSqlStatementFromHeader("trades", header)
+        JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader(tableName, header))
+        this.stmt = makeSqlStatementFromHeader(tableName, header)
     }
 
     fun insertTrades(trades: List<Pair<Trade, Trade>>) {
@@ -54,3 +54,4 @@ class StreamTradeCaseWriter(val path: Path) {
         })
     }
 }
+

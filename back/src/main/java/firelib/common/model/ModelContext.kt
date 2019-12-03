@@ -8,5 +8,9 @@ import firelib.common.tradegate.TradeGate
 class ModelContext(val timeService: TimeService,
                    val mdDistributor: MarketDataDistributor,
                    val tradeGate: TradeGate,
-                   val instruments: List<String>,
                    val config: ModelBacktestConfig)
+
+
+fun ModelContext.tickers(): List<String> {
+    return this.config.instruments.map { it.ticker }
+}

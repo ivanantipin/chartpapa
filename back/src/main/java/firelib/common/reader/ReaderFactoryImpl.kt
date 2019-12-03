@@ -37,7 +37,7 @@ class ReaderFactoryImpl(val dsPath : String, val precache: Boolean = false){
     }
 
     fun create(t: String, startDtGmt: Instant): MarketDataReader<Ohlc> {
-        val parser = createReader(t, {Ohlc() }, ohlcDescr)
+        val parser = createReader(t, {Ohlc(interpolated = false) }, ohlcDescr)
         assert(parser.seek(startDtGmt), { "failed to find start date $startDtGmt" })
         return parser
     }

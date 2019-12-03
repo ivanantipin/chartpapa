@@ -7,6 +7,4 @@ import java.time.Instant
  */
 interface IntervalService  {
     fun addListener(interval: Interval, action: (Instant) -> Unit)
-
-    fun rootInterval (): Interval
 }
