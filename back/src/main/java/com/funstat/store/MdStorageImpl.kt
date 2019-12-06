@@ -8,6 +8,8 @@ import com.funstat.finam.FinamDownloader
 import com.funstat.iqfeed.IntervalTransformer
 import com.funstat.iqfeed.IqFeedSource
 import com.funstat.tcs.SourceEmulator
+import com.funstat.tcs.TcsSource
+import com.funstat.tcs.getContext
 import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
 import firelib.common.interval.Interval
@@ -36,6 +38,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
     val sources = mapOf(
             FinamDownloader.SOURCE to FinamDownloader(),
+            "TCS" to TcsSource(getContext()),
             SourceEmulator.SOURCE to SourceEmulator(),
             VantageDownloader.SOURCE to VantageDownloader(),
             IqFeedSource.SOURCE to IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))
@@ -45,7 +48,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
 
     fun getSourceDefaultInterval(source : String) : Interval{
-        return sources[source]!!.defaultInterval
+        return sources[source]!!.getDefaultInterval()
     }
 
     fun getDao(source: String, interval: String): MdDao {

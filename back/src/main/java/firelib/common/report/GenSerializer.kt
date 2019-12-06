@@ -1,6 +1,7 @@
 package firelib.common.report
 
 import firelib.common.report.SqlTypeMapper.mapType
+import java.math.BigDecimal
 import java.sql.Timestamp
 import java.time.Instant
 import kotlin.reflect.KType
@@ -23,6 +24,11 @@ object SqlTypeMapper{
             return "INT"
         }
 
+        if (retType.classifier == BigDecimal::class) {
+            return "DOUBLE PRECISION"
+        }
+
+
         if (retType.classifier == Instant::class) {
             return "TIMESTAMPTZ"
         }
@@ -30,7 +36,7 @@ object SqlTypeMapper{
         throw RuntimeException("not supported type $retType")
     }
 
-    fun mapMapper(retType: KType): (Any)->(Any) {
+    fun fromDb(retType: KType): (Any)->(Any) {
         if (retType.classifier == String::class) {
             return {it}
         }
@@ -44,6 +50,10 @@ object SqlTypeMapper{
             return { (it as Number).toLong() }
         }
 
+        if (retType.classifier == BigDecimal::class) {
+            return { (it as Number).toDouble().toBigDecimal() }
+        }
+
         if (retType.classifier == Instant::class) {
             return {Instant.ofEpochMilli ((it as Int).toLong()*1000)}
         }
@@ -51,13 +61,17 @@ object SqlTypeMapper{
         throw RuntimeException("not supported type $retType")
     }
 
-    fun mapMapperTo(retType: KType): (Any)->(Any) {
+    fun toDb(retType: KType): (Any)->(Any) {
         if (retType.classifier == String::class) {
             return {it}
         }
         if (retType.classifier == Double::class) {
             return {it}
         }
+        if (retType.classifier == BigDecimal::class) {
+            return {(it as BigDecimal).toDouble()}
+        }
+
         if (retType.classifier == Int::class) {
             return {it}
         }

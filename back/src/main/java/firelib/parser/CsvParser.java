@@ -208,4 +208,9 @@ public class CsvParser<T extends Timed> implements MarketDataReader<T> {
 
         }
     }
+
+    @Override
+    public boolean isReadable() {
+        return true;
+    }
 }

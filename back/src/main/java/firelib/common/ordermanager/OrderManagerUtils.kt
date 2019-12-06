@@ -4,12 +4,15 @@ import firelib.common.Order
 import firelib.domain.OrderType
 import firelib.domain.Side
 
-fun OrderManager.makePositionEqualsTo(pos: Int): Unit {
+fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) {
     if(this.hasPendingState()){
         return
     }
-    val diff = getOrderForDiff(this.position(), pos)
+    var diff = getOrderForDiff(this.position(), pos)
     if(diff != null){
+        if(price != null){
+            diff = diff.copy(price = if(diff.side == Side.Buy)  price*1.3 else price*0.97)
+        }
         this.submitOrders(listOf(diff))
     }
 }

@@ -16,7 +16,6 @@ class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) 
         while (!isInterrupted){
             try {
                 buffer += queue.poll(100, TimeUnit.DAYS)
-                println("polled ${buffer}")
                 queue.drainTo(buffer)
                 if(buffer.isNotEmpty()){
                     println("processing ${buffer}")

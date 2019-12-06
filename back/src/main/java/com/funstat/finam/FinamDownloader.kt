@@ -197,7 +197,7 @@ class FinamDownloader : AutoCloseable, Source {
         return parseWithPattern(str, pattern)
     }
 
-    val intervalDurationSeconds = defaultInterval.duration.toSeconds()
+    val intervalDurationSeconds = getDefaultInterval().duration.toSeconds()
 
     fun parseWithPattern(str: String, pattern: DateTimeFormatter): Ohlc? {
         try {

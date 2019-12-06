@@ -188,6 +188,11 @@ public class UltraFastParser<T extends Timed> implements MarketDataReader<T> {
 
     }
 
+    @Override
+    public boolean isReadable() {
+        return true;
+    }
+
 
     //
     // Parses given symbol file name and returns <path>, <symbol> and <ext> components.

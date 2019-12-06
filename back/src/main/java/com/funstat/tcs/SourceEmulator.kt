@@ -27,7 +27,7 @@ class SourceEmulator : Source {
     }
 
 
-    override fun load(instrId: InstrId?): Sequence<Ohlc> {
+    override fun load(instrId: InstrId): Sequence<Ohlc> {
         return sequence({
             val first = Interval.Sec1.ceilTime(Instant.now()).minusSeconds(9)
 
@@ -49,7 +49,7 @@ class SourceEmulator : Source {
         })
     }
 
-    override fun load(instrId: InstrId?, dateTime: LocalDateTime?): Sequence<Ohlc> {
+    override fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc> {
         return load(instrId)
     }
 

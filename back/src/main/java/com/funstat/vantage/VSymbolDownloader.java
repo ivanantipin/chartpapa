@@ -4,6 +4,7 @@ import com.funstat.domain.InstrId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +29,9 @@ public class VSymbolDownloader {
                 }
                 List<InstrId> rows = Arrays.asList(entity.getBody().split("\r\n")).stream().skip(1).map(oh -> {
                     String[] data = oh.split(",");
-                    return new InstrId(data[0], data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0], VantageDownloader.Companion.getSOURCE());
+                    return new InstrId(data[0],
+                            data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0],
+                            VantageDownloader.Companion.getSOURCE(), BigDecimal.ONE, 1);
                 }).collect(Collectors.toList());
                 if(rows.size() == 0){
                     System.out.println(entity.getBody());

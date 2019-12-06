@@ -128,11 +128,17 @@ fun waitUntil(timestamp: Instant) {
 
 
 fun LinkedBlockingQueue<Ohlc>.pollOhlcsTill(time: Instant): Sequence<Ohlc> {
-    return sequence({
-        while (this@pollOhlcsTill.peek() != null && this@pollOhlcsTill.peek().time() <= time) {
-            yield(this@pollOhlcsTill.poll()!!)
-        }
-    })
+
+    println("time to poll ${time}")
+
+    val lst = mutableListOf<Ohlc>()
+
+    while (this@pollOhlcsTill.peek() != null && this@pollOhlcsTill.peek().time() <= time) {
+        lst.add(this@pollOhlcsTill.poll()!!)
+    }
+
+    return lst.groupBy { it.endTime }.values.map { it.last() }.asSequence()
+
 }
 
 

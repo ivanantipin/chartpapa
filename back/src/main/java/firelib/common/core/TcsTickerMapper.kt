@@ -5,8 +5,13 @@ import com.funstat.tcs.TcsSource
 import com.funstat.tcs.getContext
 
 class TcsTickerMapper {
+
+    val context by lazy {
+        getContext()
+    }
+
     val source by lazy {
-        TcsSource(getContext())
+        TcsSource(context)
     }
 
     val code2instr by lazy {

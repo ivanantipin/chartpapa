@@ -33,7 +33,11 @@ object PositionCloser {
                         && cnt > periods
                         && (afterTime == null || afterTime < context.timeService.currentTimeUtc().toLocalTime())
                 ) {
-                    oms.makePositionEqualsTo(0)
+                    val price = md.price(idx)
+
+
+
+                    oms.makePositionEqualsTo(0, price.close)
                 }
             })
 

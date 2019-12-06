@@ -25,6 +25,10 @@ class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Ins
         return ohlcs[cind]
     }
 
+    override fun isReadable(): Boolean {
+        return cind < ohlcs.size
+    }
+
     override fun read(): Boolean {
         if(++cind >= ohlcs.size){
             if(waitOnEnd){

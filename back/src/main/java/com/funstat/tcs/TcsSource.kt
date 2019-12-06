@@ -2,22 +2,16 @@ package com.funstat.tcs
 
 import com.funstat.domain.InstrId
 import firelib.common.core.Source
-import firelib.common.Order
 import firelib.common.core.TcsTickerMapper
 import firelib.common.interval.Interval
 import firelib.common.misc.moscowZoneId
-import firelib.common.tradegate.TradeGate
 import firelib.domain.Ohlc
-import firelib.domain.OrderState
-import firelib.domain.Side
 import ru.tinkoff.invest.openapi.data.*
 import ru.tinkoff.invest.openapi.wrapper.Context
 import ru.tinkoff.invest.openapi.wrapper.impl.ConnectionFactory
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Flow
 import java.util.logging.Logger
 
@@ -27,38 +21,51 @@ fun getContext(): Context {
     return connect.get().context()
 }
 
-class TcsSource(val context: Context) : Source {
+class TcsSource(val context: Context) : Source, Flow.Subscriber<StreamingEvent> {
 
     override fun symbols(): List<InstrId> {
+
         return context.marketStocks.thenApply {
             it.instruments.map { inst ->
-                InstrId(id = inst.figi, source = "TCS", name = inst.name, code = inst.ticker)
+                InstrId(id = inst.figi, source = "TCS", name = inst.name, code = inst.ticker, minPriceIncr = inst.minPriceIncrement, lot = inst.lot)
             }
         }.join()
+    }
+
+    init {
+        context.subscribe(this)
     }
 
     override fun load(instrId: InstrId): Sequence<Ohlc> {
         return load(instrId, LocalDateTime.now().minusDays(300))
     }
 
-    override fun load(instrId: InstrId, dateTime: LocalDateTime?): Sequence<Ohlc> {
+    override fun load(instrId: InstrId, dateTimeIn: LocalDateTime): Sequence<Ohlc> {
 
-        var dt = OffsetDateTime.of(dateTime, ZoneOffset.UTC)
+        var dateTime = if(dateTimeIn < LocalDateTime.now().minusDays(300)){
+            LocalDateTime.now().minusDays(300)
+        }else{
+            dateTimeIn
+        }
+
+
+        var dt = OffsetDateTime.of(dateTime, ZoneOffset.of("+03:00"))
+        println("loading inst ${instrId} from ${dt}")
         return sequence({
 
             while (dt < OffsetDateTime.now()) {
                 val candles = context.getMarketCandles(instrId.id,
                         dt, dt.plusDays(1), CandleInterval.ONE_MIN).join()
+
                 yieldAll(candles.candles.map {
                     Ohlc(
+                            endTime = it.time.toInstant() + Interval.Min1.duration,
                             open = it.o.toDouble(),
                             high = it.h.toDouble(),
                             low = it.l.toDouble(),
                             close = it.c.toDouble(),
                             volume = it.v.toLong(),
-                            endTime = it.time.toInstant(),
                             interpolated = false
-
                     )
                 })
                 dt = dt.plusDays(1)
@@ -73,68 +80,61 @@ class TcsSource(val context: Context) : Source {
     }
 
     override fun getDefaultInterval(): Interval {
-        return Interval.Day
-    }
-}
-
-class TcsGate(val ctx: Context, val executor: ExecutorService) : TradeGate, Flow.Subscriber<StreamingEvent> {
-
-    private var instrumentsMap: Map<String, InstrId>
-    var subscription: Flow.Subscription? = null
-
-
-    init {
-        instrumentsMap = TcsSource(ctx).symbols().associateBy { it.code }
-        subbb()
-        println("subscribed")
+        return Interval.Min1
     }
 
-    fun subbb() {
-        ctx.subscribe(this)
-    }
 
+    var listener : ((Ohlc)->Unit) ? = null
+
+    override fun listen(instrId: InstrId, callback: (Ohlc) -> Unit) {
+        listener = callback
+        context.sendStreamingRequest(StreamingRequest.subscribeCandle(instrId.id, CandleInterval.ONE_MIN)).get()
+    }
 
     override fun onComplete() {
-        println("completed")
+        println("subscription complete")
     }
 
-    override fun onSubscribe(subscription: Flow.Subscription) {
-        this.subscription = subscription
-        println("on subs")
+    override fun onSubscribe(p0: Flow.Subscription) {
+        println("subscribed")
+        p0.request(100000000L)
     }
 
     override fun onNext(event: StreamingEvent) {
-        println("on next ${event}")
+        if(event is StreamingEvent.Candle){
+            listener?.invoke(convertCaca(event))
+        }
+    }
+
+    private fun convertCaca(caca: StreamingEvent.Candle) : Ohlc{
+        return Ohlc(endTime = caca.dateTime.toInstant() + Interval.Min1.duration,
+                open = caca.openPrice.toDouble(),
+                high = caca.highestPrice.toDouble(),
+                low = caca.lowestPrice.toDouble(),
+                close = caca.closingPrice.toDouble(),
+                volume = caca.tradingValue.toLong(),
+                interpolated = false
+        )
     }
 
     override fun onError(p0: Throwable?) {
-        println("error ${p0}")
+        println("errorr ${p0}")
     }
+}
 
-    override fun cancelOrder(order: Order) {
-        ctx.cancelOrder(order.id)
+fun main(){
+    val mapper = TcsTickerMapper()
+    val instr = mapper.map("sber")
+
+    //mapper.source.listen(instr!!, {println(it)})
+
+
+    var cnt = 0
+    mapper.source.load(instr!!).forEach {
+        cnt++
+        println(cnt)
     }
+    println(cnt)
 
-    override fun sendOrder(order: Order) {
-        val opType = if (order.side == Side.Buy) OperationType.Buy else OperationType.Sell
-
-        val instr = instrumentsMap[order.security]!!
-
-        val future = ctx.placeLimitOrder(LimitOrder(instr.id, order.qty, opType, order.price.toBigDecimal()))
-
-        future.thenAccept({
-            executor.run {
-                when (it.status) {
-                    OrderStatus.Rejected -> order.orderSubscription.publish(OrderState(order,
-                            firelib.common.OrderStatus.Cancelled, Instant.now(), it.rejectReason))
-                    OrderStatus.New -> order.orderSubscription.publish(OrderState(order,
-                            firelib.common.OrderStatus.Accepted, Instant.now()))
-                }
-                println("order status is ${it}")
-            }
-        }).exceptionally {
-            println(it)
-            null
-        }
-    }
+    Thread.sleep(1000000)
 }

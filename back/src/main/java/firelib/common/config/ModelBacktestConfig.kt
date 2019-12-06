@@ -30,7 +30,7 @@ class ModelBacktestConfig (){
 
     var endDate: Instant = Instant.now()
 
-    var rootInterval = Interval.Min5
+    var rootInterval = Interval.Min1
 
 
     fun endDate(ed : LocalDate){

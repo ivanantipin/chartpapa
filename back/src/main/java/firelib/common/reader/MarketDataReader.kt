@@ -18,11 +18,15 @@ interface MarketDataReader<out T : Timed> : AutoCloseable{
     fun startTime() : Instant
 
     fun endTime() : Instant
+
+    fun isReadable() : Boolean{
+        return true
+    }
 }
 
 fun MarketDataReader<Ohlc>.pollOhlcsTill(time: Instant): Sequence<Ohlc> {
     return sequence({
-        while (current() != null && current().time() <= time) {
+        while (isReadable() && current().time() <= time) {
             yield(current())
             if (!read()) {
                 break

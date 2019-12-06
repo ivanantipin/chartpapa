@@ -28,11 +28,11 @@ class GeGeWriter<T : Any>(val name: String, val path: Path, val type: KClass<T>,
 
 
         mappers = type.memberProperties.associateBy({ it.name }, {
-            SqlTypeMapper.mapMapper(it.returnType)
+            SqlTypeMapper.fromDb(it.returnType)
         })
 
         mappersTo = type.memberProperties.associateBy({ it.name }, {
-            SqlTypeMapper.mapMapperTo(it.returnType)
+            SqlTypeMapper.toDb(it.returnType)
         })
 
         JdbcTemplate(ds).execute(SqlUtils.makeCreateSqlStmtFromHeader(name, header, pk))

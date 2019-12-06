@@ -15,4 +15,5 @@ interface TradeGate {
      * order cancel
      */
     fun cancelOrder(order: Order)
+
 }
