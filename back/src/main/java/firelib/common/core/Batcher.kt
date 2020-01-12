@@ -6,6 +6,10 @@ import java.util.concurrent.TimeUnit
 class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) : Thread(threadName) {
     val queue = LinkedBlockingQueue<T>()
 
+    init {
+        isDaemon = true
+    }
+
 
     fun add(t : T){
         queue.add(t)

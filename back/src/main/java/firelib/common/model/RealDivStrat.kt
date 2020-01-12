@@ -1,5 +1,6 @@
 package firelib.common.model
 
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.instruments
@@ -110,14 +111,11 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
     }
 }
 
-suspend fun main() {
+fun main() {
 
-    val conf = ModelBacktestConfig().apply {
-        reportTargetPath = "./report/divsStrats"
-        instruments(DivHelper.getDivs().keys, FinamDownloader.SOURCE)
+    val conf = ModelBacktestConfig(RealDivModel::class).apply {
+        instruments(DivHelper.getDivs().keys.map { InstrId.dummyInstrument(it) }, FinamDownloader.SOURCE)
     }
 
-    conf.runStrat { cfg, fac ->
-        RealDivModel(cfg, fac)
-    }
+    conf.runStrat()
 }

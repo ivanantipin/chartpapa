@@ -25,7 +25,7 @@ class GateEmulator(val executor: ExecutorService) : TradeGate {
 
             neworkExecutorService.schedule({
                 executor.execute({
-                    order.tradeSubscription.publish(Trade(qty = order.qty,
+                    order.tradeSubscription.publish(Trade(qty = order.qtyLots,
                             price = order.price, order = order,
                             dtGmt = Instant.now(),
                             priceTime = Instant.now()

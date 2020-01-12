@@ -10,5 +10,5 @@ val orderColsDefs: Array<ColDef<Order, out Any>> = arrayOf(
         makeMetric("BuySell", { if (it.side == Side.Buy) "1" else "-1" }),
         makeMetric("EntryDate", { it.placementTime }),
         makeMetric("Price", { it.price }),
-        makeMetric("Qty", { it.qty })
+        makeMetric("Qty", { it.qtyLots })
 )

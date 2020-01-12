@@ -1,5 +1,6 @@
 package firelib.common.ordermanager
 
+import com.funstat.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.misc.SubChannel
@@ -10,7 +11,7 @@ import java.time.Instant
 interface OrderManager {
 
     /**
-     * position
+     * position in lots
      */
     fun position(): Int
 
@@ -23,6 +24,8 @@ interface OrderManager {
      * alias of security as configured in model config instruments list
      */
     fun security(): String
+
+    fun instrument() : InstrId
 
     fun submitOrders(orders: List<Order>)
 

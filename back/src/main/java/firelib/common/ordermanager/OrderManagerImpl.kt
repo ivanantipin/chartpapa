@@ -1,5 +1,6 @@
 package firelib.common.ordermanager
 
+import com.funstat.domain.InstrId
 import firelib.common.Order
 import firelib.common.OrderStatus
 import firelib.domain.OrderType
@@ -27,9 +28,18 @@ import kotlin.collections.set
 class OrderManagerImpl(val tradeGate : TradeGate,
                        val timeService : TimeService,
                        val security : String,
-                       val maxOrderCount: Int = 20) : OrderManager {
+                       val maxOrderCount: Int = 20,
+                       val instr : InstrId) : OrderManager {
+
+    private val log = LoggerFactory.getLogger(javaClass)
+
+
     override fun currentTime(): Instant {
         return timeService.currentTime()
+    }
+
+    override fun instrument(): InstrId {
+        return instr
     }
 
     override fun security(): String {
@@ -43,8 +53,6 @@ class OrderManagerImpl(val tradeGate : TradeGate,
     private val tradesChannel = NonDurableChannel<Trade>()
 
     private var position = 0
-
-    private val log = LoggerFactory.getLogger(javaClass)
 
     override fun position(): Int = position
 
@@ -120,14 +128,14 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
 
     fun onTrade(trd: Trade, order : OrderWithState): Unit {
-        log.info("on trade {}", trd)
+        println("on trade ${trd}")
         order.trades += trd
         if(order.remainingQty() < 0){
-            log.error("negative remaining amount order {}", order)
+            println("negative remaining amount order ${order}")
         }
         val prevPos = position
         position = trd.adjustPositionByThisTrade(position)
-        if(log.isInfoEnabled()) log.info("position adjusted for security $security :  $prevPos -> ${position()}")
+        println("position adjusted for security $security :  $prevPos -> ${position()}")
         tradesChannel.publish(trd)
     }
 

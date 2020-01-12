@@ -12,5 +12,6 @@
 /**/.dart_tool
 /**/nohup.out
 */build/**
-
 /build/**
+/transaqgate/out/*
+/market_research/report_out/

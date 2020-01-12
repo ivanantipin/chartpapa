@@ -1,0 +1,9 @@
+<command id="gethistorydata">
+    <security>
+        <board>идентификатор режима торгов</board>
+        <seccode>код инструмента</seccode>
+    </security>
+    <period>идентификатор периода</period>
+    <count>количество свечей</count>
+    <reset>true/false</reset>
+</command>

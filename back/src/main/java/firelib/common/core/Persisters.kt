@@ -21,40 +21,34 @@ fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : Ex
     val tradeCaseWriter = StreamTradeCaseWriter(reportFilePath)
 
     val casesBatcher = Batcher<Pair<Trade, Trade>>({
-        ioExecutor.submit({tradeCaseWriter.insertTrades(it)}).get()
+        ioExecutor.submit {tradeCaseWriter.insertTrades(it)}.get()
     }, "cases writer")
 
     casesBatcher.start()
 
 
-    model.orderManagers().forEach({om->
+    model.orderManagers().forEach { om->
         val generator = StreamTradeCaseGenerator()
         om.tradesTopic().subscribe {
             casesBatcher.addAll(generator.genClosedCases(it))
         }
-    })
+    }
 
     return casesBatcher
 }
 
 fun enableOrdersPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService) : Batcher<Order>{
     val orderWriter = ColDefDao(reportFilePath, orderColsDefs, "orders")
-
     val orderBatcher = Batcher<Order>({
-
         ioExecutor.submit({
             orderWriter.upsert(it)
-
         }).get()
     }, "cases writer")
-
     orderBatcher.start()
 
     model.orderManagers().forEach({om->
         om.orderStateTopic().subscribe {
-            if(it.status == OrderStatus.New){
-                orderBatcher.add(it.order)
-            }
+            orderBatcher.add(it.order)
         }
     })
     return orderBatcher
@@ -67,15 +61,16 @@ fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : Exec
     val tradeWriter = StreamTradeCaseWriter( reportFilePath, "singleTrades")
 
     val tradesBatcher = Batcher<Trade>({
-        ioExecutor.submit({tradeWriter.insertTrades(it.map { Pair(it,it) })}).get()}, "tradesRealtime")
+        ioExecutor.submit {tradeWriter.insertTrades(it.map { Pair(it,it) })}.get()
+    }, "tradesRealtime")
 
     tradesBatcher.start()
 
-    model.orderManagers().forEach({om->
+    model.orderManagers().forEach { om->
         om.tradesTopic().subscribe {
             tradesBatcher.add(it)
         }
-    })
+    }
     return tradesBatcher
 }
 
@@ -92,7 +87,6 @@ fun enableOhlcDumping(config: ModelBacktestConfig, marketDataDistributor: Market
                 })
 
         batcher.apply {
-            isDaemon = true
             start()
         }
     }

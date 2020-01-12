@@ -1,5 +1,7 @@
 package firelib.common.model
 
+import com.funstat.GlobalConstants
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
@@ -9,6 +11,7 @@ import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
+import firelib.common.reader.toSequence
 import firelib.common.report.GeGeWriter
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
@@ -81,17 +84,14 @@ suspend fun main(args: Array<String>) {
 
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
-    val conf = ModelBacktestConfig().apply {
-        reportTargetPath = "/home/ivan/projects/chartpapa/market_research/report_tmp"
+    val conf = ModelBacktestConfig(HighVolume::class).apply {
         instruments = divs.keys.filter { it != "irao" && it != "trnfp" }.map { instr ->
-            InstrumentConfig(instr, { _ ->
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
-            })
+            InstrumentConfig(instr, {
+                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
+            }, InstrId.dummyInstrument(instr))
         }
     }
 
-    conf.runStrat({ cfg, fac ->
-        HighVolume(cfg, fac)
-    },{})
+    conf.runStrat()
 
 }

@@ -18,7 +18,7 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
             if(Instant.now().toEpochMilli() - ts[0].endTime.toEpochMilli() < 100_000){
                 println("ohlc ${ts[0]}" )
             }
-            buyViaLimitIfNoPosition(0,10_000)
+            buyIfNoPosition(0,10_000)
         }
 
         closePositionByTimeout(periods = 2, interval = Interval.Min1)
@@ -29,10 +29,17 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
             DummyModel(context, props)
         }
 
+
+
         fun modelConfig (waitOnEnd : Boolean = false , divAdjusted: Boolean = false) : ModelBacktestConfig {
-            return ModelBacktestConfig().apply {
+
+            val mapper = TcsTickerMapper()
+
+
+            return ModelBacktestConfig(DummyModel::class).apply {
                 reportTargetPath = "/home/ivan/projects/chartpapa/market_research/dummy_model"
-                instruments = instruments(listOf("sber"),
+
+                instruments = instruments(listOf(mapper.map("sber")!!),
                         source = "TCS",
                         divAdjusted = divAdjusted,
                         waitOnEnd = waitOnEnd)
@@ -51,17 +58,16 @@ fun main() {
 
     (mapper.context as SandboxContext).setCurrencyBalance(Currency.RUB, 1000_000.toBigDecimal()).get()
 
-    val gate = TcsGate(executor, mapper)
+    val gate = TcsGate(executor, mapper )
 
     try {
         ProdRunner.runStrat(
                 executor,
-                DummyModel.modelConfig(),
+                SimpleRunCtx(DummyModel.modelConfig()),
                 gate,
                 {mapper.map(it)!!},
                 {mapper.map(it)!!},
-                mapper.source,
-                DummyModel.modelFactory
+                mapper.source
         )
 
     }catch (e : Exception){

@@ -1,5 +1,6 @@
 package firelib.common.model
 
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
@@ -8,6 +9,7 @@ import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
+import firelib.common.reader.toSequence
 import firelib.common.report.GeGeWriter
 
 
@@ -91,17 +93,14 @@ suspend fun main(args: Array<String>) {
 
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
-    val conf = ModelBacktestConfig().apply {
-        reportTargetPath = "./report/gapTrading"
+    val conf = ModelBacktestConfig(GapTrading::class).apply {
         instruments = tt.map { instr ->
             InstrumentConfig(instr, { time ->
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
-            })
+                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
+            }, InstrId.dummyInstrument(instr))
         }
         opt("holdtime", 1, 3, 1)
     }
 
-    conf.runStrat{ cfg, fac ->
-        GapTrading(cfg, fac)
-    }
+    conf.runStrat()
 }

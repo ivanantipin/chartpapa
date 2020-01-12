@@ -1,152 +1,40 @@
 package com.firelib.stratserver
 
-import com.firelib.*
-import firelib.common.interval.Interval
-import firelib.common.model.UtilsHandy
-import firelib.common.model.VolatilityBreak
-import firelib.common.model.enableSeries
-import firelib.domain.Ohlc
-import io.grpc.Server
+import io.grpc.BindableService
 import io.grpc.ServerBuilder
-import io.grpc.stub.StreamObserver
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
-class StratServer {
+fun grpcServerRun(port: Int, services: List<BindableService>) {
+    val serverBuilder = ServerBuilder.forPort(port)
+    services.forEach { serverBuilder.addService(it) }
+    val server = serverBuilder.build().start()
+    println("Server started, listening on ${port}")
+    Runtime.getRuntime().addShutdownHook(object : Thread() {
+        override fun run() {
+            // Use stderr here since the logger may have been reset by its JVM shutdown hook.
+            System.err.println("*** shutting down gRPC server since JVM is shutting down")
+            server.shutdown()
+            System.err.println("*** server shut down")
+        }
+    })
+    server.awaitTermination()
 
-    private val server: Server
+}
+
+
+fun main() {
+
+//    UtilsHandy.updateRussianDivStocks()
 
     val service = ServiceImpl()
 
-    init {
-        val port = 50051
-        server = ServerBuilder.forPort(port)
-                .addService(service)
-                .build()
-                .start()
-        println("Server started, listening on ${port}")
-        Runtime.getRuntime().addShutdownHook(object : Thread() {
-            override fun run() {
-                // Use stderr here since the logger may have been reset by its JVM shutdown hook.
-                System.err.println("*** shutting down gRPC server since JVM is shutting down")
-                this@StratServer.stop()
-                System.err.println("*** server shut down")
-            }
-        })
-    }
 
-    private fun stop() {
-        server.shutdown()
-    }
-
-    fun blockUntilShutdown() {
-        server.awaitTermination()
-    }
+    Thread({
+        grpcServerRun(50051, listOf(service))
+    }, "grpcServerStart").start()
 
 
-    class ServiceImpl : StratServiceGrpc.StratServiceImplBase() {
-
-        val description = """
-# Стратегия "Волабрейк"
-## Описание логики 
-Является типичной пробойной стратегией ***"long-only"*** (только длинные позиции) с фильтрами которые повышают вероятность прибыльной сделки.
-<br/>
-Обыкновенно вы увидите оповещение о сигнали с этой стратегии в конце рабочего дня.
-<br/>
-Среднее удержание сделки **3 дня**
-    """.trimIndent()
-
-        val strats = Broadcaster<StratDescription>("stratDescription");
-
-        val levels = Broadcaster<Levels>("levels", historyKey = { l -> l.ticker })
-
-        val historicalPrices = Broadcaster<OhlcTO>("prices", maxSize = 600, historyKey = { l -> l.ticker })
-
-        val intraPrices = Broadcaster<OhlcTO>("intra prices", historyKey = { l -> l.ticker })
-
-        val tradeStat = TradeStat(stratName = "volBreak", descr = description, strats = strats)
-
-        init {
-            strats.start()
-            levels.start()
-        }
-
-        override fun getStrats(request: Empty, responseObserver: StreamObserver<StratDescription>) {
-            strats.addObserver(responseObserver)
-        }
-
-        override fun getLevels(request: Empty, responseObserver: StreamObserver<Levels>) {
-            levels.addObserver(responseObserver);
-        }
-
-        override fun priceSubscribe(request: HistoryRequest, responseObserver: StreamObserver<OhlcTO>) {
-            historicalPrices.addObserver(responseObserver)
-        }
-
-        override fun intradaySubscribe(request: Empty?, responseObserver: StreamObserver<OhlcTO>) {
-            intraPrices.addObserver(responseObserver);
-        }
-
-    }
-
-    fun convertOhlc(ohlc: Ohlc, tkr: String, op: OhlcPeriod): OhlcTO {
-        return OhlcTO.newBuilder().apply {
-            open = ohlc.open
-            high = ohlc.high
-            low = ohlc.low
-            close = ohlc.close
-            timestamp = ohlc.endTime.toEpochMilli()
-            ticker = tkr
-            period = op
-
-        }.build()
-    }
-
-    suspend fun runStrat() {
-        println("Starting strats")
-        val defferer = Defferer()
-        VolatilityBreak.runDefault(waitOnEnd = true, ctxListener = { model ->
-            val dayTss = model.enableSeries(Interval.Day, interpolated = false)
-            val weekTss = model.enableSeries(Interval.Week, interpolated = false)
-            model.context.instruments.forEachIndexed({ idx, ticker ->
-                val levelsGen = LevelsGen(service.levels, ticker)
-                dayTss[idx].preRollSubscribe {
-                    levelsGen.onOhlc(it[0], Interval.Day)
-                    service.historicalPrices.add(convertOhlc(it[0], ticker, OhlcPeriod.Day))
-
-                }
-                weekTss[idx].preRollSubscribe {
-                    levelsGen.onOhlc(it[0], Interval.Week)
-                }
-            })
-
-            model.context.mdDistributor.addListener(Interval.Min10, { time, md ->
-                dayTss.forEachIndexed({ idx, ts ->
-                    val ticker = model.context.instruments[idx]
-                    defferer.executeLater(ticker) {
-                        service.intraPrices.add(convertOhlc(ts[0], ticker, OhlcPeriod.Day))
-                    }
-                })
-            })
-
-            model.orderManagers().forEach({ om ->
-                om.tradesTopic().subscribe { trade ->
-                    service.tradeStat.addTrade(trade)
-                }
-            })
-        })
-    }
-}
-
-suspend fun main() {
-    val server = StratServer()
-
-    UtilsHandy.updateRussianDivStocks()
-
-    GlobalScope.launch {
-        server.runStrat();
-    }
+/*
     GlobalScope.launch {
         while (true) {
             println("updating stocks")
@@ -159,5 +47,10 @@ suspend fun main() {
             Thread.sleep(300000)
         }
     }
-    server.blockUntilShutdown()
+*/
+
+    Thread({
+        service.runBlocking()
+    }, "mainStrategyThread").start()
+
 }

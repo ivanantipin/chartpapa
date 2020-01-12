@@ -27,7 +27,7 @@ class MarketOrderStub(val timeService : TimeService,var bid : Double = Double.Na
         if(trdPrice.isNaN()){
             order.orderSubscription.publish(OrderState(order, OrderStatus.Rejected, timeService.currentTime()))
         }else{
-            order.tradeSubscription.publish(Trade(order.qty, trdPrice, order, timeService.currentTime(), priceTime!!))
+            order.tradeSubscription.publish(Trade(order.qtyLots, trdPrice, order, timeService.currentTime(), priceTime!!))
             order.orderSubscription.publish(OrderState(order, OrderStatus.Done, timeService.currentTime()))
         }
     }

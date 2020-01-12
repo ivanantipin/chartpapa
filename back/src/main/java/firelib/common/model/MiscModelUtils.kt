@@ -4,11 +4,29 @@ import firelib.common.interval.Interval
 import firelib.common.misc.PositionCloser
 import firelib.common.ordermanager.buyAtLimit
 import firelib.common.ordermanager.makePositionEqualsTo
+import firelib.common.ordermanager.sellAtLimit
 import firelib.common.timeseries.TimeSeries
 import firelib.common.timeseries.nonInterpolatedView
 import firelib.domain.Ohlc
 import java.time.LocalTime
 
+class IdxContext(val model: Model, val idx: Int) {
+    val om = model.orderManagers()[idx]
+    fun moneyToLots(money: Long): Int {
+        return (money / model.context.mdDistributor.price(idx).close / om.instrument().lot).toInt()
+    }
+
+    val price = model.context.mdDistributor.price(idx).close
+
+    val position = om.position()
+
+    val hasPendingState = om.hasPendingState()
+
+}
+
+fun Model.idxContext(idx: Int): IdxContext {
+    return IdxContext(this, idx)
+}
 
 fun Model.enableFactor(name: String, fact: (Int) -> Double) {
     orderManagers().forEachIndexed { index, orderManager ->
@@ -18,46 +36,37 @@ fun Model.enableFactor(name: String, fact: (Int) -> Double) {
     }
 }
 
-fun Model.enableSeries(interval : Interval,
-                       historyLen : Int = 100, interpolated: Boolean = true) : List<TimeSeries<Ohlc>>{
+fun Model.enableSeries(interval: Interval,
+                       historyLen: Int = 100, interpolated: Boolean = true): List<TimeSeries<Ohlc>> {
     val context = this.modelContext()
     val ret = context.tickers().mapIndexed { idx, _ ->
         context.mdDistributor.getOrCreateTs(idx, interval, historyLen)
 
     }
-    if(!interpolated){
+    if (!interpolated) {
         return ret.map { it.nonInterpolatedView() }
     }
     return ret
 
 }
 
-fun Model.buyIfNoPosition(idx : Int, money : Long){
-    if(orderManagers()[idx].position() <= 0 && !orderManagers()[idx].hasPendingState()){
-        val mm = money/this.context.mdDistributor.price(idx).close
-        orderManagers()[idx].makePositionEqualsTo(mm.toInt())
+fun Model.buyIfNoPosition(idx: Int, money: Long) {
+    idxContext(idx).run {
+        if (position <= 0 && !hasPendingState) {
+            om.makePositionEqualsTo(moneyToLots(money), price)
+        }
     }
 }
 
-fun Model.buyViaLimitIfNoPosition(idx : Int, money : Long){
-    if(orderManagers()[idx].position() <= 0 && !orderManagers()[idx].hasPendingState()){
-        val close = this.context.mdDistributor.price(idx).close
-        val mm = money/ close
-        orderManagers()[idx].buyAtLimit(close, mm.toInt())
+fun Model.sellIfNoPosition(idx: Int, money: Long) {
+    idxContext(idx).run {
+        if (position >= 0 && !hasPendingState)
+            om.makePositionEqualsTo(-moneyToLots(money), price)
     }
 }
 
-
-fun Model.sellIfNoPosition(idx : Int, money : Long){
-    if(orderManagers()[idx].position() >= 0 && !orderManagers()[idx].hasPendingState()){
-        val mm = money/this.context.mdDistributor.price(idx).close
-        orderManagers()[idx].makePositionEqualsTo(-mm.toInt())
-    }
-}
-
-
-fun Model.closePositionByTimeout(afterTime : LocalTime? = null,
-                                 periods : Int,
-                                 interval: Interval){
-    PositionCloser.closePosByTimeoutAndTimeOfDay(this, afterTime,  periods, interval)
+fun Model.closePositionByTimeout(afterTime: LocalTime? = null,
+                                 periods: Int,
+                                 interval: Interval) {
+    PositionCloser.closePosByTimeoutAndTimeOfDay(this, afterTime, periods, interval)
 }

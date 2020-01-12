@@ -1,14 +1,11 @@
 package firelib.common.core
 
-import firelib.common.Order
 import firelib.common.OrderStatus
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.mddistributor.MarketDataDistributorImpl
+import firelib.common.model.Model
 import firelib.common.model.ModelContext
-import firelib.common.reader.pollOhlcsTill
-import firelib.common.timeboundscalc.BacktestPeriodCalc
 import firelib.common.timeservice.TimeServiceManaged
-import firelib.common.tradegate.TradeGate
 import firelib.common.tradegate.TradeGateStub
 import firelib.domain.Ohlc
 import java.time.Instant
@@ -30,29 +27,25 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
     }
 
     val startTime by lazy {
-        val bounds = BacktestPeriodCalc.calcBounds(modelConfig)
-        modelConfig.rootInterval.roundTime(bounds.first)
+
+        modelConfig.rootInterval.roundTime(modelConfig.startDateGmt)
     }
 
     val marketDataDistributor by lazy {
+        println("start time is ${startTime}")
         MarketDataDistributorImpl(modelConfig.instruments.size, startTime)
-    }
-
-    val batchers = mutableListOf<Batcher<*>>()
-
-    fun cancelBatchersAndWait(){
-        batchers.forEach {it.cancelAndJoin()}
     }
 
     val boundModels = mutableListOf<ModelOutput>()
 
-
-    fun addModel(factory: ModelFactory, params: Map<String, String>) {
+    fun addModel(params: Map<String, String>): Model {
+        val factory = modelConfig.factory
         val ret = factory(ModelContext(timeService, marketDataDistributor, tradeGate, modelConfig), params)
         val modelOutput = ModelOutput(ret, ret.properties())
         boundModels += modelOutput
         ret.orderManagers().forEach { om -> om.tradesTopic().subscribe { modelOutput.trades += it } }
         ret.orderManagers().forEach { om -> om.orderStateTopic().filter { it.status == OrderStatus.New }.subscribe { modelOutput.orderStates += it } }
+        return ret
     }
 
     fun time(ct: Instant) {
@@ -64,37 +57,17 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         boundModels.forEach { it.model.update() }
         marketDataDistributor.roll(ct)
     }
-
-    fun onStart() {
-    }
-
-    fun onEnd() {
-        boundModels.forEach { it.model.onBacktestEnd() }
-    }
-
-
 }
 
-class TradeGateSwitch(val backtestGate : TradeGateStub) : TradeGate{
-
-    var delegate : TradeGate = backtestGate
-
-    fun setActiveReal(realGate : TradeGate){
-        delegate = realGate
-    }
-
-    override fun cancelOrder(order: Order) {
-        delegate.cancelOrder(order)
-    }
-
-    override fun sendOrder(order: Order) {
-        delegate.sendOrder(order)
-    }
-
+fun SimpleRunCtx.addModelWithDefaultParams() : Model{
+    require(boundModels.size == 0, {"only single model allowed for default params"})
+    return addModel(modelConfig.modelParams)
 }
 
 
-fun SimpleRunCtx.backtest(endOfHistory: Instant): Instant {
+
+
+fun SimpleRunCtx.backtest(endOfHistory: Instant, waitTillTime : (time : Instant)->Unit = {}): Instant {
 
     val readers = modelConfig.instruments.map { it.factory(startTime) }
 
@@ -102,22 +75,23 @@ fun SimpleRunCtx.backtest(endOfHistory: Instant): Instant {
 
     while (stTime < endOfHistory) {
         readers.forEachIndexed({ idx, reader ->
-            reader.pollOhlcsTill(stTime).forEach {
-                marketDataDistributor.addOhlc(idx, it)
+            var pick = reader.peek()
+            while(pick != null && pick.endTime <= stTime){
+                marketDataDistributor.addOhlc(idx, reader.poll())
+                pick = reader.peek()
             }
         })
+
         time(stTime)
         stTime += this.modelConfig.rootInterval.duration
+        waitTillTime(stTime)
     }
     return stTime;
-
 }
 
 
 fun waitUntil(timestamp: Instant) {
-
     val millis = timestamp.toEpochMilli() - System.currentTimeMillis()
-
     if (millis <= 0) return
     try {
         Thread.sleep(millis)
@@ -140,5 +114,3 @@ fun LinkedBlockingQueue<Ohlc>.pollOhlcsTill(time: Instant): Sequence<Ohlc> {
     return lst.groupBy { it.endTime }.values.map { it.last() }.asSequence()
 
 }
-
-

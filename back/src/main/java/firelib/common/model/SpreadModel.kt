@@ -14,6 +14,7 @@ import firelib.common.reader.ReaderFactoryImpl
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 import kotlinx.coroutines.coroutineScope
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.math.abs
@@ -59,21 +60,10 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
     }
 }
 
-suspend fun main() {
-    val conf = ModelBacktestConfig()
-    conf.reportTargetPath = "./report"
-    conf.startDateGmt = LocalDateTime.now().minusDays(1500).toInstant(ZoneOffset.UTC)
-
-
-    val storageImpl = MdStorageImpl()
-
-
-    if(true){
-        val divs = DivHelper.getDivs()
-        val finamDownloader = FinamDownloader()
-
-        val symbols = finamDownloader.symbols().filter { divs.containsKey(it.code.toLowerCase()) && it.market == "1" }
-        symbols.forEach({storageImpl.updateMarketData(it)})
+fun main() {
+    val conf = ModelBacktestConfig(SpreadModel::class).apply{
+        startDate(LocalDate.now().minusDays(1500))
     }
-    conf.runStrat{ctx,props->SpreadModel(ctx,props)}
+    UtilsHandy.updateRussianDivStocks()
+    conf.runStrat()
 }

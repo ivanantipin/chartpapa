@@ -4,6 +4,7 @@ import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.model.UtilsHandy.updateRussianDivStocks
+import firelib.common.model.UtilsHandy.updateRussianStockSimple
 import java.time.Instant
 
 
@@ -59,6 +60,6 @@ object UtilsHandy {
 
 
 fun main(args: Array<String>) {
-    //updateRussianStockSimple("sber")
-    updateRussianDivStocks()
+    updateRussianStockSimple("sber")
+//    updateRussianDivStocks()
 }

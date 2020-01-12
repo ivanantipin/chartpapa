@@ -1,5 +1,6 @@
 package firelib.common.model
 
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.*
@@ -10,6 +11,7 @@ import firelib.common.ordermanager.OrderManager
 import firelib.common.ordermanager.flattenAll
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
+import firelib.common.reader.toSequence
 
 class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
@@ -39,7 +41,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
     }
 }
 
-suspend fun main() {
+fun main() {
 
     val tt = listOf(
             "sber",
@@ -61,16 +63,13 @@ suspend fun main() {
 
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
-    val conf = ModelBacktestConfig().apply {
-        reportTargetPath = "./report/trendModel"
+    val conf = ModelBacktestConfig(TrendModel::class).apply {
         instruments = tt.map { instr ->
-            InstrumentConfig(instr, { ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
-            })
+            InstrumentConfig(instr, {
+                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
+            }, InstrId.dummyInstrument(instr))
         }
         opt("period", 7, 30, 1)
     }
-
-    conf.runStrat { cfg, fac ->
-        TrendModel(cfg, fac)
-    }
+    conf.runStrat()
 }

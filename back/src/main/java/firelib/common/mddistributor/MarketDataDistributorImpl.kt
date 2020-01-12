@@ -7,7 +7,7 @@ import firelib.domain.Ohlc
 import java.time.Instant
 
 
-class MarketDataDistributorImpl(val size: Int, val startTime: Instant) : MarketDataDistributor {
+class MarketDataDistributorImpl(override val size: Int, val startTime: Instant) : MarketDataDistributor {
 
 
     val intervalService = IntervalServiceImpl()

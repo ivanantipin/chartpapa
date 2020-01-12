@@ -1,11 +1,13 @@
 package com.firelib.test
 
+import com.funstat.domain.InstrId
 import firelib.common.*
 import firelib.common.agenda.AgendaImpl
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.ordermanager.*
 import firelib.common.reader.MarketDataReaderSql
+import firelib.common.reader.toSequence
 import firelib.common.tradegate.TradeGateStub
 import firelib.domain.OrderType
 import firelib.domain.Side
@@ -141,14 +143,14 @@ class OrderManagerTest {
 
         val config = ModelBacktestConfig()
         config.instruments = listOf(InstrumentConfig("sec",{_->
-            MarketDataReaderSql(emptyList())
-        }))
+            MarketDataReaderSql(emptyList()).toSequence()
+        }, InstrId.dummyInstrument("sec")))
 
         val tg = TradeGateStub(config, timeService)
 
         timeService.time = Instant.now()
 
-        val om =  OrderManagerImpl(tg, timeService, "sec")
+        val om =  OrderManagerImpl(tg, timeService, "sec", 20,InstrId.dummyInstrument("sec"))
         val trades =  ArrayList<Trade>()
         om.tradesTopic().subscribe {trades += it}
         return Triple(tg, trades, om)
@@ -164,7 +166,7 @@ class OrderManagerTest {
         update(tg,1.0, 3.0)
 
         om.buyAtLimit(1.5,qty)
-        om.submitOrders( listOf( Order(OrderType.Market, 2.5, sellQty, Side.Sell,om.security(),"id", Instant.now())))
+        om.submitOrders( listOf( Order(OrderType.Market, 2.5, sellQty, Side.Sell,om.security(),"id", Instant.now(),  InstrId.dummyInstrument("sec"))))
 
         update(tg,1.0, 3.0)
 

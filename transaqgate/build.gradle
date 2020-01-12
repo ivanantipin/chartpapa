@@ -1,0 +1,13 @@
+
+dependencies{
+    compile ('firelib:java:0.1-SNAPSHOT')
+
+    // https://mvnrepository.com/artifact/io.grpc/grpc-core
+    compile group: 'io.grpc', name: 'grpc-core', version: '1.21.1'
+
+
+    compile project (':back')
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.10.1'
+}

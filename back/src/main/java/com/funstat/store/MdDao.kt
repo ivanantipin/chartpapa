@@ -1,5 +1,10 @@
 package com.funstat.store
 
+import com.funstat.finam.FinamDownloader
+import firelib.common.interval.Interval
+import firelib.common.misc.atUtc
+import firelib.common.misc.toInstantDefault
+import firelib.common.reader.SimplifiedReader
 import firelib.domain.Ohlc
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -7,6 +12,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.sqlite.SQLiteDataSource
 import java.sql.ResultSet
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -93,13 +99,56 @@ class MdDao(internal val ds: SQLiteDataSource) {
         return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC))
     }
 
-    fun queryAll(codeIn: String, start: LocalDateTime): List<Ohlc> {
+    fun queryAll(codeIn: String, start: LocalDateTime, limit : Int = 10_000_000): List<Ohlc> {
         val code = normName(codeIn)
         ensureExist(code)
 
-        val map = mapOf("DT" to  start.toInstant(ZoneOffset.UTC).toEpochMilli())
-        return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc ", map, { rs, _ -> mapOhlc(rs) })
+        val map = mapOf("DT" to  start.toInstantDefault().toEpochMilli(),
+                "LIMIT" to limit
+        )
+        return NamedParameterJdbcTemplate(ds).query("select * from $code where dt > :DT order by dt asc LIMIT :LIMIT", map, { rs, _ -> mapOhlc(rs) })
     }
 
 
+}
+
+class SimplifiedReaderImpl(val mdDao: MdDao, val code : String, val startTime : Instant) : SimplifiedReader{
+
+    var lastRead : Instant = startTime
+
+    var buffer  = LinkedList<Ohlc>()
+
+    fun read(){
+        println("doing thing")
+        val list = mdDao.queryAll(code, lastRead.atUtc(), 20_000)
+        if(list.isNotEmpty()){
+            buffer.addAll(list)
+            lastRead = list.last().endTime
+        }
+    }
+
+    override fun peek(): Ohlc? {
+        if(buffer.isEmpty()){
+            read()
+        }
+        return buffer.peek()
+    }
+
+    override fun poll(): Ohlc {
+        return buffer.poll()
+    }
+
+}
+
+
+
+fun main(){
+    val impl = MdStorageImpl()
+    val dao = impl.getDao(FinamDownloader.SOURCE, Interval.Min10.name)
+
+    val start = LocalDateTime.now().minusDays(200).toInstantDefault()
+    val reader = SimplifiedReaderImpl(dao, "sber", start)
+    while(reader.peek() != null){
+        println("ohlc ${reader.poll()}")
+    }
 }

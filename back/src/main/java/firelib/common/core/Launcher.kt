@@ -2,13 +2,11 @@ package firelib.common.core
 
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.OptResourceParams
-import firelib.common.model.Model
 import firelib.common.opt.ParamsVariator
 import firelib.common.report.ReportProcessor
 import firelib.common.report.ReportWriter
 import firelib.common.report.ReportWriter.clearReportDir
 import firelib.common.report.ReportWriter.writeReport
-import firelib.common.timeboundscalc.BacktestPeriodCalc
 import firelib.domain.Ohlc
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -24,7 +22,7 @@ object Launcher{
         })
     }
 
-    fun runOptimized(cfg: ModelBacktestConfig, factory : ModelFactory) {
+    fun runOptimized(cfg: ModelBacktestConfig) {
         println("Starting")
 
         val startTime = System.currentTimeMillis()
@@ -36,7 +34,8 @@ object Launcher{
 
         val variator = ParamsVariator(optCfg.params)
 
-        val (startDtGmt, endDtGmt) = BacktestPeriodCalc.calcBounds(cfg)
+        val startDtGmt = cfg.rootInterval.roundTime(cfg.startDateGmt)
+        val endDtGmt = cfg.rootInterval.roundTime(cfg.endDate)
 
         val endOfOptimize =  if(optCfg.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
         else startDtGmt.plus(optCfg.optimizedPeriodDays, ChronoUnit.DAYS)
@@ -60,7 +59,7 @@ object Launcher{
         }.chunked(optResourceParams.batchSize).map { paramsVar ->
             val ctx = SimpleRunCtx(cfg)
             paramsVar.forEach({ p ->
-                ctx.addModel(factory, p)
+                ctx.addModel(p)
             })
             ctx
         }.forEach { ctx->
@@ -99,41 +98,15 @@ object Launcher{
         return executor
     }
 
-    fun runSimple(cfg: ModelBacktestConfig, fac: ModelFactory, ctxListener: (Model) -> Unit = {}) {
-
-        val ctx = makeContext(cfg, fac, ctxListener)
-
-        ReportWriter.copyPythonFiles(cfg)
-
-        ctx.backtest(Instant.now())
-
-        ctx.cancelBatchersAndWait()
-
-        ReportWriter.writeStaticConf(cfg, ctx.boundModels[0])
-
-        println("report written to ${cfg.reportTargetPath} you can run it , command 'jupyter lab'")
-
-        println("done")
-    }
-
-    fun makeContext(cfg: ModelBacktestConfig, fac: ModelFactory, ctxListener: (Model) -> Unit): SimpleRunCtx {
+    fun runSimple(cfg: ModelBacktestConfig) {
         clearReportDir(cfg.reportTargetPath)
-
-        val ioExecutor = Executors.newSingleThreadExecutor()
-
         val ctx = SimpleRunCtx(cfg)
-
-        ctx.addModel(fac, cfg.modelParams)
-
-        val model = ctx.boundModels[0].model
-        ctx.batchers += enableOrdersPersist(model, cfg.getReportDbFile(), ioExecutor)
-        ctx.batchers += enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor)
-        ctx.batchers += enableTradeRtPersist(model, cfg.getReportDbFile(), ioExecutor)
-        ctxListener(model)
+        ctx.addModel(cfg.modelParams)
         if (cfg.dumpOhlc) {
-            ctx.batchers += enableOhlcDumping(config = cfg, marketDataDistributor = ctx.marketDataDistributor)
+            enableOhlcDumping(config = cfg, marketDataDistributor = ctx.marketDataDistributor)
         }
-        return ctx
+        ctx.backtest(Instant.now())
+        writeReport(ctx.boundModels.first(), cfg)
     }
 }
 

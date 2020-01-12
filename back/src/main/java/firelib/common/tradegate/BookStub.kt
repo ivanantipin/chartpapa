@@ -64,7 +64,7 @@ class BookStub(val timeService : TimeService, val strategy : OrderStrategy) {
             val rec = iter.next().value
             if(whenFunc(rec.price)){
                 iter.remove()
-                rec.tradeSubscription.publish(Trade(rec.qty, priceFunc(rec.price), rec, timeService.currentTime(),priceTime))
+                rec.tradeSubscription.publish(Trade(rec.qtyLots, priceFunc(rec.price), rec, timeService.currentTime(),priceTime))
                 rec.orderSubscription.publish(OrderState(rec, OrderStatus.Done, timeService.currentTime()))
             }else{
                 flag = false

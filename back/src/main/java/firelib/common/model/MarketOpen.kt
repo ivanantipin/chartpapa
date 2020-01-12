@@ -1,5 +1,6 @@
 package firelib.common.model
 
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
@@ -8,6 +9,7 @@ import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
+import firelib.common.reader.toSequence
 import firelib.common.report.GeGeWriter
 import firelib.domain.ret
 
@@ -93,16 +95,12 @@ suspend fun main() {
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
 
-    val conf = ModelBacktestConfig().apply {
-        reportTargetPath = "./report/marketOpen"
+    val conf = ModelBacktestConfig(MarketOpen::class).apply {
         instruments = tt.map { instr ->
             InstrumentConfig(instr, { time ->
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
-            })
+                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
+            }, InstrId.dummyInstrument(instr))
         }
     }
-
-    conf.runStrat { cfg, fac ->
-        MarketOpen(cfg, fac)
-    }
+    conf.runStrat()
 }

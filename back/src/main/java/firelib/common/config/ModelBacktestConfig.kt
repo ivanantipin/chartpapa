@@ -1,26 +1,33 @@
 package firelib.common.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.funstat.GlobalConstants
+import com.funstat.domain.InstrId
 import com.funstat.store.MdStorageImpl
+import com.funstat.store.SimplifiedReaderImpl
 import firelib.common.core.Launcher
 import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
 import firelib.common.misc.toInstantDefault
 import firelib.common.model.DivHelper
 import firelib.common.model.Model
+import firelib.common.model.defaultModelFactory
 import firelib.common.opt.OptimizedParameter
 import firelib.common.reader.MarketDataReaderDb
 import firelib.common.reader.ReaderDivAdjusted
+import firelib.common.reader.SimplifiedReaderAdapter
+import firelib.common.reader.toSequence
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDate
+import kotlin.reflect.KClass
 
 
 /**
  * configuration for model backtest
  */
-class ModelBacktestConfig (){
+class ModelBacktestConfig (val modelKClass : KClass<out Model>){
     /**
      * instruments configuration
      */
@@ -38,9 +45,10 @@ class ModelBacktestConfig (){
     }
 
     fun startDate(ed : LocalDate){
-        startDateGmt = ed.toInstantDefault()
+        startDateGmt = ed.toInstantDefault().plusSeconds(13*3600)
     }
 
+    var factory : ModelFactory = defaultModelFactory(modelKClass)
 
 
     fun makeSpreadAdjuster(koeff : Double) : (Double,Double)->Pair<Double,Double>{
@@ -59,12 +67,14 @@ class ModelBacktestConfig (){
     /*
     * report will be written into this directory
      */
-    var reportTargetPath: String = ""
+    var reportTargetPath: String = GlobalConstants.rootReportPath.resolve(modelKClass.simpleName).toString()
 
 
     fun getReportDbFile(): Path {
         return Paths.get(reportTargetPath).resolve("report.db").toAbsolutePath()
     }
+
+
 
 
     var dumpOhlc = false
@@ -99,19 +109,17 @@ class ModelBacktestConfig (){
     }
 }
 
-fun ModelBacktestConfig.runStrat(fac : ModelFactory){
-    this.runStrat(fac,{})
-}
 
-fun ModelBacktestConfig.runStrat(fac : ModelFactory, modelListener : (Model)->Unit){
+
+fun ModelBacktestConfig.runStrat(){
     if(this.optConfig.params.isNotEmpty()){
-        Launcher.runOptimized(this,fac)
+        Launcher.runOptimized(this)
     }else{
-        Launcher.runSimple(this,fac,modelListener)
+        Launcher.runSimple(this)
     }
 }
 
-fun instruments(tickers: Iterable<String>, source: String,
+fun ModelBacktestConfig.instruments(tickers: Iterable<InstrId>, source: String,
                 interval: Interval? = null,
                 divAdjusted: Boolean = false,
                 waitOnEnd: Boolean = false) : List<InstrumentConfig>{
@@ -124,12 +132,16 @@ fun instruments(tickers: Iterable<String>, source: String,
     if(divAdjusted){
         val divs = DivHelper.getDivs()
         return tickers.map { instr ->
-            InstrumentConfig(instr, { ReaderDivAdjusted(MarketDataReaderDb(mdDao, instr, Instant.now().plusSeconds(1000), waitOnEnd),divs[instr]!!) })
+            InstrumentConfig(instr.code, {
+
+                ReaderDivAdjusted(MarketDataReaderDb(mdDao, instr.code, Instant.now().plusSeconds(1000), waitOnEnd),divs[instr.code]!!).toSequence()
+            }, instr)
         }
 
     }else{
         return tickers.map { instr ->
-            InstrumentConfig(instr, { MarketDataReaderDb(mdDao, instr, Instant.now().plusSeconds(1000), waitOnEnd) })
+            InstrumentConfig(instr.code, {  SimplifiedReaderImpl(mdDao, instr.code, rootInterval.roundTime(startDateGmt))}, instr)
         }
     }
 }
+

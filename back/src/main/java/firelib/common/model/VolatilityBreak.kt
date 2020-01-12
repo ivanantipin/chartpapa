@@ -1,16 +1,22 @@
 package firelib.common.model
 
+import com.funstat.GlobalConstants
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.instruments
-import firelib.common.config.runStrat
 import firelib.common.core.ModelFactory
+import firelib.common.core.SimpleRunCtx
 import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.misc.atUtc
+import firelib.common.model.VolatilityBreak.Companion.modelConfig
 import firelib.indicators.ATR
 import firelib.indicators.Donchian
+import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 
 
 /*
@@ -21,9 +27,9 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
     val period = 20
 
-    val daytss = enableSeries(interval = Interval.Day,interpolated = false)
+    val daytss = enableSeries(interval = Interval.Day, interpolated = false)
 
-    val tenMins = enableSeries(interval = Interval.Min10,interpolated = false)
+    val tenMins = enableSeries(interval = Interval.Min10, interpolated = false)
 
     val quantiles = context.tickers().map {
         Quantiles<Double>(1000);
@@ -32,7 +38,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         Quantiles<Double>(100);
     }
 
-    val donchians = daytss.map { Donchian({it.size <= period}) }
+    val donchians = daytss.map { Donchian({ it.size <= period }) }
 
 
     val mas = daytss.mapIndexed { idx, it ->
@@ -60,10 +66,10 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         })
 
 
-        tenMins.forEachIndexed({idx,it->
+        tenMins.forEachIndexed({ idx, it ->
             it.preRollSubscribe {
                 val timeSeries = daytss[idx]
-                if(it[0].endTime.atUtc().toLocalTime() > LocalTime.of(13,10) && timeSeries.count() > period){
+                if (it[0].endTime.atUtc().toLocalTime() > LocalTime.of(13, 10) && timeSeries.count() > period) {
                     val vola = quantiles[idx].getQuantile(mas[idx].value())
                     val vol = volumeQuantiles[idx].getQuantile(timeSeries.last().volume.toDouble())
 
@@ -81,36 +87,38 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
             }
         })
 
-        closePositionByTimeout(periods = properties["hold_hours"]!!.toInt(), interval = Interval.Min60, afterTime = LocalTime.of(10,5))
+        closePositionByTimeout(periods = properties["hold_hours"]!!.toInt(), interval = Interval.Min60, afterTime = LocalTime.of(10, 5))
     }
 
 
-
     companion object {
-
-        val modelFactory : ModelFactory = { context, props ->
-            VolatilityBreak(context, props)
-        }
-
-        fun modelConfig (waitOnEnd : Boolean = false , divAdjusted: Boolean = false) : ModelBacktestConfig{
-            return ModelBacktestConfig().apply {
-                reportTargetPath = "/home/ivan/projects/chartpapa/market_research/vol_break_report"
+        fun modelConfig(waitOnEnd: Boolean = false, divAdjusted: Boolean = false): ModelBacktestConfig {
+            return ModelBacktestConfig(VolatilityBreak::class).apply {
                 param("hold_hours", 30)
-                instruments = instruments(listOf("sber"),
+                rootInterval = Interval.Min10
+                startDate(LocalDate.now().minusDays(100))
+                instruments = instruments(listOf(InstrId.dummyInstrument("sber")),
                         source = FinamDownloader.SOURCE,
                         divAdjusted = divAdjusted,
                         waitOnEnd = waitOnEnd)
                 adjustSpread = makeSpreadAdjuster(0.0005)
             }
         }
-
-        fun runDefault(ctxListener : (Model)->Unit, waitOnEnd : Boolean = false , divAdjusted: Boolean = false){
-            val conf = modelConfig(waitOnEnd,divAdjusted)
-            conf.runStrat (modelFactory, ctxListener)
-        }
     }
 }
 
-suspend fun main() {
-    VolatilityBreak.runDefault ({  }, false)
+fun defaultModelFactory(kl: KClass<out Model>): ModelFactory {
+    val cons = kl.primaryConstructor!!
+    return { a, b ->
+        cons.call(a, b)
+    }
+}
+
+fun main() {
+    val conf = modelConfig(false)
+    val fac = defaultModelFactory(VolatilityBreak::class)
+
+    val ctx = SimpleRunCtx(VolatilityBreak.modelConfig())
+    ctx.addModel(emptyMap())
+
 }

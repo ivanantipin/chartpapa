@@ -3,6 +3,7 @@ package firelib.common.core
 import com.funstat.domain.InstrId
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
+import java.lang.RuntimeException
 import java.time.LocalDateTime
 
 interface Source {
@@ -12,7 +13,6 @@ interface Source {
     fun getName(): String;
     fun getDefaultInterval(): Interval
 
-    fun listen(instrId: InstrId, callback : (Ohlc)->Unit){
-    }
+    fun listen(instrId: InstrId, callback : (Ohlc)->Unit){}
 
 }

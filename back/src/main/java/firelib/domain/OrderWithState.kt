@@ -8,5 +8,5 @@ class OrderWithState(val order: Order) {
     val statuses = mutableListOf(OrderStatus.New)
     val trades = mutableListOf<Trade>()
     fun status() = statuses.last()
-    fun remainingQty(): Int = order.qty - trades.sumBy { it.qty }
+    fun remainingQty(): Int = order.qtyLots - trades.sumBy { it.qty }
 }

@@ -1,6 +1,7 @@
 package firelib.common.model
 
 import com.funstat.GlobalConstants
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
@@ -9,6 +10,7 @@ import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
 import firelib.common.reader.MarketDataReaderSql
+import firelib.common.reader.toSequence
 import firelib.common.report.GeGeWriter
 import firelib.common.report.SqlUtils
 import org.springframework.jdbc.core.JdbcTemplate
@@ -135,10 +137,9 @@ suspend fun main() {
 
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
-    val conf = ModelBacktestConfig().apply {
-        reportTargetPath = "./report/divStrat0"
-        instruments = DivHelper.getDivs().keys.map { InstrumentConfig(it, { time -> MarketDataReaderSql(mdDao.queryAll(it)) }) }
+    val conf = ModelBacktestConfig(DivModel::class).apply {
+        instruments = DivHelper.getDivs().keys.map { InstrumentConfig(it, { time -> MarketDataReaderSql(mdDao.queryAll(it)).toSequence() }, InstrId.dummyInstrument(it)) }
         param("holdTimeDays", 10)
     }
-    conf.runStrat({ctx, prop->DivModel(ctx,prop)})
+    conf.runStrat()
 }

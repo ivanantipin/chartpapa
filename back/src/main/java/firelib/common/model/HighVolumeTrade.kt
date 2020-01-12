@@ -1,5 +1,6 @@
 package firelib.common.model
 
+import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.InstrumentConfig
@@ -9,6 +10,7 @@ import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
+import firelib.common.reader.toSequence
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 import java.time.LocalDate
@@ -70,25 +72,21 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
 }
 
-suspend fun main() {
+fun main() {
 
     val divs = DivHelper.getDivs()
 
     val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
 
-    val conf = ModelBacktestConfig().apply {
-        reportTargetPath = "/home/ivan/projects/chartpapa/market_research/report_tmp"
+    val conf = ModelBacktestConfig(HighVolumeTrade::class).apply {
         endDate(LocalDate.of(2016, 1, 1))
         instruments = divs.keys.map { instr ->
             InstrumentConfig(instr, {
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!)
-            })
+                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
+            }, InstrId.dummyInstrument(instr))
         }
         opt("length", 1, 10, 1)
     }
 
-
-    conf.runStrat { ctx, props ->
-        HighVolumeTrade(ctx, props)
-    }
+    conf.runStrat()
 }

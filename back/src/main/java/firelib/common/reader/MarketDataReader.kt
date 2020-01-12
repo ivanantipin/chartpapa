@@ -24,13 +24,25 @@ interface MarketDataReader<out T : Timed> : AutoCloseable{
     }
 }
 
-fun MarketDataReader<Ohlc>.pollOhlcsTill(time: Instant): Sequence<Ohlc> {
-    return sequence({
-        while (isReadable() && current().time() <= time) {
-            yield(current())
-            if (!read()) {
-                break
-            }
-        }
-    })
+interface SimplifiedReader{
+
+    fun peek() : Ohlc?
+
+    fun poll() : Ohlc
+}
+
+class SimplifiedReaderAdapter(val mdReader : MarketDataReader<Ohlc>) : SimplifiedReader{
+    override fun peek(): Ohlc {
+        return mdReader.current()
+    }
+
+    override fun poll(): Ohlc {
+        mdReader.read()
+        return mdReader.current()
+    }
+
+}
+
+fun MarketDataReader<Ohlc>.toSequence(): SimplifiedReader {
+    return SimplifiedReaderAdapter(this)
 }

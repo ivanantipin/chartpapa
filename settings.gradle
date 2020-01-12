@@ -1,3 +1,5 @@
 include 'back'
 include 'grpc-back'
+include 'transaqgate'
 includeBuild("../tcs-api")
+includeBuild("../transaqgrpc/client/java")

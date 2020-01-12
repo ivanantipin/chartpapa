@@ -1,5 +1,6 @@
 package com.firelib.test
 
+import com.funstat.domain.InstrId
 import firelib.common.Order
 import firelib.domain.OrderType
 import firelib.domain.Side
@@ -13,7 +14,7 @@ class MiscTests{
 
     @Test
     fun testPosAdj(): Unit {
-        val order = Order(OrderType.Market, 1.0, 10, Side.Buy,"sec","id", Instant.now())
+        val order = Order(OrderType.Market, 1.0, 10, Side.Buy,"sec","id", Instant.now(), InstrId.dummyInstrument("sec"))
         val trade = Trade(5, 1.0, order, Instant.now(), Instant.now())
         val pos = trade.adjustPositionByThisTrade(10)
         Assert.assertEquals(pos , 15)
