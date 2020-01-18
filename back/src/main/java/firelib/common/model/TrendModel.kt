@@ -4,10 +4,7 @@ import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.*
-import firelib.common.core.Launcher.runOptimized
 import firelib.common.interval.Interval
-import firelib.common.opt.OptimizedParameter
-import firelib.common.ordermanager.OrderManager
 import firelib.common.ordermanager.flattenAll
 import firelib.common.reader.MarketDataReaderSql
 import firelib.common.reader.ReaderDivAdjusted
@@ -32,7 +29,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
                     if (idx < sorted.size - 3) {
                         oms[pair.first].flattenAll()
                     } else {
-                        buyIfNoPosition(idx, 1000_000)
+                        longForMoneyIfFlat(idx, 1000_000)
                     }
                 })
             }

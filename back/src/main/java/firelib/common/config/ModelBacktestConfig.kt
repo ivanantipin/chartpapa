@@ -74,9 +74,6 @@ class ModelBacktestConfig (val modelKClass : KClass<out Model>){
         return Paths.get(reportTargetPath).resolve("report.db").toAbsolutePath()
     }
 
-
-
-
     var dumpOhlc = false
 
 

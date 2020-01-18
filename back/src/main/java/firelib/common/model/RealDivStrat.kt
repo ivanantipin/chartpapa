@@ -73,7 +73,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                                 println("t1 ${ret[1]}")
                             }
 
-                            buyIfNoPosition(idx,100_000)
+                            longForMoneyIfFlat(idx,100_000)
 
                             nextIdx = divs.indexOfFirst {
                                 it.lastDayWithDivs.isAfter(prevIdx.lastDayWithDivs) && it.lastDayWithDivs.atStartOfDay().isAfter(context.timeService.currentTime().atUtc())

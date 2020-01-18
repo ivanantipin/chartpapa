@@ -17,20 +17,26 @@ class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) 
 
     override fun run(){
         val buffer = mutableListOf<T>()
-        while (!isInterrupted){
+        while (!isInterrupted || queue.isNotEmpty()){
             try {
                 buffer += queue.poll(100, TimeUnit.DAYS)
-                queue.drainTo(buffer)
-                if(buffer.isNotEmpty()){
-                    println("processing ${buffer}")
-                    batchProcessor(buffer)
-                    buffer.clear()
-                }
+                processBuffer(buffer)
             }catch (e : RuntimeException){
                 println(" ${threadName} : runtime exception in happened ${e}")
             } catch (e : InterruptedException){
+                println("processing finish buffer")
+                processBuffer(buffer)
                 break;
             }
+        }
+    }
+
+    private fun processBuffer(buffer: MutableList<T>) {
+        queue.drainTo(buffer)
+        if (buffer.isNotEmpty()) {
+            println("processing ${buffer}")
+            batchProcessor(buffer)
+            buffer.clear()
         }
     }
 
@@ -39,7 +45,7 @@ class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) 
         join()
     }
 
-    fun addAll(addTrade: List<T>) {
-        queue += addTrade
+    fun addAll(batch: List<T>) {
+        queue += batch
     }
 }

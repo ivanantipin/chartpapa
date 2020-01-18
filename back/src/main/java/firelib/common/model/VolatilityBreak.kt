@@ -1,6 +1,5 @@
 package firelib.common.model
 
-import com.funstat.GlobalConstants
 import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import firelib.common.config.ModelBacktestConfig
@@ -74,7 +73,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
                     val vol = volumeQuantiles[idx].getQuantile(timeSeries.last().volume.toDouble())
 
                     if (it[0].close > donchians[idx].max) {
-                        buyIfNoPosition(idx, 1000_000)
+                        longForMoneyIfFlat(idx, 1000_000)
                     }
                 }
             }

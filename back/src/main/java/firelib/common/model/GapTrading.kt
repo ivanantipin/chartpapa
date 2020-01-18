@@ -50,7 +50,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
                     dayRolled[idx] = false
                     val gap = (it[0].open - tssDay[idx][1].close) / tssDay[idx][1].close
                     if (gap < -0.02) {
-                        sellIfNoPosition(idx, -1000_000)
+                        shortForMoneyIfFlat(idx, -1000_000)
                     }
                     println("written ${it[0].endTime} ${tssDay[idx][1].endTime} ")
                 }

@@ -59,7 +59,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
                     }
                     // go long whenever volume spikes
                     if (quantiles[idx].getQuantile(measure) > 0.9) {
-                        buyIfNoPosition(idx, 1000_000)
+                        longForMoneyIfFlat(idx, 1000_000)
                     }
                 }
             }

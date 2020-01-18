@@ -6,6 +6,7 @@ import firelib.common.Trade
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.interval.Interval
 import firelib.common.mddistributor.MarketDataDistributor
+import firelib.common.misc.ChannelSubscription
 import firelib.common.misc.StreamTradeCaseGenerator
 import firelib.common.model.Model
 import firelib.common.report.dao.OhlcStreamWriter
@@ -14,11 +15,16 @@ import firelib.common.report.dao.StreamTradeCaseWriter
 import firelib.common.report.orderColsDefs
 import firelib.common.timeseries.nonInterpolatedView
 import firelib.domain.Ohlc
+import org.apache.commons.io.FileUtils
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService
 
-fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService) : Batcher<Pair<Trade, Trade>>{
-    val tradeCaseWriter = StreamTradeCaseWriter(reportFilePath)
+
+
+fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "trades") : Persisting{
+    FileUtils.forceMkdir(reportFilePath.parent.toFile())
+
+    val tradeCaseWriter = StreamTradeCaseWriter(reportFilePath, tableName)
 
     val casesBatcher = Batcher<Pair<Trade, Trade>>({
         ioExecutor.submit {tradeCaseWriter.insertTrades(it)}.get()
@@ -26,39 +32,52 @@ fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : Ex
 
     casesBatcher.start()
 
-
-    model.orderManagers().forEach { om->
+    val subscriptions = model.orderManagers().map { om ->
         val generator = StreamTradeCaseGenerator()
         om.tradesTopic().subscribe {
             casesBatcher.addAll(generator.genClosedCases(it))
         }
     }
 
-    return casesBatcher
+    return Persisting(casesBatcher, subscriptions)
 }
 
-fun enableOrdersPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService) : Batcher<Order>{
-    val orderWriter = ColDefDao(reportFilePath, orderColsDefs, "orders")
+class Persisting(val batcher: Batcher<out Any>, val subscriptions: Collection<ChannelSubscription>){
+    fun cancel(){
+        subscriptions.forEach {it.unsubscribe()}
+        batcher.cancelAndJoin()
+    }
+}
+
+
+
+fun enableOrdersPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "orders") : Persisting{
+    FileUtils.forceMkdir(reportFilePath.parent.toFile())
+
+    val orderWriter = ColDefDao(reportFilePath, orderColsDefs, tableName)
     val orderBatcher = Batcher<Order>({
-        ioExecutor.submit({
+        ioExecutor.submit {
             orderWriter.upsert(it)
-        }).get()
+        }.get()
     }, "cases writer")
     orderBatcher.start()
 
-    model.orderManagers().forEach({om->
+    val subscriptions = model.orderManagers().map { om ->
         om.orderStateTopic().subscribe {
             orderBatcher.add(it.order)
         }
-    })
-    return orderBatcher
+    }
+
+
+    return Persisting(orderBatcher, subscriptions)
 }
 
 
 
-fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService) : Batcher<Trade>{
+fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "singleTrades") : Persisting{
+    FileUtils.forceMkdir(reportFilePath.parent.toFile())
 
-    val tradeWriter = StreamTradeCaseWriter( reportFilePath, "singleTrades")
+    val tradeWriter = StreamTradeCaseWriter( reportFilePath, tableName)
 
     val tradesBatcher = Batcher<Trade>({
         ioExecutor.submit {tradeWriter.insertTrades(it.map { Pair(it,it) })}.get()
@@ -66,12 +85,12 @@ fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : Exec
 
     tradesBatcher.start()
 
-    model.orderManagers().forEach { om->
+    val subscriptions = model.orderManagers().map { om ->
         om.tradesTopic().subscribe {
             tradesBatcher.add(it)
         }
     }
-    return tradesBatcher
+    return Persisting(tradesBatcher, subscriptions)
 }
 
 
@@ -82,9 +101,9 @@ fun enableOhlcDumping(config: ModelBacktestConfig, marketDataDistributor: Market
 
         marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min240, 2)
                 .nonInterpolatedView()
-                .preRollSubscribe({
+                .preRollSubscribe {
                     batcher.add(it[0])
-                })
+                }
 
         batcher.apply {
             start()

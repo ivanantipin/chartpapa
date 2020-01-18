@@ -136,7 +136,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         val prevPos = position
         position = trd.adjustPositionByThisTrade(position)
         println("position adjusted for security $security :  $prevPos -> ${position()}")
-        tradesChannel.publish(trd)
+        tradesChannel.publish(trd.copy(positionAfter = position))
     }
 
 

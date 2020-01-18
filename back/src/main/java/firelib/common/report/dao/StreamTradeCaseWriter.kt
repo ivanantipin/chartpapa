@@ -28,11 +28,12 @@ val tradeCaseColDefs: Array<ColDef<Pair<Trade, Trade>, out Any>> = arrayOf(
         makeMetric("Pnl") { it.pnl() },
         makeMetric("Qty") { it.first.qty },
         makeMetric("MAE") { it.second.tradeStat.MAE() },
-        makeMetric("MFE") { it.second.tradeStat.MFE() }
+        makeMetric("MFE") { it.second.tradeStat.MFE() },
+        makeMetric("PosAfter") { it.second.positionAfter}
 )
 
 
-class StreamTradeCaseWriter(val path: Path, val tableName : String = "trades") {
+class StreamTradeCaseWriter(val path: Path, val tableName : String) {
 
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
     var stmt: String? = null

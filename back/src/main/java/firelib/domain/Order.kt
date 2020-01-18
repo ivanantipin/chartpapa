@@ -27,10 +27,24 @@ data class Order(val orderType: OrderType,
         require(qtyLots > 0) {"order qty <= 0!!"}
         require(price > 0 || orderType == OrderType.Market) {"price : $price <=  0!!"}
     }
-    
+
+
+    val anyInfo = HashMap<String,Any>(0)
 
     val longPrice = (price *1000000).toLong()
 
     override fun toString(): String = "Order(price=${dbl2Str(price,6)} qty=$qtyLots side=$side type=$orderType orderId=$id sec=$security time=${placementTime.toStandardString()}})"
 }
 
+fun Order.reject(reason : String){
+    this.orderSubscription.publish(OrderState(this, OrderStatus.Rejected, Instant.now(), reason))
+}
+
+fun Order.cancelReject(reason : String){
+    this.orderSubscription.publish(OrderState(this, OrderStatus.CancelFailed, Instant.now(), reason))
+}
+
+
+fun Order.cancel(){
+    this.orderSubscription.publish(OrderState(this, OrderStatus.Cancelled, Instant.now(), ""))
+}

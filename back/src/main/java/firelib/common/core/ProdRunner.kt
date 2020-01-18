@@ -4,6 +4,7 @@ import com.funstat.domain.InstrId
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.interval.Interval
+import firelib.common.ordermanager.flattenAll
 import firelib.common.report.ReportWriter
 import firelib.common.tradegate.TradeGate
 import firelib.domain.Ohlc
@@ -27,7 +28,13 @@ object ProdRunner {
 
         val endTime = updateMd(cfg, backtestMapper)
 
-        context.addModel(cfg.modelParams)
+        val model = context.addModel(cfg.modelParams)
+
+        val ioExecutor = Executors.newSingleThreadExecutor()
+
+        val persistings = listOf(enableOrdersPersist(model, cfg.getReportDbFile(), ioExecutor, "orders_backtest"),
+                enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor, "trades_backtest"))
+
 
         println("end of hist time is ${endTime}")
 
@@ -35,24 +42,31 @@ object ProdRunner {
             context.backtest(endTime)
         })
 
-        val queues = cfg.instruments.map { realtimeMapper(it.ticker) }.map {
-            println("initing realtime poller for  ${it}")
-            val queue = LinkedBlockingQueue<Ohlc>()
-            realtimeSource.listen(it, { queue += it })
-            queue
-        }
-
-        context.tradeGate.setActiveReal(realGate)
-
         var ct = fut.get()
 
         println("backtest ended starting from ${ct}")
 
-        val model = context.boundModels.first().model
+        executorService.submit {
+            model.orderManagers().forEach {it.flattenAll("switching gate")}
+        }.get()
 
-        val ioExecutor = Executors.newSingleThreadExecutor()
 
-        ioExecutor.submit({ReportWriter.writeReport(context.boundModels.first(),cfg)})
+        persistings.forEach {it.cancel()}
+
+
+        val queues = cfg.instruments.map { realtimeMapper(it.ticker) }.map {
+            println("initing realtime poller for  ${it}")
+            val queue = LinkedBlockingQueue<Ohlc>()
+            realtimeSource.listen(it) { queue += it }
+            queue
+        }
+
+
+
+        context.tradeGate.setActiveReal(realGate)
+
+
+        ioExecutor.submit {ReportWriter.writeReport(context.boundModels.first(),cfg)}.get()
 
         enableOrdersPersist(model, cfg.getReportDbFile(), ioExecutor)
         enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor)
@@ -60,7 +74,7 @@ object ProdRunner {
 
 
         timeSequence(ct, cfg.rootInterval).forEach { ctt->
-            executorService.submit({
+            executorService.submit {
                 try {
                     queues.forEachIndexed { idx, poller ->
                         poller.pollOhlcsTill(ctt).forEach {
@@ -72,15 +86,15 @@ object ProdRunner {
                     //fixme log
                     e.printStackTrace()
                 }
-            })
+            }
         }
     }
 
     fun updateMd(cfg: ModelBacktestConfig, backtestMapper: (ticker: String) -> InstrId): Instant {
         val storageImpl = MdStorageImpl()
-        return cfg.instruments.map { it.ticker }.map({
+        return cfg.instruments.map { it.ticker }.map {
             storageImpl.updateMarketData(backtestMapper(it))
-        }).min()!!
+        }.min()!!
     }
 }
 
@@ -88,12 +102,12 @@ object ProdRunner {
 
 fun timeSequence(startTime: Instant, interval: Interval, msShift : Long = 1000): Sequence<Instant> {
     var time = interval.roundTime(startTime)
-    return sequence({
+    return sequence {
         while (true) {
             yield(time)
             time += interval.duration
             waitUntil(time.plusMillis(msShift)) // wait a bit for md to arrive
         }
-    })
+    }
 }
 

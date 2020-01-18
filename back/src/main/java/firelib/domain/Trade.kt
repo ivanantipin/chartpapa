@@ -32,7 +32,7 @@ class TradeStat(val price : Double, val side : Side){
 
 }
 
-data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:Instant, val priceTime : Instant, val tradeStat: TradeStat = TradeStat(price, order.side)) {
+data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:Instant, val priceTime : Instant, val tradeStat: TradeStat = TradeStat(price, order.side), val positionAfter : Int = 0) {
 
     init {
         require(qty >= 0,{"amount can't be negative"})
@@ -57,7 +57,7 @@ data class Trade(val qty: Int, val price: Double, val order: Order, val dtGmt:In
     }
 
     override fun toString(): String {
-        return "Trade(price=${dbl2Str(price, 2)} qty=$qty side=${side()} dtGmt=$dtGmt orderId=${order.id} sec=${security()})"
+        return "Trade(price=${dbl2Str(price, 2)} qty=$qty side=${side()} dtGmt=$dtGmt orderId=${order.id} sec=${security()} posAfter=${positionAfter})"
     }
 
 }

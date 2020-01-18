@@ -50,7 +50,7 @@ fun Model.enableSeries(interval: Interval,
 
 }
 
-fun Model.buyIfNoPosition(idx: Int, money: Long) {
+fun Model.longForMoneyIfFlat(idx: Int, money: Long) {
     idxContext(idx).run {
         if (position <= 0 && !hasPendingState) {
             om.makePositionEqualsTo(moneyToLots(money), price)
@@ -58,7 +58,7 @@ fun Model.buyIfNoPosition(idx: Int, money: Long) {
     }
 }
 
-fun Model.sellIfNoPosition(idx: Int, money: Long) {
+fun Model.shortForMoneyIfFlat(idx: Int, money: Long) {
     idxContext(idx).run {
         if (position >= 0 && !hasPendingState)
             om.makePositionEqualsTo(-moneyToLots(money), price)

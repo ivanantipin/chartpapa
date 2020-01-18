@@ -43,9 +43,9 @@ object ReportWriter{
         if (model.trades.size == 0) {
             println("no trades generated")
         }else{
-            model.trades.groupBy { it.security() }.values.forEach({
-                StreamTradeCaseWriter(cfg.getReportDbFile()).insertTrades(it.toTradingCases())
-            })
+            model.trades.groupBy { it.security() }.values.forEach {
+                StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
+            }
         }
 
         ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates.filter { it.status == OrderStatus.New }.map { it.order })
