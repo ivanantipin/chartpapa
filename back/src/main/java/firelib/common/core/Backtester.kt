@@ -14,12 +14,12 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-object Launcher{
+object Backtester{
 
     init{
-        Thread.setDefaultUncaughtExceptionHandler({thread, throwable ->
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             throwable.printStackTrace()
-        })
+        }
     }
 
     fun runOptimized(cfg: ModelBacktestConfig) {
@@ -52,15 +52,15 @@ object Launcher{
 
         var jobsList = emptyList<Batcher<Ohlc>>()
 
-        sequence({
+        sequence {
             yieldAll(variator)
-        }).map {
+        }.map {
             cfg.modelParams + it.mapValues { "${it.value}"}
         }.chunked(optResourceParams.batchSize).map { paramsVar ->
             val ctx = SimpleRunCtx(cfg)
-            paramsVar.forEach({ p ->
+            paramsVar.forEach { p ->
                 ctx.addModel(p)
-            })
+            }
             ctx
         }.forEach { ctx->
             if(ohlcDumpSubscriptionNeeded){

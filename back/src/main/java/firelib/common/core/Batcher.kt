@@ -24,7 +24,6 @@ class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) 
             }catch (e : RuntimeException){
                 println(" ${threadName} : runtime exception in happened ${e}")
             } catch (e : InterruptedException){
-                println("processing finish buffer")
                 processBuffer(buffer)
                 break;
             }
@@ -34,7 +33,6 @@ class Batcher<T>(val batchProcessor : (List<T>)->Unit, val threadName : String) 
     private fun processBuffer(buffer: MutableList<T>) {
         queue.drainTo(buffer)
         if (buffer.isNotEmpty()) {
-            println("processing ${buffer}")
             batchProcessor(buffer)
             buffer.clear()
         }

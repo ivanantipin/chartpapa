@@ -74,13 +74,13 @@ fun SimpleRunCtx.backtest(endOfHistory: Instant, waitTillTime : (time : Instant)
     var stTime = this.startTime
 
     while (stTime < endOfHistory) {
-        readers.forEachIndexed({ idx, reader ->
+        readers.forEachIndexed { idx, reader ->
             var pick = reader.peek()
             while(pick != null && pick.endTime <= stTime){
                 marketDataDistributor.addOhlc(idx, reader.poll())
                 pick = reader.peek()
             }
-        })
+        }
 
         time(stTime)
         stTime += this.modelConfig.rootInterval.duration

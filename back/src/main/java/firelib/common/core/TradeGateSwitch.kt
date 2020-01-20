@@ -5,7 +5,6 @@ import firelib.common.tradegate.TradeGate
 import firelib.common.tradegate.TradeGateStub
 
 class TradeGateSwitch(val backtestGate: TradeGateStub) : TradeGate {
-
     var delegate: TradeGate = backtestGate
 
     fun setActiveReal(realGate: TradeGate) {

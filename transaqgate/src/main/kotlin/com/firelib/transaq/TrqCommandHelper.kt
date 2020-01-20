@@ -1,4 +1,4 @@
-package com.example
+package com.firelib.transaq
 
 import com.funstat.domain.InstrId
 import firelib.common.Order

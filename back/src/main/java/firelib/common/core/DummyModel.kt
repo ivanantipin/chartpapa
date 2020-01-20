@@ -1,17 +1,12 @@
 package firelib.common.core
 
-import com.funstat.tcs.GateEmulator
-import com.funstat.tcs.SourceEmulator
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.instruments
 import firelib.common.interval.Interval
 import firelib.common.model.*
 import org.apache.commons.io.FileUtils
-import ru.tinkoff.invest.openapi.data.Currency
-import ru.tinkoff.invest.openapi.wrapper.SandboxContext
 import java.time.Instant
 import java.time.LocalDate
-import java.util.concurrent.Executors
 
 class DummyModel(context: ModelContext, properties: Map<String, String>) : Model(context, properties) {
 
@@ -38,8 +33,6 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
             DummyModel(context, props)
         }
 
-
-
         fun modelConfig (waitOnEnd : Boolean = false , divAdjusted: Boolean = false) : ModelBacktestConfig {
 
             val mapper = TcsTickerMapper()
@@ -59,32 +52,5 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
 
             return cfg
         }
-    }
-}
-
-fun main() {
-
-    val executor = Executors.newSingleThreadExecutor({ Thread(it,"mainExecutor") })
-
-    val mapper = TcsTickerMapper()
-
-    (mapper.context as SandboxContext).setCurrencyBalance(Currency.RUB, 1000_000.toBigDecimal()).get()
-
-    //val gate = TcsGate(executor, mapper )
-    val gate = GateEmulator(executor)
-
-
-    try {
-        ProdRunner.runStrat(
-                executor,
-                SimpleRunCtx(DummyModel.modelConfig()),
-                gate,
-                {mapper.map(it)!!},
-                {mapper.map(it)!!},
-                SourceEmulator()
-        )
-
-    }catch (e : Exception){
-        e.printStackTrace()
     }
 }

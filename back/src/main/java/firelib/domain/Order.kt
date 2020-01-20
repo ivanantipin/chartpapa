@@ -48,3 +48,10 @@ fun Order.cancelReject(reason : String){
 fun Order.cancel(){
     this.orderSubscription.publish(OrderState(this, OrderStatus.Cancelled, Instant.now(), ""))
 }
+
+fun Order.done(){
+    this.orderSubscription.publish(OrderState(this, OrderStatus.Done, Instant.now(), ""))
+}
+fun Order.accepted(){
+    this.orderSubscription.publish(OrderState(this, OrderStatus.Accepted, Instant.now(), ""))
+}

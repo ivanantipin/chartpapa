@@ -14,7 +14,7 @@ class RealtimePoller(val instrs: InstrId,
                      val interval : Interval,
                      val queue: LinkedBlockingQueue<Ohlc>) {
 
-    val thread = Thread({
+    val thread = Thread {
         var stT = startTime
         while (true) {
             var nonEmpty = false
@@ -33,6 +33,6 @@ class RealtimePoller(val instrs: InstrId,
             val timestamp = stT.plusMillis(interval.durationMs/2)
             waitUntil(timestamp)
         }
-    })
+    }
 }
 

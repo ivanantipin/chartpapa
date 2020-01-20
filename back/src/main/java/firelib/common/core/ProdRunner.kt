@@ -66,7 +66,7 @@ object ProdRunner {
         context.tradeGate.setActiveReal(realGate)
 
 
-        ioExecutor.submit {ReportWriter.writeReport(context.boundModels.first(),cfg)}.get()
+//        ioExecutor.submit {ReportWriter.writeReport(context.boundModels.first(),cfg)}.get()
 
         enableOrdersPersist(model, cfg.getReportDbFile(), ioExecutor)
         enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor)

@@ -51,7 +51,7 @@ class TcsSource(val context: Context) : Source, Flow.Subscriber<StreamingEvent> 
 
         var dt = OffsetDateTime.of(dateTime, ZoneOffset.of("+03:00"))
         println("loading inst ${instrId} from ${dt}")
-        return sequence({
+        return sequence {
 
             while (dt < OffsetDateTime.now()) {
                 val candles = context.getMarketCandles(instrId.id,
@@ -70,7 +70,7 @@ class TcsSource(val context: Context) : Source, Flow.Subscriber<StreamingEvent> 
                 })
                 dt = dt.plusDays(1)
             }
-        })
+        }
     }
 
     override fun getName(): String {

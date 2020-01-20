@@ -1,4 +1,4 @@
-package com.example
+package com.firelib.transaq
 
 import com.firelib.TransaqConnectorGrpc
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts

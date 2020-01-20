@@ -1,4 +1,4 @@
-package com.example
+package com.firelib.transaq
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
@@ -17,12 +17,17 @@ object TrqParser{
 
     fun parseTrqMsg(str: String): TrqMsg? {
         println("====================")
+        //TrqTrades
         if (str.startsWith("<candlekinds")) {
             return kotlinXmlMapper.readValue(str, CandleKinds::class.java)
+        }else if (str.startsWith("<trades")) {
+            return kotlinXmlMapper.readValue(str, TrqTrades::class.java)
         } else if (str.startsWith("<boards")) {
             return kotlinXmlMapper.readValue(str, Boards::class.java)
         } else if (str.startsWith("<securities")) {
             return kotlinXmlMapper.readValue(str, Securities::class.java)
+        } else if (str.startsWith("<candles")) {
+            return kotlinXmlMapper.readValue(str, Candles::class.java)
         } else if (str.startsWith("<pits")) {
             println("received pits  , skipped")
         } else if (str.startsWith("<sec_info_upd")) {
@@ -31,6 +36,10 @@ object TrqParser{
             return kotlinXmlMapper.readValue(str, Markets::class.java)
         } else if (str.startsWith("<portfolio_tplus")) {
             return kotlinXmlMapper.readValue(str, TrqPortfolio::class.java)
+        }else if (str.startsWith("<orders")) {
+            return kotlinXmlMapper.readValue(str, TrqOrders::class.java)
+        } else if (str.startsWith("<alltrades")) {
+            return kotlinXmlMapper.readValue(str, AllTrades::class.java)
         } else {
             println("unparsed message ${str}")
             println("====================")

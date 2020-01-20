@@ -5,7 +5,7 @@ import com.funstat.GlobalConstants
 import com.funstat.domain.InstrId
 import com.funstat.store.MdStorageImpl
 import com.funstat.store.SimplifiedReaderImpl
-import firelib.common.core.Launcher
+import firelib.common.core.Backtester
 import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
 import firelib.common.misc.toInstantDefault
@@ -15,7 +15,6 @@ import firelib.common.model.defaultModelFactory
 import firelib.common.opt.OptimizedParameter
 import firelib.common.reader.MarketDataReaderDb
 import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.reader.SimplifiedReaderAdapter
 import firelib.common.reader.toSequence
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -110,9 +109,9 @@ class ModelBacktestConfig (val modelKClass : KClass<out Model>){
 
 fun ModelBacktestConfig.runStrat(){
     if(this.optConfig.params.isNotEmpty()){
-        Launcher.runOptimized(this)
+        Backtester.runOptimized(this)
     }else{
-        Launcher.runSimple(this)
+        Backtester.runSimple(this)
     }
 }
 

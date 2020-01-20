@@ -1,4 +1,4 @@
-package com.example
+package com.firelib.transaq
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRawValue
@@ -8,11 +8,8 @@ import java.util.*
 interface TrqMsg
 
 data class Kind(
-        @set:JsonProperty("id")
-        var id: String?,
-        @set:JsonProperty("period")
-        var period: String?,
-        @set:JsonProperty("name")
+        var id: String,
+        var period: Int,
         var name: String?)
 
 data class CandleKinds(
@@ -32,18 +29,32 @@ data class Boards(
         var boards: List<Board>
 ) : TrqMsg
 
+val aa = """
+<candles secid=".." period="идентификатор периода" status=".." board="идентификатор режима торгов"
+         seccode="код инструмента">
+    <candle date="дата" open="..." high="..." low="..." close="..." volume="..." oi="open_interest"/>
+</candles>        
+"""
 
-/*
-</decimals><minstep>Шаг цены</minstep><lotsize>Размер лота</lotsize><point_cost>Стоимость пункта цены
-</point_cost><opmask usecredit="yes/no" bymarket="yes/no" nosplit="yes/no" fok="yes/no" ioc="yes/no "/><sectype>Тип
-бумаги
-</sectype><sec_tz>имя таймзоны инструмента (типа "Russian Standard Time", "USA=Eastern Standard Time"),содержит секцию
-CDATA
-</sec_tz><quotestype>0 -без стакана; 1 -стакан типа OrderBook; 2 -стакан типа Level2</quotestype><MIC>код биржи листинга
-по стандарту ISO
-</MIC><ticker>тикер на бирже листинга</ticker><currency>валютацены</currency>
- */
 
+data class Candle(
+        var date: String?,
+        var open: Double?,
+        var high: Double?,
+        var low: Double?,
+        var close: Double?,
+        var volume: Int?,
+        var oi: Int?
+)
+
+data class Candles(
+        var secid: String?,
+        var status: String?,
+        var board: String?,
+        var seccode: String?,
+        @set:JsonProperty(value = "candle")
+        var candles: List<Candle>
+) : TrqMsg
 
 data class Security(
         var secid: String?,
@@ -67,7 +78,7 @@ data class Security(
 )
 
 
-data class Securities (
+data class Securities(
         @set:JsonProperty(value = "security")
         var securities: List<Security>
 ) : TrqMsg
@@ -100,51 +111,51 @@ data class SecInfoUpd(
 ) : TrqMsg
 
 
-data class FinamTrade(
-        var price: String?
+data class TrqTrade(
+        var secid: String?,
+        var tradeno: String?,
+        var orderno: String?,
+        var board: String?,
+        var seccode: String?,
+        var client: String?,
+        var buysell: String?,
+        var union: String?,
+        var time: String?,
+        var brokerref: String?,
+        var value: String?,
+        var comission: String?,
+        var price: String?,
+        var quantity: String?,
+        var items: String?,
+        var yield: String?,
+        var currentpos: String?,
+        var accruedint: String?,
+        var tradetype: String?,
+        var settlecode: String?
 )
 
+data class Tick(
+var tradeno : String?,
+var board : String?,
+var time : String?,
+var price : Double,
+var quantity : Int,
+var buysell : String?,
+var seccode : String?,
+var period : String?
+
+)
 
 data class AllTrades(
         @set:JsonProperty("trade")
-        var trades: List<FinamTrade> = ArrayList()
+        var ticks : List<Tick>
 ) : TrqMsg
 
-/*
-<orders>
-    <order transactionid="идентификатор транзакции сервера Transaq">
-    <orderno>биржевой номер заявки</orderno>
-    <secid>идентификатор бумаги</secid>
-    <board>идентификатор борда</board>
-    <seccode>код инструмента</seccode>
-    <client>идентификатор клиента</client>
-    <union>Код юниона</union>
-    <status>статус заявки (см. ниже в таблице 5)</status>
-    <buysell>покупка (B) / продажа (S)</buysell>
-    <time>время регистрации заявки биржей</time>
-    <expdate>дата экспирации (только для ФОРТС)</expdate>(задается в формате 23.07.2012 00:00:00 (не обязательно)
-    <origin_orderno>биржевой номер родительской заявки</origin_orderno>
-    <accepttime>время регистрации заявки сервером Transaq(только для условных заявок)</accepttime>
-    <brokerref>примечание</brokerref>
-    <value>объем заявки в валюте инструмента</value>
-    <accruedint>НКД</accruedint>
-    <settlecode>Код поставки (значение биржи, определяющее правила расчетов -смотрите подробнее в документах биржи)
-    </settlecode>
-    <balance>Неудовлетворенный остаток объема заявки в лотах (контрактах)</balance>
-    <price>Цена</price>
-    <quantity>Количество</quantity>
-    <hidden>Скрытое количество в лотах</hidden>
-    <yield>Доходность</yield>
-    <withdrawtime>Время снятия заявки, 0 для активных</withdrawtime>
-    <condition>Условие, см. newcondorder</condition>
-    <conditionvalue>Цена для условной заявки, либо обеспеченность в процентах</conditionvalue>
-    <validafter>с какого момента времени действительна (см. newcondorder)</validafter>
-    <validbefore>до какого момента действительно (см. newcondorder)</validbefore>
-    <maxcomission>максимальная комиссия по сделкам заявки</maxcomission>
-    <result>сообщение биржи в случае отказа выставить заявку</result>
-</order>
-</orders>
- */
+
+data class TrqTrades(
+        @set:JsonProperty("trade")
+        var trades: List<TrqTrade> = ArrayList()
+) : TrqMsg
 
 data class TrqOrder(var transactionid: String,
                     var orderno: String?,
@@ -235,7 +246,7 @@ data class TrqPortfolio(
         var leverage: String?,
         var margin_level: String?,
         @set:JsonProperty("security")
-        var securities : List<PortfolioSecurity>
+        var securities: List<PortfolioSecurity>
 ) : TrqMsg
 
 data class TrqClient(
@@ -248,3 +259,12 @@ data class TrqClient(
 )
 
 
+data class TrqOrders(
+        @set:JsonProperty("order")
+        var orders: List<TrqOrder>
+) : TrqMsg
+
+
+data class TrqPositions(
+        var some : String
+) : TrqMsg
