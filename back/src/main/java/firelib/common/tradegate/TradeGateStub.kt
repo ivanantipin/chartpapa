@@ -21,14 +21,12 @@ class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) 
         MarketOrderStub(timeService)
     }.toTypedArray()
 
-
-    fun updateBidAsks(i : Int, time : Instant, price : Double) {
-        val (bid,ask) = cfg.adjustSpread(price,price)
-        limitBooks[i].updateBidAsk(bid, ask,time)
-        stopBooks[i].updateBidAsk(bid, ask,time)
-        marketSubs[i].updateBidAsk(bid, ask,time)
+    fun updateBidAsks(i: Int, time: Instant, price: Double) {
+        val (bid, ask) = cfg.adjustSpread(price, price)
+        limitBooks[i].updateBidAsk(bid, ask, time)
+        stopBooks[i].updateBidAsk(bid, ask, time)
+        marketSubs[i].updateBidAsk(bid, ask, time)
     }
-
 
     fun getSecIdx(sec: String): Int {
         return cfg.instruments.indexOfFirst { it.ticker == sec }
@@ -49,13 +47,12 @@ class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) 
     /**
      * just order cancel
      */
-    override fun cancelOrder(order: Order): Unit {
+    override fun cancelOrder(order: Order) {
         val secIdx = getSecIdx(order.security)
         when (order.orderType) {
             OrderType.Limit -> limitBooks[secIdx].cancelOrder(order)
             OrderType.Stop -> stopBooks[secIdx].cancelOrder(order)
             OrderType.Market -> throw RuntimeException("not possible to cancel market order ${order}")
         }
-
     }
 }

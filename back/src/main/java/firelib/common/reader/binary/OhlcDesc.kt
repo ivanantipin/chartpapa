@@ -1,9 +1,8 @@
 package firelib.common.reader.binary
 
+import firelib.domain.Ohlc
 import java.nio.ByteBuffer
 import java.time.Instant
-
-import firelib.domain.Ohlc
 
 class OhlcDesc : BinaryReaderRecordDescriptor<Ohlc>{
     override fun write(tick: Ohlc, buffer: ByteBuffer): Unit {

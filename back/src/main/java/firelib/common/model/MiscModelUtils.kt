@@ -2,9 +2,7 @@ package firelib.common.model
 
 import firelib.common.interval.Interval
 import firelib.common.misc.PositionCloser
-import firelib.common.ordermanager.buyAtLimit
 import firelib.common.ordermanager.makePositionEqualsTo
-import firelib.common.ordermanager.sellAtLimit
 import firelib.common.timeseries.TimeSeries
 import firelib.common.timeseries.nonInterpolatedView
 import firelib.domain.Ohlc

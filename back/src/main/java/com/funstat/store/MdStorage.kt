@@ -1,8 +1,7 @@
 package com.funstat.store
 
-import firelib.domain.Ohlc
 import com.funstat.domain.InstrId
-import firelib.common.interval.Interval
+import firelib.domain.Ohlc
 
 interface MdStorage {
 

@@ -3,7 +3,6 @@ package firelib.common.model
 import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import firelib.common.model.UtilsHandy.updateRussianDivStocks
 import firelib.common.model.UtilsHandy.updateRussianStockSimple
 import java.time.Instant
 

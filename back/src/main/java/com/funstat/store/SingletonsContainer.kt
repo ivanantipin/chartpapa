@@ -3,7 +3,6 @@ package com.funstat.store
 
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
-import java.util.function.Supplier
 
 class SingletonsContainer : AutoCloseable {
 

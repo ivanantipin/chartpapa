@@ -2,10 +2,10 @@ package com.firelib.test
 
 import com.funstat.domain.InstrId
 import firelib.common.Order
-import firelib.domain.OrderType
-import firelib.domain.Side
 import firelib.common.Trade
 import firelib.common.interval.Interval
+import firelib.domain.OrderType
+import firelib.domain.Side
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant

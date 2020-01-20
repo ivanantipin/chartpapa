@@ -2,7 +2,6 @@ package firelib.common.report
 
 import firelib.common.report.SqlTypeMapper.mapType
 import java.math.BigDecimal
-import java.sql.Timestamp
 import java.time.Instant
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.reflect

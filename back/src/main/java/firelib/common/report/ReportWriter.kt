@@ -1,6 +1,6 @@
 package firelib.common.report
 
-import firelib.common.OrderStatus
+import firelib.domain.OrderStatus
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.core.ModelOutput
 import firelib.common.misc.JsonHelper

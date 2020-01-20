@@ -1,6 +1,6 @@
 package firelib.common.core
 
-import firelib.common.OrderStatus
+import firelib.domain.OrderStatus
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.mddistributor.MarketDataDistributorImpl
 import firelib.common.model.Model

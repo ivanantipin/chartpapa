@@ -1,9 +1,8 @@
 package com.funstat.iqfeed
 
-import firelib.domain.Ohlc
 import firelib.common.interval.Interval
+import firelib.domain.Ohlc
 import firelib.domain.merge
-
 import java.util.*
 
 object IntervalTransformer {

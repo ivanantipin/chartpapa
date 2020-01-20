@@ -4,7 +4,6 @@ package com.firelib.test
 import firelib.common.interval.Interval
 import firelib.common.model.Model
 import firelib.common.model.ModelContext
-import firelib.common.ordermanager.OrderManagerImpl
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 import java.time.Instant

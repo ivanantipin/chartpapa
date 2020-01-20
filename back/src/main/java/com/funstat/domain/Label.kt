@@ -1,7 +1,6 @@
 package com.funstat.domain
 
 import java.time.LocalDateTime
-import java.util.HashMap
 
 data class Label(
         val level: Double,

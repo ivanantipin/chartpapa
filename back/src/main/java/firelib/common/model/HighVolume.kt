@@ -1,6 +1,5 @@
 package firelib.common.model
 
-import com.funstat.GlobalConstants
 import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl

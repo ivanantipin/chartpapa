@@ -1,27 +1,25 @@
 package com.funstat.finam
 
 import com.funstat.domain.InstrId
-import firelib.domain.Ohlc
-import firelib.common.core.Source
+import com.google.common.io.CharStreams.readLines
 import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
+import firelib.common.core.Source
 import firelib.common.interval.Interval
+import firelib.domain.Ohlc
+import io.netty.util.concurrent.DefaultThreadFactory
 import org.apache.commons.io.IOUtils
 import org.asynchttpclient.DefaultAsyncHttpClient
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
 import org.slf4j.LoggerFactory
-
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URL
 import java.nio.charset.Charset
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.HashMap
-
-import com.google.common.io.CharStreams.readLines
-import io.netty.util.concurrent.DefaultThreadFactory
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 class FinamDownloader : AutoCloseable, Source {

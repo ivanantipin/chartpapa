@@ -1,7 +1,6 @@
 package firelib.domain
 
 import firelib.common.Order
-import firelib.common.OrderStatus
 import firelib.common.Trade
 
 class OrderWithState(val order: Order) {

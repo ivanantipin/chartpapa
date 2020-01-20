@@ -5,7 +5,6 @@ import com.funstat.store.MdStorageImpl
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.interval.Interval
 import firelib.common.ordermanager.flattenAll
-import firelib.common.report.ReportWriter
 import firelib.common.tradegate.TradeGate
 import firelib.domain.Ohlc
 import java.time.Instant

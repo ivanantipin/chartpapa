@@ -1,8 +1,8 @@
 package com.funstat.store
 
 import com.funstat.domain.InstrId
-import firelib.domain.Ohlc
 import firelib.common.interval.Interval
+import firelib.domain.Ohlc
 
 class CachedStorage(private val delegate: MdStorage) : MdStorage {
     override fun updateRequested(code: String) {

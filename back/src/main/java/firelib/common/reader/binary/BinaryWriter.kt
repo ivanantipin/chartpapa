@@ -1,6 +1,7 @@
 package firelib.common.reader.binary
 
-import java.io.*
+import java.io.File
+import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 
 class BinaryWriter<T>(val fileName: String, val desc: BinaryReaderRecordDescriptor<T>) {

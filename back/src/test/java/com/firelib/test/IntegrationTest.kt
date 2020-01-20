@@ -11,10 +11,7 @@ import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler
 import firelib.parser.ParserHandlersProducer
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Path

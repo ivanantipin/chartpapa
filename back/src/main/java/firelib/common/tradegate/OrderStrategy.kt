@@ -1,6 +1,6 @@
 package firelib.common.tradegate
 
-import java.util.Comparator
+import java.util.*
 
 interface OrderStrategy {
     fun sellOrdering  (): Comparator<OrderKey>

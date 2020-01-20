@@ -3,11 +3,13 @@ package com.funstat.iqfeed
 import com.funstat.store.MdStorageImpl
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
-import firelib.parser.*
-
+import firelib.parser.CsvParser
+import firelib.parser.LegacyMarketDataFormatLoader
+import firelib.parser.ParseHandler
+import firelib.parser.ParserHandlersProducer
 import java.nio.file.Paths
 import java.time.Instant
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 object DbPopulator {

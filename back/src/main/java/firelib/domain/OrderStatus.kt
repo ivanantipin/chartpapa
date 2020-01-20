@@ -1,4 +1,4 @@
-package firelib.common
+package firelib.domain
 
 enum class OrderStatus {
     New, Accepted, PendingCancel, CancelFailed, Done, Rejected, Cancelled;

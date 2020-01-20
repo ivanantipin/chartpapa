@@ -3,7 +3,9 @@ package firelib.common.model
 import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import firelib.common.config.*
+import firelib.common.config.InstrumentConfig
+import firelib.common.config.ModelBacktestConfig
+import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.ordermanager.flattenAll
 import firelib.common.reader.MarketDataReaderSql

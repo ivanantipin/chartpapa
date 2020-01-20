@@ -1,22 +1,13 @@
 package firelib.common.model
 
-import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
-import firelib.common.core.ModelFactory
 import firelib.common.interval.Interval
-import firelib.common.ordermanager.OrderManager
-import firelib.common.ordermanager.OrderManagerImpl
 import firelib.common.ordermanager.flattenAll
 import firelib.common.ordermanager.makePositionEqualsTo
-import firelib.common.reader.ReaderFactoryImpl
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
-import kotlinx.coroutines.coroutineScope
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import kotlin.math.abs
 
 class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model(context,props){

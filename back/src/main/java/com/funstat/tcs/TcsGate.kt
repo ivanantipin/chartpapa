@@ -116,7 +116,7 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
             executor.run {
                 when (it.status) {
                     OrderStatus.Rejected -> order.orderSubscription.publish(OrderState(order,
-                            firelib.common.OrderStatus.Cancelled, Instant.now(), it.rejectReason))
+                            firelib.domain.OrderStatus.Cancelled, Instant.now(), it.rejectReason))
                     OrderStatus.New , OrderStatus.Fill, OrderStatus.PartiallyFill -> {
                         if(it.executedLots > 0){
                             order.tradeSubscription.publish(Trade(it.executedLots,order.price,order,Instant.now(),Instant.now()))
@@ -129,7 +129,7 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
             }
         }).exceptionally {
             order.orderSubscription.publish(OrderState(order,
-                    firelib.common.OrderStatus.Cancelled, Instant.now(), "${it.message}"))
+                    firelib.domain.OrderStatus.Cancelled, Instant.now(), "${it.message}"))
             null
         }
         future.get()

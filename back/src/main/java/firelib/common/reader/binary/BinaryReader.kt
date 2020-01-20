@@ -1,11 +1,10 @@
 package firelib.common.reader.binary
 
+import firelib.common.reader.MarketDataReader
+import firelib.domain.Timed
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.time.Instant
-
-import firelib.common.reader.MarketDataReader
-import firelib.domain.Timed
 
 class BinaryReader<T : Timed>(val fileName : String, val desc : BinaryReaderRecordDescriptor<T>) : MarketDataReader<T>{
 

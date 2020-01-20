@@ -37,13 +37,13 @@ class IqFeedSource(val csvPath: Path) : Source {
         val producer = ParserHandlersProducer(load)
         val fname = csvPath.resolve(instrId.code + "_1.csv").toAbsolutePath().toString()
 
-        return sequence({
+        return sequence {
             val parser = CsvParser<Ohlc>(fname, producer.handlers as Array<out ParseHandler<Ohlc>>?, { Ohlc() }, 10_000_000)
             println(parser.seek(dateTime.toInstant(ZoneOffset.UTC)))
             while (parser.read()) {
                 yield(parser.current())
             }
-        })
+        }
     }
 
     override fun getName(): String {

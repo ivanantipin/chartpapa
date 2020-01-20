@@ -3,7 +3,6 @@ package firelib.common.core
 import com.funstat.domain.InstrId
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
-import java.lang.RuntimeException
 import java.time.LocalDateTime
 
 interface Source {

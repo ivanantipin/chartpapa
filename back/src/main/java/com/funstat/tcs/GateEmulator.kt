@@ -1,7 +1,7 @@
 package com.funstat.tcs
 
 import firelib.common.Order
-import firelib.common.OrderStatus
+import firelib.domain.OrderStatus
 import firelib.common.Trade
 import firelib.common.tradegate.TradeGate
 import firelib.domain.OrderState

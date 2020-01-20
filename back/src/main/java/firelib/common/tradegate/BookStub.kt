@@ -1,11 +1,11 @@
 package firelib.common.tradegate
 
 import firelib.common.Order
-import firelib.common.OrderStatus
-import firelib.domain.Side
+import firelib.domain.OrderStatus
 import firelib.common.Trade
 import firelib.common.timeservice.TimeService
 import firelib.domain.OrderState
+import firelib.domain.Side
 import java.time.Instant
 import java.util.*
 
@@ -27,7 +27,7 @@ class BookStub(val timeService : TimeService, val strategy : OrderStrategy) {
     fun sendOrder(order: Order) {
         val ords = if(order.side == Side.Buy) buyOrders else sellOrders
         ords.put(keyForOrder(order),order)
-        order.orderSubscription.publish(OrderState(order,OrderStatus.Accepted,timeService.currentTime()))
+        order.orderSubscription.publish(OrderState(order, OrderStatus.Accepted,timeService.currentTime()))
         checkOrders()
     }
 
@@ -40,7 +40,7 @@ class BookStub(val timeService : TimeService, val strategy : OrderStrategy) {
         val rec: Order? = ords.remove(keyForOrder(order))
         if(rec != null){
             //this can be null due to delay trade gate
-            rec.orderSubscription.publish(OrderState(order,OrderStatus.Cancelled,timeService.currentTime()))
+            rec.orderSubscription.publish(OrderState(order, OrderStatus.Cancelled,timeService.currentTime()))
         }
 
     }

@@ -21,11 +21,8 @@ class GeGeWriter<T : Any>(val name: String, val path: Path, val type: KClass<T>,
     val mappers : Map<String,(Any)->(Any)>
     val mappersTo: Map<String, (Any) -> Any>
 
-
-
     init {
         val header = type.memberProperties.associateBy({ it.name }, { SqlTypeMapper.mapType(it.returnType) })
-
 
         mappers = type.memberProperties.associateBy({ it.name }, {
             SqlTypeMapper.fromDb(it.returnType)
@@ -44,20 +41,18 @@ class GeGeWriter<T : Any>(val name: String, val path: Path, val type: KClass<T>,
         val rowsM = rows.map { row ->
             type.memberProperties.associateBy({ it.name }, { mappersTo[it.name]!!(it.get(row)!!)  })
         }
-        TransactionTemplate(tman).execute({ status ->
+        TransactionTemplate(tman).execute { status ->
             NamedParameterJdbcTemplate(ds).batchUpdate(stmt, rowsM.toTypedArray())
-        })
+        }
     }
 
     fun read(): List<T> {
-        return NamedParameterJdbcTemplate(ds).query(sel, { rs, row ->
+        return NamedParameterJdbcTemplate(ds).query(sel) { rs, row ->
             val cons = type.primaryConstructor!!
             val params = cons.parameters
-
-
             cons.callBy(params.associateBy({ it }, {
                 mappers[it.name]!!(rs.getObject(it.name))
             }))
-        })
+        }
     }
 }

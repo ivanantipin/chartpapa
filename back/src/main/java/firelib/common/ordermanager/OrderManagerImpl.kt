@@ -2,26 +2,18 @@ package firelib.common.ordermanager
 
 import com.funstat.domain.InstrId
 import firelib.common.Order
-import firelib.common.OrderStatus
-import firelib.domain.OrderType
+import firelib.domain.OrderStatus
 import firelib.common.Trade
 import firelib.common.misc.NonDurableChannel
 import firelib.common.misc.SubChannel
 import firelib.common.timeservice.TimeService
 import firelib.common.tradegate.TradeGate
 import firelib.domain.OrderState
+import firelib.domain.OrderType
 import firelib.domain.OrderWithState
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.Random
 import java.util.concurrent.atomic.AtomicLong
-import kotlin.collections.HashMap
-import kotlin.collections.List
-import kotlin.collections.any
-import kotlin.collections.contains
-import kotlin.collections.forEach
-import kotlin.collections.map
-import kotlin.collections.plusAssign
 import kotlin.collections.set
 
 
@@ -79,7 +71,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
             if(ord != null){
                 tradeGate.cancelOrder(order)
                 ord.statuses += OrderStatus.PendingCancel
-                orderStateChannel.publish(OrderState(ord.order,OrderStatus.PendingCancel, timeService.currentTime()))
+                orderStateChannel.publish(OrderState(ord.order, OrderStatus.PendingCancel, timeService.currentTime()))
             }else{
                 log.error("cancelling non existing order {}", order)
             }
@@ -90,7 +82,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
     override fun submitOrders(orders: List<Order>) {
         if(this.id2Order.size > maxOrderCount){
             log.error("max order count reached rejecting orders {}", orders)
-            orders.forEach({orderStateChannel.publish(OrderState(it,OrderStatus.Rejected, timeService.currentTime()))})
+            orders.forEach({orderStateChannel.publish(OrderState(it, OrderStatus.Rejected, timeService.currentTime()))})
         }else{
             orders.forEach { order ->
                 val orderWithState = OrderWithState(order)
@@ -127,11 +119,11 @@ class OrderManagerImpl(val tradeGate : TradeGate,
     }
 
 
-    fun onTrade(trd: Trade, order : OrderWithState): Unit {
+    fun onTrade(trd: Trade, order : OrderWithState) {
         println("on trade ${trd}")
         order.trades += trd
         if(order.remainingQty() < 0){
-            println("negative remaining amount order ${order}")
+            println("negative remaining amount order $order")
         }
         val prevPos = position
         position = trd.adjustPositionByThisTrade(position)
