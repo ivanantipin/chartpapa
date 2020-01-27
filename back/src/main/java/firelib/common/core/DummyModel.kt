@@ -1,10 +1,9 @@
 package firelib.common.core
 
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.config.instruments
 import firelib.common.interval.Interval
 import firelib.common.model.*
-import org.apache.commons.io.FileUtils
+import firelib.common.ordermanager.sellAtMarket
 import java.time.Instant
 import java.time.LocalDate
 
@@ -16,10 +15,8 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
             if(Instant.now().toEpochMilli() - ts[0].endTime.toEpochMilli() < 100_000){
                 println("ohlc ${ts[0]}" )
             }
-            if(orderManagers()[0].position() >= 0){
-                shortForMoneyIfFlat(0, 10_000)
-            }else{
-                longForMoneyIfFlat(0,10_000)
+            if(!orderManagers()[0].hasPendingState()){
+                orderManagers()[0].sellAtMarket(1)
             }
             println("position ${orderManagers()[0].position()}")
 
@@ -29,27 +26,14 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
     }
 
     companion object{
-        val modelFactory : ModelFactory = { context, props ->
-            DummyModel(context, props)
-        }
-
-        fun modelConfig (waitOnEnd : Boolean = false , divAdjusted: Boolean = false) : ModelBacktestConfig {
-
-            val mapper = TcsTickerMapper()
-
-
+        fun modelConfig () : ModelBacktestConfig {
             val cfg = ModelBacktestConfig(DummyModel::class).apply {
-                instruments = instruments(listOf(mapper.map("sber")!!),
-                        source = "TCS",
-                        divAdjusted = divAdjusted,
-                        waitOnEnd = waitOnEnd)
+                instruments = listOf("SBER")
                 startDate(LocalDate.now().minusDays(1))
-                rootInterval = Interval.Sec10
+                interval = Interval.Sec10
                 adjustSpread = makeSpreadAdjuster(0.0005)
+                backtestSourceName = SourceName.DUMMY
             }
-
-            FileUtils.forceDelete(cfg.getReportDbFile().toFile())
-
             return cfg
         }
     }

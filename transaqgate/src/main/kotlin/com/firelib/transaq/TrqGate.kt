@@ -8,12 +8,15 @@ import firelib.common.*
 import firelib.common.tradegate.TradeGate
 import firelib.domain.OrderType
 import firelib.domain.Side
+import firelib.domain.*
 import org.apache.commons.text.StringEscapeUtils
+import java.lang.Exception
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class TrqGate(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStub,
               val clientId: String,
@@ -41,12 +44,24 @@ class TrqGate(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStu
         }
     }
 
-    val callbacker = MsgCallbacker(blockingStub, executor)
+    val callbacker = MsgCallbacker(blockingStub)
 
     init {
-        callbacker.addPlainListener {
-            processMsg(it)
-        }
+        val receiver = callbacker.add<TrqMsg> { true }
+        Thread {
+            while(true){
+                try {
+                    val poll = receiver.queue.poll(10, TimeUnit.SECONDS)
+                    if(poll == null){
+                        println("nothing received")
+                    }else{
+                        executor.execute{processMsg(poll)}
+                    }
+                }catch (e : Exception){
+                    println("error proccessing ")
+                }
+            }
+        }.start()
     }
 
 
@@ -75,18 +90,43 @@ class TrqGate(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStu
                         println("error, no order found for ${msg} ")
                     }else{
                         if (msg.status == "cancelled" && msg.withdrawtime != "0") {
+                            println("cancel")
                             order.cancel()
-                        }
-                        if (msg.status == "active" ) {
+                        }else if (msg.status == "active" ) {
+                            println("active")
                             order.accepted()
-                        }
-
-                        if (msg.status == "matched" ) {
+                        } else if (msg.status == "matched" ) {
+                            println("matched")
                             order.done()
+                        } else{
+                            println("error unreckon status ${msg}")
                         }
                     }
 
                 }
+            }
+            is AllTrades->{
+                println("ignore")
+            }
+            is TrqTrades->{
+                msgTrq.trades.forEach { trade->
+                    val order = ordersByOrderNumber.get(trade.orderno)
+                    if(order == null){
+                        println("error received trade for missing order ${trade}")
+                    }else{
+
+                        order.tradeSubscription.publish(Trade(
+                            qty = trade.quantity!!.toInt(),
+                            price = trade.price!!.toDouble(),
+                            order = order,
+                            dtGmt = Instant.now(), // fixme
+                            priceTime = Instant.now()
+                        ))
+                    }
+
+
+                }
+                println("transaq trades ${msgTrq}")
             }
         }
     }
@@ -128,13 +168,13 @@ fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str : String) : Tr
     return parseTrqResponse(StringEscapeUtils.unescapeJava(this.sendCommand(Str.newBuilder().setTxt(str).build()).txt))
 }
 
+val loginCmd = TrqCommandHelper.connectCmd("TCNN9986", "z7L4V4", "tr1-demo5.finam.ru", "3939")
+
 
 fun makeDefaultTransaqGate(executor: Executor): TrqGate {
     val stub = makeDefaultStub()
 
-    println("login response ${stub.command(TrqCommandHelper.connectCmd("TCNN9974", "v9D9z4", "tr1-demo5.finam.ru", "3939"))}")
-
-    return TrqGate(stub, "virt/9974", executor)
+    return TrqGate(stub, "virt/9986", executor)
 }
 
 

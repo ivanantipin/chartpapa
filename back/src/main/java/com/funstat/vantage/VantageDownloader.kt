@@ -2,7 +2,8 @@ package com.funstat.vantage
 
 import com.funstat.domain.InstrId
 import com.funstat.store.MdDao
-import firelib.common.core.Source
+import firelib.common.core.HistoricalSource
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import org.springframework.web.client.RestTemplate
@@ -13,7 +14,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class VantageDownloader : Source {
+class VantageDownloader : HistoricalSource {
 
     internal var mdDao: MdDao? = null
 
@@ -53,8 +54,8 @@ class VantageDownloader : Source {
         return load(instrId)
     }
 
-    override fun getName(): String {
-        return SOURCE
+    override fun getName(): SourceName {
+        return SourceName.VANTAGE
     }
 
     override fun getDefaultInterval(): Interval {
@@ -63,8 +64,7 @@ class VantageDownloader : Source {
 
     companion object {
 
-        val SOURCE = "VANTAGE"
-        val MICEX = "MICEX"
+        val SOURCE = SourceName.VANTAGE
         internal var pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 

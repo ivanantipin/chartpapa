@@ -1,15 +1,8 @@
 package firelib.common.model
 
-import com.funstat.domain.InstrId
-import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
 import firelib.common.interval.Interval
-import firelib.common.reader.MarketDataReaderSql
-import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.reader.toSequence
 import firelib.common.report.GeGeWriter
 
 
@@ -28,7 +21,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
     init {
 
 
-        val dayRolled = context.tickers().map { false }.toMutableList()
+        val dayRolled = context.config.instruments.map { false }.toMutableList()
 
 
 
@@ -43,7 +36,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
         }
 
 
-        context.tickers().forEachIndexed { idx, tick ->
+        context.config.instruments.forEachIndexed { idx, tick ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Min60, 1000)
             ret.preRollSubscribe {
                 if (dayRolled[idx] && it[1].interpolated && !it[0].interpolated) {
@@ -70,35 +63,9 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
 
 }
 
-suspend fun main(args: Array<String>) {
-
-
-    val tt = listOf(
-            "sber",
-            "lkoh",
-            "gazp",
-            "alrs",
-            "moex",
-            "gmkn",
-            "mgnt",
-            "chmf",
-            "sberp",
-            "nvtk",
-            "nlmk",
-            "mtss",
-            "magn"
-    )
-
-    val divs = DivHelper.getDivs()
-
-    val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-
+fun main() {
     val conf = ModelBacktestConfig(GapTrading::class).apply {
-        instruments = tt.map { instr ->
-            InstrumentConfig(instr, { time ->
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
-            }, InstrId.dummyInstrument(instr))
-        }
+        instruments = DivHelper.getDivs().keys.toList()
         opt("holdtime", 1, 3, 1)
     }
 

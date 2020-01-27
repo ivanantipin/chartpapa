@@ -29,7 +29,7 @@ class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) 
     }
 
     fun getSecIdx(sec: String): Int {
-        return cfg.instruments.indexOfFirst { it.ticker == sec }
+        return cfg.instruments.indexOf(sec)
     }
 
     /**

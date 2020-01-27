@@ -4,7 +4,8 @@ import com.funstat.domain.InstrId
 import com.google.common.io.CharStreams.readLines
 import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
-import firelib.common.core.Source
+import firelib.common.core.HistoricalSource
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import io.netty.util.concurrent.DefaultThreadFactory
@@ -22,7 +23,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class FinamDownloader : AutoCloseable, Source {
+class FinamDownloader : AutoCloseable, HistoricalSource {
 
     private val client = DefaultAsyncHttpClient(
             DefaultAsyncHttpClientConfig.Builder()
@@ -62,9 +63,9 @@ class FinamDownloader : AutoCloseable, Source {
             val markets = map["varaEmitentMarkets"]
 
 
-            return codes.mapIndexed({ i, code ->
-                InstrId(id = ids!![i], name = names!![i], market = markets!![i], code = codes[i].replace("'", ""), source = SOURCE)
-            })
+            return codes.mapIndexed { i, code ->
+                InstrId(id = ids!![i], name = names!![i], market = markets!![i], code = codes[i].replace("'", ""), source = SOURCE.name)
+            }
 
         } catch (e: IOException) {
             throw RuntimeException(e)
@@ -154,8 +155,8 @@ class FinamDownloader : AutoCloseable, Source {
         }
     }
 
-    override fun getName(): String {
-        return SOURCE
+    override fun getName(): SourceName {
+        return SourceName.FINAM
     }
 
     override fun getDefaultInterval(): Interval {
@@ -164,7 +165,7 @@ class FinamDownloader : AutoCloseable, Source {
 
     companion object{
         private val log = LoggerFactory.getLogger(FinamDownloader::class.java)
-        val SOURCE = "FINAM"
+        val SOURCE = SourceName.FINAM
         val SHARES_MARKET = "1"
     }
 

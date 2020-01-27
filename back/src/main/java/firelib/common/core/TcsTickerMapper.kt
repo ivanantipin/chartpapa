@@ -1,7 +1,7 @@
 package firelib.common.core
 
 import com.funstat.domain.InstrId
-import com.funstat.tcs.TcsSource
+import com.funstat.tcs.TcsHistoricalSource
 import com.funstat.tcs.getContext
 
 class TcsTickerMapper {
@@ -11,7 +11,7 @@ class TcsTickerMapper {
     }
 
     val source by lazy {
-        TcsSource(context)
+        TcsHistoricalSource(context)
     }
 
     val code2instr by lazy {

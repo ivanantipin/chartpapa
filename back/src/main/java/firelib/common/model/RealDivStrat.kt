@@ -1,9 +1,6 @@
 package firelib.common.model
 
-import com.funstat.domain.InstrId
-import com.funstat.finam.FinamDownloader
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.config.instruments
 import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.misc.StreamTradeCaseGenerator
@@ -14,25 +11,24 @@ import firelib.common.ordermanager.flattenAll
 class RealDivModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
     init {
-        orderManagers().forEach({
+        orderManagers().forEach {
             val gen = StreamTradeCaseGenerator()
             it.tradesTopic().subscribe {
                 val cases = gen.genClosedCases(it)
                 if (!cases.isEmpty()) {
-                    cases.forEach({
+                    cases.forEach {
                         println(it.first)
                         println(it.second)
                     }
-                    )
                 }
             }
-        })
+        }
 
         val divMap = DivHelper.getDivs()
 
         val tss = enableSeries(Interval.Min10)
 
-        context.tickers().forEachIndexed({ idx, instrument ->
+        context.config.instruments.forEachIndexed { idx, instrument ->
             val divs = divMap[instrument]!!
             val ret = tss[idx]
 
@@ -73,10 +69,12 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                                 println("t1 ${ret[1]}")
                             }
 
-                            longForMoneyIfFlat(idx,100_000)
+                            longForMoneyIfFlat(idx, 100_000)
 
                             nextIdx = divs.indexOfFirst {
-                                it.lastDayWithDivs.isAfter(prevIdx.lastDayWithDivs) && it.lastDayWithDivs.atStartOfDay().isAfter(context.timeService.currentTime().atUtc())
+                                it.lastDayWithDivs.isAfter(prevIdx.lastDayWithDivs) && it.lastDayWithDivs.atStartOfDay().isAfter(
+                                    context.timeService.currentTime().atUtc()
+                                )
                             }
                             if (nextIdx > 0) {
                                 //println("next div is ${divs[nextIdx]} for instrument ${instrument}" )
@@ -107,14 +105,14 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                     }
                 }
             }
-        })
+        }
     }
 }
 
 fun main() {
 
     val conf = ModelBacktestConfig(RealDivModel::class).apply {
-        instruments(DivHelper.getDivs().keys.map { InstrId.dummyInstrument(it) }, FinamDownloader.SOURCE)
+        instruments = DivHelper.getDivs().keys.toList()
     }
 
     conf.runStrat()

@@ -1,5 +1,6 @@
 package firelib.common.core
 
+import com.funstat.store.DbReaderFactory
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.OptResourceParams
 import firelib.common.opt.ParamsVariator
@@ -34,8 +35,8 @@ object Backtester{
 
         val variator = ParamsVariator(optCfg.params)
 
-        val startDtGmt = cfg.rootInterval.roundTime(cfg.startDateGmt)
-        val endDtGmt = cfg.rootInterval.roundTime(cfg.endDate)
+        val startDtGmt = cfg.interval.roundTime(cfg.startDateGmt)
+        val endDtGmt = cfg.interval.roundTime(cfg.endDate)
 
         val endOfOptimize =  if(optCfg.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
         else startDtGmt.plus(optCfg.optimizedPeriodDays, ChronoUnit.DAYS)
@@ -49,6 +50,8 @@ object Backtester{
         clearReportDir(cfg.reportTargetPath)
 
         var ohlcDumpSubscriptionNeeded = cfg.dumpOhlc
+
+        val readerFactory = DbReaderFactory(cfg.backtestSourceName, cfg.interval, cfg.roundedStartTime())
 
         var jobsList = emptyList<Batcher<Ohlc>>()
 

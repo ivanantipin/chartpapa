@@ -1,13 +1,15 @@
-package firelib.common.model
+package firelib.common.misc
 
 import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import firelib.common.model.UtilsHandy.updateRussianStockSimple
+import firelib.common.core.InstrumentMapper
+import firelib.common.misc.UtilsHandy.updateRussianStockSimple
+import firelib.common.model.DivHelper
 import java.time.Instant
 
 
-class FinamTickerMapper{
+class FinamTickerMapper : InstrumentMapper{
     val finamDownloader by lazy{
         FinamDownloader()
     }
@@ -20,9 +22,9 @@ class FinamTickerMapper{
         symbols.groupBy { it.code.toLowerCase() }
     }
 
-    fun map(ticker : String) : InstrId?{
+    override fun invoke(ticker: String): InstrId {
         val lst = code2instr[ticker.toLowerCase()]!!
-        return lst.filter { it.market == FinamDownloader.SHARES_MARKET }.firstOrNull()
+        return lst.filter { it.market == FinamDownloader.SHARES_MARKET }.firstOrNull()!!
     }
 }
 

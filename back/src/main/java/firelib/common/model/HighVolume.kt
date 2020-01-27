@@ -1,16 +1,9 @@
 package firelib.common.model
 
-import com.funstat.domain.InstrId
-import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
-import firelib.common.reader.MarketDataReaderSql
-import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.reader.toSequence
 import firelib.common.report.GeGeWriter
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
@@ -42,7 +35,7 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
     init {
         val daytss = enableSeries(Interval.Day, interpolated = false)
 
-        val quantiles = context.tickers().map {
+        val quantiles = context.config.instruments.map {
             Quantiles<Double>(1000);
         }
 
@@ -63,7 +56,7 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
                                 makeRet(it, 3, 8),
                                 makeRet(it, 3, 11),
                                 makeRet(it, 3, 18),
-                                context.tickers()[idx]
+                                context.config.instruments[idx]
                         )
                         dumper.write(listOf(hvStat))
                     }
@@ -77,20 +70,9 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
 
 }
 
-suspend fun main(args: Array<String>) {
-
-    val divs = DivHelper.getDivs()
-
-    val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-
+fun main() {
     val conf = ModelBacktestConfig(HighVolume::class).apply {
-        instruments = divs.keys.filter { it != "irao" && it != "trnfp" }.map { instr ->
-            InstrumentConfig(instr, {
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
-            }, InstrId.dummyInstrument(instr))
-        }
+        instruments = DivHelper.getDivs().keys.toList()
     }
-
     conf.runStrat()
-
 }

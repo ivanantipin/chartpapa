@@ -1,9 +1,6 @@
 package firelib.common.model
 
-import com.funstat.domain.InstrId
-import com.funstat.finam.FinamDownloader
 import firelib.common.config.ModelBacktestConfig
-import firelib.common.config.instruments
 import firelib.common.core.ModelFactory
 import firelib.common.core.SimpleRunCtx
 import firelib.common.interval.Interval
@@ -30,10 +27,10 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
     val tenMins = enableSeries(interval = Interval.Min10, interpolated = false)
 
-    val quantiles = context.tickers().map {
+    val quantiles = context.config.instruments.map {
         Quantiles<Double>(1000);
     }
-    val volumeQuantiles = context.tickers().map {
+    val volumeQuantiles = context.config.instruments.map {
         Quantiles<Double>(100);
     }
 
@@ -94,12 +91,9 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         fun modelConfig(waitOnEnd: Boolean = false, divAdjusted: Boolean = false): ModelBacktestConfig {
             return ModelBacktestConfig(VolatilityBreak::class).apply {
                 param("hold_hours", 30)
-                rootInterval = Interval.Min10
+                interval = Interval.Min10
                 startDate(LocalDate.now().minusDays(100))
-                instruments = instruments(listOf(InstrId.dummyInstrument("sber")),
-                        source = FinamDownloader.SOURCE,
-                        divAdjusted = divAdjusted,
-                        waitOnEnd = waitOnEnd)
+                instruments = DivHelper.getDivs().keys.toList()
                 adjustSpread = makeSpreadAdjuster(0.0005)
             }
         }

@@ -31,7 +31,7 @@ public class VSymbolDownloader {
                     String[] data = oh.split(",");
                     return new InstrId(data[0],
                             data[1], data[2] + "/" + data[3] + "/" + data[6] + "/" + data[7], data[0],
-                            VantageDownloader.Companion.getSOURCE(), BigDecimal.ONE, 1, "N/A");
+                            VantageDownloader.Companion.getSOURCE().name(), BigDecimal.ONE, 1, "N/A");
                 }).collect(Collectors.toList());
                 if(rows.size() == 0){
                     System.out.println(entity.getBody());

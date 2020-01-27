@@ -1,7 +1,8 @@
 package com.funstat.tcs
 
 import com.funstat.domain.InstrId
-import firelib.common.core.Source
+import firelib.common.core.HistoricalSource
+import firelib.common.core.SourceName
 import firelib.common.core.TcsTickerMapper
 import firelib.common.interval.Interval
 import firelib.common.misc.moscowZoneId
@@ -23,7 +24,7 @@ fun getContext(): Context {
     return connect.get().context()
 }
 
-class TcsSource(val context: Context) : Source, Flow.Subscriber<StreamingEvent> {
+class TcsHistoricalSource(val context: Context) : HistoricalSource, Flow.Subscriber<StreamingEvent> {
 
     override fun symbols(): List<InstrId> {
 
@@ -75,10 +76,8 @@ class TcsSource(val context: Context) : Source, Flow.Subscriber<StreamingEvent> 
         }
     }
 
-    override fun getName(): String {
-
-        moscowZoneId
-        return "TCS"
+    override fun getName(): SourceName {
+        return SourceName.TCS
     }
 
     override fun getDefaultInterval(): Interval {
@@ -88,7 +87,7 @@ class TcsSource(val context: Context) : Source, Flow.Subscriber<StreamingEvent> 
 
     var listener : ((Ohlc)->Unit) ? = null
 
-    override fun listen(instrId: InstrId, callback: (Ohlc) -> Unit) {
+    fun listen(instrId: InstrId, callback: (Ohlc) -> Unit) {
         listener = callback
         context.sendStreamingRequest(StreamingRequest.subscribeCandle(instrId.id, CandleInterval.ONE_MIN)).get()
     }

@@ -7,6 +7,7 @@ import com.funstat.store.MdStorageImpl
 import com.funstat.store.SimplifiedReaderImpl
 import firelib.common.core.Backtester
 import firelib.common.core.ModelFactory
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.common.misc.toInstantDefault
 import firelib.common.model.DivHelper
@@ -30,14 +31,19 @@ class ModelBacktestConfig (val modelKClass : KClass<out Model>){
     /**
      * instruments configuration
      */
-    var instruments: List<InstrumentConfig> = emptyList()
+    var instruments: List<String> = emptyList()
 
     var startDateGmt: Instant = Instant.EPOCH
 
     var endDate: Instant = Instant.now()
 
-    var rootInterval = Interval.Min1
+    fun roundedStartTime() : Instant{
+        return interval.roundTime(startDateGmt)
+    }
 
+    var interval = Interval.Min1
+
+    var backtestSourceName = SourceName.FINAM
 
     fun endDate(ed : LocalDate){
         endDate = ed.toInstantDefault()
@@ -115,7 +121,7 @@ fun ModelBacktestConfig.runStrat(){
     }
 }
 
-fun ModelBacktestConfig.instruments(tickers: Iterable<InstrId>, source: String,
+fun ModelBacktestConfig.instruments(tickers: Iterable<InstrId>, source: SourceName,
                 interval: Interval? = null,
                 divAdjusted: Boolean = false,
                 waitOnEnd: Boolean = false) : List<InstrumentConfig>{
@@ -123,7 +129,7 @@ fun ModelBacktestConfig.instruments(tickers: Iterable<InstrId>, source: String,
     val storageImpl = MdStorageImpl()
 
     val interval =  interval ?: storageImpl.getSourceDefaultInterval(source)
-    val mdDao = storageImpl.getDao(source,  interval.name)
+    val mdDao = storageImpl.getDao(source,  interval)
 
     if(divAdjusted){
         val divs = DivHelper.getDivs()
@@ -136,7 +142,7 @@ fun ModelBacktestConfig.instruments(tickers: Iterable<InstrId>, source: String,
 
     }else{
         return tickers.map { instr ->
-            InstrumentConfig(instr.code, {  SimplifiedReaderImpl(mdDao, instr.code, rootInterval.roundTime(startDateGmt))}, instr)
+            InstrumentConfig(instr.code, {  SimplifiedReaderImpl(mdDao, instr.code, this.interval.roundTime(startDateGmt))}, instr)
         }
     }
 }

@@ -1,16 +1,13 @@
 package firelib.common.model
 
 import com.funstat.GlobalConstants
-import com.funstat.domain.InstrId
 import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
 import firelib.common.interval.Interval
+import firelib.common.misc.UtilsHandy
 import firelib.common.misc.atUtc
-import firelib.common.reader.MarketDataReaderSql
-import firelib.common.reader.toSequence
 import firelib.common.report.GeGeWriter
 import firelib.common.report.SqlUtils
 import org.springframework.jdbc.core.JdbcTemplate
@@ -31,7 +28,7 @@ object DivHelper {
 
         val storage = MdStorageImpl()
 
-        val dao = storage.getDao(FinamDownloader.SOURCE, Interval.Min10.toString())
+        val dao = storage.getDao(FinamDownloader.SOURCE, Interval.Min10)
 
         var trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
 
@@ -73,12 +70,12 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
 
     init {
         val divMap = DivHelper.getDivs()
-        val divdivs = context.tickers().map { divMap[it]!!.sortedBy { it.lastDayWithDivs } }
-        val nextIdxes = context.tickers().map { -1 }.toIntArray()
+        val divdivs = context.config.instruments.map { divMap[it]!!.sortedBy { it.lastDayWithDivs } }
+        val nextIdxes = context.config.instruments.map { -1 }.toIntArray()
 
         val dumper = GeGeWriter<Stat>("divstat", Paths.get(context.config.reportTargetPath).resolve("stat.db"), Stat::class)
 
-        context.tickers().forEachIndexed({ idx, instrument ->
+        context.config.instruments.forEachIndexed({ idx, instrument ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Day, 100)
 
             ret.preRollSubscribe {
@@ -133,12 +130,9 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
     }
 }
 
-suspend fun main() {
-
-    val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-
+fun main() {
     val conf = ModelBacktestConfig(DivModel::class).apply {
-        instruments = DivHelper.getDivs().keys.map { InstrumentConfig(it, { time -> MarketDataReaderSql(mdDao.queryAll(it)).toSequence() }, InstrId.dummyInstrument(it)) }
+        instruments = DivHelper.getDivs().keys.toList()
         param("holdTimeDays", 10)
     }
     conf.runStrat()

@@ -1,6 +1,7 @@
 package com.funstat.iqfeed
 
 import com.funstat.store.MdStorageImpl
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import firelib.parser.CsvParser
@@ -17,8 +18,7 @@ object DbPopulator {
     @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        val syncer = MdStorageImpl(MdStorageImpl.HOME_PATH)
-        ssync(syncer)
+        ssync(MdStorageImpl())
     }
 
     fun ssync(storage: MdStorageImpl) {
@@ -42,7 +42,7 @@ object DbPopulator {
                         ohlcs.add(parser.current())
                         cnt.incrementAndGet()
                     }
-                    storage.save(table, "IQFEED", Interval.Min1.name, ohlcs)
+                    storage.save(table, SourceName.IQFEED, Interval.Min1, ohlcs)
                     println("done $fname cnt is $cnt")
 
                 } catch (e: Exception) {

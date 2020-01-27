@@ -1,6 +1,7 @@
 package com.funstat.store
 
 import com.funstat.domain.InstrId
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 
@@ -15,13 +16,13 @@ class CachedStorage(private val delegate: MdStorage) : MdStorage {
 
     internal val container = SingletonsContainer()
 
-    override fun read(instrId: InstrId, interval: String): List<Ohlc> {
-        val iv = Interval.valueOf(interval)
+    override fun read(instrId: InstrId, interval: Interval): List<Ohlc> {
+        val iv = interval
         return container.getWithExpiration(instrId.toString() + "/" + interval, { delegate.read(instrId, interval) }, Math.min(iv.duration.toMinutes() / 2, 30))
 
     }
 
-    override fun save(code: String, source: String, interval: String, data: List<firelib.domain.Ohlc>) {
+    override fun save(code: String, source: SourceName, interval: Interval, data: List<firelib.domain.Ohlc>) {
         throw RuntimeException("not implemented")
     }
 

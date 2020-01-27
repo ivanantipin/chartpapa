@@ -4,14 +4,17 @@ package com.funstat.store
 import com.funstat.GlobalConstants
 import com.funstat.Pair
 import com.funstat.domain.InstrId
+import com.funstat.domain.sourceEnum
 import com.funstat.finam.FinamDownloader
 import com.funstat.iqfeed.IntervalTransformer
-import com.funstat.iqfeed.IqFeedSource
-import com.funstat.tcs.SourceEmulator
-import com.funstat.tcs.TcsSource
+import com.funstat.iqfeed.IqFeedHistoricalSource
+import com.funstat.tcs.HistoricalSourceEmulator
+import com.funstat.tcs.TcsHistoricalSource
 import com.funstat.tcs.getContext
 import com.funstat.vantage.VSymbolDownloader
 import com.funstat.vantage.VantageDownloader
+import firelib.common.core.HistoricalSource
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
 import firelib.common.report.GeGeWriter
@@ -31,43 +34,45 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
     val container = SingletonsContainer()
 
+    val requestedDao = GeGeWriter<InstrId>("requested", Paths.get("$folder/meta.db"), InstrId::class, listOf("code"))
+    val symbolsDao = GeGeWriter<InstrId>("symbols", Paths.get("$folder/meta.db"), InstrId::class, listOf("code"))
+    val pairs = GeGeWriter<Pair>("pairs", Paths.get("$folder/meta.db"), Pair::class, listOf("key"))
+
+
     init {
         FileUtils.forceMkdir(File(folder))
     }
 
 
-    val sources = mapOf(
+    val sources  = mapOf(
             FinamDownloader.SOURCE to FinamDownloader(),
-            "TCS" to TcsSource(getContext()),
-            SourceEmulator.SOURCE to SourceEmulator(),
+            SourceName.TCS to TcsHistoricalSource(getContext()),
+            HistoricalSourceEmulator.SOURCE to HistoricalSourceEmulator(),
             VantageDownloader.SOURCE to VantageDownloader(),
-            IqFeedSource.SOURCE to IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))
+            IqFeedHistoricalSource.SOURCE to IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))
     )
 
     private val executor = Executors.newScheduledThreadPool(1)
 
 
-    fun getSourceDefaultInterval(source : String) : Interval{
+    fun getSourceDefaultInterval(source : SourceName) : Interval{
         return sources[source]!!.getDefaultInterval()
     }
 
-    fun getDao(source: String, interval: String): MdDao {
-        return container.get("$source/$interval") {
+    fun getDao(source: SourceName, interval: Interval): MdDao {
+        return container.get("$source/${interval}") {
             val folder = this.folder + "/" + source + "/"
             FileUtils.forceMkdir(File(folder))
             MdDao(SqlUtils.getDsForFile("$folder$interval.db"))
         }
     }
 
-    val requestedDao = GeGeWriter<InstrId>("requested", Paths.get("$folder/meta.db"), InstrId::class, listOf("code"))
-    val symbolsDao = GeGeWriter<InstrId>("symbols", Paths.get("$folder/meta.db"), InstrId::class, listOf("code"))
-    val pairs = GeGeWriter<Pair>("pairs", Paths.get("$folder/meta.db"), Pair::class, listOf("key"))
 
 
-    override fun read(instrId: InstrId, interval: String): List<Ohlc> {
+    override fun read(instrId: InstrId, interval: Interval): List<Ohlc> {
         requestedDao.write(listOf(instrId))
-        val dao = getDao(instrId.source, sources[instrId.source]!!.getDefaultInterval().name)
-        val target = Interval.valueOf(interval)
+        val dao = getDao(instrId.sourceEnum(), sources[instrId.sourceEnum()]!!.getDefaultInterval())
+        val target = interval
         val startTime = LocalDateTime.now().minusSeconds(target.durationMs * 600 / 1000)
         var ret = dao.queryAll(instrId.code, startTime)
 
@@ -83,7 +88,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         }
     }
 
-    override fun save(code: String, source: String, interval: String, data: List<firelib.domain.Ohlc>) {
+    override fun save(code: String, source: SourceName, interval: Interval, data: List<Ohlc>) {
         getDao(source, interval).insertOhlc(data, code)
     }
 
@@ -104,8 +109,8 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             println("updating symbols as they are stale")
             symbolsDao.write(sources.values.flatMap { s -> s.symbols() }.filter { s ->
                 s.market == "1"
-                        || s.source == VantageDownloader.SOURCE
-                        || s.source == IqFeedSource.SOURCE
+                        || s.sourceEnum() == VantageDownloader.SOURCE
+                        || s.sourceEnum() == IqFeedHistoricalSource.SOURCE
             })
             pairs.write(listOf(Pair(SYMBOLS_LAST_UPDATED, "" + System.currentTimeMillis())))
         } else {
@@ -145,8 +150,8 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
         var instant = Instant.now()
         try {
-            val source = sources[instrId.source]!!
-            val dao = getDao(instrId.source, source.getDefaultInterval().name)
+            val source = sources[instrId.sourceEnum()]!!
+            val dao = getDao(instrId.sourceEnum(), source.getDefaultInterval())
             val startTime = dao.queryLast(instrId.code).map { oh -> oh.endTime.atUtc().minusDays(2) }.orElse(LocalDateTime.now().minusDays(3000))
 
             println("start time is ${startTime}")
@@ -165,17 +170,15 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
     companion object {
 
-        val HOME_PATH = "/ddisk/globaldatabase/md"
-
         val SYMBOLS_LAST_UPDATED = "SYMBOLS_LAST_UPDATED"
         private val VANTAGE_LAST_UPDATED = "VANTAGE_LAST_UPDATED"
 
 
         @JvmStatic
         fun main(args: Array<String>) {
-            val mdStorage = MdStorageImpl(HOME_PATH)
+            val mdStorage = MdStorageImpl()
             mdStorage.updateSymbolsMeta()
-            println(mdStorage.meta().filter { s -> s.source == FinamDownloader.SOURCE })
+            println(mdStorage.meta().filter { s -> s.sourceEnum() == FinamDownloader.SOURCE })
 
         }
     }

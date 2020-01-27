@@ -41,7 +41,7 @@ fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : Ex
 }
 
 class Persisting(val batcher: Batcher<out Any>, val subscriptions: Collection<ChannelSubscription>){
-    fun cancel(){
+    fun cancelAndJoin(){
         subscriptions.forEach {it.unsubscribe()}
         batcher.cancelAndJoin()
     }
@@ -95,7 +95,7 @@ fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : Exec
 fun enableOhlcDumping(config: ModelBacktestConfig, marketDataDistributor: MarketDataDistributor) : List<Batcher<Ohlc>> {
     return config.instruments.mapIndexed{ instrIdx, instr ->
         val writer = OhlcStreamWriter(config.getReportDbFile())
-        val batcher = Batcher<Ohlc>({ writer.insertOhlcs(instr.ticker, it) }, instr.ticker)
+        val batcher = Batcher<Ohlc>({ writer.insertOhlcs(instr, it) }, instr)
 
         marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min240, 2)
                 .nonInterpolatedView()

@@ -4,6 +4,7 @@ import com.funstat.domain.InstrId
 import firelib.common.Order
 import firelib.domain.OrderStatus
 import firelib.common.Trade
+import firelib.common.core.InstrumentMapper
 import firelib.common.misc.NonDurableChannel
 import firelib.common.misc.SubChannel
 import firelib.common.timeservice.TimeService
@@ -21,7 +22,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
                        val timeService : TimeService,
                        val security : String,
                        val maxOrderCount: Int = 20,
-                       val instr : InstrId) : OrderManager {
+                       val instrument : InstrId) : OrderManager {
 
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -31,7 +32,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
     }
 
     override fun instrument(): InstrId {
-        return instr
+        return instrument
     }
 
     override fun security(): String {
@@ -111,9 +112,11 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
         if (state.status.isFinal()) {
             if(state.status == OrderStatus.Done && sOrder.remainingQty() > 0){
-                log.error("status is Done but order {} has non zero remaining amount {} ", state.order, sOrder.remainingQty())
+                log.error("status is Done but order {} has non zero remaining amount {} leaving in pending... ", state.order, sOrder.remainingQty())
+            }else{
+                id2Order.remove(state.order.id)
             }
-            val finalOrder: OrderWithState = id2Order.remove(state.order.id)!!
+
         }
         orderStateChannel.publish(state)
     }
@@ -124,6 +127,10 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         order.trades += trd
         if(order.remainingQty() < 0){
             println("negative remaining amount order $order")
+        }
+        if(order.remainingQty() == 0 && order.status().isFinal()){
+            println("removing filled order as remaining qty is zero")
+            id2Order.remove(order.order.id)
         }
         val prevPos = position
         position = trd.adjustPositionByThisTrade(position)

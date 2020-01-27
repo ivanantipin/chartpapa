@@ -1,25 +1,26 @@
 package com.funstat.tcs
 
 import com.funstat.domain.InstrId
-import firelib.common.core.Source
+import firelib.common.core.HistoricalSource
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import java.time.Instant
 import java.time.LocalDateTime
 import kotlin.random.Random
 
-class SourceEmulator : Source {
+class HistoricalSourceEmulator : HistoricalSource {
 
     companion object{
-        val SOURCE = "Dummy"
+        val SOURCE = SourceName.DUMMY
     }
 
-    override fun getName(): String {
-        return SOURCE
+    override fun getName(): SourceName {
+        return SourceName.DUMMY
     }
 
     override fun symbols(): List<InstrId> {
-        return listOf(InstrId(id = "1", name = "sber", market = "2", code = "sber", source = SOURCE))
+        return listOf(InstrId(id = "1", name = "sber", market = "2", code = "sber", source = SOURCE.name))
     }
 
     override fun getDefaultInterval(): Interval {

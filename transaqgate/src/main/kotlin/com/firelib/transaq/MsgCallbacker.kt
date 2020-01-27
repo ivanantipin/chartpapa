@@ -3,17 +3,18 @@ package com.firelib.transaq
 import com.firelib.Empty
 import com.firelib.TransaqConnectorGrpc
 import com.google.common.util.concurrent.SettableFuture
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.apache.commons.text.StringEscapeUtils
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicBoolean
 
-class MsgCallbacker(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStub, executor: Executor){
+class MsgCallbacker(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStub){
 
-    val listeners = ConcurrentLinkedQueue<TrqCondMsgListener<out TrqMsg>>()
-
-    val continuos = ConcurrentLinkedQueue<TrqContMsgListener<out TrqMsg>>()
-
-    val plain = ConcurrentLinkedQueue<(TrqMsg)->Unit>()
+    val listeners = ConcurrentLinkedQueue<Receiver<Any>>()
 
     init {
         Thread {
@@ -24,20 +25,17 @@ class MsgCallbacker(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlock
                     messages.forEachRemaining {
                         val msg = TrqParser.parseTrqMsg(StringEscapeUtils.unescapeJava(it.txt))
                         if (msg != null) {
-                            executor.execute {
-
-                                listeners.removeIf {
-                                    it.check(msg)
-                                }
-                                continuos.forEach {
-                                    it.process(msg)
-                                }
-
-                                plain.forEach{callback->
-                                    callback(msg)
+                            listeners.forEach {
+                                if(!it.isCancelled.get()){
+                                    if(it.predicate(msg)){
+                                        it.queue.offer(msg)
+                                    }
+                                }else{
+                                    listeners.remove(it)
                                 }
                             }
                         }
+
 
                     }
                 } catch (e: Exception) {
@@ -48,22 +46,18 @@ class MsgCallbacker(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlock
         }.start()
     }
 
-
-    fun <T : TrqMsg> getNext(predicate : (TrqMsg)->Boolean) : SettableFuture<T> {
-        val ret = SettableFuture.create<T>()
-        listeners.add(TrqCondMsgListener<T>(predicate, ret))
+    fun <T : TrqMsg> add(predicate : (TrqMsg)->Boolean) : Receiver<T>{
+        val ret = Receiver<T>(predicate)
+        listeners.add(ret as Receiver<Any>)
         return ret
     }
 
-    fun <T : TrqMsg> getContinuos(predicate : (TrqMsg)->Boolean) : TrqContMsgListener<T> {
-        val ret = TrqContMsgListener<T>(predicate)
-        continuos.add(ret)
-        return ret
+}
+
+class Receiver<T>(val predicate : (TrqMsg)->Boolean) : AutoCloseable{
+    val isCancelled = AtomicBoolean(false)
+    val queue =  LinkedBlockingQueue<T>()
+    override fun close() {
+        isCancelled.set(true)
     }
-
-    fun addPlainListener(listener: (TrqMsg)->Unit){
-        plain.add(listener)
-    }
-
-
 }

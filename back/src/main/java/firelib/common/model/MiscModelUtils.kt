@@ -37,7 +37,7 @@ fun Model.enableFactor(name: String, fact: (Int) -> Double) {
 fun Model.enableSeries(interval: Interval,
                        historyLen: Int = 100, interpolated: Boolean = true): List<TimeSeries<Ohlc>> {
     val context = this.modelContext()
-    val ret = context.tickers().mapIndexed { idx, _ ->
+    val ret = context.config.instruments.mapIndexed { idx, _ ->
         context.mdDistributor.getOrCreateTs(idx, interval, historyLen)
 
     }

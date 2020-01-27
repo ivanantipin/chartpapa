@@ -38,11 +38,11 @@ object TrqCommandHelper {
 
     fun subscribeCmd(instr: Array<InstrId>): String {
         return """
-<command id="subscribe">
-    <alltrades>
-    ${instr.map { mapInstr(it) }.joinToString()}
-    </alltrades>
-</command>            
+            <command id="subscribe">
+                <alltrades>
+                    ${instr.map { mapInstr(it) }.joinToString()}
+                </alltrades>
+            </command>            
         """.trimIndent()
     }
 
@@ -60,32 +60,30 @@ object TrqCommandHelper {
 
     fun getHistory(seccode: String, board: String, kind: String, count: Int): String {
         return """
-<command id="gethistorydata">
-    <security>
-        <board>${board}</board>
-        <seccode>${seccode}</seccode>
-    </security>
-    <period>${kind}</period>
-    <count>${count}</count>
-    <reset>true</reset>
-</command>    
-""".trimIndent()
+            <command id="gethistorydata">
+                <security>
+                    <board>${board}</board>
+                    <seccode>${seccode}</seccode>
+                </security>
+                <period>${kind}</period>
+                <count>${count}</count>
+                <reset>true</reset>
+            </command>    
+            """.trimIndent()
     }
 
     fun subscribe(seccode: String, board: String): String {
-        val ret = """
-<command id="subscribe">
-    <alltrades>
-            <security>
-                <board>${board}</board>
-                <seccode>${seccode}</seccode>
-            </security>
-    
-    </alltrades>
-</command>            
+        return """
+            <command id="subscribe">
+                <alltrades>
+                        <security>
+                            <board>${board}</board>
+                            <seccode>${seccode}</seccode>
+                        </security>
+                
+                </alltrades>
+            </command>            
         """.trimIndent()
-
-        return ret
     }
 
 

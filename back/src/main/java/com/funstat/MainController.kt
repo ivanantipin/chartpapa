@@ -1,9 +1,6 @@
 package com.funstat
 
-import com.funstat.domain.Annotations
-import com.funstat.domain.InstrId
-import com.funstat.domain.StringWrap
-import com.funstat.domain.TimePoint
+import com.funstat.domain.*
 import com.funstat.ohlc.Metadata
 import com.funstat.store.CachedStorage
 import com.funstat.store.MdStorage
@@ -60,7 +57,7 @@ class MainController {
     }
 
     fun instruments(): Collection<InstrId> {
-        return storage.meta().filter { s -> s.source != VantageDownloader.SOURCE }
+        return storage.meta().filter { s -> s.sourceEnum() != VantageDownloader.SOURCE }
     }
 
     fun timeframes(): List<String> {
@@ -68,16 +65,16 @@ class MainController {
     }
 
 
-    fun getOhlcs(instrId: InstrId, interval: String): Collection<Ohlc> {
+    fun getOhlcs(instrId: InstrId, interval: Interval): Collection<Ohlc> {
         return storage.read(instrId, interval)
     }
 
-    fun getAnnotations(instrId: InstrId, interval: String): Annotations {
+    fun getAnnotations(instrId: InstrId, interval: Interval): Annotations {
         val ohlcs = storage.read(instrId, interval)
         return AnnotationCreator.createAnnotations(ohlcs)
     }
 
-    fun getSeries(codes: Array<InstrId>, interval: String): Map<String, Collection<TimePoint>> {
+    fun getSeries(codes: Array<InstrId>, interval: Interval): Map<String, Collection<TimePoint>> {
         val mm = HashMap<String, Collection<TimePoint>>()
         Arrays.stream(codes).forEach { c ->
             mm[c.code] = storage.read(c, interval).map { oh -> TimePoint(oh.endTime.atUtc(), oh.close) }.sorted()

@@ -1,5 +1,6 @@
 package com.funstat.domain
 
+import firelib.common.core.SourceName
 import java.math.BigDecimal
 
 
@@ -22,3 +23,7 @@ data class InstrId(val id: String = "N/A",
 }
 
 
+
+fun InstrId.sourceEnum() : SourceName{
+    return SourceName.valueOf(this.source)
+}

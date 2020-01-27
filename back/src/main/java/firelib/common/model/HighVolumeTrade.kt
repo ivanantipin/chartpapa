@@ -1,16 +1,9 @@
 package firelib.common.model
 
-import com.funstat.domain.InstrId
-import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
-import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
 import firelib.common.interval.Interval
 import firelib.common.misc.Quantiles
-import firelib.common.reader.MarketDataReaderSql
-import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.reader.toSequence
 import firelib.common.timeseries.TimeSeries
 import firelib.domain.Ohlc
 import java.time.LocalDate
@@ -27,7 +20,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
     init {
 
-        val quantiles = context.tickers().map {
+        val quantiles = context.config.instruments.map {
             Quantiles<Double>(100);
         }
 
@@ -37,19 +30,19 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
         // periods of previos price as factors
         val factors = setOf(3, 5, 8, 13).associateBy({ it }, {
-            context.tickers().map {
+            context.config.instruments.map {
                 Quantiles<Double>(200);
             }
         })
 
-        factors.forEach({ facLen, lst ->
-            enableFactor("diff${facLen}", {
+        factors.forEach { facLen, lst ->
+            enableFactor("diff${facLen}") {
                 factors[facLen]!![it].getQuantile(makeRet(daytss[it], 0, facLen))
-            })
-        })
+            }
+        }
 
 
-        daytss.forEachIndexed({ idx, it ->
+        daytss.forEachIndexed { idx, it ->
             it.preRollSubscribe {
                 if (it.count() > 20) {
                     val measure = makeRet(daytss[idx], 0, props["length"]!!.toInt())
@@ -63,7 +56,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
                     }
                 }
             }
-        })
+        }
 
         closePositionByTimeout(periods = 3, interval = Interval.Day)
     }
@@ -73,18 +66,9 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 }
 
 fun main() {
-
-    val divs = DivHelper.getDivs()
-
-    val mdDao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-
     val conf = ModelBacktestConfig(HighVolumeTrade::class).apply {
         endDate(LocalDate.of(2016, 1, 1))
-        instruments = divs.keys.map { instr ->
-            InstrumentConfig(instr, {
-                ReaderDivAdjusted(MarketDataReaderSql(mdDao.queryAll(instr)), divs[instr]!!).toSequence()
-            }, InstrId.dummyInstrument(instr))
-        }
+        instruments = DivHelper.getDivs().keys.toList()
         opt("length", 1, 10, 1)
     }
 

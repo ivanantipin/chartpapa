@@ -34,6 +34,10 @@ fun OrderManager.sellAtLimit(price: Double, vol: Int = 1) {
     submitOrders(listOf(Order(OrderType.Limit, price, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument())))
 }
 
+fun OrderManager.sellAtMarket(vol: Int = 1) {
+    submitOrders(listOf(Order(OrderType.Market, 0.0, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument())))
+}
+
 fun OrderManager.buyAtStop(price: Double, vol: Int = 1) {
     submitOrders(listOf(Order(OrderType.Stop, price, vol, Side.Buy, security(), nextOrderId(), currentTime(), instrument())))
 }

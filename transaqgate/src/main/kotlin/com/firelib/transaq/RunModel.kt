@@ -1,38 +1,45 @@
 package com.firelib.transaq
 
+import com.funstat.tcs.GateEmulator
 import firelib.common.core.DummyModel
 import firelib.common.core.ProdRunner
 import firelib.common.core.SimpleRunCtx
+import firelib.common.interval.Interval
+import firelib.common.misc.FinamTickerMapper
 import java.util.concurrent.Executors
 
 
 fun main() {
 
-    val executor = Executors.newSingleThreadExecutor { Thread(it,"mainExecutor") }
-
-    //val gate = TcsGate(executor, mapper )
+    val executor = Executors.newSingleThreadExecutor { Thread(it, "mainExecutor") }
 
     val stub = makeDefaultStub()
 
-    val gate = makeDefaultTransaqGate(executor)
+    stub.command(loginCmd)
 
-    val source = TrqSource(stub, "1")
+    val mapper = TrqInstrumentMapper(stub)
 
-    val symbols = source.symbols().associateBy { it.code }
+    //val gate = makeDefaultTransaqGate(executor)
 
+    val factory = TrqRealtimeReaderFactory(stub, Interval.Sec10, mapper)
 
+    val gate = GateEmulator(executor)
+
+    val finamMapper = FinamTickerMapper()
 
     try {
-        ProdRunner.runStrat(
-                executor,
-                SimpleRunCtx(DummyModel.modelConfig()),
-                gate,
-                {symbols[it]!!},
-                {symbols[it]!!},
-                source
-        )
+        val context = SimpleRunCtx(DummyModel.modelConfig())
 
-    }catch (e : Exception){
+        context.gateMapper = mapper
+
+        ProdRunner.runStrat(
+            executor,
+            context,
+            gate,
+            factory,
+            finamMapper
+        )
+    } catch (e: Exception) {
         e.printStackTrace()
     }
 }

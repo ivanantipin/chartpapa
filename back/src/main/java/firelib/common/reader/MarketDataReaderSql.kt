@@ -1,12 +1,9 @@
 package firelib.common.reader
 
-import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
-import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import java.time.Instant
 
-class MarketDataReaderSql(val ohlcs : List<Ohlc>) : MarketDataReader<Ohlc> {
+class MarketDataReaderSql(val ohlcs: List<Ohlc>) : MarketDataReader<Ohlc> {
 
     var cind = 0;
 
@@ -29,22 +26,9 @@ class MarketDataReaderSql(val ohlcs : List<Ohlc>) : MarketDataReader<Ohlc> {
     }
 
     override fun endTime(): Instant {
-        return ohlcs[ohlcs.size - 1].endTime
+        return ohlcs.last().endTime
     }
 
     override fun close() {
     }
-
 }
-
-fun main() {
-    //
-    val dao = MdStorageImpl().getDao(FinamDownloader.SOURCE, Interval.Min10.name)
-    val reader = MarketDataReaderDb(dao, "sber", Instant.now())
-    while (reader.read()){
-        println(reader.current())
-    }
-}
-
-
-

@@ -6,9 +6,6 @@ import com.firelib.stratserver.ServiceFac.makeHistoricalBc
 import com.firelib.stratserver.ServiceFac.makeInterServiceBc
 import com.firelib.stratserver.ServiceFac.makeLevelsBc
 import com.firelib.stratserver.ServiceFac.makeStratBc
-import firelib.common.core.backtest
-import firelib.common.core.waitUntil
-import firelib.common.mddistributor.MarketDataDistributor
 import io.grpc.stub.StreamObserver
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -21,7 +18,7 @@ class ServiceImpl() : StratServiceGrpc.StratServiceImplBase() {
 
     val distributor = context.marketDataDistributor
 
-    val tickers = context.modelConfig.instruments.map { it.ticker }
+    val tickers = context.modelConfig.instruments
 
     val strats = makeStratBc(context)
 
@@ -49,7 +46,7 @@ class ServiceImpl() : StratServiceGrpc.StratServiceImplBase() {
 
     fun runBlocking(){
         try {
-            context.backtest(Instant.MAX, waitTillTime = {waitUntil(it)})
+            context.backtest(Instant.MAX)
         }catch (e : Exception){
             log.error("failed", e)
         }

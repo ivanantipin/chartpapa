@@ -5,13 +5,24 @@ import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import java.time.LocalDateTime
 
-interface Source {
+interface HistoricalSource {
     fun symbols(): List<InstrId>
     fun load(instrId: InstrId): Sequence<Ohlc>
     fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc>
-    fun getName(): String;
+    fun getName(): SourceName
     fun getDefaultInterval(): Interval
+}
 
+interface RealtimeSource{
     fun listen(instrId: InstrId, callback : (Ohlc)->Unit){}
+}
 
+
+
+enum class SourceName{
+    FINAM,TRANSAQ, TCS, DUMMY, VANTAGE, IQFEED
+}
+
+enum class RealtimeSourceName{
+    TRANSAQ
 }

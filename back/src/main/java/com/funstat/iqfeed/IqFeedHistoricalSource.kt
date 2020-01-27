@@ -1,7 +1,8 @@
 package com.funstat.iqfeed
 
 import com.funstat.domain.InstrId
-import firelib.common.core.Source
+import firelib.common.core.HistoricalSource
+import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
@@ -18,13 +19,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
-class IqFeedSource(val csvPath: Path) : Source {
+class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
 
     override fun symbols(): List<InstrId> {
         val map = code2name()
         return csvPath.toFile().list().map {
             it.replace("_1.csv", "")
-        }.filter { map.containsKey(it) }.map { InstrId(it, map!![it]!!, "NA", it, SOURCE) }
+        }.filter { map.containsKey(it) }.map { InstrId(it, map!![it]!!, "NA", it, SOURCE.name) }
     }
 
     override fun load(instrId: InstrId): Sequence<Ohlc> {
@@ -46,8 +47,8 @@ class IqFeedSource(val csvPath: Path) : Source {
         }
     }
 
-    override fun getName(): String {
-        return SOURCE
+    override fun getName(): SourceName {
+        return SourceName.IQFEED
     }
 
     override fun getDefaultInterval(): Interval {
@@ -55,10 +56,10 @@ class IqFeedSource(val csvPath: Path) : Source {
     }
 
     companion object {
-        val SOURCE = "IQFEED"
+        val SOURCE = SourceName.IQFEED
         fun code2name(): Map<String, String> {
             try {
-                val lines = Files.readAllLines(Paths.get(IqFeedSource::class.java.getResource("/iqfeed_symbols.txt").toURI()))
+                val lines = Files.readAllLines(Paths.get(IqFeedHistoricalSource::class.java.getResource("/iqfeed_symbols.txt").toURI()))
                 return lines.map { it.split(";") }.associateBy({ it[0] }, { it[1] })
             } catch (e: Exception) {
                 throw RuntimeException(e)
@@ -67,7 +68,7 @@ class IqFeedSource(val csvPath: Path) : Source {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            println(IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).symbols())
+            println(IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).symbols())
         }
     }
 }
@@ -77,7 +78,7 @@ fun solve(data : Array<MutableList<Double>>) : Array<Double>{
 }
 
 fun main(args: Array<String>) {
-    val minBars = IqFeedSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).load(InstrId(code = "SPY"))
+    val minBars = IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).load(InstrId(code = "SPY"))
             .filter { it.endTime.atUtc().toLocalTime().hour != 0 }
             .toList()
 
