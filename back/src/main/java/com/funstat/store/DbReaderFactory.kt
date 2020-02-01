@@ -10,7 +10,7 @@ import java.time.Instant
 class DbReaderFactory(source : SourceName, interval: Interval, val startTime : Instant) :
     ReaderFactory {
 
-    val dao = MdStorageImpl().getDao(source, interval)
+    val dao = MdDaoContainer().getDao(source, interval)
 
     override fun makeReader(security: String): SimplifiedReader {
         return SimplifiedReaderImpl(

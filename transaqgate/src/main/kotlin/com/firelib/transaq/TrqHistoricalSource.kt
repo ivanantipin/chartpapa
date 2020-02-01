@@ -90,18 +90,6 @@ class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlocki
 }
 
 
-class QueueSimplifiedReader : SimplifiedReader{
-    val queue = LinkedBlockingQueue<Ohlc>()
-
-    override fun peek(): Ohlc? {
-        return queue.peek()
-    }
-
-    override fun poll(): Ohlc {
-        return queue.poll()
-    }
-}
-
 class TrqInstrumentMapper(val stub: TransaqConnectorGrpc.TransaqConnectorBlockingStub) : InstrumentMapper{
 
     val source = TrqHistoricalSource(stub, "1")

@@ -14,12 +14,12 @@ import java.time.Instant
 
 class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
 
-    val tradeGateStub by lazy {
+    val backtestGate by lazy {
         TradeGateStub(modelConfig, timeService)
     }
 
     val tradeGate by lazy {
-        TradeGateSwitch(tradeGateStub)
+        TradeGateSwitch(backtestGate)
     }
 
     val timeService by lazy {
@@ -43,7 +43,7 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
     }
 
     val backtestReaderFactory by lazy {
-        DbReaderFactory(modelConfig.backtestSourceName, modelConfig.interval, modelConfig.roundedStartTime())
+        DbReaderFactory(modelConfig.backtestHistSource.getName(), modelConfig.interval, modelConfig.roundedStartTime())
     }
 
     fun addModel(params: Map<String, String>): Model {

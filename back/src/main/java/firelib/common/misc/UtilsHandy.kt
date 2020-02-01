@@ -9,10 +9,7 @@ import firelib.common.model.DivHelper
 import java.time.Instant
 
 
-class FinamTickerMapper : InstrumentMapper{
-    val finamDownloader by lazy{
-        FinamDownloader()
-    }
+class FinamTickerMapper(val finamDownloader: FinamDownloader) : InstrumentMapper{
 
     val symbols by lazy {
         finamDownloader.symbols()

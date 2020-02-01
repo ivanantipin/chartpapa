@@ -7,6 +7,7 @@ import com.opencsv.CSVParserBuilder
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
+import firelib.common.misc.FinamTickerMapper
 import firelib.domain.Ohlc
 import io.netty.util.concurrent.DefaultThreadFactory
 import org.apache.commons.io.IOUtils
@@ -211,6 +212,12 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
             println("not valid entry " + str + " because " + e.message)
             return null
         }
+    }
+
+    val tickerMapper = FinamTickerMapper(this)
+
+    override fun mapSecurity(security: String): InstrId {
+        return tickerMapper(security)
     }
 }
 

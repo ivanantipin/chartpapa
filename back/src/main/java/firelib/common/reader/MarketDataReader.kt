@@ -3,6 +3,7 @@ package firelib.common.reader
 import firelib.domain.Ohlc
 import firelib.domain.Timed
 import java.time.Instant
+import java.util.concurrent.LinkedBlockingQueue
 
 /**
 
@@ -45,4 +46,17 @@ class SimplifiedReaderAdapter(val mdReader : MarketDataReader<Ohlc>) : Simplifie
 
 fun MarketDataReader<Ohlc>.toSequence(): SimplifiedReader {
     return SimplifiedReaderAdapter(this)
+}
+
+
+class QueueSimplifiedReader : SimplifiedReader{
+    val queue = LinkedBlockingQueue<Ohlc>()
+
+    override fun peek(): Ohlc? {
+        return queue.peek()
+    }
+
+    override fun poll(): Ohlc {
+        return queue.poll()
+    }
 }

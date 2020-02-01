@@ -10,9 +10,6 @@ class CachedStorage(private val delegate: MdStorage) : MdStorage {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun start() {
-        delegate.start()
-    }
 
     internal val container = SingletonsContainer()
 
@@ -28,9 +25,5 @@ class CachedStorage(private val delegate: MdStorage) : MdStorage {
 
     override fun meta(): List<InstrId> {
         return delegate.meta()
-    }
-
-    override fun updateSymbolsMeta() {
-        delegate.updateSymbolsMeta()
     }
 }

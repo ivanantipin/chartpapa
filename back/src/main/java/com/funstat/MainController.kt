@@ -14,11 +14,6 @@ import java.nio.file.Paths
 import java.util.*
 
 
-object GlobalConstants{
-    val mdFolder = Paths.get("/ddisk/globaldatabase/md")
-    val rootReportPath =  Paths.get("/home/ivan/projects/chartpapa/market_research/report_out")
-}
-
 class MainController {
 
     internal var storage: MdStorage = CachedStorage(MdStorageImpl(GlobalConstants.mdFolder.toString()))
@@ -35,11 +30,6 @@ class MainController {
         return noteBooksDir.toFile()
                 .list { f, name -> name.endsWith("html") }
                 .map { it.replace(".html", "") }
-    }
-
-    internal fun onStart() {
-        storage.updateSymbolsMeta()
-        storage.start()
     }
 
     fun loadAllMetas(): List<Metadata> {

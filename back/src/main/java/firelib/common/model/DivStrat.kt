@@ -2,6 +2,7 @@ package firelib.common.model
 
 import com.funstat.GlobalConstants
 import com.funstat.finam.FinamDownloader
+import com.funstat.store.MdDaoContainer
 import com.funstat.store.MdStorageImpl
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat
@@ -28,7 +29,9 @@ object DivHelper {
 
         val storage = MdStorageImpl()
 
-        val dao = storage.getDao(FinamDownloader.SOURCE, Interval.Min10)
+        val mdDaoContainer = MdDaoContainer()
+
+        val dao = mdDaoContainer.getDao(FinamDownloader.SOURCE, Interval.Min10)
 
         var trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
 

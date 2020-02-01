@@ -3,9 +3,11 @@ package firelib.common.config
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.funstat.GlobalConstants
 import com.funstat.domain.InstrId
+import com.funstat.finam.FinamDownloader
 import com.funstat.store.MdStorageImpl
 import com.funstat.store.SimplifiedReaderImpl
 import firelib.common.core.Backtester
+import firelib.common.core.HistoricalSource
 import firelib.common.core.ModelFactory
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
@@ -27,7 +29,9 @@ import kotlin.reflect.KClass
 /**
  * configuration for model backtest
  */
-class ModelBacktestConfig (val modelKClass : KClass<out Model>){
+class ModelBacktestConfig (
+    @get:JsonIgnore
+    val modelKClass : KClass<out Model>){
     /**
      * instruments configuration
      */
@@ -43,7 +47,9 @@ class ModelBacktestConfig (val modelKClass : KClass<out Model>){
 
     var interval = Interval.Min1
 
-    var backtestSourceName = SourceName.FINAM
+
+    @get:JsonIgnore
+    var backtestHistSource : HistoricalSource = FinamDownloader()
 
     fun endDate(ed : LocalDate){
         endDate = ed.toInstantDefault()
@@ -53,7 +59,9 @@ class ModelBacktestConfig (val modelKClass : KClass<out Model>){
         startDateGmt = ed.toInstantDefault().plusSeconds(13*3600)
     }
 
+    @get:JsonIgnore
     var factory : ModelFactory = defaultModelFactory(modelKClass)
+
 
 
     fun makeSpreadAdjuster(koeff : Double) : (Double,Double)->Pair<Double,Double>{
@@ -111,8 +119,6 @@ class ModelBacktestConfig (val modelKClass : KClass<out Model>){
     }
 }
 
-
-
 fun ModelBacktestConfig.runStrat(){
     if(this.optConfig.params.isNotEmpty()){
         Backtester.runOptimized(this)
@@ -120,30 +126,3 @@ fun ModelBacktestConfig.runStrat(){
         Backtester.runSimple(this)
     }
 }
-
-fun ModelBacktestConfig.instruments(tickers: Iterable<InstrId>, source: SourceName,
-                interval: Interval? = null,
-                divAdjusted: Boolean = false,
-                waitOnEnd: Boolean = false) : List<InstrumentConfig>{
-
-    val storageImpl = MdStorageImpl()
-
-    val interval =  interval ?: storageImpl.getSourceDefaultInterval(source)
-    val mdDao = storageImpl.getDao(source,  interval)
-
-    if(divAdjusted){
-        val divs = DivHelper.getDivs()
-        return tickers.map { instr ->
-            InstrumentConfig(instr.code, {
-
-                ReaderDivAdjusted(MarketDataReaderDb(mdDao, instr.code, Instant.now().plusSeconds(1000), waitOnEnd),divs[instr.code]!!).toSequence()
-            }, instr)
-        }
-
-    }else{
-        return tickers.map { instr ->
-            InstrumentConfig(instr.code, {  SimplifiedReaderImpl(mdDao, instr.code, this.interval.roundTime(startDateGmt))}, instr)
-        }
-    }
-}
-

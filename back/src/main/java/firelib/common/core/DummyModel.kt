@@ -32,7 +32,6 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
                 startDate(LocalDate.now().minusDays(1))
                 interval = Interval.Sec10
                 adjustSpread = makeSpreadAdjuster(0.0005)
-                backtestSourceName = SourceName.DUMMY
             }
             return cfg
         }

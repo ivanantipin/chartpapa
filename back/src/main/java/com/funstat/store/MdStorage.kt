@@ -12,9 +12,6 @@ interface MdStorage {
 
     fun save(code: String, source: SourceName, interval: Interval, data: List<Ohlc>)
 
-    fun updateSymbolsMeta()
-
-    fun start()
     fun updateRequested(code: String)
 }
 

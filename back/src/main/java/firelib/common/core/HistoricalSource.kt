@@ -11,6 +11,10 @@ interface HistoricalSource {
     fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc>
     fun getName(): SourceName
     fun getDefaultInterval(): Interval
+
+    fun mapSecurity(security : String) : InstrId{
+        return InstrId(code = security)
+    }
 }
 
 interface RealtimeSource{

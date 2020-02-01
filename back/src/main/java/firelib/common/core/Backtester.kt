@@ -51,8 +51,6 @@ object Backtester{
 
         var ohlcDumpSubscriptionNeeded = cfg.dumpOhlc
 
-        val readerFactory = DbReaderFactory(cfg.backtestSourceName, cfg.interval, cfg.roundedStartTime())
-
         var jobsList = emptyList<Batcher<Ohlc>>()
 
         sequence {

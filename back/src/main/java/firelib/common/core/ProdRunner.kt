@@ -16,8 +16,7 @@ object ProdRunner {
     fun runStrat(executorService: ExecutorService,
                  context: SimpleRunCtx,
                  realGate: TradeGate,
-                 realReaderFactory: ReaderFactory,
-                 backtestMapper: InstrumentMapper) {
+                 realReaderFactory: ReaderFactory) {
 
         val cfg = context.modelConfig
 
@@ -25,7 +24,7 @@ object ProdRunner {
 
         val ioExecutor = Executors.newSingleThreadExecutor()
 
-        val endTime = updateMd(cfg, backtestMapper)
+        val endTime = updateMd(cfg)
 
         val persistings = listOf(enableOrdersPersist(model, cfg.getReportDbFile(), ioExecutor, "orders_backtest"),
             enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor, "trades_backtest"))
@@ -69,10 +68,10 @@ object ProdRunner {
         }
     }
 
-    fun updateMd(cfg: ModelBacktestConfig, backtestMapper: InstrumentMapper): Instant {
+    fun updateMd(cfg: ModelBacktestConfig): Instant {
         val storageImpl = MdStorageImpl()
-        return cfg.instruments.map {
-            storageImpl.updateMarketData(backtestMapper(it))
+        return cfg.instruments.map(cfg.backtestHistSource::mapSecurity).map {
+            storageImpl.updateMd(it, cfg.backtestHistSource)
         }.min()!!
     }
 }
