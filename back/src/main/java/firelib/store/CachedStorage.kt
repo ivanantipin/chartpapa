@@ -1,6 +1,6 @@
-package com.funstat.store
+package firelib.store
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc

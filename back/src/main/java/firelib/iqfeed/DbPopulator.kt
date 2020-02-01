@@ -1,6 +1,6 @@
-package com.funstat.iqfeed
+package firelib.iqfeed
 
-import com.funstat.store.MdStorageImpl
+import firelib.store.MdStorageImpl
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc

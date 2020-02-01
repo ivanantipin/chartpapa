@@ -1,17 +1,15 @@
 package com.firelib.transaq
 
 import com.firelib.TransaqConnectorGrpc
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.core.HistoricalSource
 import firelib.common.core.InstrumentMapper
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.common.misc.toInstantDefault
-import firelib.common.reader.SimplifiedReader
 import firelib.domain.Ohlc
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlockingStub, val kindId : String) : HistoricalSource {

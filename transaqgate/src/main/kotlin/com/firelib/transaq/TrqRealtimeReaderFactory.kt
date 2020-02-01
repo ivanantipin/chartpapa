@@ -1,7 +1,7 @@
 package com.firelib.transaq
 
 import com.firelib.TransaqConnectorGrpc
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.core.InstrumentMapper
 import firelib.common.core.ReaderFactory
 import firelib.common.core.timeSequence

@@ -1,6 +1,6 @@
 package com.firelib.test
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.config.InstrumentConfig
@@ -150,7 +150,7 @@ class OrderManagerTest {
 
         timeService.updateTime(Instant.now())
 
-        val om =  OrderManagerImpl(tg, timeService, "sec", 20,InstrId.dummyInstrument("sec"))
+        val om =  OrderManagerImpl(tg, timeService, "sec", 20, InstrId.dummyInstrument("sec"))
         val trades =  ArrayList<Trade>()
         om.tradesTopic().subscribe {trades += it}
         return Triple(tg, trades, om)

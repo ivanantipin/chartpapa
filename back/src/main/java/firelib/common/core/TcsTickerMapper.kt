@@ -1,8 +1,8 @@
 package firelib.common.core
 
-import com.funstat.domain.InstrId
-import com.funstat.tcs.TcsHistoricalSource
-import com.funstat.tcs.getContext
+import firelib.domain.InstrId
+import firelib.tcs.TcsHistoricalSource
+import firelib.tcs.getContext
 
 class TcsTickerMapper {
 

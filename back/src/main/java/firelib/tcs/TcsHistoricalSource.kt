@@ -1,11 +1,10 @@
-package com.funstat.tcs
+package firelib.tcs
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
 import firelib.common.core.TcsTickerMapper
 import firelib.common.interval.Interval
-import firelib.common.misc.moscowZoneId
 import firelib.domain.Ohlc
 import ru.tinkoff.invest.openapi.data.CandleInterval
 import ru.tinkoff.invest.openapi.data.StreamingEvent
@@ -30,7 +29,14 @@ class TcsHistoricalSource(val context: Context) : HistoricalSource, Flow.Subscri
 
         return context.marketStocks.thenApply {
             it.instruments.map { inst ->
-                InstrId(id = inst.figi, source = "TCS", name = inst.name, code = inst.ticker, minPriceIncr = inst.minPriceIncrement, lot = inst.lot)
+                InstrId(
+                    id = inst.figi,
+                    source = "TCS",
+                    name = inst.name,
+                    code = inst.ticker,
+                    minPriceIncr = inst.minPriceIncrement,
+                    lot = inst.lot
+                )
             }
         }.join()
     }

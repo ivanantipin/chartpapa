@@ -1,6 +1,6 @@
 package firelib.common.report.dao
 
-import com.funstat.store.MdDao
+import firelib.store.MdDao
 import firelib.common.report.SqlUtils
 import firelib.domain.Ohlc
 import java.nio.file.Path

@@ -1,4 +1,4 @@
-package com.funstat.store
+package firelib.store
 
 
 import org.slf4j.LoggerFactory

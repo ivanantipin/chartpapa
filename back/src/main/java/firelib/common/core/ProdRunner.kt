@@ -1,6 +1,6 @@
 package firelib.common.core
 
-import com.funstat.store.MdStorageImpl
+import firelib.store.MdStorageImpl
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.ordermanager.flattenAll
 import firelib.common.report.ReportWriter

@@ -1,4 +1,4 @@
-package com.funstat.domain
+package firelib.domain
 
 import firelib.common.core.SourceName
 import java.math.BigDecimal
@@ -16,8 +16,8 @@ data class InstrId(val id: String = "N/A",
 
 ){
     companion object{
-        fun dummyInstrument(ticker : String) : InstrId{
-            return InstrId(ticker,ticker,"",ticker,"dummy")
+        fun dummyInstrument(ticker : String) : InstrId {
+            return InstrId(ticker, ticker, "", ticker, "dummy")
         }
     }
 }

@@ -1,6 +1,6 @@
 package firelib.common.core
 
-import com.funstat.store.DbReaderFactory
+import firelib.store.DbReaderFactory
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.mddistributor.MarketDataDistributorImpl
 import firelib.common.model.Model

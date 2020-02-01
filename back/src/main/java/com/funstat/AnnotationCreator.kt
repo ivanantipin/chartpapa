@@ -3,9 +3,9 @@ package com.funstat
 import com.funstat.domain.Annotations
 import com.funstat.domain.HLine
 import com.funstat.domain.Label
-import com.funstat.sequenta.Sequenta
-import com.funstat.sequenta.Signal
-import com.funstat.sequenta.SignalType
+import firelib.indicators.sequenta.Sequenta
+import firelib.indicators.sequenta.Signal
+import firelib.indicators.sequenta.SignalType
 import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
 import firelib.domain.range

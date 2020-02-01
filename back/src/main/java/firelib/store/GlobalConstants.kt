@@ -1,4 +1,4 @@
-package com.funstat
+package firelib.store
 
 import java.nio.file.Paths
 

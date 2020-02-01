@@ -1,16 +1,15 @@
-package com.funstat.store
+package firelib.store
 
 
-import com.funstat.GlobalConstants
-import com.funstat.domain.InstrId
-import com.funstat.domain.sourceEnum
-import com.funstat.finam.FinamDownloader
-import com.funstat.iqfeed.IntervalTransformer
-import com.funstat.iqfeed.IqFeedHistoricalSource
-import com.funstat.tcs.HistoricalSourceEmulator
-import com.funstat.tcs.TcsHistoricalSource
-import com.funstat.tcs.getContext
-import com.funstat.vantage.VantageDownloader
+import firelib.domain.InstrId
+import firelib.domain.sourceEnum
+import firelib.finam.FinamDownloader
+import firelib.iqfeed.IntervalTransformer
+import firelib.iqfeed.IqFeedHistoricalSource
+import firelib.tcs.HistoricalSourceEmulator
+import firelib.tcs.TcsHistoricalSource
+import firelib.tcs.getContext
+import firelib.vantage.VantageDownloader
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
@@ -112,7 +111,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         return updateMd(instrId, source)
     }
 
-    fun updateMd(instrId: InstrId,source: HistoricalSource): Instant {
+    fun updateMd(instrId: InstrId, source: HistoricalSource): Instant {
         var instant = Instant.now()
         try {
             val dao = md.getDao(instrId.sourceEnum(), source.getDefaultInterval())

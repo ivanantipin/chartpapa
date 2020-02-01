@@ -1,6 +1,6 @@
-package com.funstat.vantage;
+package firelib.vantage;
 
-import com.funstat.domain.InstrId;
+import firelib.domain.InstrId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 

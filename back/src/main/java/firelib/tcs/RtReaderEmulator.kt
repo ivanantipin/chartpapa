@@ -1,4 +1,4 @@
-package com.funstat.tcs
+package firelib.tcs
 
 import firelib.common.core.timeSequence
 import firelib.common.interval.Interval

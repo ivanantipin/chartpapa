@@ -1,6 +1,6 @@
 package firelib.common.core
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import java.time.LocalDateTime
@@ -12,7 +12,7 @@ interface HistoricalSource {
     fun getName(): SourceName
     fun getDefaultInterval(): Interval
 
-    fun mapSecurity(security : String) : InstrId{
+    fun mapSecurity(security : String) : InstrId {
         return InstrId(code = security)
     }
 }

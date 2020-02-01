@@ -1,10 +1,9 @@
 package firelib.common.ordermanager
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.Order
 import firelib.domain.OrderStatus
 import firelib.common.Trade
-import firelib.common.core.InstrumentMapper
 import firelib.common.misc.NonDurableChannel
 import firelib.common.misc.SubChannel
 import firelib.common.timeservice.TimeService
@@ -22,7 +21,8 @@ class OrderManagerImpl(val tradeGate : TradeGate,
                        val timeService : TimeService,
                        val security : String,
                        val maxOrderCount: Int = 20,
-                       val instrument : InstrId) : OrderManager {
+                       val instrument : InstrId
+) : OrderManager {
 
     private val log = LoggerFactory.getLogger(javaClass)
 

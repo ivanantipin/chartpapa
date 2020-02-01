@@ -1,6 +1,6 @@
-package com.funstat.finam
+package firelib.finam
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import com.google.common.io.CharStreams.readLines
 import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
@@ -65,7 +65,13 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
 
             return codes.mapIndexed { i, code ->
-                InstrId(id = ids!![i], name = names!![i], market = markets!![i], code = codes[i].replace("'", ""), source = SOURCE.name)
+                InstrId(
+                    id = ids!![i],
+                    name = names!![i],
+                    market = markets!![i],
+                    code = codes[i].replace("'", ""),
+                    source = SOURCE.name
+                )
             }
 
         } catch (e: IOException) {

@@ -1,6 +1,6 @@
-package com.funstat.tcs
+package firelib.tcs
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
@@ -20,7 +20,15 @@ class HistoricalSourceEmulator(val interval: Interval) : HistoricalSource {
     }
 
     override fun symbols(): List<InstrId> {
-        return listOf(InstrId(id = "1", name = "sber", market = "2", code = "sber", source = SOURCE.name))
+        return listOf(
+            InstrId(
+                id = "1",
+                name = "sber",
+                market = "2",
+                code = "sber",
+                source = SOURCE.name
+            )
+        )
     }
 
     override fun getDefaultInterval(): Interval {

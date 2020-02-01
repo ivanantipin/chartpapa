@@ -1,6 +1,6 @@
 package com.firelib.transaq
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.Order
 import firelib.domain.OrderType
 import firelib.domain.Side

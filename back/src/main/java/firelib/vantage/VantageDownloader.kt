@@ -1,7 +1,7 @@
-package com.funstat.vantage
+package firelib.vantage
 
-import com.funstat.domain.InstrId
-import com.funstat.store.MdDao
+import firelib.domain.InstrId
+import firelib.store.MdDao
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
@@ -71,7 +71,15 @@ class VantageDownloader : HistoricalSource {
         @JvmStatic
         fun main(args: Array<String>) {
 
-            val load = VantageDownloader().load(InstrId("RASP.MOS", "RASP.MOS", "RASP.MOS", "RASP.MOS", "RASP.MOS"))
+            val load = VantageDownloader().load(
+                InstrId(
+                    "RASP.MOS",
+                    "RASP.MOS",
+                    "RASP.MOS",
+                    "RASP.MOS",
+                    "RASP.MOS"
+                )
+            )
             println(load)
 
         }

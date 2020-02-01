@@ -1,6 +1,6 @@
-package com.funstat.iqfeed
+package firelib.iqfeed
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
 import firelib.common.interval.Interval
@@ -25,7 +25,15 @@ class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
         val map = code2name()
         return csvPath.toFile().list().map {
             it.replace("_1.csv", "")
-        }.filter { map.containsKey(it) }.map { InstrId(it, map!![it]!!, "NA", it, SOURCE.name) }
+        }.filter { map.containsKey(it) }.map {
+            InstrId(
+                it,
+                map!![it]!!,
+                "NA",
+                it,
+                SOURCE.name
+            )
+        }
     }
 
     override fun load(instrId: InstrId): Sequence<Ohlc> {
@@ -78,7 +86,11 @@ fun solve(data : Array<MutableList<Double>>) : Array<Double>{
 }
 
 fun main(args: Array<String>) {
-    val minBars = IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).load(InstrId(code = "SPY"))
+    val minBars = IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).load(
+        InstrId(
+            code = "SPY"
+        )
+    )
             .filter { it.endTime.atUtc().toLocalTime().hour != 0 }
             .toList()
 

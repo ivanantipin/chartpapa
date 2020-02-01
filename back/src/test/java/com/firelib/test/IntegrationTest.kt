@@ -1,6 +1,6 @@
 package com.firelib.test
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.config.InstrumentConfig
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.runStrat

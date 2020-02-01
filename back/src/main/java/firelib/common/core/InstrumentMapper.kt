@@ -1,5 +1,5 @@
 package firelib.common.core
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 
-interface InstrumentMapper : (String)->InstrId
+interface InstrumentMapper : (String)-> InstrId

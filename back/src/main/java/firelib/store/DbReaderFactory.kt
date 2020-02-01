@@ -1,4 +1,4 @@
-package com.funstat.store
+package firelib.store
 
 import firelib.common.core.ReaderFactory
 import firelib.common.core.SourceName

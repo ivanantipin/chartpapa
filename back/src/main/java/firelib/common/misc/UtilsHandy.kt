@@ -1,8 +1,8 @@
 package firelib.common.misc
 
-import com.funstat.domain.InstrId
-import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
+import firelib.domain.InstrId
+import firelib.finam.FinamDownloader
+import firelib.store.MdStorageImpl
 import firelib.common.core.InstrumentMapper
 import firelib.common.misc.UtilsHandy.updateRussianStockSimple
 import firelib.common.model.DivHelper

@@ -1,6 +1,6 @@
 package com.firelib.test
 
-import com.funstat.store.MdDao
+import firelib.store.MdDao
 import firelib.common.report.SqlUtils
 import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils

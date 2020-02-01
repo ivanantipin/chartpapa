@@ -1,6 +1,6 @@
 package firelib.common
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.misc.DurableChannel
 import firelib.common.misc.dbl2Str
 import firelib.common.misc.toStandardString

@@ -1,4 +1,4 @@
-package com.funstat.finam
+package firelib.finam
 
 enum class Period(val id: Int) {
     // TODO: add more periods

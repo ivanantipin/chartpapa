@@ -1,5 +1,5 @@
-package com.funstat.ohlc
+package firelib.store
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 
 data class Metadata(val instrIds: List<InstrId>, val period: Int)

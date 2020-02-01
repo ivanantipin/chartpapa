@@ -3,7 +3,7 @@ package com.firelib.transaq
 import com.firelib.Str
 import com.firelib.TransaqConnectorGrpc
 import com.firelib.transaq.TrqParser.parseTrqResponse
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.*
 import firelib.common.tradegate.TradeGate
 import firelib.domain.OrderType
@@ -144,7 +144,8 @@ fun main() {
 
     val gate = makeDefaultTransaqGate(Executors.newSingleThreadExecutor())
 
-    val instrId = InstrId(code = "SBER", board = "TQBR", minPriceIncr = BigDecimal(0.1))
+    val instrId =
+        InstrId(code = "SBER", board = "TQBR", minPriceIncr = BigDecimal(0.1))
 
     val order = Order(OrderType.Limit, 256.0, 1, Side.Buy, "sber", "0", Instant.now(), instrId)
     order.orderSubscription.subscribe { println(it) }

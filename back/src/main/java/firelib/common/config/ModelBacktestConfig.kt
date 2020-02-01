@@ -1,24 +1,16 @@
 package firelib.common.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.funstat.GlobalConstants
-import com.funstat.domain.InstrId
-import com.funstat.finam.FinamDownloader
-import com.funstat.store.MdStorageImpl
-import com.funstat.store.SimplifiedReaderImpl
+import firelib.store.GlobalConstants
+import firelib.finam.FinamDownloader
 import firelib.common.core.Backtester
 import firelib.common.core.HistoricalSource
 import firelib.common.core.ModelFactory
-import firelib.common.core.SourceName
 import firelib.common.interval.Interval
 import firelib.common.misc.toInstantDefault
-import firelib.common.model.DivHelper
 import firelib.common.model.Model
 import firelib.common.model.defaultModelFactory
 import firelib.common.opt.OptimizedParameter
-import firelib.common.reader.MarketDataReaderDb
-import firelib.common.reader.ReaderDivAdjusted
-import firelib.common.reader.toSequence
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant

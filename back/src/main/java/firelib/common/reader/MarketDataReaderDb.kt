@@ -1,6 +1,6 @@
 package firelib.common.reader
 
-import com.funstat.store.MdDao
+import firelib.store.MdDao
 import firelib.common.misc.atUtc
 import firelib.domain.Ohlc
 import java.time.Instant

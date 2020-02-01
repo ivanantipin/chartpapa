@@ -1,6 +1,6 @@
-package com.funstat.tcs
+package firelib.tcs
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import com.google.common.collect.Sets
 import firelib.common.Order
 import firelib.common.Trade

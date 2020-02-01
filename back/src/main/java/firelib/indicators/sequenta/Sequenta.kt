@@ -1,4 +1,4 @@
-package com.funstat.sequenta
+package firelib.indicators.sequenta
 
 import firelib.common.misc.atUtc
 import firelib.domain.Ohlc

@@ -4,13 +4,11 @@ import com.firelib.DatePoint
 import com.firelib.Level
 import com.firelib.Levels
 import com.firelib.OhlcPeriod
-import com.funstat.sequenta.Sequenta
-import com.funstat.sequenta.SignalType
+import firelib.indicators.sequenta.Sequenta
+import firelib.indicators.sequenta.SignalType
 import firelib.common.interval.Interval
 import firelib.common.misc.toInstantDefault
 import firelib.domain.Ohlc
-import org.joda.time.PeriodType
-import java.time.Period
 import java.util.*
 
 class LevelsGen(val broadcaster: Broadcaster<Levels>, val ticker: String) {

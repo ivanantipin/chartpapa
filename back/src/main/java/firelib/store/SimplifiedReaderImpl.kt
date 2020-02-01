@@ -1,4 +1,4 @@
-package com.funstat.store
+package firelib.store
 
 import firelib.common.misc.atUtc
 import firelib.common.reader.SimplifiedReader

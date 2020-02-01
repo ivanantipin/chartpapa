@@ -1,4 +1,4 @@
-import com.funstat.iqfeed.IntervalTransformer
+import firelib.iqfeed.IntervalTransformer
 import firelib.common.interval.Interval
 import firelib.domain.Ohlc
 import org.junit.Test

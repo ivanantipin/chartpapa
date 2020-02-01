@@ -1,4 +1,4 @@
-package com.funstat.store
+package firelib.store
 
 import firelib.common.misc.toInstantDefault
 import firelib.domain.Ohlc

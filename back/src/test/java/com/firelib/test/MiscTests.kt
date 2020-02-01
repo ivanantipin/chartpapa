@@ -1,6 +1,6 @@
 package com.firelib.test
 
-import com.funstat.domain.InstrId
+import firelib.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.interval.Interval

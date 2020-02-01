@@ -1,6 +1,5 @@
 package firelib.common.core
 
-import com.funstat.store.DbReaderFactory
 import firelib.common.config.ModelBacktestConfig
 import firelib.common.config.OptResourceParams
 import firelib.common.opt.ParamsVariator
