@@ -1,10 +1,10 @@
 package firelib.common.model
 
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.PositionCloser
-import firelib.common.ordermanager.makePositionEqualsTo
-import firelib.common.timeseries.TimeSeries
-import firelib.common.timeseries.nonInterpolatedView
+import firelib.common.core.makePositionEqualsTo
+import firelib.common.core.timeseries.TimeSeries
+import firelib.common.core.timeseries.nonInterpolatedView
 import firelib.domain.Ohlc
 import java.time.LocalTime
 
@@ -65,6 +65,7 @@ fun Model.shortForMoneyIfFlat(idx: Int, money: Long) {
 
 fun Model.closePositionByTimeout(afterTime: LocalTime? = null,
                                  periods: Int,
-                                 interval: Interval) {
+                                 interval: Interval
+) {
     PositionCloser.closePosByTimeoutAndTimeOfDay(this, afterTime, periods, interval)
 }

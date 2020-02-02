@@ -1,4 +1,4 @@
-package firelib.common.ordermanager
+package firelib.common.core
 
 import firelib.domain.InstrId
 import firelib.common.Order
@@ -7,7 +7,6 @@ import firelib.common.Trade
 import firelib.common.misc.NonDurableChannel
 import firelib.common.misc.SubChannel
 import firelib.common.timeservice.TimeService
-import firelib.common.tradegate.TradeGate
 import firelib.domain.OrderState
 import firelib.domain.OrderType
 import firelib.domain.OrderWithState

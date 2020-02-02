@@ -1,15 +1,12 @@
 package com.firelib.test
 
-import firelib.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
-import firelib.common.config.InstrumentConfig
-import firelib.common.config.ModelBacktestConfig
-import firelib.common.ordermanager.*
-import firelib.common.reader.MarketDataReaderSql
-import firelib.common.reader.toSequence
+import firelib.common.core.config.ModelBacktestConfig
+import firelib.common.core.*
 import firelib.common.timeservice.TimeServiceManaged
 import firelib.common.tradegate.TradeGateStub
+import firelib.domain.InstrId
 import firelib.domain.OrderType
 import firelib.domain.Side
 import org.junit.Assert
@@ -143,14 +140,19 @@ class OrderManagerTest {
         val timeService = TimeServiceManaged()
 
         val config = ModelBacktestConfig()
-        config.instruments = listOf(InstrumentConfig("sec",{MarketDataReaderSql(emptyList()).toSequence()
-        }, InstrId.dummyInstrument("sec")))
+        config.instruments = listOf("SBER")
 
         val tg = TradeGateStub(config, timeService)
 
         timeService.updateTime(Instant.now())
 
-        val om =  OrderManagerImpl(tg, timeService, "sec", 20, InstrId.dummyInstrument("sec"))
+        val om = OrderManagerImpl(
+            tg,
+            timeService,
+            "sec",
+            20,
+            InstrId.dummyInstrument("sec")
+        )
         val trades =  ArrayList<Trade>()
         om.tradesTopic().subscribe {trades += it}
         return Triple(tg, trades, om)

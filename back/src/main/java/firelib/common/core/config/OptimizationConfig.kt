@@ -1,7 +1,7 @@
-package firelib.common.config
+package firelib.common.core.config
 
 import firelib.common.opt.OptimizedParameter
-import firelib.common.report.StrategyMetric
+import firelib.common.core.report.StrategyMetric
 
 
 /**

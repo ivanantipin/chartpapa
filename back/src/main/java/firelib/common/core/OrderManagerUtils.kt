@@ -1,4 +1,4 @@
-package firelib.common.ordermanager
+package firelib.common.core
 
 import firelib.common.Order
 import firelib.domain.OrderType
@@ -59,7 +59,7 @@ fun OrderManager.flattenAll(reason: String? = null) {
     makePositionEqualsTo(0)
 }
 
-fun OrderManager.cancelAllOrders() {cancelOrders(liveOrders().filter({o->o.orderType != OrderType.Market}))}
+fun OrderManager.cancelAllOrders() {cancelOrders(liveOrders().filter({ o->o.orderType != OrderType.Market}))}
 
 
 

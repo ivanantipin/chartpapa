@@ -1,7 +1,7 @@
 package firelib.common.core
 
 import firelib.domain.InstrId
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.Ohlc
 import java.time.LocalDateTime
 

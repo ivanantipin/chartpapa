@@ -5,7 +5,7 @@ import firelib.domain.InstrId
 import firelib.common.core.HistoricalSource
 import firelib.common.core.InstrumentMapper
 import firelib.common.core.SourceName
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.toInstantDefault
 import firelib.domain.Ohlc
 import java.time.LocalDateTime

@@ -12,10 +12,10 @@ import firelib.tcs.getContext
 import firelib.vantage.VantageDownloader
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.atUtc
-import firelib.common.report.GeGeWriter
-import firelib.common.report.SqlUtils
+import firelib.common.core.report.GeGeWriter
+import firelib.common.core.report.SqlUtils
 import firelib.domain.Ohlc
 import org.apache.commons.io.FileUtils
 import java.io.File

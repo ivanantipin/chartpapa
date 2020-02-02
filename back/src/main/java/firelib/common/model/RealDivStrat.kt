@@ -1,11 +1,11 @@
 package firelib.common.model
 
-import firelib.common.config.ModelBacktestConfig
-import firelib.common.config.runStrat
-import firelib.common.interval.Interval
+import firelib.common.core.config.ModelBacktestConfig
+import firelib.common.core.config.runStrat
+import firelib.domain.Interval
 import firelib.common.misc.StreamTradeCaseGenerator
 import firelib.common.misc.atUtc
-import firelib.common.ordermanager.flattenAll
+import firelib.common.core.flattenAll
 
 
 class RealDivModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {

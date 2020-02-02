@@ -2,7 +2,7 @@ package com.funstat
 
 import com.funstat.domain.*
 import firelib.vantage.VantageDownloader
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.atUtc
 import firelib.domain.InstrId
 import firelib.domain.Ohlc

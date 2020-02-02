@@ -1,4 +1,4 @@
-package firelib.common.config
+package firelib.common.core.config
 
 data class OptResourceParams(val threadCount : Int, val batchSize : Int)
 

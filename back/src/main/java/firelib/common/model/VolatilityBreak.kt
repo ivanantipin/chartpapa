@@ -1,9 +1,9 @@
 package firelib.common.model
 
-import firelib.common.config.ModelBacktestConfig
+import firelib.common.core.config.ModelBacktestConfig
 import firelib.common.core.ModelFactory
 import firelib.common.core.SimpleRunCtx
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.Quantiles
 import firelib.common.misc.atUtc
 import firelib.common.model.VolatilityBreak.Companion.modelConfig

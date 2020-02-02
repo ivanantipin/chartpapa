@@ -1,6 +1,6 @@
 package firelib.common.core
 
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import java.time.Instant
 
 fun waitUntil(timestamp: Instant) {

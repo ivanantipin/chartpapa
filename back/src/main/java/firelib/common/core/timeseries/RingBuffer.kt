@@ -1,4 +1,4 @@
-package firelib.common.timeseries
+package firelib.common.core.timeseries
 
 
 class RingBuffer<T>(val capacity: Int, val func: (i: Int) -> T) {

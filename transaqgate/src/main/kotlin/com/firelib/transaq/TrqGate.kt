@@ -5,7 +5,7 @@ import com.firelib.TransaqConnectorGrpc
 import com.firelib.transaq.TrqParser.parseTrqResponse
 import firelib.domain.InstrId
 import firelib.common.*
-import firelib.common.tradegate.TradeGate
+import firelib.common.core.TradeGate
 import firelib.domain.OrderType
 import firelib.domain.Side
 import firelib.domain.*

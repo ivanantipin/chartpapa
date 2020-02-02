@@ -6,7 +6,7 @@ import firelib.common.Order
 import firelib.common.Trade
 import firelib.common.core.TcsTickerMapper
 import firelib.common.misc.moscowZoneId
-import firelib.common.tradegate.TradeGate
+import firelib.common.core.TradeGate
 import firelib.domain.OrderState
 import firelib.domain.OrderType
 import firelib.domain.Side

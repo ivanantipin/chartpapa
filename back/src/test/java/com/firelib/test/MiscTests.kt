@@ -3,7 +3,7 @@ package com.firelib.test
 import firelib.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.OrderType
 import firelib.domain.Side
 import org.junit.Assert

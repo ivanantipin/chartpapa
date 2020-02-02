@@ -6,7 +6,7 @@ import com.firelib.OhlcTO
 import com.firelib.StratDescription
 import firelib.common.core.SimpleRunCtx
 import firelib.common.core.addModelWithDefaultParams
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.mddistributor.MarketDataDistributor
 import firelib.common.mddistributor.getOrCreatTss
 import firelib.common.model.VolatilityBreak.Companion.modelConfig

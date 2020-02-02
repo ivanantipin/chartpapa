@@ -1,9 +1,8 @@
 package firelib.common.core
 
-import firelib.common.config.ModelBacktestConfig
-import firelib.common.interval.Interval
+import firelib.common.core.config.ModelBacktestConfig
+import firelib.domain.Interval
 import firelib.common.model.*
-import firelib.common.ordermanager.sellAtMarket
 import java.time.Instant
 import java.time.LocalDate
 

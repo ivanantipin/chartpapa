@@ -1,4 +1,4 @@
-package firelib.common.tradegate
+package firelib.common.core
 
 import firelib.common.Order
 

@@ -1,6 +1,6 @@
 package firelib.indicators
 
-import firelib.common.timeseries.TimeSeries
+import firelib.common.core.timeseries.TimeSeries
 import firelib.domain.Ohlc
 import firelib.domain.range
 

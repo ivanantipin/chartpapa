@@ -5,7 +5,7 @@ import firelib.domain.InstrId
 import firelib.common.core.InstrumentMapper
 import firelib.common.core.ReaderFactory
 import firelib.common.core.timeSequence
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.reader.QueueSimplifiedReader
 import firelib.common.reader.SimplifiedReader
 import firelib.domain.Ohlc

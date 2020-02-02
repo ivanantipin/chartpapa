@@ -1,4 +1,4 @@
-package firelib.common.report
+package firelib.common.core.report
 
 import firelib.common.Order
 import firelib.domain.Side

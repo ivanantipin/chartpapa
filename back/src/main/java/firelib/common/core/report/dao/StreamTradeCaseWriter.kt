@@ -1,10 +1,10 @@
-package firelib.common.report.dao
+package firelib.common.core.report.dao
 
 import firelib.common.Trade
 import firelib.common.misc.pnl
-import firelib.common.report.*
-import firelib.common.report.SqlUtils.makeCreateSqlStmtFromHeader
-import firelib.common.report.SqlUtils.makeSqlStatementFromHeader
+import firelib.common.core.report.*
+import firelib.common.core.report.SqlUtils.makeCreateSqlStmtFromHeader
+import firelib.common.core.report.SqlUtils.makeSqlStatementFromHeader
 import firelib.domain.Side
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate

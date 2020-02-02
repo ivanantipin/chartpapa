@@ -2,7 +2,7 @@ package firelib.iqfeed
 
 import firelib.store.MdStorageImpl
 import firelib.common.core.SourceName
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader

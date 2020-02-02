@@ -1,4 +1,4 @@
-package firelib.common.report
+package firelib.common.core.report
 
 import java.nio.file.Paths
 import java.time.Instant

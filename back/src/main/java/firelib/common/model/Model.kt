@@ -1,8 +1,8 @@
 package firelib.common.model
 
-import firelib.common.ordermanager.OrderManager
-import firelib.common.ordermanager.OrderManagerImpl
-import firelib.common.ordermanager.flattenAll
+import firelib.common.core.OrderManager
+import firelib.common.core.OrderManagerImpl
+import firelib.common.core.flattenAll
 
 /**
 

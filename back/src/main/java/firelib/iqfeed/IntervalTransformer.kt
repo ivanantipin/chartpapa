@@ -1,6 +1,6 @@
 package firelib.iqfeed
 
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.Ohlc
 import firelib.domain.merge
 import java.util.*

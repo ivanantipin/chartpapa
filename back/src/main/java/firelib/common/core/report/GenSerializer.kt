@@ -1,6 +1,6 @@
-package firelib.common.report
+package firelib.common.core.report
 
-import firelib.common.report.SqlTypeMapper.mapType
+import firelib.common.core.report.SqlTypeMapper.mapType
 import java.math.BigDecimal
 import java.time.Instant
 import kotlin.reflect.KType

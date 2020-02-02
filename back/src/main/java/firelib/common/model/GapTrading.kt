@@ -1,9 +1,9 @@
 package firelib.common.model
 
-import firelib.common.config.ModelBacktestConfig
-import firelib.common.config.runStrat
-import firelib.common.interval.Interval
-import firelib.common.report.GeGeWriter
+import firelib.common.core.config.ModelBacktestConfig
+import firelib.common.core.config.runStrat
+import firelib.domain.Interval
+import firelib.common.core.report.GeGeWriter
 
 
 class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(context, fac) {

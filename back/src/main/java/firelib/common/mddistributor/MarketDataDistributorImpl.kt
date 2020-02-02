@@ -1,8 +1,8 @@
 package firelib.common.mddistributor
 
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.interval.IntervalServiceImpl
-import firelib.common.timeseries.TimeSeries
+import firelib.common.core.timeseries.TimeSeries
 import firelib.domain.Ohlc
 import java.time.Instant
 

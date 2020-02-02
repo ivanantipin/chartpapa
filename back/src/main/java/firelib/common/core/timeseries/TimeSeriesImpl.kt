@@ -1,4 +1,4 @@
-package firelib.common.timeseries
+package firelib.common.core.timeseries
 
 import firelib.common.misc.NonDurableChannel
 

@@ -1,4 +1,4 @@
-package firelib.common.interval
+package firelib.domain
 
 import java.time.Duration
 import java.time.Instant

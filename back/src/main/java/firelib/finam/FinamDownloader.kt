@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.FinamTickerMapper
 import firelib.domain.Ohlc
 import io.netty.util.concurrent.DefaultThreadFactory

@@ -1,12 +1,12 @@
 package firelib.common.core
 
-import firelib.common.config.ModelBacktestConfig
-import firelib.common.config.OptResourceParams
+import firelib.common.core.config.ModelBacktestConfig
+import firelib.common.core.config.OptResourceParams
 import firelib.common.opt.ParamsVariator
-import firelib.common.report.ReportProcessor
-import firelib.common.report.ReportWriter
-import firelib.common.report.ReportWriter.clearReportDir
-import firelib.common.report.ReportWriter.writeReport
+import firelib.common.core.report.ReportProcessor
+import firelib.common.core.report.ReportWriter
+import firelib.common.core.report.ReportWriter.clearReportDir
+import firelib.common.core.report.ReportWriter.writeReport
 import firelib.domain.Ohlc
 import java.time.Instant
 import java.time.temporal.ChronoUnit

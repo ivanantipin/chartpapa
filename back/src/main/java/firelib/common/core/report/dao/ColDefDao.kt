@@ -1,9 +1,9 @@
-package firelib.common.report.dao
+package firelib.common.core.report.dao
 
-import firelib.common.report.ColDef
-import firelib.common.report.SqlUtils
-import firelib.common.report.getHeader
-import firelib.common.report.toMapForSqlUpdate
+import firelib.common.core.report.ColDef
+import firelib.common.core.report.SqlUtils
+import firelib.common.core.report.getHeader
+import firelib.common.core.report.toMapForSqlUpdate
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager

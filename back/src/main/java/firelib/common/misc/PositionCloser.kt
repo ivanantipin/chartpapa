@@ -1,9 +1,9 @@
 package firelib.common.misc
 
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.model.Model
-import firelib.common.ordermanager.makePositionEqualsTo
-import firelib.common.timeseries.nonInterpolatedView
+import firelib.common.core.makePositionEqualsTo
+import firelib.common.core.timeseries.nonInterpolatedView
 import java.time.LocalTime
 
 

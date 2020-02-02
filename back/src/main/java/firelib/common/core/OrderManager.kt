@@ -1,4 +1,4 @@
-package firelib.common.ordermanager
+package firelib.common.core
 
 import firelib.domain.InstrId
 import firelib.common.Order

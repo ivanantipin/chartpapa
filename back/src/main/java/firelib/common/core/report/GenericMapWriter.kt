@@ -1,4 +1,4 @@
-package firelib.common.report
+package firelib.common.core.report
 
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate

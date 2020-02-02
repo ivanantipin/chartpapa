@@ -5,7 +5,7 @@ import firelib.common.Order
 import firelib.domain.OrderStatus
 import firelib.common.Trade
 import firelib.common.core.InstrumentMapper
-import firelib.common.tradegate.TradeGate
+import firelib.common.core.TradeGate
 import firelib.domain.OrderState
 import java.time.Instant
 import java.util.concurrent.ExecutorService

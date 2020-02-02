@@ -2,7 +2,7 @@ package firelib.store
 
 import firelib.domain.InstrId
 import firelib.common.core.SourceName
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.Ohlc
 
 class CachedStorage(private val delegate: MdStorage) : MdStorage {

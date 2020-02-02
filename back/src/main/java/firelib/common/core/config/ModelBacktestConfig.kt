@@ -1,4 +1,4 @@
-package firelib.common.config
+package firelib.common.core.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import firelib.store.GlobalConstants
@@ -6,7 +6,7 @@ import firelib.finam.FinamDownloader
 import firelib.common.core.Backtester
 import firelib.common.core.HistoricalSource
 import firelib.common.core.ModelFactory
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.toInstantDefault
 import firelib.common.model.Model
 import firelib.common.model.defaultModelFactory

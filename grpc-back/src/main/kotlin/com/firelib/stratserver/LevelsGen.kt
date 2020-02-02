@@ -6,7 +6,7 @@ import com.firelib.Levels
 import com.firelib.OhlcPeriod
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.misc.toInstantDefault
 import firelib.domain.Ohlc
 import java.util.*

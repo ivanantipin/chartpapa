@@ -1,4 +1,4 @@
-package firelib.common.report
+package firelib.common.core.report
 
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource

@@ -4,7 +4,7 @@ import firelib.domain.InstrId
 import firelib.store.MdDao
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.Ohlc
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate

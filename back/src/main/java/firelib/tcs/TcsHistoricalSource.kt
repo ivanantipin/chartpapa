@@ -4,7 +4,7 @@ import firelib.domain.InstrId
 import firelib.common.core.HistoricalSource
 import firelib.common.core.SourceName
 import firelib.common.core.TcsTickerMapper
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.Ohlc
 import ru.tinkoff.invest.openapi.data.CandleInterval
 import ru.tinkoff.invest.openapi.data.StreamingEvent

@@ -6,7 +6,7 @@ import firelib.common.core.DummyModel
 import firelib.common.core.ProdRunner
 import firelib.common.core.ReaderFactory
 import firelib.common.core.SimpleRunCtx
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.reader.SimplifiedReader
 import java.util.concurrent.Executors
 

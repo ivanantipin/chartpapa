@@ -1,7 +1,7 @@
 package firelib.common.core
 
 import firelib.store.DbReaderFactory
-import firelib.common.config.ModelBacktestConfig
+import firelib.common.core.config.ModelBacktestConfig
 import firelib.common.mddistributor.MarketDataDistributorImpl
 import firelib.common.model.Model
 import firelib.common.model.ModelContext

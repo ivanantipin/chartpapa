@@ -1,11 +1,8 @@
 package com.firelib.test
 
-import firelib.domain.InstrId
-import firelib.common.config.InstrumentConfig
-import firelib.common.config.ModelBacktestConfig
-import firelib.common.config.runStrat
+import firelib.common.core.config.ModelBacktestConfig
+import firelib.common.core.config.runStrat
 import firelib.common.reader.ReaderFactoryImpl
-import firelib.common.reader.toSequence
 import firelib.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
@@ -85,9 +82,7 @@ class BacktestIntegrationTest {
 
             val factoryImpl = ReaderFactoryImpl(dataServerRoot)
 
-            instruments += InstrumentConfig("XG", { startTime ->
-                factoryImpl.create(fileName, startTime).toSequence()
-            }, InstrId.dummyInstrument("XG"))
+            instruments += "XG"
             startDateGmt = LocalDateTime.of(2013, Month.MARCH, 8, 5, 0, 0).toInstant(ZoneOffset.UTC)
             precacheMarketData = false
         }

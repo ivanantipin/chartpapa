@@ -1,7 +1,7 @@
-package firelib.common.report.dao
+package firelib.common.core.report.dao
 
 import firelib.store.MdDao
-import firelib.common.report.SqlUtils
+import firelib.common.core.report.SqlUtils
 import firelib.domain.Ohlc
 import java.nio.file.Path
 

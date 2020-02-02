@@ -1,4 +1,4 @@
-package firelib.common.report
+package firelib.common.core.report
 
 import firelib.common.Trade
 import firelib.common.misc.pnl

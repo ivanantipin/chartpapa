@@ -1,6 +1,6 @@
 package com.firelib.test
 
-import firelib.common.timeseries.RingBuffer
+import firelib.common.core.timeseries.RingBuffer
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 

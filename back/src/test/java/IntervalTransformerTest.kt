@@ -1,5 +1,5 @@
 import firelib.iqfeed.IntervalTransformer
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.domain.Ohlc
 import org.junit.Test
 import java.time.LocalDateTime
@@ -21,7 +21,8 @@ class IntervalTransformerTest {
         println(Date(1177718400000L))
 
 
-        val out = IntervalTransformer.transform(Interval.Week, listOf(
+        val out = IntervalTransformer.transform(
+            Interval.Week, listOf(
                 Ohlc(mon, 1.0, 2.0, 0.0, 1.0),
                 Ohlc(fri, 2.0, 3.0, 1.0, 2.0),
                 Ohlc(sun, 2.0, 3.5, 0.5, 2.0),

@@ -1,5 +1,6 @@
 package firelib.common.interval
 
+import firelib.domain.Interval
 import java.time.Instant
 
 /**

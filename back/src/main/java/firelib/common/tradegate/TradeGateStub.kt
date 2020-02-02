@@ -1,13 +1,15 @@
 package firelib.common.tradegate
 
 import firelib.common.Order
-import firelib.common.config.ModelBacktestConfig
+import firelib.common.core.config.ModelBacktestConfig
+import firelib.common.core.TradeGate
 import firelib.common.timeservice.TimeService
 import firelib.domain.OrderType
 import java.time.Instant
 
 
-class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) : TradeGate {
+class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) :
+    TradeGate {
 
     val limitBooks = cfg.instruments.map {
         BookStub(timeService, LimitOBook())

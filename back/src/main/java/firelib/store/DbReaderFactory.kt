@@ -2,7 +2,7 @@ package firelib.store
 
 import firelib.common.core.ReaderFactory
 import firelib.common.core.SourceName
-import firelib.common.interval.Interval
+import firelib.domain.Interval
 import firelib.common.reader.SimplifiedReader
 import java.time.Instant
 
