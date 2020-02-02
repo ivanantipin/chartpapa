@@ -1,11 +1,11 @@
 package firelib.common.tradegate
 
 import firelib.common.Order
-import firelib.domain.OrderStatus
+import firelib.core.domain.OrderStatus
 import firelib.common.Trade
 import firelib.common.timeservice.TimeService
-import firelib.domain.OrderState
-import firelib.domain.Side
+import firelib.core.domain.OrderState
+import firelib.core.domain.Side
 import java.time.Instant
 
 

@@ -1,11 +1,11 @@
 package firelib.tcs
 
-import firelib.domain.InstrId
-import firelib.common.core.HistoricalSource
-import firelib.common.core.SourceName
-import firelib.common.core.TcsTickerMapper
-import firelib.domain.Interval
-import firelib.domain.Ohlc
+import firelib.core.domain.InstrId
+import firelib.core.HistoricalSource
+import firelib.core.SourceName
+import firelib.core.TcsTickerMapper
+import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
 import ru.tinkoff.invest.openapi.data.CandleInterval
 import ru.tinkoff.invest.openapi.data.StreamingEvent
 import ru.tinkoff.invest.openapi.data.StreamingRequest

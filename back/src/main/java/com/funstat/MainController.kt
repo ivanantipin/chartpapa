@@ -2,12 +2,12 @@ package com.funstat
 
 import com.funstat.domain.*
 import firelib.vantage.VantageDownloader
-import firelib.domain.Interval
+import firelib.core.domain.Interval
 import firelib.common.misc.atUtc
-import firelib.domain.InstrId
-import firelib.domain.Ohlc
-import firelib.domain.sourceEnum
-import firelib.store.*
+import firelib.core.domain.InstrId
+import firelib.core.domain.Ohlc
+import firelib.core.domain.sourceEnum
+import firelib.core.store.*
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*

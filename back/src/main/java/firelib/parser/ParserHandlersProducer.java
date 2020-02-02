@@ -1,7 +1,7 @@
 package firelib.parser;
 
-import firelib.domain.Ohlc;
-import firelib.domain.Tick;
+import firelib.core.domain.Ohlc;
+import firelib.core.domain.Tick;
 import javolution.text.TypeFormat;
 
 import java.time.ZoneId;

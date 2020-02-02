@@ -4,7 +4,7 @@ import firelib.common.misc.toInstantDefault
 import firelib.common.model.Div
 import firelib.common.reader.MarketDataReader
 import firelib.common.reader.ReaderDivAdjusted
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant

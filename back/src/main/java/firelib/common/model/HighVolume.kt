@@ -1,12 +1,12 @@
 package firelib.common.model
 
-import firelib.common.core.config.ModelBacktestConfig
-import firelib.common.core.config.runStrat
-import firelib.domain.Interval
+import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.runStrat
+import firelib.core.domain.Interval
 import firelib.common.misc.Quantiles
-import firelib.common.core.report.GeGeWriter
-import firelib.common.core.timeseries.TimeSeries
-import firelib.domain.Ohlc
+import firelib.core.report.GeGeWriter
+import firelib.core.timeseries.TimeSeries
+import firelib.core.domain.Ohlc
 import java.nio.file.Paths
 
 

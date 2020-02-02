@@ -1,6 +1,6 @@
 package firelib.vantage;
 
-import firelib.domain.InstrId;
+import firelib.core.domain.InstrId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 

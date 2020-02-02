@@ -1,9 +1,9 @@
 package firelib.common.model
 
-import firelib.common.core.config.ModelBacktestConfig
-import firelib.common.core.config.runStrat
-import firelib.domain.Interval
-import firelib.common.core.flattenAll
+import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.runStrat
+import firelib.core.domain.Interval
+import firelib.core.flattenAll
 
 class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 

@@ -1,11 +1,11 @@
 package com.firelib.test
 
 
-import firelib.domain.Interval
+import firelib.core.domain.Interval
 import firelib.common.model.Model
 import firelib.common.model.ModelContext
-import firelib.common.core.timeseries.TimeSeries
-import firelib.domain.Ohlc
+import firelib.core.timeseries.TimeSeries
+import firelib.core.domain.Ohlc
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 

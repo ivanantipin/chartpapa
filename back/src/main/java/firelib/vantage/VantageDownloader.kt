@@ -1,11 +1,11 @@
 package firelib.vantage
 
-import firelib.domain.InstrId
-import firelib.store.MdDao
-import firelib.common.core.HistoricalSource
-import firelib.common.core.SourceName
-import firelib.domain.Interval
-import firelib.domain.Ohlc
+import firelib.core.domain.InstrId
+import firelib.core.store.MdDao
+import firelib.core.HistoricalSource
+import firelib.core.SourceName
+import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime

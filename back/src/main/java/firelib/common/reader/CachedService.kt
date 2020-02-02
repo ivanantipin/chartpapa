@@ -4,7 +4,7 @@ import firelib.common.misc.toStandardString
 import firelib.common.reader.binary.BinaryReader
 import firelib.common.reader.binary.BinaryReaderRecordDescriptor
 import firelib.common.reader.binary.BinaryWriter
-import firelib.domain.Timed
+import firelib.core.domain.Timed
 import org.apache.commons.io.FileUtils
 import java.nio.file.Path
 import java.nio.file.Paths

@@ -1,8 +1,8 @@
 package firelib.iqfeed
 
-import firelib.domain.Interval
-import firelib.domain.Ohlc
-import firelib.domain.merge
+import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
+import firelib.core.domain.merge
 import java.util.*
 
 object IntervalTransformer {

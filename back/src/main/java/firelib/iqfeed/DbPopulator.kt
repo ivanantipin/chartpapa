@@ -1,9 +1,9 @@
 package firelib.iqfeed
 
-import firelib.store.MdStorageImpl
-import firelib.common.core.SourceName
-import firelib.domain.Interval
-import firelib.domain.Ohlc
+import firelib.core.store.MdStorageImpl
+import firelib.core.SourceName
+import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler

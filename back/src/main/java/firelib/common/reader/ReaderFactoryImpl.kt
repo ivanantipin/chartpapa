@@ -2,7 +2,7 @@ package firelib.common.reader
 
 import firelib.common.reader.binary.BinaryReaderRecordDescriptor
 import firelib.common.reader.binary.OhlcDesc
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler

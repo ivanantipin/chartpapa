@@ -1,10 +1,10 @@
 package firelib.common.model
 
-import firelib.common.core.config.ModelBacktestConfig
-import firelib.common.core.InstrumentMapper
+import firelib.core.config.ModelBacktestConfig
+import firelib.core.InstrumentMapper
 import firelib.common.mddistributor.MarketDataDistributor
 import firelib.common.timeservice.TimeService
-import firelib.common.core.TradeGate
+import firelib.core.TradeGate
 
 class ModelContext(val timeService: TimeService,
                    val mdDistributor: MarketDataDistributor,

@@ -1,6 +1,6 @@
 package firelib.indicators
 
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.util.*
 
 class Donchian(val tailCondition : (List<Ohlc>)->Boolean) {

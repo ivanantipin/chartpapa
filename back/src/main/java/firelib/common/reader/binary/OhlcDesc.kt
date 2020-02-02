@@ -1,6 +1,6 @@
 package firelib.common.reader.binary
 
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.nio.ByteBuffer
 import java.time.Instant
 

@@ -3,12 +3,12 @@ package com.firelib.transaq
 import com.firelib.Str
 import com.firelib.TransaqConnectorGrpc
 import com.firelib.transaq.TrqParser.parseTrqResponse
-import firelib.domain.InstrId
+import firelib.core.domain.InstrId
 import firelib.common.*
-import firelib.common.core.TradeGate
-import firelib.domain.OrderType
-import firelib.domain.Side
-import firelib.domain.*
+import firelib.core.TradeGate
+import firelib.core.domain.OrderType
+import firelib.core.domain.Side
+import firelib.core.domain.*
 import org.apache.commons.text.StringEscapeUtils
 import java.lang.Exception
 import java.math.BigDecimal

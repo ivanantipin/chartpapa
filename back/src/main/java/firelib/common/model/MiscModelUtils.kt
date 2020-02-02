@@ -1,11 +1,11 @@
 package firelib.common.model
 
-import firelib.domain.Interval
+import firelib.core.domain.Interval
 import firelib.common.misc.PositionCloser
-import firelib.common.core.makePositionEqualsTo
-import firelib.common.core.timeseries.TimeSeries
-import firelib.common.core.timeseries.nonInterpolatedView
-import firelib.domain.Ohlc
+import firelib.core.makePositionEqualsTo
+import firelib.core.timeseries.TimeSeries
+import firelib.core.timeseries.nonInterpolatedView
+import firelib.core.domain.Ohlc
 import java.time.LocalTime
 
 class IdxContext(val model: Model, val idx: Int) {

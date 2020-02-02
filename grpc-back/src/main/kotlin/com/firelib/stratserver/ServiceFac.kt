@@ -4,13 +4,13 @@ import com.firelib.Levels
 import com.firelib.OhlcPeriod
 import com.firelib.OhlcTO
 import com.firelib.StratDescription
-import firelib.common.core.SimpleRunCtx
-import firelib.common.core.addModelWithDefaultParams
-import firelib.domain.Interval
+import firelib.core.SimpleRunCtx
+import firelib.core.addModelWithDefaultParams
+import firelib.core.domain.Interval
 import firelib.common.mddistributor.MarketDataDistributor
 import firelib.common.mddistributor.getOrCreatTss
 import firelib.common.model.VolatilityBreak.Companion.modelConfig
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 
 fun convertOhlcToGrpc(ohlc: Ohlc, tkr: String, op: OhlcPeriod): OhlcTO {
     return OhlcTO.newBuilder().apply {

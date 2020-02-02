@@ -1,7 +1,7 @@
 package firelib.indicators
 
-import firelib.common.core.timeseries.TimeSeries
-import firelib.domain.Ohlc
+import firelib.core.timeseries.TimeSeries
+import firelib.core.domain.Ohlc
 
 class Ema(
         val period: Int,

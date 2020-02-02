@@ -1,7 +1,7 @@
 package com.firelib.test
 
 
-import firelib.domain.Interval
+import firelib.core.domain.Interval
 import firelib.common.interval.IntervalServiceImpl
 import org.junit.Assert
 import org.junit.Test

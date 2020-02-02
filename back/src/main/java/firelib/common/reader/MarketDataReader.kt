@@ -1,7 +1,7 @@
 package firelib.common.reader
 
-import firelib.domain.Ohlc
-import firelib.domain.Timed
+import firelib.core.domain.Ohlc
+import firelib.core.domain.Timed
 import java.time.Instant
 import java.util.concurrent.LinkedBlockingQueue
 

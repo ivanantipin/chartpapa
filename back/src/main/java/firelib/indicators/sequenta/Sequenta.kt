@@ -1,7 +1,7 @@
 package firelib.indicators.sequenta
 
 import firelib.common.misc.atUtc
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.time.LocalDateTime
 
 

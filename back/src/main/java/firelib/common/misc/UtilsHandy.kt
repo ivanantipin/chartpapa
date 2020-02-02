@@ -1,9 +1,9 @@
 package firelib.common.misc
 
-import firelib.domain.InstrId
+import firelib.core.domain.InstrId
 import firelib.finam.FinamDownloader
-import firelib.store.MdStorageImpl
-import firelib.common.core.InstrumentMapper
+import firelib.core.store.MdStorageImpl
+import firelib.core.InstrumentMapper
 import firelib.common.misc.UtilsHandy.updateRussianStockSimple
 import firelib.common.model.DivHelper
 import java.time.Instant

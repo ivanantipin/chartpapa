@@ -1,13 +1,13 @@
 package com.firelib.transaq
 
 import com.firelib.TransaqConnectorGrpc
-import firelib.domain.InstrId
-import firelib.common.core.HistoricalSource
-import firelib.common.core.InstrumentMapper
-import firelib.common.core.SourceName
-import firelib.domain.Interval
+import firelib.core.domain.InstrId
+import firelib.core.HistoricalSource
+import firelib.core.InstrumentMapper
+import firelib.core.SourceName
+import firelib.core.domain.Interval
 import firelib.common.misc.toInstantDefault
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit

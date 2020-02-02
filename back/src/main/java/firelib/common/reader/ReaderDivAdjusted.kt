@@ -2,7 +2,7 @@ package firelib.common.reader
 
 import firelib.common.misc.atUtc
 import firelib.common.model.Div
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.time.Instant
 import java.time.ZoneOffset
 

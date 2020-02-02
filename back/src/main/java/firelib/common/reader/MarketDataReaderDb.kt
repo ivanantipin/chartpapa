@@ -1,8 +1,8 @@
 package firelib.common.reader
 
-import firelib.store.MdDao
+import firelib.core.store.MdDao
 import firelib.common.misc.atUtc
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.time.Instant
 
 class MarketDataReaderDb(val dao : MdDao, val ticker : String, val endTime : Instant, val waitOnEnd : Boolean = true) : MarketDataReader<Ohlc> {

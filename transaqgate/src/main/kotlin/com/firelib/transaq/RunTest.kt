@@ -1,9 +1,9 @@
 package com.firelib.transaq
 
-import firelib.domain.InstrId
+import firelib.core.domain.InstrId
 import firelib.common.Order
-import firelib.domain.OrderType
-import firelib.domain.Side
+import firelib.core.domain.OrderType
+import firelib.core.domain.Side
 import java.time.Instant
 import java.util.concurrent.Executors
 

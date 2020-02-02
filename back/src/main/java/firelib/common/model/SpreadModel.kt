@@ -1,13 +1,13 @@
 package firelib.common.model
 
-import firelib.common.core.config.ModelBacktestConfig
-import firelib.common.core.config.runStrat
-import firelib.domain.Interval
+import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.runStrat
+import firelib.core.domain.Interval
 import firelib.common.misc.UtilsHandy
-import firelib.common.core.flattenAll
-import firelib.common.core.makePositionEqualsTo
-import firelib.common.core.timeseries.TimeSeries
-import firelib.domain.Ohlc
+import firelib.core.flattenAll
+import firelib.core.makePositionEqualsTo
+import firelib.core.timeseries.TimeSeries
+import firelib.core.domain.Ohlc
 import java.time.LocalDate
 import kotlin.math.abs
 

@@ -1,9 +1,9 @@
 package com.firelib.test
 
-import firelib.common.core.config.ModelBacktestConfig
-import firelib.common.core.config.runStrat
+import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.runStrat
 import firelib.common.reader.ReaderFactoryImpl
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler

@@ -1,10 +1,10 @@
 package firelib.tcs
 
-import firelib.domain.InstrId
-import firelib.common.core.HistoricalSource
-import firelib.common.core.SourceName
-import firelib.domain.Interval
-import firelib.domain.Ohlc
+import firelib.core.domain.InstrId
+import firelib.core.HistoricalSource
+import firelib.core.SourceName
+import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
 import java.time.Instant
 import java.time.LocalDateTime
 import kotlin.random.Random

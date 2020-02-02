@@ -1,6 +1,6 @@
 package firelib.common.reader
 
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.time.Instant
 
 class MarketDataReaderSql(val ohlcs: List<Ohlc>) : MarketDataReader<Ohlc> {

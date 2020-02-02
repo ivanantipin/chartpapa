@@ -2,11 +2,11 @@ package com.firelib.transaq
 
 import firelib.tcs.GateEmulator
 import firelib.tcs.RtReaderEmulator
-import firelib.common.core.DummyModel
-import firelib.common.core.ProdRunner
-import firelib.common.core.ReaderFactory
-import firelib.common.core.SimpleRunCtx
-import firelib.domain.Interval
+import firelib.core.DummyModel
+import firelib.core.ProdRunner
+import firelib.core.ReaderFactory
+import firelib.core.SimpleRunCtx
+import firelib.core.domain.Interval
 import firelib.common.reader.SimplifiedReader
 import java.util.concurrent.Executors
 

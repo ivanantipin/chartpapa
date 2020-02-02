@@ -1,13 +1,13 @@
 package firelib.iqfeed
 
-import firelib.domain.InstrId
-import firelib.common.core.HistoricalSource
-import firelib.common.core.SourceName
-import firelib.domain.Interval
+import firelib.core.domain.InstrId
+import firelib.core.HistoricalSource
+import firelib.core.SourceName
+import firelib.core.domain.Interval
 import firelib.common.misc.atUtc
-import firelib.domain.Ohlc
-import firelib.domain.date
-import firelib.domain.ret
+import firelib.core.domain.Ohlc
+import firelib.core.domain.date
+import firelib.core.domain.ret
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler

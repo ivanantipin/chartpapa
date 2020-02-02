@@ -7,8 +7,8 @@ import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.SignalType
 import firelib.common.misc.atUtc
-import firelib.domain.Ohlc
-import firelib.domain.range
+import firelib.core.domain.Ohlc
+import firelib.core.domain.range
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger

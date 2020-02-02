@@ -1,10 +1,10 @@
 package firelib.tcs
 
-import firelib.common.core.timeSequence
-import firelib.domain.Interval
+import firelib.core.timeSequence
+import firelib.core.domain.Interval
 import firelib.common.reader.QueueSimplifiedReader
 import firelib.common.reader.SimplifiedReader
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import java.time.Instant
 
 class RtReaderEmulator(val interval : Interval) : SimplifiedReader {

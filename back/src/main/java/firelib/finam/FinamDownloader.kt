@@ -1,14 +1,14 @@
 package firelib.finam
 
-import firelib.domain.InstrId
+import firelib.core.domain.InstrId
 import com.google.common.io.CharStreams.readLines
 import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
-import firelib.common.core.HistoricalSource
-import firelib.common.core.SourceName
-import firelib.domain.Interval
+import firelib.core.HistoricalSource
+import firelib.core.SourceName
+import firelib.core.domain.Interval
 import firelib.common.misc.FinamTickerMapper
-import firelib.domain.Ohlc
+import firelib.core.domain.Ohlc
 import io.netty.util.concurrent.DefaultThreadFactory
 import org.apache.commons.io.IOUtils
 import org.asynchttpclient.DefaultAsyncHttpClient

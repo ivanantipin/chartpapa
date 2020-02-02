@@ -2,13 +2,13 @@ package com.firelib.test
 
 import firelib.common.Order
 import firelib.common.Trade
-import firelib.common.core.config.ModelBacktestConfig
-import firelib.common.core.*
+import firelib.core.config.ModelBacktestConfig
+import firelib.core.*
 import firelib.common.timeservice.TimeServiceManaged
 import firelib.common.tradegate.TradeGateStub
-import firelib.domain.InstrId
-import firelib.domain.OrderType
-import firelib.domain.Side
+import firelib.core.domain.InstrId
+import firelib.core.domain.OrderType
+import firelib.core.domain.Side
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant

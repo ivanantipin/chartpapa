@@ -1,15 +1,15 @@
 package firelib.tcs
 
-import firelib.domain.InstrId
+import firelib.core.domain.InstrId
 import com.google.common.collect.Sets
 import firelib.common.Order
 import firelib.common.Trade
-import firelib.common.core.TcsTickerMapper
+import firelib.core.TcsTickerMapper
 import firelib.common.misc.moscowZoneId
-import firelib.common.core.TradeGate
-import firelib.domain.OrderState
-import firelib.domain.OrderType
-import firelib.domain.Side
+import firelib.core.TradeGate
+import firelib.core.domain.OrderState
+import firelib.core.domain.OrderType
+import firelib.core.domain.Side
 import ru.tinkoff.invest.openapi.data.*
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -116,7 +116,7 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
             executor.run {
                 when (it.status) {
                     OrderStatus.Rejected -> order.orderSubscription.publish(OrderState(order,
-                            firelib.domain.OrderStatus.Cancelled, Instant.now(), it.rejectReason))
+                            firelib.core.domain.OrderStatus.Cancelled, Instant.now(), it.rejectReason))
                     OrderStatus.New , OrderStatus.Fill, OrderStatus.PartiallyFill -> {
                         if(it.executedLots > 0){
                             order.tradeSubscription.publish(Trade(it.executedLots,order.price,order,Instant.now(),Instant.now()))
@@ -129,7 +129,7 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
             }
         }).exceptionally {
             order.orderSubscription.publish(OrderState(order,
-                    firelib.domain.OrderStatus.Cancelled, Instant.now(), "${it.message}"))
+                    firelib.core.domain.OrderStatus.Cancelled, Instant.now(), "${it.message}"))
             null
         }
         future.get()
