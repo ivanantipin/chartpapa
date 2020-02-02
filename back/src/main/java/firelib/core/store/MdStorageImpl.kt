@@ -14,8 +14,8 @@ import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.Interval
 import firelib.core.misc.atUtc
-import firelib.core.report.GeGeWriter
-import firelib.core.report.SqlUtils
+import firelib.core.report.dao.GeGeWriter
+import firelib.core.misc.SqlUtils
 import firelib.core.domain.Ohlc
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -58,8 +58,18 @@ class SourceFactory{
 
 class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toString()) : MdStorage {
 
-    val requestedDao = GeGeWriter<InstrId>("requested", Paths.get("$folder/meta.db"), InstrId::class, listOf("code"))
-    val symbolsDao = GeGeWriter<InstrId>("symbols", Paths.get("$folder/meta.db"), InstrId::class, listOf("code"))
+    val requestedDao = GeGeWriter<InstrId>(
+        "requested",
+        Paths.get("$folder/meta.db"),
+        InstrId::class,
+        listOf("code")
+    )
+    val symbolsDao = GeGeWriter<InstrId>(
+        "symbols",
+        Paths.get("$folder/meta.db"),
+        InstrId::class,
+        listOf("code")
+    )
 
     val md = MdDaoContainer()
 

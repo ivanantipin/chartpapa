@@ -9,8 +9,8 @@ import firelib.core.misc.ChannelSubscription
 import firelib.core.misc.StreamTradeCaseGenerator
 import firelib.model.Model
 import firelib.core.report.dao.ColDefDao
-import firelib.core.report.dao.OhlcStreamWriter
-import firelib.core.report.dao.StreamTradeCaseWriter
+import firelib.core.report.OhlcStreamWriter
+import firelib.core.report.StreamTradeCaseWriter
 import firelib.core.report.orderColsDefs
 import firelib.core.timeseries.nonInterpolatedView
 import firelib.core.domain.Ohlc
@@ -76,7 +76,7 @@ fun enableOrdersPersist(model : Model, reportFilePath : Path, ioExecutor : Execu
 fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "singleTrades") : Persisting{
     FileUtils.forceMkdir(reportFilePath.parent.toFile())
 
-    val tradeWriter = StreamTradeCaseWriter( reportFilePath, tableName)
+    val tradeWriter = StreamTradeCaseWriter(reportFilePath, tableName)
 
     val tradesBatcher = Batcher<Trade>({
         ioExecutor.submit { tradeWriter.insertTrades(it.map { Pair(it, it) }) }.get()

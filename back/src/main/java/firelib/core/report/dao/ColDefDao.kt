@@ -1,7 +1,6 @@
 package firelib.core.report.dao
 
-import firelib.core.report.ColDef
-import firelib.core.report.SqlUtils
+import firelib.core.misc.SqlUtils
 import firelib.core.report.getHeader
 import firelib.core.report.toMapForSqlUpdate
 import org.springframework.jdbc.core.JdbcTemplate

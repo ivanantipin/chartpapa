@@ -6,7 +6,6 @@ import firelib.core.domain.ModelOutput
 import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
-import firelib.core.report.dao.StreamTradeCaseWriter
 import org.apache.commons.io.FileUtils
 import java.nio.file.*
 

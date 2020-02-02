@@ -2,6 +2,7 @@ package firelib.core.report
 
 import firelib.common.Order
 import firelib.core.domain.Side
+import firelib.core.report.dao.ColDef
 
 val orderColsDefs: Array<ColDef<Order, out Any>> = arrayOf(
         makeMetric("Ticker", { it.security }),

@@ -1,5 +1,6 @@
-package firelib.core.report
+package firelib.core.report.dao
 
+import firelib.core.misc.SqlUtils
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -32,7 +33,13 @@ class GeGeWriter<T : Any>(val name: String, val path: Path, val type: KClass<T>,
             SqlTypeMapper.toDb(it.returnType)
         })
 
-        JdbcTemplate(ds).execute(SqlUtils.makeCreateSqlStmtFromHeader(name, header, pk))
+        JdbcTemplate(ds).execute(
+            SqlUtils.makeCreateSqlStmtFromHeader(
+                name,
+                header,
+                pk
+            )
+        )
         stmt = SqlUtils.makeSqlStatementFromHeader(name, header)
         sel = "select * from $name"
     }

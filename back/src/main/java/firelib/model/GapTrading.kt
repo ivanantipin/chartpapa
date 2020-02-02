@@ -3,7 +3,7 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.report.GeGeWriter
+import firelib.core.report.dao.GeGeWriter
 
 
 class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(context, fac) {
@@ -57,7 +57,11 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
 
     override fun onBacktestEnd() {
         super.onBacktestEnd()
-        val writer = GeGeWriter<GapStat>("gaps", context.config.getReportDbFile(), GapStat::class)
+        val writer = GeGeWriter<GapStat>(
+            "gaps",
+            context.config.getReportDbFile(),
+            GapStat::class
+        )
         writer.write(stat)
     }
 

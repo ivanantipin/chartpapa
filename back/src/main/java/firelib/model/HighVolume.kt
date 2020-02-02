@@ -4,7 +4,7 @@ import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.misc.Quantiles
-import firelib.core.report.GeGeWriter
+import firelib.core.report.dao.GeGeWriter
 import firelib.core.timeseries.TimeSeries
 import firelib.core.domain.Ohlc
 import java.nio.file.Paths
@@ -40,7 +40,11 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
         }
 
 
-        val dumper = GeGeWriter("highvolume", Paths.get(context.config.reportTargetPath).resolve("stat.db"), HVStat::class)
+        val dumper = GeGeWriter(
+            "highvolume",
+            Paths.get(context.config.reportTargetPath).resolve("stat.db"),
+            HVStat::class
+        )
         daytss.forEachIndexed{ idx, it ->
             it.preRollSubscribe {
                 if (it.count() > 20) {

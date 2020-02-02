@@ -9,8 +9,8 @@ import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.misc.UtilsHandy
 import firelib.core.misc.atUtc
-import firelib.core.report.GeGeWriter
-import firelib.core.report.SqlUtils
+import firelib.core.report.dao.GeGeWriter
+import firelib.core.misc.SqlUtils
 import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Paths
 import java.time.Instant
@@ -76,7 +76,11 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
         val divdivs = context.config.instruments.map { divMap[it]!!.sortedBy { it.lastDayWithDivs } }
         val nextIdxes = context.config.instruments.map { -1 }.toIntArray()
 
-        val dumper = GeGeWriter<Stat>("divstat", Paths.get(context.config.reportTargetPath).resolve("stat.db"), Stat::class)
+        val dumper = GeGeWriter<Stat>(
+            "divstat",
+            Paths.get(context.config.reportTargetPath).resolve("stat.db"),
+            Stat::class
+        )
 
         context.config.instruments.forEachIndexed({ idx, instrument ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Day, 100)
