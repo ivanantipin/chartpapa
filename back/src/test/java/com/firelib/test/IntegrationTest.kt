@@ -2,7 +2,7 @@ package com.firelib.test
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
-import firelib.common.reader.ReaderFactoryImpl
+import firelib.core.store.reader.ReaderFactoryImpl
 import firelib.core.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader

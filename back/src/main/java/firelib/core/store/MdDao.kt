@@ -1,6 +1,6 @@
 package firelib.core.store
 
-import firelib.common.misc.toInstantDefault
+import firelib.core.misc.toInstantDefault
 import firelib.core.domain.Ohlc
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate

@@ -3,7 +3,7 @@ package firelib.core
 import firelib.core.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
-import firelib.common.misc.SubChannel
+import firelib.core.misc.SubChannel
 import firelib.core.domain.OrderState
 import java.time.Instant
 

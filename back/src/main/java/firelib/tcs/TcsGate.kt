@@ -4,8 +4,7 @@ import firelib.core.domain.InstrId
 import com.google.common.collect.Sets
 import firelib.common.Order
 import firelib.common.Trade
-import firelib.core.TcsTickerMapper
-import firelib.common.misc.moscowZoneId
+import firelib.core.misc.moscowZoneId
 import firelib.core.TradeGate
 import firelib.core.domain.OrderState
 import firelib.core.domain.OrderType

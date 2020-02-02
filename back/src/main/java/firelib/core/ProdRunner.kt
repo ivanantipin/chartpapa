@@ -2,7 +2,9 @@ package firelib.core
 
 import firelib.core.store.MdStorageImpl
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.misc.timeSequence
 import firelib.core.report.ReportWriter
+import firelib.core.store.ReaderFactory
 import java.time.Instant
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
@@ -14,7 +16,8 @@ object ProdRunner {
     fun runStrat(executorService: ExecutorService,
                  context: SimpleRunCtx,
                  realGate: TradeGate,
-                 realReaderFactory: ReaderFactory) {
+                 realReaderFactory: ReaderFactory
+    ) {
 
         val cfg = context.modelConfig
 

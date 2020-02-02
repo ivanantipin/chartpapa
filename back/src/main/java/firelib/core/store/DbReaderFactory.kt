@@ -1,9 +1,8 @@
 package firelib.core.store
 
-import firelib.core.ReaderFactory
 import firelib.core.SourceName
 import firelib.core.domain.Interval
-import firelib.common.reader.SimplifiedReader
+import firelib.core.store.reader.SimplifiedReader
 import java.time.Instant
 
 //fixme time in make reader

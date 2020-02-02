@@ -4,7 +4,7 @@ import firelib.core.domain.InstrId
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.Interval
-import firelib.common.misc.atUtc
+import firelib.core.misc.atUtc
 import firelib.core.domain.Ohlc
 import firelib.core.domain.date
 import firelib.core.domain.ret

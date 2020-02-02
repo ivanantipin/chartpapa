@@ -6,7 +6,7 @@ import firelib.core.HistoricalSource
 import firelib.core.InstrumentMapper
 import firelib.core.SourceName
 import firelib.core.domain.Interval
-import firelib.common.misc.toInstantDefault
+import firelib.core.misc.toInstantDefault
 import firelib.core.domain.Ohlc
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

@@ -2,7 +2,7 @@ package com.firelib.test
 
 
 import firelib.core.domain.Interval
-import firelib.common.interval.IntervalServiceImpl
+import firelib.core.interval.IntervalServiceImpl
 import org.junit.Assert
 import org.junit.Test
 import java.time.Duration

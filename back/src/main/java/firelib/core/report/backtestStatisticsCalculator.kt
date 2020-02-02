@@ -1,7 +1,7 @@
 package firelib.core.report
 
 import firelib.common.Trade
-import firelib.common.misc.pnl
+import firelib.core.misc.pnl
 import org.apache.commons.math3.stat.descriptive.moment.Mean
 import org.apache.commons.math3.stat.descriptive.moment.Variance
 import java.time.Duration

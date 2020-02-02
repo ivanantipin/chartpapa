@@ -2,7 +2,7 @@ package firelib.core
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.Interval
-import firelib.common.model.*
+import firelib.model.*
 import java.time.Instant
 import java.time.LocalDate
 

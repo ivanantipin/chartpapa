@@ -7,7 +7,7 @@ import com.opencsv.CSVParserBuilder
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.Interval
-import firelib.common.misc.FinamTickerMapper
+import firelib.core.misc.FinamTickerMapper
 import firelib.core.domain.Ohlc
 import io.netty.util.concurrent.DefaultThreadFactory
 import org.apache.commons.io.IOUtils

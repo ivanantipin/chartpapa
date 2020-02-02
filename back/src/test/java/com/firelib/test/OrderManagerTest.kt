@@ -4,8 +4,8 @@ import firelib.common.Order
 import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.*
-import firelib.common.timeservice.TimeServiceManaged
-import firelib.common.tradegate.TradeGateStub
+import firelib.core.timeservice.TimeServiceManaged
+import firelib.core.backtest.tradegate.TradeGateStub
 import firelib.core.domain.InstrId
 import firelib.core.domain.OrderType
 import firelib.core.domain.Side

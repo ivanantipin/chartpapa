@@ -1,7 +1,7 @@
 package firelib.core.report.dao
 
 import firelib.common.Trade
-import firelib.common.misc.pnl
+import firelib.core.misc.pnl
 import firelib.core.report.*
 import firelib.core.report.SqlUtils.makeCreateSqlStmtFromHeader
 import firelib.core.report.SqlUtils.makeSqlStatementFromHeader

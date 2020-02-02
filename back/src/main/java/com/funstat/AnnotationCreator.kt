@@ -6,7 +6,7 @@ import com.funstat.domain.Label
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.SignalType
-import firelib.common.misc.atUtc
+import firelib.core.misc.atUtc
 import firelib.core.domain.Ohlc
 import firelib.core.domain.range
 import java.text.DecimalFormat

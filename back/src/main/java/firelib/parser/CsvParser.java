@@ -1,6 +1,6 @@
 package firelib.parser;
 
-import firelib.common.reader.MarketDataReader;
+import firelib.core.store.reader.MarketDataReader;
 import firelib.core.domain.Timed;
 import org.apache.commons.lang3.mutable.MutableInt;
 

@@ -3,11 +3,11 @@ package com.firelib.transaq
 import com.firelib.TransaqConnectorGrpc
 import firelib.core.domain.InstrId
 import firelib.core.InstrumentMapper
-import firelib.core.ReaderFactory
-import firelib.core.timeSequence
+import firelib.core.store.ReaderFactory
+import firelib.core.misc.timeSequence
 import firelib.core.domain.Interval
-import firelib.common.reader.QueueSimplifiedReader
-import firelib.common.reader.SimplifiedReader
+import firelib.core.store.reader.QueueSimplifiedReader
+import firelib.core.store.reader.SimplifiedReader
 import firelib.core.domain.Ohlc
 import java.time.Instant
 import java.util.concurrent.ConcurrentLinkedQueue

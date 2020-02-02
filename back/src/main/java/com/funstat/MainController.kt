@@ -3,7 +3,7 @@ package com.funstat
 import com.funstat.domain.*
 import firelib.vantage.VantageDownloader
 import firelib.core.domain.Interval
-import firelib.common.misc.atUtc
+import firelib.core.misc.atUtc
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum

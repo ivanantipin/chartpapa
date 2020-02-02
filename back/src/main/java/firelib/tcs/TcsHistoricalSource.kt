@@ -3,7 +3,6 @@ package firelib.tcs
 import firelib.core.domain.InstrId
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
-import firelib.core.TcsTickerMapper
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import ru.tinkoff.invest.openapi.data.CandleInterval

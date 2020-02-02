@@ -7,7 +7,7 @@ import com.firelib.OhlcPeriod
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
 import firelib.core.domain.Interval
-import firelib.common.misc.toInstantDefault
+import firelib.core.misc.toInstantDefault
 import firelib.core.domain.Ohlc
 import java.util.*
 

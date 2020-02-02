@@ -1,6 +1,6 @@
 package firelib.core.timeseries
 
-import firelib.common.misc.NonDurableChannel
+import firelib.core.misc.NonDurableChannel
 
 class TimeSeriesImpl<T>(val capacity: Int, val func: (Int) -> T) : TimeSeries<T> {
 

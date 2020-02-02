@@ -4,16 +4,17 @@ import firelib.common.Order
 import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.Interval
-import firelib.common.mddistributor.MarketDataDistributor
-import firelib.common.misc.ChannelSubscription
-import firelib.common.misc.StreamTradeCaseGenerator
-import firelib.common.model.Model
+import firelib.core.mddistributor.MarketDataDistributor
+import firelib.core.misc.ChannelSubscription
+import firelib.core.misc.StreamTradeCaseGenerator
+import firelib.model.Model
 import firelib.core.report.dao.ColDefDao
 import firelib.core.report.dao.OhlcStreamWriter
 import firelib.core.report.dao.StreamTradeCaseWriter
 import firelib.core.report.orderColsDefs
 import firelib.core.timeseries.nonInterpolatedView
 import firelib.core.domain.Ohlc
+import firelib.core.misc.Batcher
 import org.apache.commons.io.FileUtils
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService
@@ -25,7 +26,7 @@ fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : Ex
     val tradeCaseWriter = StreamTradeCaseWriter(reportFilePath, tableName)
 
     val casesBatcher = Batcher<Pair<Trade, Trade>>({
-        ioExecutor.submit {tradeCaseWriter.insertTrades(it)}.get()
+        ioExecutor.submit { tradeCaseWriter.insertTrades(it) }.get()
     }, "cases writer")
 
     casesBatcher.start()
@@ -78,7 +79,7 @@ fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : Exec
     val tradeWriter = StreamTradeCaseWriter( reportFilePath, tableName)
 
     val tradesBatcher = Batcher<Trade>({
-        ioExecutor.submit {tradeWriter.insertTrades(it.map { Pair(it,it) })}.get()
+        ioExecutor.submit { tradeWriter.insertTrades(it.map { Pair(it, it) }) }.get()
     }, "tradesRealtime")
 
     tradesBatcher.start()

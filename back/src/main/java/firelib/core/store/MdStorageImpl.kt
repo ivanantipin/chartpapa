@@ -6,14 +6,14 @@ import firelib.core.domain.sourceEnum
 import firelib.finam.FinamDownloader
 import firelib.iqfeed.IntervalTransformer
 import firelib.iqfeed.IqFeedHistoricalSource
-import firelib.tcs.HistoricalSourceEmulator
+import firelib.emulator.HistoricalSourceEmulator
 import firelib.tcs.TcsHistoricalSource
 import firelib.tcs.getContext
 import firelib.vantage.VantageDownloader
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.Interval
-import firelib.common.misc.atUtc
+import firelib.core.misc.atUtc
 import firelib.core.report.GeGeWriter
 import firelib.core.report.SqlUtils
 import firelib.core.domain.Ohlc
@@ -43,7 +43,7 @@ class SourceFactory{
         SourceName.FINAM to {FinamDownloader()},
         SourceName.TCS to {TcsHistoricalSource(getContext())},
         SourceName.VANTAGE to {VantageDownloader()},
-        SourceName.DUMMY to {HistoricalSourceEmulator(Interval.Sec10)},
+        SourceName.DUMMY to { HistoricalSourceEmulator(Interval.Sec10) },
         SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))}
     )
 

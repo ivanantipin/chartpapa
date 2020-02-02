@@ -1,7 +1,7 @@
 package firelib.core.store
 
-import firelib.common.misc.atUtc
-import firelib.common.reader.SimplifiedReader
+import firelib.core.misc.atUtc
+import firelib.core.store.reader.SimplifiedReader
 import firelib.core.domain.Ohlc
 import java.time.Instant
 import java.util.*

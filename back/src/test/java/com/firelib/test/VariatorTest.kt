@@ -1,7 +1,7 @@
 package com.firelib.test
 
-import firelib.common.opt.OptimizedParameter
-import firelib.common.opt.ParamsVariator
+import firelib.core.backtest.opt.OptimizedParameter
+import firelib.core.backtest.opt.ParamsVariator
 import junit.framework.Assert.assertEquals
 import org.junit.Assert
 import org.junit.Test

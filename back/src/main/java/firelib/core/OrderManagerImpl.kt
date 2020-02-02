@@ -4,9 +4,9 @@ import firelib.core.domain.InstrId
 import firelib.common.Order
 import firelib.core.domain.OrderStatus
 import firelib.common.Trade
-import firelib.common.misc.NonDurableChannel
-import firelib.common.misc.SubChannel
-import firelib.common.timeservice.TimeService
+import firelib.core.misc.NonDurableChannel
+import firelib.core.misc.SubChannel
+import firelib.core.timeservice.TimeService
 import firelib.core.domain.OrderState
 import firelib.core.domain.OrderType
 import firelib.core.domain.OrderWithState

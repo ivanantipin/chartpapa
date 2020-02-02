@@ -1,6 +1,6 @@
 package firelib.core.domain
 
-import firelib.common.misc.atUtc
+import firelib.core.misc.atUtc
 import java.time.LocalDate
 
 fun Ohlc.nprice(): Double = (close + high + low) / 3

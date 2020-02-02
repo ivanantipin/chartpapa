@@ -2,8 +2,8 @@ package com.firelib.test
 
 
 import firelib.core.domain.Interval
-import firelib.common.model.Model
-import firelib.common.model.ModelContext
+import firelib.model.Model
+import firelib.model.ModelContext
 import firelib.core.timeseries.TimeSeries
 import firelib.core.domain.Ohlc
 import java.time.Instant

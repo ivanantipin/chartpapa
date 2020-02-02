@@ -2,12 +2,13 @@ package firelib.core
 
 import firelib.core.store.DbReaderFactory
 import firelib.core.config.ModelBacktestConfig
-import firelib.common.mddistributor.MarketDataDistributorImpl
-import firelib.common.model.Model
-import firelib.common.model.ModelContext
-import firelib.common.reader.SimplifiedReader
-import firelib.common.timeservice.TimeServiceManaged
-import firelib.common.tradegate.TradeGateStub
+import firelib.core.mddistributor.MarketDataDistributorImpl
+import firelib.model.Model
+import firelib.model.ModelContext
+import firelib.core.store.reader.SimplifiedReader
+import firelib.core.timeservice.TimeServiceManaged
+import firelib.core.backtest.tradegate.TradeGateStub
+import firelib.core.domain.ModelOutput
 import firelib.core.domain.OrderStatus
 import java.time.Instant
 

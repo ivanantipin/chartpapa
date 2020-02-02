@@ -3,8 +3,8 @@ package com.firelib.test
 import firelib.core.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
-import firelib.common.misc.pnl
-import firelib.common.misc.toTradingCases
+import firelib.core.misc.pnl
+import firelib.core.misc.toTradingCases
 import firelib.core.domain.OrderType
 import firelib.core.domain.Side
 import org.junit.Assert

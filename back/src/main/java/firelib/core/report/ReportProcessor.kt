@@ -1,8 +1,8 @@
 package firelib.core.report
 
 
-import firelib.core.ModelOutput
-import firelib.common.misc.toTradingCases
+import firelib.core.domain.ModelOutput
+import firelib.core.misc.toTradingCases
 import firelib.core.report.StatCalculator.statCalculator
 import java.util.*
 

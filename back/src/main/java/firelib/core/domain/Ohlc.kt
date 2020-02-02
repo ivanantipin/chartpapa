@@ -1,6 +1,6 @@
 package firelib.core.domain
 
-import firelib.common.misc.toStandardString
+import firelib.core.misc.toStandardString
 import java.time.Instant
 
 data class Ohlc(

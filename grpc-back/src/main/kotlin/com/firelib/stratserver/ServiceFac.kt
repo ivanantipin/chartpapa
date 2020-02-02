@@ -7,9 +7,9 @@ import com.firelib.StratDescription
 import firelib.core.SimpleRunCtx
 import firelib.core.addModelWithDefaultParams
 import firelib.core.domain.Interval
-import firelib.common.mddistributor.MarketDataDistributor
-import firelib.common.mddistributor.getOrCreatTss
-import firelib.common.model.VolatilityBreak.Companion.modelConfig
+import firelib.core.mddistributor.MarketDataDistributor
+import firelib.core.mddistributor.getOrCreatTss
+import firelib.model.VolatilityBreak.Companion.modelConfig
 import firelib.core.domain.Ohlc
 
 fun convertOhlcToGrpc(ohlc: Ohlc, tkr: String, op: OhlcPeriod): OhlcTO {

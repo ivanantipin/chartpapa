@@ -1,6 +1,6 @@
 package firelib.core.config
 
-import firelib.common.opt.OptimizedParameter
+import firelib.core.backtest.opt.OptimizedParameter
 import firelib.core.report.StrategyMetric
 
 

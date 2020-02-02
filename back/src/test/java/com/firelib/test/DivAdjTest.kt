@@ -1,9 +1,9 @@
 package com.firelib.test
 
-import firelib.common.misc.toInstantDefault
-import firelib.common.model.Div
-import firelib.common.reader.MarketDataReader
-import firelib.common.reader.ReaderDivAdjusted
+import firelib.core.misc.toInstantDefault
+import firelib.model.Div
+import firelib.core.store.reader.MarketDataReader
+import firelib.core.store.reader.ReaderDivAdjusted
 import firelib.core.domain.Ohlc
 import org.junit.Assert
 import org.junit.Test

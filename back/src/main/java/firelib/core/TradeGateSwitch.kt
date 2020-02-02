@@ -1,7 +1,7 @@
 package firelib.core
 
 import firelib.common.Order
-import firelib.common.tradegate.TradeGateStub
+import firelib.core.backtest.tradegate.TradeGateStub
 
 class TradeGateSwitch(val backtestGate: TradeGateStub) : TradeGate {
     var delegate: TradeGate = backtestGate
