@@ -3,11 +3,14 @@ package firelib.model
 import firelib.core.OrderManager
 import firelib.core.OrderManagerImpl
 import firelib.core.flattenAll
+import org.slf4j.LoggerFactory
 
 /**
 
  */
 open class Model(val context: ModelContext, val properties: Map<String, String>) {
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     val oms = makeOrderManagers(context)
 

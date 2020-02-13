@@ -3,12 +3,16 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.ModelFactory
 import firelib.core.SimpleRunCtx
+import firelib.core.backtest.Backtester
+import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.misc.Quantiles
+import firelib.core.misc.UtilsHandy.updateRussianDivStocks
 import firelib.core.misc.atUtc
 import firelib.model.VolatilityBreak.Companion.modelConfig
 import firelib.indicators.ATR
 import firelib.indicators.Donchian
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlin.reflect.KClass
@@ -62,7 +66,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         })
 
 
-        tenMins.forEachIndexed({ idx, it ->
+        tenMins.forEachIndexed { idx, it ->
             it.preRollSubscribe {
                 val timeSeries = daytss[idx]
                 if (it[0].endTime.atUtc().toLocalTime() > LocalTime.of(13, 10) && timeSeries.count() > period) {
@@ -74,25 +78,25 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
                     }
                 }
             }
-        })
+        }
 
-        daytss.forEachIndexed({ idx, it ->
+        daytss.forEachIndexed { idx, it ->
             it.preRollSubscribe {
                 volumeQuantiles[idx].add(it[0].volume.toDouble())
                 donchians[idx].add(it[0])
             }
-        })
+        }
 
         closePositionByTimeout(periods = properties["hold_hours"]!!.toInt(), interval = Interval.Min60, afterTime = LocalTime.of(10, 5))
     }
 
 
     companion object {
-        fun modelConfig(waitOnEnd: Boolean = false, divAdjusted: Boolean = false): ModelBacktestConfig {
+        fun modelConfig(): ModelBacktestConfig {
             return ModelBacktestConfig(VolatilityBreak::class).apply {
                 param("hold_hours", 30)
                 interval = Interval.Min10
-                startDate(LocalDate.now().minusDays(100))
+                startDate(LocalDate.now().minusDays(1000))
                 instruments = DivHelper.getDivs().keys.toList()
                 adjustSpread = makeSpreadAdjuster(0.0005)
             }
@@ -108,10 +112,11 @@ fun defaultModelFactory(kl: KClass<out Model>): ModelFactory {
 }
 
 fun main() {
-    val conf = modelConfig(false)
-    val fac = defaultModelFactory(VolatilityBreak::class)
 
-    val ctx = SimpleRunCtx(VolatilityBreak.modelConfig())
-    ctx.addModel(emptyMap())
-
+//    updateRussianDivStocks()
+    val conf = modelConfig()
+    println(conf.instruments)
+    val ctx = SimpleRunCtx(conf)
+    ctx.addModelWithDefaultParams()
+    conf.runStrat()
 }

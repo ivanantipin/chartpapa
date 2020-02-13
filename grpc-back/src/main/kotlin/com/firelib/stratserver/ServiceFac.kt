@@ -5,7 +5,6 @@ import com.firelib.OhlcPeriod
 import com.firelib.OhlcTO
 import com.firelib.StratDescription
 import firelib.core.SimpleRunCtx
-import firelib.core.addModelWithDefaultParams
 import firelib.core.domain.Interval
 import firelib.core.mddistributor.MarketDataDistributor
 import firelib.core.mddistributor.getOrCreatTss
@@ -73,7 +72,7 @@ object ServiceFac {
 
     fun makeContext(): SimpleRunCtx {
         println("Starting strats")
-        val conf = modelConfig(waitOnEnd = true)
+        val conf = modelConfig()
         val context = SimpleRunCtx(conf)
         context.addModelWithDefaultParams()
         return context

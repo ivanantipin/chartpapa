@@ -14,7 +14,7 @@ except ImportError:
 import pandas as pd
 from pandas.io.parsers import ParserError
 
-from market_research.finam.utils import is_container, smart_decode
+from finam.utils import is_container, smart_decode
 
 __all__ = ['Market',
            'Timeframe',

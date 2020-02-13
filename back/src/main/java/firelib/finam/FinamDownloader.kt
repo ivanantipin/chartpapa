@@ -9,6 +9,7 @@ import firelib.core.SourceName
 import firelib.core.domain.Interval
 import firelib.core.misc.FinamTickerMapper
 import firelib.core.domain.Ohlc
+import firelib.core.misc.moscowZoneId
 import io.netty.util.concurrent.DefaultThreadFactory
 import org.apache.commons.io.IOUtils
 import org.asynchttpclient.DefaultAsyncHttpClient
@@ -53,7 +54,7 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
     override fun symbols(): List<InstrId> {
         try {
             val ins = URL("https://www.finam.ru/cache/icharts/icharts.js").openStream()
-            val lines = IOUtils.readLines(ins, Charset.forName("cp1251"))
+            val lines : List<String> = IOUtils.readLines(ins, "cp1251") as List<String>
 
             val map = HashMap<String, Array<String>>()
             lines.forEach { l -> populate(l, map) }
@@ -86,14 +87,14 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
     @Synchronized
     override fun load(instrId: InstrId, start: LocalDateTime): Sequence<Ohlc> {
-        val ret = MutableList(0, { Ohlc() })
         var mstart = start
-        while (mstart < LocalDateTime.now()) {
-            val finish = mstart.plusDays(1005)
-            ret += loadSome(instrId, mstart, finish)
-            mstart = finish.minusDays(2)
+        return sequence {
+            while (mstart < LocalDateTime.now()) {
+                val finish = mstart.plusDays(1005)
+                yieldAll(loadSome(instrId, mstart, finish))
+                mstart = finish.minusDays(2)
+            }
         }
-        return ret.asSequence()
     }
 
     private fun loadSome(instrId: InstrId, start: LocalDateTime, finishI: LocalDateTime): List<Ohlc> {
@@ -109,17 +110,16 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
         lastFinamCall = System.currentTimeMillis()
 
         val params = listOf(
-                "d" to "d",
                 "f" to "table",
                 "e" to ".csv",
                 "dtf" to "1",
                 "tmf" to "3",
-                "MSOR" to "0",
+                "MSOR" to "1", // end of period
                 "mstime" to "on",
                 "mstimever" to "1",
                 "sep" to "3",
                 "sep2" to "1",
-                "at" to "1",
+                // "at" to "1", header
                 "p" to "${Period.TEN_MINUTES.id}",
                 "em" to "${instrId.id}",
                 "market" to "${instrId.market}",
@@ -137,11 +137,9 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
         val url = "http://export.finam.ru/table.csv?" + params.map { "${it.first}=${it.second}" }.joinToString(separator = "&")
 
-        //http://export.finam.ru/table.csv?d=d&f=table&e=.csv&dtf=1&tmf=3&MSOR=0&mstime=on&mstimever=1&sep=3&sep2=1&at=1&p=4&em=81820&market=1&df=1&mf=0&yf=2017&dt=15&mt=0&yt=2019&cn=ALRS&code=ALRS&datf=5
-        //http://export.finam.ru/table.csv?d=d&f=table&e=.csv&dtf=1&tmf=3&MSOR=0&mstime=on&mstimever=1&sep=3&sep2=1&at=1&p=4&em=81112&market=32&df=25&mf=4&yf=2017&dt=15&mt=0&yt=2019&code=alrs&cn=alrsMdDao
 
         val ret = SettableFuture.create<List<String>>()
-        print(url)
+        log.info(url)
         client.prepareGet(url).execute()
                 .toCompletableFuture()
                 .thenAccept { response ->
@@ -155,8 +153,7 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
                 }
 
         try {
-            val ret = ret.get().map { parseOhlc(it) }.filter { it != null }.map { it!! }
-            return ret
+            return ret.get().map { parseOhlc(it) }.filter { it != null }.map { it!! }
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
@@ -203,19 +200,17 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
         return parseWithPattern(str, pattern)
     }
 
-    val intervalDurationSeconds = getDefaultInterval().duration.toSeconds()
-
     fun parseWithPattern(str: String, pattern: DateTimeFormatter): Ohlc? {
         try {
             val arr = str.split(";")
-            return Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1], pattern).toInstant(ZoneOffset.UTC).plusSeconds(intervalDurationSeconds),
+            return Ohlc(LocalDateTime.parse(arr[0] + " " + arr[1], pattern).atZone(moscowZoneId).toInstant(),
                     arr[2].toDouble(),
                     arr[3].toDouble(),
                     arr[4].toDouble(),
                     arr[5].toDouble(),
                     volume = arr[6].toLong())
         } catch (e: Exception) {
-            println("not valid entry " + str + " because " + e.message)
+            log.info("not valid entry " + str + " because " + e.message)
             return null
         }
     }

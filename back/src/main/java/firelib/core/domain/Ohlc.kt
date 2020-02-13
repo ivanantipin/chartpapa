@@ -1,6 +1,7 @@
 package firelib.core.domain
 
 import firelib.core.misc.toStandardString
+import firelib.core.misc.toStringAtMoscow
 import java.time.Instant
 
 data class Ohlc(
@@ -23,6 +24,11 @@ data class Ohlc(
 
     override fun toString(): String {
         val dtStr: String = endTime.toStandardString()
+        return "OHLC($open/$high/$low/$close/$dtStr/${volume}/$interpolated)"
+    }
+
+    fun toStrAtMoscow() : String {
+        val dtStr: String = endTime.toStringAtMoscow()
         return "OHLC($open/$high/$low/$close/$dtStr/${volume}/$interpolated)"
     }
 }

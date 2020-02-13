@@ -7,6 +7,7 @@ import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
 import org.apache.commons.io.FileUtils
+import org.slf4j.LoggerFactory
 import java.nio.file.*
 
 
@@ -15,6 +16,7 @@ object ReportWriter{
         Files.write(Paths.get(ff), rows, StandardOpenOption.CREATE)
     }
 
+    val log = LoggerFactory.getLogger(javaClass)
 
     fun clearReportDir(targetDir: String) {
         try {
@@ -34,13 +36,13 @@ object ReportWriter{
 
         writeModelOutput(model, cfg)
 
-        println("report written to ${cfg.reportTargetPath} you can run it , command 'jupyter lab'")
+        log.info("report written to ${cfg.reportTargetPath} you can run it , command 'jupyter lab'")
 
     }
 
     fun writeModelOutput(model: ModelOutput, cfg: ModelBacktestConfig){
         if (model.trades.size == 0) {
-            println("no trades generated")
+            log.info("no trades generated")
         }else{
             model.trades.groupBy { it.security() }.values.forEach {
                 StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())

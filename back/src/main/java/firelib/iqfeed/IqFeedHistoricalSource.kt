@@ -12,6 +12,7 @@ import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler
 import firelib.parser.ParserHandlersProducer
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -20,6 +21,8 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     override fun symbols(): List<InstrId> {
         val map = code2name()
@@ -48,7 +51,6 @@ class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
 
         return sequence {
             val parser = CsvParser<Ohlc>(fname, producer.handlers as Array<out ParseHandler<Ohlc>>?, { Ohlc() }, 10_000_000)
-            println(parser.seek(dateTime.toInstant(ZoneOffset.UTC)))
             while (parser.read()) {
                 yield(parser.current())
             }
@@ -72,11 +74,6 @@ class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
-        }
-
-        @JvmStatic
-        fun main(args: Array<String>) {
-            println(IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).symbols())
         }
     }
 }

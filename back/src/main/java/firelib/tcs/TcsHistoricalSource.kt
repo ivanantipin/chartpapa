@@ -5,6 +5,7 @@ import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
+import org.slf4j.LoggerFactory
 import ru.tinkoff.invest.openapi.data.CandleInterval
 import ru.tinkoff.invest.openapi.data.StreamingEvent
 import ru.tinkoff.invest.openapi.data.StreamingRequest
@@ -23,6 +24,8 @@ fun getContext(): Context {
 }
 
 class TcsHistoricalSource(val context: Context) : HistoricalSource, Flow.Subscriber<StreamingEvent> {
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     override fun symbols(): List<InstrId> {
 
@@ -58,7 +61,7 @@ class TcsHistoricalSource(val context: Context) : HistoricalSource, Flow.Subscri
 
 
         var dt = OffsetDateTime.of(dateTime, ZoneOffset.of("+03:00"))
-        println("loading inst ${instrId} from ${dt}")
+        log.info("loading inst ${instrId} from ${dt}")
         return sequence {
 
             while (dt < OffsetDateTime.now()) {
@@ -98,7 +101,7 @@ class TcsHistoricalSource(val context: Context) : HistoricalSource, Flow.Subscri
     }
 
     override fun onComplete() {
-        println("subscription complete")
+        log.info("subscription complete")
     }
 
     override fun onSubscribe(p0: Flow.Subscription) {

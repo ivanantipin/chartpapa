@@ -16,7 +16,6 @@ object TrqParser{
 
 
     fun parseTrqMsg(str: String): TrqMsg? {
-        println("====================")
         //TrqTrades
         if (str.startsWith("<candlekinds")) {
             return kotlinXmlMapper.readValue(str, CandleKinds::class.java)
@@ -40,9 +39,14 @@ object TrqParser{
             return kotlinXmlMapper.readValue(str, TrqOrders::class.java)
         } else if (str.startsWith("<alltrades")) {
             return kotlinXmlMapper.readValue(str, AllTrades::class.java)
+        } else if (str.startsWith("<client")) {
+            return kotlinXmlMapper.readValue(str, TrqClient::class.java)
+        } else if (str.startsWith("<server_status")) {
+            return kotlinXmlMapper.readValue(str, ServerStatus::class.java)
+        }else if (str.startsWith("<positions")) {
+            return kotlinXmlMapper.readValue(str, Positions::class.java)
         } else {
             println("unparsed message ${str}")
-            println("====================")
         }
         return null
     }

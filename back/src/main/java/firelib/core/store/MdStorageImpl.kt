@@ -18,6 +18,7 @@ import firelib.core.report.dao.GeGeWriter
 import firelib.core.misc.SqlUtils
 import firelib.core.domain.Ohlc
 import org.apache.commons.io.FileUtils
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Paths
 import java.time.Instant
@@ -57,6 +58,8 @@ class SourceFactory{
 
 
 class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toString()) : MdStorage {
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     val requestedDao = GeGeWriter<InstrId>(
         "requested",
@@ -99,7 +102,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         try {
             return IntervalTransformer.transform(target, ret)
         } finally {
-            println("transformed in " + (System.currentTimeMillis() - start) / 1000.0 + " s. " + ret.size + " min bars")
+            log.info("transformed in " + (System.currentTimeMillis() - start) / 1000.0 + " s. " + ret.size + " min bars")
         }
     }
 
@@ -128,14 +131,14 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             val startTime = dao.queryLast(instrId.code).map { oh -> oh.endTime.atUtc().minusDays(2) }
                 .orElse(LocalDateTime.now().minusDays(3000))
 
-            println("start time is ${startTime}")
+            log.info("start time is ${startTime}")
 
             source.load(instrId, startTime).chunked(5000).forEach {
                 instant = it.last().endTime
                 dao.insertOhlc(it, instrId.code)
             }
         } catch (e: Exception) {
-            println("failed to update " + instrId + " " + e.message)
+            log.info("failed to update " + instrId + " " + e.message)
             e.printStackTrace()
         }
         return instant

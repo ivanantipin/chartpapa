@@ -52,7 +52,6 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
                     val volume = oh.volume.toDouble()
                     quantiles[idx].add(volume)
                     val qq = quantiles[idx].getQuantile(volume)
-                    println(qq)
                     if (qq > 0.9) {
                         val hvStat = HVStat(qq,
                                 makeRet(it, 0, 3),

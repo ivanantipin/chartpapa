@@ -6,6 +6,7 @@ import firelib.core.store.MdStorageImpl
 import firelib.core.InstrumentMapper
 import firelib.core.misc.UtilsHandy.updateRussianStockSimple
 import firelib.model.DivHelper
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 
@@ -27,10 +28,13 @@ class FinamTickerMapper(val finamDownloader: FinamDownloader) : InstrumentMapper
 
 
 object UtilsHandy {
+
+    val log = LoggerFactory.getLogger(javaClass)
+
     fun updateRussianDivStocks(): List<Pair<String, Instant>> {
-        println("updating tickers that have a divs")
+        log.info("updating tickers that have a divs")
         val divs = DivHelper.getDivs()
-        println("tickers to update ${divs.keys}")
+        log.info("tickers to update ${divs.keys}")
         val storageImpl = MdStorageImpl()
         val finamDownloader = FinamDownloader()
         val symbols = finamDownloader.symbols().filter { divs.containsKey(it.code.toLowerCase()) && it.market == FinamDownloader.SHARES_MARKET }
@@ -45,10 +49,10 @@ object UtilsHandy {
         val instr = symbols.find { it.code.equals(ticker, true) && it.market == FinamDownloader.SHARES_MARKET }
 
         if (instr != null) {
-            println("updating instrument ${instr}")
+            log.info("updating instrument ${instr}")
             MdStorageImpl().updateMarketData(instr)
         } else {
-            println("instrument not found ${ticker}")
+            log.info("instrument not found ${ticker}")
         }
         downloader.close()
 

@@ -17,8 +17,8 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                 val cases = gen.genClosedCases(it)
                 if (!cases.isEmpty()) {
                     cases.forEach {
-                        println(it.first)
-                        println(it.second)
+                        log.info("${it.first}")
+                        log.info("${it.second}")
                     }
                 }
             }
@@ -42,7 +42,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                             it.lastDayWithDivs.atStartOfDay().isAfter(context.timeService.currentTime().atUtc())
                         }
                         if (nextIdx >= 0) {
-                            //println("next div is ${divs[nextIdx]} for instrument ${instrument}" )
+                            //log.info("next div is ${divs[nextIdx]} for instrument ${instrument}" )
                         }
 
                     }
@@ -55,7 +55,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
 
                     if (context.config.verbose && orderManagers()[idx].position() != 0) {
-                        println("${ret[0]}")
+                        log.info("${ret[0]}")
                     }
 
                     if (localTime.hour == 18 && localTime.minute == 30 && nextIdx >= 0 && !ret[0].interpolated) {
@@ -64,9 +64,9 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                         if (date == nextDivDate) {
                             val prevIdx = divs[nextIdx]
                             if (context.config.verbose) {
-                                println("entering for ${instrument} time ${context.timeService.currentTime()} div is $prevIdx price is ${ret[0].close}")
-                                println("t0 ${ret[0]}")
-                                println("t1 ${ret[1]}")
+                                log.info("entering for ${instrument} time ${context.timeService.currentTime()} div is $prevIdx price is ${ret[0].close}")
+                                log.info("t0 ${ret[0]}")
+                                log.info("t1 ${ret[1]}")
                             }
 
                             longForMoneyIfFlat(idx, 100_000)
@@ -77,7 +77,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                                 )
                             }
                             if (nextIdx > 0) {
-                                //println("next div is ${divs[nextIdx]} for instrument ${instrument}" )
+                                //log.info("next div is ${divs[nextIdx]} for instrument ${instrument}" )
                             }
 
                         }
@@ -85,9 +85,9 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
                     if (localTime.hour == 18 && localTime.minute == 20 && orderManagers()[idx].position() != 0 && !ret[0].interpolated) {
                         if (context.config.verbose) {
-                            println("exit position for ${instrument} time is ${context.timeService.currentTime()}  price is ${ret[0].close}")
-                            println("t0 ${ret[0]}")
-                            println("t1 ${ret[1]}")
+                            log.info("exit position for ${instrument} time is ${context.timeService.currentTime()}  price is ${ret[0].close}")
+                            log.info("t0 ${ret[0]}")
+                            log.info("t1 ${ret[1]}")
                         }
 
                         orderManagers()[idx].flattenAll()
@@ -100,7 +100,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                         val date = time.toLocalDate()
                         val localTime = time.toLocalTime()
                         if (context.config.verbose) {
-                            println("instrument ${instrument} date ${date} localtime ${localTime} minute ${time.minute} hour ${time.hour}")
+                            log.info("instrument ${instrument} date ${date} localtime ${localTime} minute ${time.minute} hour ${time.hour}")
                         }
                     }
                 }

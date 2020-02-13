@@ -2,7 +2,7 @@ import sqlite3
 import sys
 import time
 from functools import reduce
-from fredapi import Fred
+# from fredapi import Fred
 import numpy as np
 import pandas as pd
 import requests
@@ -126,7 +126,7 @@ def getPortfolio(tabs : typing.List[str], dbpath : str):
     return df.sort_values(by='money',ascending=True)
 
 
-fred = Fred(api_key='d9ab0788d00a3be2b4e1a552d57fc467')
-
-def getFredMd(name : str):
-    return fred.get_series(name)
+# fred = Fred(api_key='d9ab0788d00a3be2b4e1a552d57fc467')
+#
+# def getFredMd(name : str):
+#     return fred.get_series(name)

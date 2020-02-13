@@ -20,15 +20,15 @@ class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlocki
         return dist.add<Securities> {it is Securities}.use {
             val response = stub.command(TrqCommandHelper.securitiesCmd())
             if(!response.success){
-                throw RuntimeException("command did not succed ${response.message}")
+                throw RuntimeException("command did not succeed ${response.message}")
             }
-            val sec = it.queue.poll(5, TimeUnit.SECONDS)
+            val sec = it.queue.poll(60, TimeUnit.SECONDS)
 
             if(sec == null){
                 return emptyList()
             }
             return sec.securities.map {
-                InstrId(code = it.seccode!!, board = it.board!!)
+                InstrId(code = it.seccode!!, board = it.board!!, lot = it.lotsize!!.toInt(), minPriceIncr = it.minstep!!.toBigDecimal(), name = it.shortname!!, id = it.secid!!)
             }
         }
     }

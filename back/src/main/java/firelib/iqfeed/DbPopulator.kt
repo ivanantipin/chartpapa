@@ -8,12 +8,15 @@ import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler
 import firelib.parser.ParserHandlersProducer
+import org.slf4j.LoggerFactory
 import java.nio.file.Paths
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 object DbPopulator {
+
+    val log  = LoggerFactory.getLogger(javaClass)
 
     @Throws(Exception::class)
     @JvmStatic
@@ -37,21 +40,20 @@ object DbPopulator {
                 val ohlcs = ArrayList<Ohlc>()
                 try {
                     val parser = CsvParser(fname, producer.handlers as Array<out ParseHandler<Ohlc>>, { Ohlc() }, 100000000)
-                    println(parser.seek(Instant.MIN))
                     while (parser.read()) {
                         ohlcs.add(parser.current())
                         cnt.incrementAndGet()
                     }
                     storage.save(table, SourceName.IQFEED, Interval.Min1, ohlcs)
-                    println("done $fname cnt is $cnt")
+                    log.info("done $fname cnt is $cnt")
 
                 } catch (e: Exception) {
-                    println("failed " + s + " due to " + e.message)
+                    log.info("failed " + s + " due to " + e.message)
                     e.printStackTrace()
                 }
 
             } catch (e: Exception) {
-                println("failed for " + s + " due to " + e.message)
+                log.info("failed for " + s + " due to " + e.message)
             }
 
         }

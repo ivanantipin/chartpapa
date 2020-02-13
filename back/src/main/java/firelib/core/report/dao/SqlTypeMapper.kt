@@ -24,6 +24,11 @@ object SqlTypeMapper{
             return "DOUBLE PRECISION"
         }
 
+        if (retType.classifier == Boolean::class) {
+            return "INT"
+        }
+
+
 
         if (retType.classifier == Instant::class) {
             return "TIMESTAMPTZ"
@@ -53,6 +58,9 @@ object SqlTypeMapper{
         if (retType.classifier == Instant::class) {
             return { Instant.ofEpochMilli((it as Int).toLong() * 1000) }
         }
+        if (retType.classifier == Boolean::class) {
+            return {it}
+        }
 
         throw RuntimeException("not supported type $retType")
     }
@@ -74,6 +82,11 @@ object SqlTypeMapper{
         if (retType.classifier == Long::class) {
             return { it  }
         }
+
+        if (retType.classifier == Boolean::class) {
+            return { it  }
+        }
+
 
         if (retType.classifier == Instant::class) {
             return {(it as Instant).toEpochMilli()/1000}

@@ -31,6 +31,9 @@ fun Instant.atMoscow (): LocalDateTime = LocalDateTime.ofInstant(this, moscowZon
 
 fun Instant.toStandardString (): String = if(this == null) "null" else dateStringFormatOfDateUtils.format(this.atZone(ZoneOffset.UTC))
 
+fun Instant.toStringAtMoscow(): String = if(this == null) "null" else dateStringFormatOfDateUtils.format(this.atMoscow())
+
+
 
 fun LocalDateTime.toInstantDefault() : Instant = this.toInstant(ZoneOffset.UTC)
 fun LocalDate.toInstantDefault() : Instant = this.atStartOfDay().toInstant(ZoneOffset.UTC)

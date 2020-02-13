@@ -24,7 +24,7 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
     override fun update() {
         val omanagers = orderManagers()
         if(count++ % 1000_000 == 0){
-            println("count is ${count}" )
+            log.info("count is ${count}" )
         }
 
         val r0 = (ts0[0].close - ts0[period].close) / ts0[period].close
@@ -47,8 +47,8 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
     }
 
     init {
-        orderManagers()[0].tradesTopic().subscribe { println("trade ${it}") }
-        orderManagers()[1].tradesTopic().subscribe { println("trade ${it}") }
+        orderManagers()[0].tradesTopic().subscribe { log.info("trade ${it}") }
+        orderManagers()[1].tradesTopic().subscribe { log.info("trade ${it}") }
     }
 }
 

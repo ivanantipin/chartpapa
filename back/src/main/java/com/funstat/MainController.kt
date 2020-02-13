@@ -8,12 +8,16 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
 import firelib.core.store.*
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
 
 
 class MainController {
+
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     internal var storage: MdStorage = CachedStorage(MdStorageImpl(GlobalConstants.mdFolder.toString()))
 
@@ -22,7 +26,7 @@ class MainController {
     val noteBooksDir = Paths.get(System.getProperty("notebooksDir") ?: "/home/ivan/projects/fbackend/market_research/published" )
 
     init {
-        println("notebooks dir is " + noteBooksDir)
+        log.info("notebooks dir is " + noteBooksDir)
     }
 
     fun loadStaticPages(): List<String> {

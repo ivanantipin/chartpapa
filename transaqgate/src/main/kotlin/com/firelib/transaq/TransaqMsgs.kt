@@ -76,7 +76,10 @@ data class Securities(
     @set:JsonProperty(value = "security")
     var securities: List<Security>
 ) : TrqMsg
-
+/*
+server_status server_tz="Russian Standard Time" id="0" connected="true"/>
+ */
+data class ServerStatus(val server_tz : String?, var id : String?, var connected : String?) : TrqMsg
 
 data class Market(
     var id: String?,
@@ -244,17 +247,60 @@ data class TrqPortfolio(
     var securities: List<PortfolioSecurity>
 ) : TrqMsg
 
-data class TrqClient(
-    var id: String?,
-    var type: String?,
-    var currency: String?,
-    var market: String?,
-    var union: String?,
-    var forts_acc: String?
-)
+
 
 
 data class TrqOrders(
     @set:JsonProperty("order")
     var orders: List<TrqOrder>
+) : TrqMsg
+
+
+data class TrqClient(
+    var id : String?,
+    var remove : Boolean?,
+    var market : String?,
+    var currency : String?,
+    var type : String?,
+    var union: String?,
+    var forts_acc: String?
+) : TrqMsg
+
+data class MoneyPosition(
+var register :  String?,
+var asset :  String?,
+var client :  String?,
+var union :  String?,
+var shortname :  String?,
+var saldoin :  String?,
+var bought :  String?,
+var sold :  String?,
+var saldo :  String?,
+var ordbuy :  String?,
+var ordbuycond :  String?,
+var comission :  String?
+)
+
+data class SecPosition(
+var secid :  String?,
+var market :  String?,
+var seccode :  String?,
+var register :  String?,
+var client :  String?,
+var union :  String?,
+var shortname :  String?,
+var saldoin :  String?,
+var saldomin :  String?,
+var bought :  String?,
+var sold :  String?,
+var saldo :  String?,
+var ordbuy :  String?,
+var ordsell :  String?,
+var amount :  String?,
+var equity :  String?
+)
+
+data class Positions(
+  var sec_position : SecPosition?,
+  var money_position : MoneyPosition?
 ) : TrqMsg

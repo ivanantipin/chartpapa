@@ -4,7 +4,10 @@ import firelib.core.store.MdStorageImpl
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.misc.timeSequence
 import firelib.core.report.ReportWriter
+import firelib.core.report.Sqls.readCurrentPositions
 import firelib.core.store.ReaderFactory
+import org.slf4j.LoggerFactory
+import java.lang.Exception
 import java.time.Instant
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
@@ -19,6 +22,8 @@ object ProdRunner {
                  realReaderFactory: ReaderFactory
     ) {
 
+        val log = LoggerFactory.getLogger(javaClass)
+
         val cfg = context.modelConfig
 
         val model = context.addModel(cfg.modelParams)
@@ -31,15 +36,17 @@ object ProdRunner {
             enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor, "trades_backtest"))
 
 
-        println("end of hist time is ${endTime}")
+        log.info("end of hist time is ${endTime}")
 
         val fut = executorService.submit(Callable<Instant> {
             context.backtest(endTime)
         })
 
+        val curentPoses = readCurrentPositions(cfg.getReportDbFile())
+
         var ct = fut.get()
 
-        println("backtest ended starting from ${ct}")
+        log.info("backtest ended starting from ${ct}")
 
         executorService.submit {
             model.orderManagers().forEach {it.flattenAll("switching gate")}
@@ -47,6 +54,14 @@ object ProdRunner {
 
 
         persistings.forEach {it.cancelAndJoin()}
+
+        executorService.submit {
+            model.orderManagers().forEach {
+                val pos = curentPoses.getOrDefault(it.security(), 0)
+                log.info("restored position for ${it.security()} to ${pos}")
+                it.updatePosition(pos)
+            }
+        }.get()
 
 
         context.tradeGate.setActiveReal(realGate)
@@ -63,9 +78,14 @@ object ProdRunner {
         enableTradeRtPersist(model, cfg.getReportDbFile(), ioExecutor)
 
         timeSequence(cfg.interval.roundTime(Instant.now()), cfg.interval).forEach {
-            executorService.submit {
-                context.progress(it, realReaders)
-            }.get()
+            try{
+                executorService.submit {
+                    context.progress(it, realReaders)
+                }.get()
+            }catch (e : Exception){
+                log.error("error iterating loop for timestamp ${it}")
+            }
+
         }
     }
 

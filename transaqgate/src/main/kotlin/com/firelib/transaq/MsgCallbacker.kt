@@ -24,6 +24,9 @@ class MsgCallbacker(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlock
                     //continuous messages, this call will generally block till the end
                     messages.forEachRemaining {
                         val msg = TrqParser.parseTrqMsg(StringEscapeUtils.unescapeJava(it.txt))
+                        if(msg is Positions){
+                            println("received ${msg}")
+                        }
                         if (msg != null) {
                             listeners.forEach {
                                 if(!it.isCancelled.get()){

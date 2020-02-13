@@ -2,6 +2,7 @@ package firelib.core.store
 
 import firelib.core.misc.toInstantDefault
 import firelib.core.domain.Ohlc
+import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -17,6 +18,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     private val manager: DataSourceTransactionManager = DataSourceTransactionManager(ds)
 
+    val log = LoggerFactory.getLogger(javaClass)
     internal var tableCreated = ConcurrentHashMap<String, Boolean>()
 
     private fun saveInTransaction(sql: String, data: List<Map<String, Any>>) {
@@ -25,7 +27,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
             val start = System.currentTimeMillis()
             NamedParameterJdbcTemplate(ds).batchUpdate(sql, data.toTypedArray())
             val dur = (System.currentTimeMillis() - start) / 1000.0
-            println(
+            log.info(
                 "MdDao: inserting " + data.size + " took " + dur + " sec ," + " rate is " +
                         data.size / dur + " per sec"
             )
@@ -41,7 +43,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
             if (it.open.isFinite()) {
                 true
             } else {
-                println("not correct ${it}")
+                log.info("not correct ${it}")
                 false
             }
         }.map {

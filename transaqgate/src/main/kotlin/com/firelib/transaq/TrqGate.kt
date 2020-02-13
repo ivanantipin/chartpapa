@@ -3,29 +3,30 @@ package com.firelib.transaq
 import com.firelib.Str
 import com.firelib.TransaqConnectorGrpc
 import com.firelib.transaq.TrqParser.parseTrqResponse
-import firelib.core.domain.InstrId
-import firelib.common.*
+import firelib.common.Order
+import firelib.common.Trade
 import firelib.core.TradeGate
-import firelib.core.domain.OrderType
-import firelib.core.domain.Side
 import firelib.core.domain.*
+import io.grpc.Deadline
 import org.apache.commons.text.StringEscapeUtils
-import java.lang.Exception
+import org.slf4j.LoggerFactory
+import java.io.FileReader
 import java.math.BigDecimal
+import java.nio.file.Files
 import java.time.Instant
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class TrqGate(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStub,
-              val clientId: String,
-              val executor: Executor) : TradeGate {
+class TrqGate(
+    val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStub,
+    val executor: Executor,
+    var clientId: String
+) : TradeGate {
 
-    fun sendCmd(str: String): TrqResponse {
-        return parseTrqResponse(blockingStub.sendCommand(Str.newBuilder().setTxt(str).build()).txt)
-    }
-
+    private val log = LoggerFactory.getLogger(javaClass)
 
     val orderByTransactionId = ConcurrentHashMap<String, Order>()
     val ordersByOrderNumber = ConcurrentHashMap<String, Order>()
@@ -34,14 +35,20 @@ class TrqGate(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStu
 
 
     override fun sendOrder(order: Order) {
-        val resp = sendCmd(TrqCommandHelper.newOrder(order, clientId))
 
-        if (!resp.success) {
-            order.reject("${resp.message}")
-        } else {
-            orderByTransactionId[resp.transactionid!!] = order
-            orderNoToTransactionId[order.id] = resp.transactionid!!
+        try {
+            val resp = blockingStub.command(TrqCommandHelper.newOrder(order, clientId))
+            if (!resp.success) {
+                order.reject("${resp.message}")
+            } else {
+                orderByTransactionId[resp.transactionid!!] = order
+                orderNoToTransactionId[order.id] = resp.transactionid!!
+            }
+        } catch (e: Exception) {
+            order.reject("uncknown error ${e.message}")
         }
+
+
     }
 
     val callbacker = MsgCallbacker(blockingStub)
@@ -49,32 +56,31 @@ class TrqGate(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStu
     init {
         val receiver = callbacker.add<TrqMsg> { true }
         Thread {
-            while(true){
+            while (true) {
                 try {
                     val poll = receiver.queue.poll(10, TimeUnit.SECONDS)
-                    if(poll == null){
-                        println("nothing received")
-                    }else{
-                        executor.execute{processMsg(poll)}
+                    if (poll != null) {
+                        executor.execute { processMsg(poll) }
                     }
-                }catch (e : Exception){
-                    println("error proccessing ")
+                } catch (e: Exception) {
+                    log.error("error proccessing ", e)
                 }
             }
         }.start()
     }
 
 
-    fun getNativeOrder(ord : TrqOrder) : Order?{
-        if(orderByTransactionId.containsKey(ord.transactionid)){
+    fun getNativeOrder(ord: TrqOrder): Order? {
+        if (orderByTransactionId.containsKey(ord.transactionid)) {
             val order = orderByTransactionId[ord.transactionid]!!
-            if(!ord.orderno.isNullOrBlank()){
+            if (!ord.orderno.isNullOrBlank()) {
                 ordersByOrderNumber[ord.orderno!!] = order
-                orderByTransactionId.remove(ord.transactionid)
             }
+            log.info("got order by transaction id ${ord.transactionid}")
             return order
         }
-        if(ordersByOrderNumber.containsKey(ord.orderno)){
+        if (ordersByOrderNumber.containsKey(ord.orderno)) {
+            log.info("got order by orderno ${ord.orderno}")
             return ordersByOrderNumber[ord.orderno]!!
         }
         return null
@@ -84,59 +90,64 @@ class TrqGate(val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStu
     fun processMsg(msgTrq: TrqMsg) {
         when (msgTrq) {
             is TrqOrders -> {
-                msgTrq.orders.forEach { msg->
+                msgTrq.orders.forEach { msg ->
                     val order = getNativeOrder(msg)
-                    if(order == null){
-                        println("error, no order found for ${msg} ")
-                    }else{
+                    if (order == null) {
+                        log.error("error, no order found for ${msg} ")
+                    } else {
                         if (msg.status == "cancelled" && msg.withdrawtime != "0") {
-                            println("cancel")
                             order.cancel()
-                        }else if (msg.status == "active" ) {
-                            println("active")
+                        } else if (msg.status == "active") {
                             order.accepted()
-                        } else if (msg.status == "matched" ) {
-                            println("matched")
+                        } else if (msg.status == "matched") {
                             order.done()
-                        } else{
-                            println("error unreckon status ${msg}")
+                        } else {
+                            log.error("can not process status ${msg}")
                         }
                     }
 
                 }
             }
-            is AllTrades->{
-                println("ignore")
+            is AllTrades -> {
             }
-            is TrqTrades->{
-                msgTrq.trades.forEach { trade->
+            is TrqClient -> {
+                log.info("client id received ${msgTrq.id}")
+                clientId = msgTrq.id!!
+            }
+            is TrqTrades -> {
+                msgTrq.trades.forEach { trade ->
                     val order = ordersByOrderNumber.get(trade.orderno)
-                    if(order == null){
-                        println("error received trade for missing order ${trade}")
-                    }else{
+                    if (order == null) {
+                        log.error("error received trade for missing order ${trade}")
+                    } else {
 
-                        order.tradeSubscription.publish(Trade(
-                            qty = trade.quantity!!.toInt(),
-                            price = trade.price!!.toDouble(),
-                            order = order,
-                            dtGmt = Instant.now(), // fixme
-                            priceTime = Instant.now()
-                        ))
+                        order.tradeSubscription.publish(
+                            Trade(
+                                tradeNo = trade.tradeno!!,
+                                qty = trade.quantity!!.toInt(),
+                                price = trade.price!!.toDouble(),
+                                order = order,
+                                dtGmt = Instant.now(), // fixme
+                                priceTime = Instant.now()
+                            )
+                        )
                     }
-
-
                 }
-                println("transaq trades ${msgTrq}")
             }
         }
     }
 
     override fun cancelOrder(order: Order) {
         val transactionid = orderNoToTransactionId[order.id]!!
-        val response = sendCmd(TrqCommandHelper.cancelOrder(transactionid))
-        if (!response.success) {
-            order.cancelReject("${response.message}")
+        try {
+            val response = blockingStub.command(TrqCommandHelper.cancelOrder(transactionid))
+            if (!response.success) {
+                order.cancelReject("${response.message}")
+            }
+        } catch (e: Exception) {
+            order.reject("unknown error ${e.message}")
         }
+
     }
 }
 
@@ -159,23 +170,44 @@ fun main() {
 }
 
 
-
-
-fun makeDefaultStub() : TransaqConnectorGrpc.TransaqConnectorBlockingStub{
+fun makeDefaultStub(): TransaqConnectorGrpc.TransaqConnectorBlockingStub {
     return TransaqGrpcClientExample("localhost", 50051).blockingStub
 }
 
-fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str : String) : TrqResponse {
-    return parseTrqResponse(StringEscapeUtils.unescapeJava(this.sendCommand(Str.newBuilder().setTxt(str).build()).txt))
+fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str: String): TrqResponse {
+    return parseTrqResponse(
+        StringEscapeUtils.unescapeJava(
+            this.withDeadline(
+                Deadline.after(
+                    3000,
+                    TimeUnit.MILLISECONDS
+                )
+            ).sendCommand(Str.newBuilder().setTxt(str).build()).txt
+        )
+    )
 }
 
-val loginCmd = TrqCommandHelper.connectCmd("TCNN9986", "z7L4V4", "tr1-demo5.finam.ru", "3939")
+
+val pp = Properties().apply {
+    load(FileReader("${System.getProperty("user.home")}/keys/test.properties"))
+}
+/*
+Ваш логин:
+Ваш пароль: suV7gU
+ */
+val loginCmd = TrqCommandHelper.connectCmd(
+    pp["login"]!!.toString(),
+    pp["password"]!!.toString(),
+    pp["host"].toString(),
+    pp["port"].toString()
+)
+//val loginCmd = TrqCommandHelper.connectCmd("FBTC277A", "x8Er8EuU", "tr1.finambank.ru", "3324")
 
 
 fun makeDefaultTransaqGate(executor: Executor): TrqGate {
     val stub = makeDefaultStub()
 
-    return TrqGate(stub, "virt/9986", executor)
+    return TrqGate(stub, executor, "virt/9952")
 }
 
 

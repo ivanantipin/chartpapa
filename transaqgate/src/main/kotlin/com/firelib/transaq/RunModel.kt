@@ -2,7 +2,7 @@ package com.firelib.transaq
 
 import firelib.emulator.GateEmulator
 import firelib.emulator.RtReaderEmulator
-import firelib.core.DummyModel
+import firelib.model.DummyModel
 import firelib.core.ProdRunner
 import firelib.core.store.ReaderFactory
 import firelib.core.SimpleRunCtx

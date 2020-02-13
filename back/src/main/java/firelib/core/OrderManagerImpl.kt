@@ -16,11 +16,12 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.set
 
 
-class OrderManagerImpl(val tradeGate : TradeGate,
-                       val timeService : TimeService,
-                       val security : String,
-                       val maxOrderCount: Int = 20,
-                       val instrument : InstrId
+class OrderManagerImpl(
+    val tradeGate: TradeGate,
+    val timeService: TimeService,
+    val security: String,
+    val maxOrderCount: Int = 20,
+    val instrument: InstrId
 ) : OrderManager {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -38,7 +39,7 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         return security
     }
 
-    private val id2Order = mutableMapOf<String,OrderWithState>()
+    private val id2Order = mutableMapOf<String, OrderWithState>()
 
     private val orderStateChannel = NonDurableChannel<OrderState>()
 
@@ -50,17 +51,18 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
     var idCounter = AtomicLong(0)
 
-    override fun liveOrders(): List<Order>{
-        return  id2Order.values.map({it.order})
+    override fun liveOrders(): List<Order> {
+        return id2Order.values.map { it.order }
     }
 
     override fun hasPendingState(): Boolean {
-        return id2Order.values.any { (it.status().isPending() || (it.order.orderType == OrderType.Market))}
+        return id2Order.values.any { (it.status().isPending() || (it.order.orderType == OrderType.Market)) }
     }
 
     override fun tradesTopic(): SubChannel<Trade> {
         return tradesChannel
     }
+
     override fun orderStateTopic(): SubChannel<OrderState> {
         return orderStateChannel
     }
@@ -68,11 +70,11 @@ class OrderManagerImpl(val tradeGate : TradeGate,
     override fun cancelOrders(orders: List<Order>) {
         for (order in orders) {
             val ord = id2Order.get(order.id)
-            if(ord != null){
+            if (ord != null) {
                 tradeGate.cancelOrder(order)
                 ord.statuses += OrderStatus.PendingCancel
                 orderStateChannel.publish(OrderState(ord.order, OrderStatus.PendingCancel, timeService.currentTime()))
-            }else{
+            } else {
                 log.error("cancelling non existing order {}", order)
             }
         }
@@ -80,25 +82,32 @@ class OrderManagerImpl(val tradeGate : TradeGate,
 
 
     override fun submitOrders(orders: List<Order>) {
-        if(this.id2Order.size > maxOrderCount){
+        if (this.id2Order.size > maxOrderCount) {
             log.error("max order count reached rejecting orders {}", orders)
-            orders.forEach({orderStateChannel.publish(OrderState(it, OrderStatus.Rejected, timeService.currentTime()))})
-        }else{
+            orders.forEach {
+                orderStateChannel.publish(
+                    OrderState(
+                        it,
+                        OrderStatus.Rejected,
+                        timeService.currentTime()
+                    )
+                )
+            }
+        } else {
             orders.forEach { order ->
                 val orderWithState = OrderWithState(order)
                 this.id2Order[order.id] = orderWithState
-                orders.forEach {orderStateChannel.publish(OrderState(it, OrderStatus.New, timeService.currentTime()))}
+                orders.forEach { orderStateChannel.publish(OrderState(it, OrderStatus.New, timeService.currentTime())) }
                 log.info("submitting order {}", order)
-                order.tradeSubscription.subscribe {onTrade(it, orderWithState)}
-                order.orderSubscription.subscribe {onOrderState(it)}
+                order.tradeSubscription.subscribe { onTrade(it, orderWithState) }
+                order.orderSubscription.subscribe { onOrderState(it) }
                 tradeGate.sendOrder(order)
             }
         }
     }
 
 
-
-    fun onOrderState(state : OrderState) {
+    fun onOrderState(state: OrderState) {
         if (!id2Order.contains(state.order.id)) {
             log.error("order state received {} for nonexisting or finalized order", state)
             return
@@ -110,9 +119,13 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         sOrder.statuses += state.status
 
         if (state.status.isFinal()) {
-            if(state.status == OrderStatus.Done && sOrder.remainingQty() > 0){
-                log.error("status is Done but order {} has non zero remaining amount {} leaving in pending... ", state.order, sOrder.remainingQty())
-            }else{
+            if (state.status == OrderStatus.Done && sOrder.remainingQty() > 0) {
+                log.info(
+                    "status is Done but order {} has non zero remaining amount {} leaving in pending... ",
+                    state.order,
+                    sOrder.remainingQty()
+                )
+            } else {
                 id2Order.remove(state.order.id)
             }
 
@@ -120,25 +133,39 @@ class OrderManagerImpl(val tradeGate : TradeGate,
         orderStateChannel.publish(state)
     }
 
+    val processedTrades = mutableSetOf<String>()
 
-    fun onTrade(trd: Trade, order : OrderWithState) {
-        println("on trade ${trd}")
+    fun onTrade(trd: Trade, order: OrderWithState) {
+        log.info("on trade ${trd}")
         order.trades += trd
-        if(order.remainingQty() < 0){
-            println("negative remaining amount order $order")
+
+        if (trd.tradeNo != "na") {
+            if (!processedTrades.add(trd.tradeNo)) {
+                log.info("ignoring already processed trade ${trd.tradeNo}")
+                return
+            }
         }
-        if(order.remainingQty() == 0 && order.status().isFinal()){
-            println("removing filled order as remaining qty is zero")
+
+
+        if (order.remainingQty() < 0) {
+            log.error("negative remaining amount order $order")
+        }
+        if (order.remainingQty() == 0) {
+            log.info("removing filled order as remaining qty is zero")
             id2Order.remove(order.order.id)
         }
         val prevPos = position
         position = trd.adjustPositionByThisTrade(position)
-        println("position adjusted for security $security :  $prevPos -> ${position()}")
+        log.info("position adjusted for security $security :  $prevPos -> ${position()}")
         tradesChannel.publish(trd.copy(positionAfter = position))
     }
 
 
     override fun nextOrderId(): String {
         return "${security}_${idCounter.incrementAndGet()}"
+    }
+
+    override fun updatePosition(pos: Int) {
+        this.position = pos
     }
 }

@@ -11,6 +11,7 @@ import firelib.core.report.ReportWriter.clearReportDir
 import firelib.core.report.ReportWriter.writeReport
 import firelib.core.domain.Ohlc
 import firelib.core.enableOhlcDumping
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
@@ -19,6 +20,8 @@ import java.util.concurrent.TimeUnit
 
 object Backtester{
 
+    val log = LoggerFactory.getLogger(javaClass)
+
     init{
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             throwable.printStackTrace()
@@ -26,7 +29,7 @@ object Backtester{
     }
 
     fun runOptimized(cfg: ModelBacktestConfig) {
-        println("Starting")
+        log.info("Starting")
 
         val startTime = System.currentTimeMillis()
 
@@ -43,7 +46,7 @@ object Backtester{
         val endOfOptimize =  if(optCfg.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
         else startDtGmt.plus(optCfg.optimizedPeriodDays, ChronoUnit.DAYS)
 
-        println("total number of models to test : ${variator.combinations()}")
+        log.info("total number of models to test : ${variator.combinations()}")
 
         val optResourceParams: OptResourceParams = optCfg.resourceStrategy.getParams(variator.combinations())
 
@@ -74,7 +77,7 @@ object Backtester{
                 ctx.backtest(endOfOptimize)
                 reportProcessor.process(ctx.boundModels)
             }
-            println("models scheduled for optimization ${ctx.boundModels.size}")
+            log.info("models scheduled for optimization ${ctx.boundModels.size}")
         }
 
 
@@ -85,13 +88,13 @@ object Backtester{
 
         require(reportProcessor.bestModels().isNotEmpty(), {"no models get produced!! probably because they did not generated enough trades"})
 
-        println("Model optimized in ${(System.currentTimeMillis() - startTime) / 1000} sec")
+        log.info("Model optimized in ${(System.currentTimeMillis() - startTime) / 1000} sec")
 
         writeReport(reportProcessor.bestModels().last(), cfg)
 
         ReportWriter.writeOpt(cfg.getReportDbFile(), reportProcessor.estimates)
 
-        println("Finished")
+        log.info("Finished")
     }
 
     private fun makeExecutor(optResourceParams: OptResourceParams): ThreadPoolExecutor {

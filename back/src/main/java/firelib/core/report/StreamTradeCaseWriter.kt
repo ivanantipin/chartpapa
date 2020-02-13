@@ -7,6 +7,7 @@ import firelib.core.misc.SqlUtils.makeSqlStatementFromHeader
 import firelib.core.domain.Side
 import firelib.core.misc.SqlUtils
 import firelib.core.report.dao.ColDef
+import firelib.model.DummyModel
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -57,4 +58,3 @@ class StreamTradeCaseWriter(val path: Path, val tableName: String) {
         }
     }
 }
-

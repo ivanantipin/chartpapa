@@ -139,7 +139,7 @@ class OrderManagerTest {
 
         val timeService = TimeServiceManaged()
 
-        val config = ModelBacktestConfig()
+        val config = ModelBacktestConfig(OhlcTestModel::class)
         config.instruments = listOf("SBER")
 
         val tg = TradeGateStub(config, timeService)

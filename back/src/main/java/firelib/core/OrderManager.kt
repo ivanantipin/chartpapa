@@ -41,4 +41,6 @@ interface OrderManager {
 
     fun nextOrderId (): String
 
+    fun updatePosition(pos : Int)
+
 }

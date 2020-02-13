@@ -53,7 +53,7 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
                         )
                     )
 
-                    println("written ${it[0].endTime} ${tssDay[idx][1].endTime} ")
+                    log.info("written ${it[0].endTime} ${tssDay[idx][1].endTime} ")
                 }
             }
             ret

@@ -167,7 +167,7 @@ class BacktestResults(object):
 
 
 
-    def load(self, filename, tz=pytz.UTC):
+    def load(self, filename, tableName = "trades"):
 
         # Create your connection.
         cnx = sqlite3.connect(filename)

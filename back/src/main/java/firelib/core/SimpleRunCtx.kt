@@ -8,8 +8,10 @@ import firelib.model.ModelContext
 import firelib.core.store.reader.SimplifiedReader
 import firelib.core.timeservice.TimeServiceManaged
 import firelib.core.backtest.tradegate.TradeGateStub
+import firelib.core.domain.InstrId
 import firelib.core.domain.ModelOutput
 import firelib.core.domain.OrderStatus
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 
@@ -27,14 +29,16 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         TimeServiceManaged()
     }
 
-    var gateMapper: InstrumentMapper? = null
-
+    var gateMapper: InstrumentMapper = object : InstrumentMapper{
+        override fun invoke(p1: String): InstrId {
+            return InstrId(code = p1)
+        }
+    }
 
     val startTime = modelConfig.interval.roundTime(modelConfig.startDateGmt)
 
     val marketDataDistributor by lazy {
-        println("start time is ${startTime}")
-        MarketDataDistributorImpl(modelConfig.instruments.size, startTime)
+        MarketDataDistributorImpl(modelConfig.instruments.size, startTime, modelConfig.interval)
     }
 
     val boundModels = mutableListOf<ModelOutput>()
@@ -61,7 +65,7 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
     fun progress(time: Instant, readers: List<SimplifiedReader>) {
         readers.forEachIndexed { idx, reader ->
             var pick = reader.peek()
-            while (pick != null && pick.endTime <= this.startTime) {
+            while (pick != null && pick.endTime <= time) {
                 marketDataDistributor.addOhlc(idx, reader.poll())
                 pick = reader.peek()
             }

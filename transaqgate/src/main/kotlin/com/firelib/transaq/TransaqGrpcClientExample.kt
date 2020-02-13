@@ -1,6 +1,7 @@
 package com.firelib.transaq
 
 import com.firelib.TransaqConnectorGrpc
+import io.grpc.Deadline
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext
@@ -31,12 +32,14 @@ class TransaqGrpcClientExample  {
 
     constructor(host: String, port: Int) {
         this.channel = NettyChannelBuilder.forAddress(host, port)
+
+            .maxInboundMessageSize(30_000_000)
 //                .overrideAuthority("foo.test.google.fr")  /* Only for using provided test certs. */
                 .sslContext(
                         buildSslContext(
-                                "/home/ivan/keys/ca.crt",
-                                "/home/ivan/keys/client.crt",
-                                "/home/ivan/keys/client.pem"))
+                                "${System.getProperty("user.home")}/keys/ca.crt",
+                                "${System.getProperty("user.home")}/keys/client.crt",
+                                "${System.getProperty("user.home")}/keys/client.pem"))
                 .build()
         blockingStub = TransaqConnectorGrpc.newBlockingStub(channel)
     }

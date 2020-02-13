@@ -9,6 +9,7 @@ import firelib.core.TradeGate
 import firelib.core.domain.OrderState
 import firelib.core.domain.OrderType
 import firelib.core.domain.Side
+import org.slf4j.LoggerFactory
 import ru.tinkoff.invest.openapi.data.*
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -19,6 +20,8 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
     var subscription: Flow.Subscription? = null
 
     var scheduled: ScheduledExecutorService
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     val requestedInstrIds : MutableSet<InstrId> = Sets.newConcurrentHashSet<InstrId>()
 
@@ -67,9 +70,9 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
 
             if (prev == null || prev != position.lots.toLong()) {
                 if(init){
-                    println("position at start for ${instrId.code} is ${position.lots}")
+                    log.info("position at start for ${instrId.code} is ${position.lots}")
                 }else{
-                    println("position changed for ${instrId.code} from ${prev} to ${position.lots}")
+                    log.info("position changed for ${instrId.code} from ${prev} to ${position.lots}")
                 }
 
             }
@@ -78,7 +81,7 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
     }
 
     override fun onComplete() {
-        println("completed")
+        log.info("completed")
     }
 
 
@@ -94,7 +97,7 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
     }
 
     override fun onError(p0: Throwable?) {
-        println("error ${p0}")
+        log.info("error ${p0}")
     }
 
     override fun cancelOrder(order: Order) {
@@ -124,7 +127,7 @@ class TcsGate(val executor: ExecutorService, val mapper: TcsTickerMapper) : Trad
                 }
 
 
-                println("order status is ${it.str()}")
+                log.info("order status is ${it.str()}")
             }
         }).exceptionally {
             order.orderSubscription.publish(OrderState(order,

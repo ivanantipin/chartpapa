@@ -19,8 +19,8 @@ object TrqCommandHelper {
                 "<host>" + host + "</host>" +
                 "<port>" + port + "</port>" +
                 "<rqdelay>100</rqdelay>" +
-                "<session_timeout>1000</session_timeout> " +
-                "<request_timeout>1000</request_timeout>" +
+                "<session_timeout>100</session_timeout> " +
+                "<request_timeout>20</request_timeout>" +
                 "</command>"
     }
 

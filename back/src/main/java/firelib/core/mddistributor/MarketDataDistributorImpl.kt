@@ -7,7 +7,7 @@ import firelib.core.domain.Ohlc
 import java.time.Instant
 
 
-class MarketDataDistributorImpl(override val size: Int, val startTime: Instant) : MarketDataDistributor {
+class MarketDataDistributorImpl(override val size: Int, val startTime: Instant, val rootInterval : Interval = Interval.Min10) : MarketDataDistributor {
 
 
     val intervalService = IntervalServiceImpl()
@@ -26,6 +26,7 @@ class MarketDataDistributorImpl(override val size: Int, val startTime: Instant) 
 
 
     override fun getOrCreateTs(idx: Int, interval: Interval, capacity: Int): TimeSeries<Ohlc> {
+        require(interval.durationMs % rootInterval.durationMs == 0L) {"series interval ${interval} has to be divisible by root interval ${rootInterval}"}
         return timeseries[idx].getOrCreateTs(interval, capacity)
     }
 

@@ -28,19 +28,4 @@ class SimpleMovingAverage(val period: Int, val calcSko: Boolean) {
             }/period, 0.5);
         }
     }
-
-}
-
-fun main() {
-    val ma = SimpleMovingAverage(20, false)
-    for(i in 0 until 10){
-        ma.add(5.0)
-    }
-    for(i in 0 until 10){
-        ma.add(10.0)
-    }
-
-    println(ma.value())
-
-
 }

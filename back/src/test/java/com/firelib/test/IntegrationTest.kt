@@ -76,18 +76,15 @@ class BacktestIntegrationTest {
         } while (pp.read())
 
 
-        val cfg = ModelBacktestConfig().apply {
+        val cfg = ModelBacktestConfig(OhlcTestModel::class).apply {
             dataServerRoot = getDsRoot()
             reportTargetPath = getReportDir()
-
-            val factoryImpl = ReaderFactoryImpl(dataServerRoot)
-
             instruments += "XG"
             startDateGmt = LocalDateTime.of(2013, Month.MARCH, 8, 5, 0, 0).toInstant(ZoneOffset.UTC)
             precacheMarketData = false
         }
 
-        cfg.runStrat{ ctx, _ -> OhlcTestModel(ctx) }
+        cfg.runStrat()
 
 
         var idx = -1

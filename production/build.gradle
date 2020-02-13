@@ -1,0 +1,22 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    compile project(':back')
+    compile project(':transaqgate')
+}
+
+startScripts.enabled = false
+
+task modelRun(type: CreateStartScripts) {
+    mainClassName = 'com.firelib.prod.RunRunKt'
+    applicationName ="prod0"
+    outputDir = new File(project.buildDir, 'tmp')
+    classpath = startScripts.classpath
+}
+
+applicationDistribution.into('bin') {
+    from(modelRun)
+    fileMode = 0755
+}

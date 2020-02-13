@@ -4,11 +4,14 @@ package firelib.core.report
 import firelib.core.domain.ModelOutput
 import firelib.core.misc.toTradingCases
 import firelib.core.report.StatCalculator.statCalculator
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class ReportProcessor(val optimizedFunctionName: StrategyMetric,
                       val optParams: List<String>, val topModelsToKeep: Int = 3, val minNumberOfTrades: Int = 20, val removeOutlierTrades: Int = 2) {
 
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     data class ModelStat (val optMetric : Double, val output : ModelOutput, val metrics : Map<StrategyMetric, Double>)
 
@@ -22,7 +25,7 @@ class ReportProcessor(val optimizedFunctionName: StrategyMetric,
 
         val filtered: List<ModelOutput> = models.filter {it.trades.size >= minNumberOfTrades}
 
-        println("model processed ${models.size} models met min trades count criteria ${filtered.size}")
+        log.info("model processed ${models.size} models met min trades count criteria ${filtered.size}")
 
         filtered.forEach { output ->
 
@@ -39,7 +42,7 @@ class ReportProcessor(val optimizedFunctionName: StrategyMetric,
             estimates.add(ExecutionEstimates(extractOptParams(output.modelProps) , metrics))
 
         }
-        println("total model complete ${estimates.size}")
+        log.info("total model complete ${estimates.size}")
 
     }
 
