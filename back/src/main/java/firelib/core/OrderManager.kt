@@ -15,6 +15,8 @@ interface OrderManager {
      */
     fun position(): Int
 
+    fun positionTime() : Instant
+
     /**
      * any market order on market or not accepted limit order
      */
@@ -41,6 +43,6 @@ interface OrderManager {
 
     fun nextOrderId (): String
 
-    fun updatePosition(pos : Int)
+    fun updatePosition(pos : Int, time : Instant)
 
 }

@@ -59,7 +59,7 @@ object ProdRunner {
             model.orderManagers().forEach {
                 val pos = curentPoses.getOrDefault(it.security(), 0)
                 log.info("restored position for ${it.security()} to ${pos}")
-                it.updatePosition(pos)
+                it.updatePosition(pos, Instant.now())
             }
         }.get()
 

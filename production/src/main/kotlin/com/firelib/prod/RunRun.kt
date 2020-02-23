@@ -8,41 +8,57 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.report.dao.GeGeWriter
 import firelib.core.store.GlobalConstants
+import firelib.finam.FinamDownloader
 import firelib.model.DummyModel
+import java.lang.RuntimeException
 import java.util.concurrent.Executors
 
-val writer = GeGeWriter(
-    "trq_instruments",
-    GlobalConstants.metaDb,
-    InstrId::class,
-    listOf("code", "board")
-)
+fun trqMapperWriter(): GeGeWriter<InstrId> {
+    return GeGeWriter(
+        "trq_instruments",
+        GlobalConstants.metaDb,
+        InstrId::class,
+        listOf("code", "board")
+    )
+}
 
-val finamWriter = GeGeWriter(
-    "finam_instruments",
-    GlobalConstants.metaDb,
-    InstrId::class,
-    listOf("id", "code", "market")
-)
+fun finamMapperWriter(): GeGeWriter<InstrId> {
+    return GeGeWriter(
+        "finam_instruments",
+        GlobalConstants.metaDb,
+        InstrId::class,
+        listOf("id", "code", "market")
+    )
+}
 
-val mapper = DbMapper(GlobalConstants.metaDb, "trq_instruments")
+
+fun populateMapping(writer: GeGeWriter<InstrId>, func : ()->List<InstrId>) : DbMapper {
+    val lst = writer.read()
+    if (lst.isEmpty()) {
+        println("mapping is empty populating")
+        val symbols = func()
+        writer.write(symbols)
+        println("inserted ${symbols.size} instruments")
+    }
+    return DbMapper(writer, {true})
+}
+
 
 fun main() {
 
+    GlobalConstants.ensureDirsExist()
+
+    val mapper = populateMapping(finamMapperWriter(), {FinamDownloader().symbols()})
 
     val executor = Executors.newSingleThreadExecutor { Thread(it, "mainExecutor") }
 
-
-
-
-
-   val config = DummyModel.modelConfig()
+    val config = DummyModel.modelConfig()
 
     val stub = makeDefaultStub()
 
     enableReconnect(stub)
 
-    val gate = TrqGate(stub, executor, "virt/9952")
+    val gate = TrqGate(stub, executor, GlobalConstants.getProp("transaq.client.id"))
 
     Thread.sleep(1000)
 
@@ -62,6 +78,5 @@ fun main() {
     } catch (e: Exception) {
         e.printStackTrace()
     }
-
 
 }

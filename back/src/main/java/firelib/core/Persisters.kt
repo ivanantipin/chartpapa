@@ -93,10 +93,10 @@ fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : Exec
 }
 
 
-fun enableOhlcDumping(config: ModelBacktestConfig, marketDataDistributor: MarketDataDistributor) : List<Batcher<Ohlc>> {
+fun enableOhlcDumping(config: ModelBacktestConfig, marketDataDistributor: MarketDataDistributor, executorService: ExecutorService) : List<Batcher<Ohlc>> {
     return config.instruments.mapIndexed{ instrIdx, instr ->
         val writer = OhlcStreamWriter(config.getReportDbFile())
-        val batcher = Batcher<Ohlc>({ writer.insertOhlcs(instr, it) }, instr)
+        val batcher = Batcher<Ohlc>({ executorService.submit({writer.insertOhlcs(instr, it)}).get()  }, instr)
 
         marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min240, 2)
                 .nonInterpolatedView()

@@ -1,11 +1,13 @@
 package firelib.model
 
 import firelib.core.domain.Interval
-import firelib.core.misc.PositionCloser
+import firelib.core.domain.Ohlc
+import firelib.core.flattenAll
 import firelib.core.makePositionEqualsTo
+import firelib.core.misc.PositionCloser
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.nonInterpolatedView
-import firelib.core.domain.Ohlc
+import java.time.Instant
 import java.time.LocalTime
 
 class IdxContext(val model: Model, val idx: Int) {
@@ -32,6 +34,10 @@ fun Model.enableFactor(name: String, fact: (Int) -> Double) {
             it.tradeStat.addFactor(name, fact(index))
         }
     }
+}
+
+fun Model.currentTime() : Instant {
+    return context.timeService.currentTime()
 }
 
 fun Model.enableSeries(interval: Interval,
@@ -68,4 +74,16 @@ fun Model.closePositionByTimeout(afterTime: LocalTime? = null,
                                  interval: Interval
 ) {
     PositionCloser.closePosByTimeoutAndTimeOfDay(this, afterTime, periods, interval)
+}
+
+fun Model.closePosByCondition(condition : (idx: Int)->Boolean
+) {
+    val interval = this.context.config.interval
+    context.mdDistributor.getOrCreateTs(0,interval, 1).preRollSubscribe {
+        orderManagers().forEachIndexed { index, orderManager ->
+            if(condition(index)){
+                orderManager.flattenAll()
+            }
+        }
+    }
 }

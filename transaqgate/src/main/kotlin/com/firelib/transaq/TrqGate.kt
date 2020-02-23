@@ -171,7 +171,7 @@ fun main() {
 
 
 fun makeDefaultStub(): TransaqConnectorGrpc.TransaqConnectorBlockingStub {
-    return TransaqGrpcClientExample("localhost", 50051).blockingStub
+    return TransaqGrpcClientExample("localhost", 50052).blockingStub
 }
 
 fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str: String): TrqResponse {

@@ -14,6 +14,7 @@ import firelib.core.enableOhlcDumping
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -21,6 +22,9 @@ import java.util.concurrent.TimeUnit
 object Backtester{
 
     val log = LoggerFactory.getLogger(javaClass)
+
+
+    val ioExecutor = Executors.newSingleThreadExecutor {Thread(it).apply  { isDaemon=true }}
 
     init{
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
@@ -70,7 +74,7 @@ object Backtester{
             ctx
         }.forEach { ctx->
             if(ohlcDumpSubscriptionNeeded){
-                jobsList = enableOhlcDumping(cfg, ctx.marketDataDistributor)
+                jobsList = enableOhlcDumping(cfg, ctx.marketDataDistributor, ioExecutor)
                 ohlcDumpSubscriptionNeeded = false
             }
             executor.execute {
@@ -111,7 +115,8 @@ object Backtester{
         if (cfg.dumpOhlc) {
             enableOhlcDumping(
                 config = cfg,
-                marketDataDistributor = ctx.marketDataDistributor
+                marketDataDistributor = ctx.marketDataDistributor,
+                executorService = ioExecutor
             )
         }
         ctx.backtest(Instant.now())

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.collections.set
+import kotlin.math.sign
 
 
 class OrderManagerImpl(
@@ -47,7 +48,12 @@ class OrderManagerImpl(
 
     private var position = 0
 
+    private var positionTime = Instant.EPOCH
+
     override fun position(): Int = position
+    override fun positionTime(): Instant {
+        return positionTime
+    }
 
     var idCounter = AtomicLong(0)
 
@@ -156,6 +162,11 @@ class OrderManagerImpl(
         }
         val prevPos = position
         position = trd.adjustPositionByThisTrade(position)
+
+        if(prevPos.sign != position.sign){
+            positionTime = trd.dtGmt
+        }
+
         log.info("position adjusted for security $security :  $prevPos -> ${position()}")
         tradesChannel.publish(trd.copy(positionAfter = position))
     }
@@ -165,7 +176,9 @@ class OrderManagerImpl(
         return "${security}_${idCounter.incrementAndGet()}"
     }
 
-    override fun updatePosition(pos: Int) {
+    override fun updatePosition(pos: Int, time : Instant) {
         this.position = pos
+        this.positionTime = time
     }
+
 }

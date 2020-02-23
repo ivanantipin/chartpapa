@@ -37,7 +37,7 @@ class ModelBacktestConfig (
         return interval.roundTime(startDateGmt)
     }
 
-    var interval = Interval.Min1
+    var interval = Interval.Min10
 
 
     @get:JsonIgnore

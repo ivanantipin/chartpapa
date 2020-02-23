@@ -5,6 +5,8 @@ import firelib.core.domain.OrderType
 import firelib.core.domain.Side
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) {
     if(this.hasPendingState()){
@@ -66,4 +68,8 @@ fun OrderManager.cancelAllOrders() {cancelOrders(liveOrders().filter({ o->o.orde
 fun Double.roundPrice(incr : BigDecimal) : Double{
     val price = this.toBigDecimal().divide(incr, RoundingMode.HALF_UP)
     return incr.multiply(price.toInt().toBigDecimal()).toDouble()
+}
+
+fun OrderManager.positionDuration(now : Instant, unit : TimeUnit = TimeUnit.HOURS) : Long {
+    return (now.toEpochMilli() - positionTime().toEpochMilli())/unit.toMillis(1)
 }

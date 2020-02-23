@@ -162,7 +162,7 @@ class BacktestResults(object):
         self.seasonalMapFunc = {'weekday': lambda x: x.weekday(), 'month': lambda x: x.month, 'hour': lambda x: x.hour}
         self.seasonalAggFunc = {'pf': MetricsCalculator.pf, 'cnt': len}
         self.seasonalAggColors = ['r', 'g']
-        self.lastStaticColumnInTrades = 'MFE'
+        self.lastStaticColumnInTrades = 'PosAfter'
         self.load(filename)
 
 
@@ -182,14 +182,14 @@ class BacktestResults(object):
         # date_parser=vect_str_to_datetime)
         # self.trades.dropna(inplace=True)
         self.trades['EntryDate'] = self.trades['EntryDate']
-            # .map(lambda x: x.tz_localize(tz))
+        # .map(lambda x: x.tz_localize(tz))
         self.trades['ExitDate'] = self.trades['ExitDate']
-            # .map(lambda x: x.tz_localize(tz))
+        # .map(lambda x: x.tz_localize(tz))
         self.sort()
 
         try:
             self.opts = pd.read_sql_query(sql="SELECT * FROM opts",
-                                            con=cnx)
+                                          con=cnx)
             self.opts.fillna(0, inplace=True)
             self.opts.sort_values(by=[self.opts.columns[0]], inplace=True)
         except:
@@ -257,10 +257,10 @@ class BacktestResults(object):
         plt.title(title)
         return ret
 
-    
+
     def makeTickersTab(self):
         cont=[ widgets.Output() for i in range(1 + len(self.tickers()))]
-        
+
         mc = MetricsCalculator()
 
         tab = widgets.Tab(children = cont)
@@ -269,7 +269,7 @@ class BacktestResults(object):
 
         tab.set_title(0,'Overall stat')
 
-        for idx,out in enumerate(cont):    
+        for idx,out in enumerate(cont):
             with out:
                 if idx == 0:
                     display(HTML(mc.statToHtml(self.trades).to_html()))
@@ -277,15 +277,15 @@ class BacktestResults(object):
                     plt.show()
                 else:
                     ticker=self.tickers()[idx - 1]
-                    self.plot_equity_d2d_for_ticker(ticker)        
+                    self.plot_equity_d2d_for_ticker(ticker)
                     plt.show()
                     display(HTML(mc.statToHtml(self.trades[self.trades.Ticker == ticker]).to_html()))
         return tab
-    
+
     def plotSeasonalitiesPnls(self, pnls : pd.DataFrame):
         if pnls.size == 0:
             return
-        
+
         seasonalMapFunc = self.seasonalMapFunc
 
         outputs=list([widgets.Output() for i in seasonalMapFunc])
@@ -313,24 +313,27 @@ class BacktestResults(object):
         return self.plotSeasonalitiesPnls(tr.Pnl)
 
     def getFactorCols(self):
-        
         return list(self.trades.columns[self.trades.columns.get_loc(self.lastStaticColumnInTrades) + 1:].values)
 
     def plotFactors(self):
         cols = self.getFactorCols()
+        if(len(cols) == 0):
+            return
         cont=[ widgets.Output() for i in range(1 + len(cols))]
-
         tab = widgets.Tab(children = cont)
-        for i in range(len(cols)):
-            tab.set_title(i,cols[i])
 
         for idx,out in enumerate(cont):
+            tab.set_title(idx,cols[idx - 1])
+            cat = pd.cut(self.trades[cols[idx - 1]], 10, duplicates='drop')
+            grp=self.trades['Pnl'].groupby(cat)
+
             with out:
-                ticker=cols[idx]
-                cat = pd.qcut(self.trades[ticker], 10, duplicates='drop')
-                self.trades['Pnl'].groupby(cat).aggregate(MetricsCalculator.pf).plot()
-                currFigure = plt.gcf()
-                currFigure.set_size_inches((18,7))
+                grp.aggregate(len).plot(ax=plt.gca(), color='red', marker='o')
+                plt.gca().set_ylabel('Count',color='red')
+                grp.aggregate(MetricsCalculator.pf).plot(ax=plt.gca().twinx(), color='green', marker='o')
+                plt.gca().set_ylabel('Pf',color='green')
+                #             plt.gca().get_yticklabels().set_color('green')
+                plt.gcf().set_size_inches(15, 6)
                 plt.show()
         return tab
 
