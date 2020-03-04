@@ -12,10 +12,7 @@ import firelib.core.store.reader.SimplifiedReader
 import firelib.emulator.GateEmulator
 import firelib.emulator.HistoricalSourceEmulator
 import firelib.emulator.RtReaderEmulator
-import firelib.model.DummyModel
-import firelib.model.TrendModel
-import firelib.model.VolatilityBreak
-import firelib.model.trendModelConfig
+import firelib.model.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 
@@ -72,7 +69,7 @@ fun runNeverRun() {
     }
     val executor = Executors.newSingleThreadExecutor { Thread(it, "mainExecutor") }
 
-    val config = DummyModel.modelConfig()
+    val config = NeverTradeModel.modelConfig()
 
     config.backtestHistSource = historicalSourceEmulator
     config.gateMapper = mapper

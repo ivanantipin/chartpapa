@@ -31,7 +31,6 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
     companion object{
         fun modelConfig () : ModelBacktestConfig {
             val cfg = ModelBacktestConfig(DummyModel::class).apply {
-                this.reportTargetPath = System.getProperty("user.dir")
                 instruments = listOf("SBER")
                 startDate(LocalDate.now().minusDays(1))
                 interval = Interval.Min1

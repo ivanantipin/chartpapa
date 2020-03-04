@@ -8,7 +8,7 @@ class NeverTradeModel(context: ModelContext, properties: Map<String, String>) : 
 
     init {
         enableSeries(Interval.Sec10)[0].preRollSubscribe {
-            println(it)
+            println(it[0])
         }
     }
 
