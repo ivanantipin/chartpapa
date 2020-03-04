@@ -7,21 +7,19 @@ import firelib.common.Order
 import firelib.common.Trade
 import firelib.core.TradeGate
 import firelib.core.domain.*
+import firelib.core.store.GlobalConstants
 import io.grpc.Deadline
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
-import java.io.FileReader
 import java.math.BigDecimal
-import java.nio.file.Files
 import java.time.Instant
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class TrqGate(
-    val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStub,
+    val dispatcherTrq: TrqMsgDispatcher,
     val executor: Executor,
     var clientId: String
 ) : TradeGate {
@@ -37,7 +35,7 @@ class TrqGate(
     override fun sendOrder(order: Order) {
 
         try {
-            val resp = blockingStub.command(TrqCommandHelper.newOrder(order, clientId))
+            val resp = dispatcherTrq.stub.command(TrqCommandHelper.newOrder(order, clientId))
             if (!resp.success) {
                 order.reject("${resp.message}")
             } else {
@@ -51,22 +49,10 @@ class TrqGate(
 
     }
 
-    val callbacker = MsgCallbacker(blockingStub)
-
     init {
-        val receiver = callbacker.add<TrqMsg> { true }
-        Thread {
-            while (true) {
-                try {
-                    val poll = receiver.queue.poll(10, TimeUnit.SECONDS)
-                    if (poll != null) {
-                        executor.execute { processMsg(poll) }
-                    }
-                } catch (e: Exception) {
-                    log.error("error proccessing ", e)
-                }
-            }
-        }.start()
+        dispatcherTrq.addSync<TrqMsg>({ true }, { msg ->
+            executor.execute({ processMsg(msg) })
+        })
     }
 
 
@@ -140,7 +126,7 @@ class TrqGate(
     override fun cancelOrder(order: Order) {
         val transactionid = orderNoToTransactionId[order.id]!!
         try {
-            val response = blockingStub.command(TrqCommandHelper.cancelOrder(transactionid))
+            val response = dispatcherTrq.stub.command(TrqCommandHelper.cancelOrder(transactionid))
             if (!response.success) {
                 order.cancelReject("${response.message}")
             }
@@ -174,6 +160,8 @@ fun makeDefaultStub(): TransaqConnectorGrpc.TransaqConnectorBlockingStub {
     return TransaqGrpcClientExample("localhost", 50052).blockingStub
 }
 
+val logger = LoggerFactory.getLogger("command")
+
 fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str: String): TrqResponse {
     return parseTrqResponse(
         StringEscapeUtils.unescapeJava(
@@ -188,26 +176,22 @@ fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str: String): TrqR
 }
 
 
-val pp = Properties().apply {
-    load(FileReader("${System.getProperty("user.home")}/keys/test.properties"))
-}
 /*
 Ваш логин:
 Ваш пароль: suV7gU
  */
 val loginCmd = TrqCommandHelper.connectCmd(
-    pp["login"]!!.toString(),
-    pp["password"]!!.toString(),
-    pp["host"].toString(),
-    pp["port"].toString()
+    GlobalConstants.getProp("login"),
+    GlobalConstants.getProp("password"),
+    GlobalConstants.getProp("host"),
+    GlobalConstants.getProp("port")
 )
 //val loginCmd = TrqCommandHelper.connectCmd("FBTC277A", "x8Er8EuU", "tr1.finambank.ru", "3324")
 
 
 fun makeDefaultTransaqGate(executor: Executor): TrqGate {
     val stub = makeDefaultStub()
-
-    return TrqGate(stub, executor, "virt/9952")
+    return TrqGate(TrqMsgDispatcher(stub), executor, "virt/9952")
 }
 
 

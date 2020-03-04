@@ -5,6 +5,7 @@ import firelib.core.domain.Ohlc
 import firelib.core.flattenAll
 import firelib.core.makePositionEqualsTo
 import firelib.core.misc.PositionCloser
+import firelib.core.misc.Quantiles
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.nonInterpolatedView
 import java.time.Instant
@@ -45,13 +46,18 @@ fun Model.enableSeries(interval: Interval,
     val context = this.modelContext()
     val ret = context.config.instruments.mapIndexed { idx, _ ->
         context.mdDistributor.getOrCreateTs(idx, interval, historyLen)
-
     }
+
     if (!interpolated) {
         return ret.map { it.nonInterpolatedView() }
     }
     return ret
+}
 
+fun Model.quantiles(window : Int) : List<Quantiles<Double>>{
+    return context.config.instruments.map {
+        Quantiles<Double>(window);
+    }
 }
 
 fun Model.longForMoneyIfFlat(idx: Int, money: Long) {

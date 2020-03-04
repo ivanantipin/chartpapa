@@ -20,8 +20,6 @@ dependencies {
 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 
-    compile ('ru.tinkoff.invest:sdk:0.4-SNAPSHOT')
-
     // https://mvnrepository.com/artifact/com.google.guava/guava
     compile group: 'com.google.guava', name: 'guava', version: '28.2-jre'
 

@@ -34,8 +34,6 @@ fun main() {
     try {
         val context = SimpleRunCtx(DummyModel.modelConfig())
 
-        context.gateMapper = gate
-
         ProdRunner.runStrat(
             executor,
             context,

@@ -2,16 +2,12 @@ package firelib.model
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
-import firelib.core.domain.Interval
-import firelib.core.domain.downShadow
-import firelib.core.domain.range
-import firelib.core.domain.upShadow
+import firelib.core.domain.*
 import firelib.core.misc.Quantiles
 import firelib.core.misc.atMoscow
+import firelib.core.misc.atUtc
 import firelib.core.positionDuration
-import firelib.model.VolatilityBreak.Companion.modelConfig
 import firelib.indicators.ATR
-import firelib.indicators.Donchian
 import java.time.LocalDate
 
 
@@ -19,7 +15,7 @@ import java.time.LocalDate
 research model for simple breakout after low volatility period
  */
 
-class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : Model(context, properties) {
+class CandleMax(context: ModelContext, properties: Map<String, String>) : Model(context, properties) {
 
     val period = 20
 
@@ -28,14 +24,11 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
     val tenMins = enableSeries(interval = Interval.Min10, interpolated = false)
 
     val quantiles = context.config.instruments.map {
-        Quantiles<Double>(300);
+        Quantiles<Double>(100);
     }
     val volumeQuantiles = context.config.instruments.map {
-        Quantiles<Double>(300);
+        Quantiles<Double>(100);
     }
-
-    val donchians = daytss.map { Donchian { it.size <= period } }
-
 
     val mas = daytss.mapIndexed { idx, it ->
         val atr = ATR(period, it)
@@ -45,9 +38,8 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         atr
     }
 
-    init {
 
-        val tradeSize = properties["trade_size"]!!.toInt()
+    init {
 
         enableFactor("volatility") {
             val ret = quantiles[it].getQuantile(mas[it].value())
@@ -68,7 +60,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         }
 
         enableFactor("barQuantLow") {
-            barQuantLowFun(it)
+            daytss[it][0].downShadow()/daytss[it][0].range()
         }
 
         enableFactor("hour") {
@@ -78,14 +70,10 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
         tenMins.forEachIndexed { idx, it ->
             it.preRollSubscribe {
-                val timeSeries = daytss[idx]
-                if (it[0].endTime.atMoscow().hour == 18 && timeSeries.count() > period )  {
-                    val vola = quantiles[idx].getQuantile(mas[idx].value())
-                    val vol = volumeQuantiles[idx].getQuantile(timeSeries.last().volume.toDouble())
-                    val vol1 = volumeQuantiles[idx].getQuantile(timeSeries[1].volume.toDouble())
-                    val barQuantLow = barQuantLowFun(idx)
-                    if (it[0].close > donchians[idx].max && barQuantLow > 0.8) {
-                        longForMoneyIfFlat(idx, tradeSize.toLong())
+                val moscomTime = currentTime().atMoscow()
+                if (moscomTime.hour == 18 && moscomTime.minute == 30)  {
+                    if(daytss[idx][0].ret() > 0 && daytss[idx][0].upShadow()/daytss[idx][0].retAbs() < 0.05){
+                        longForMoneyIfFlat(idx, 1000_000)
                     }
                 }
             }
@@ -93,20 +81,18 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
         daytss.forEachIndexed { idx, it ->
             it.preRollSubscribe {
-                if(!it[0].interpolated){
-                    volumeQuantiles[idx].add(it[0].volume.toDouble())
-                    donchians[idx].add(it[0])
-                }
+                volumeQuantiles[idx].add(it[0].volume.toDouble())
             }
         }
 
         closePosByCondition { idx->
+            val moscomTime = currentTime().atMoscow()
             val orderManager = orderManagers()[idx]
             val condition = (orderManager.position() != 0
-                    && orderManager.positionDuration(currentTime()) > 24*3
-                    && currentTime().atMoscow().toLocalTime().hour > 10
-                    && tenMins[idx][0].close < donchians[idx].max
-                    && !tenMins[idx][0].interpolated)
+                    && orderManager.positionDuration(currentTime()) > 10
+                    && !tenMins[0][0].interpolated
+                    && moscomTime.hour == 18 && moscomTime.minute == 30
+                    )
             if(condition){
                 println("position time ${orderManager.positionTime()} current time ${context.timeService.currentTime()}")
             }
@@ -114,17 +100,14 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         }
     }
 
-    private fun barQuantLowFun(it: Int) = daytss[it][0].downShadow() / daytss[it][0].range()
-
 
     companion object {
-        fun modelConfig(tradeSize : Int): ModelBacktestConfig {
-            return ModelBacktestConfig(VolatilityBreak::class).apply {
+        fun modelConfig(): ModelBacktestConfig {
+            return ModelBacktestConfig(CandleMax::class).apply {
                 param("hold_hours", 30)
-                param("trade_size", tradeSize)
                 interval = Interval.Min10
                 startDate(LocalDate.now().minusDays(3000))
-                instruments = tickers
+                instruments = DivHelper.getDivs().keys.toList()
 //                adjustSpread = makeSpreadAdjuster(0.0005)
             }
         }
@@ -133,8 +116,8 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
 
 fun main() {
-//    updateRussianDivStocks()
-    val conf = modelConfig(1000_000)
+    //updateRussianDivStocks()
+    val conf = CandleMax.modelConfig()
     println(conf.instruments)
     conf.dumpInterval = Interval.Day
     conf.runStrat()

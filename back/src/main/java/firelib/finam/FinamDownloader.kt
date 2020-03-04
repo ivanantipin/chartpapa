@@ -218,7 +218,9 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
     val tickerMapper = FinamTickerMapper(this)
 
     override fun mapSecurity(security: String): InstrId {
-        return tickerMapper(security)
+        val tickerMapper1 = tickerMapper(security)
+        require(tickerMapper1 != null, {"cant find symbol for ${security}"})
+        return tickerMapper1
     }
 }
 

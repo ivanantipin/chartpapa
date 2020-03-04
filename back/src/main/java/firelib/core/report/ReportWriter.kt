@@ -6,6 +6,7 @@ import firelib.core.domain.ModelOutput
 import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
+import firelib.core.store.GlobalConstants
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.nio.file.*
@@ -32,7 +33,9 @@ object ReportWriter{
 
         writeStaticConf(cfg, model)
 
-        copyPythonFiles(cfg)
+        if(GlobalConstants.env == "test"){
+            copyPythonFiles(cfg)
+        }
 
         writeModelOutput(model, cfg)
 

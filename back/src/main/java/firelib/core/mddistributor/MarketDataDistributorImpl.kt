@@ -32,9 +32,12 @@ class MarketDataDistributorImpl(override val size: Int, val startTime: Instant, 
 
     fun roll(dt: Instant) {
         val rolledIntervals = intervalService.onStep(dt)
-        rolledIntervals.forEach({ interval ->
+        rolledIntervals.forEach { interval ->
             timeseries.forEach { ts -> ts.roll(interval, dt) }
-        })
+        }
+
+
+
     }
 
     override fun addListener(interval: Interval, action: (Instant, MarketDataDistributor) -> Unit) {

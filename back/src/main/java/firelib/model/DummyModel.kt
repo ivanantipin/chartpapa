@@ -9,7 +9,7 @@ import java.time.LocalDate
 class DummyModel(context: ModelContext, properties: Map<String, String>) : Model(context, properties) {
 
     init {
-        val ts = context.mdDistributor.getOrCreateTs(0, Interval.Min10, 100)
+        val ts = context.mdDistributor.getOrCreateTs(0, Interval.Min1, 100)
         ts.preRollSubscribe { ts->
             if(Instant.now().toEpochMilli() - ts[0].endTime.toEpochMilli() < 100_000){
                 log.info("ohlc ${ts[0]}" )
@@ -17,12 +17,11 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
             if(!ts[0].interpolated){
                 if(orderManagers()[0].position() <= 0 && !orderManagers()[0].hasPendingState()){
                     orderManagers()[0].makePositionEqualsTo(1)
-                }
-                if(orderManagers()[0].position() > 0 && !orderManagers()[0].hasPendingState()){
+                } else if(orderManagers()[0].position() > 0 && !orderManagers()[0].hasPendingState()){
                     orderManagers()[0].makePositionEqualsTo(0)
                 }
             }
-            log.info("position ${orderManagers()[0].position()}")
+            log.info("position ${orderManagers()[0].position()} time is ${ts[0].endTime}")
 
         }
 
@@ -35,7 +34,7 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
                 this.reportTargetPath = System.getProperty("user.dir")
                 instruments = listOf("SBER")
                 startDate(LocalDate.now().minusDays(1))
-                interval = Interval.Min10
+                interval = Interval.Min1
                 adjustSpread = makeSpreadAdjuster(0.0005)
             }
             return cfg

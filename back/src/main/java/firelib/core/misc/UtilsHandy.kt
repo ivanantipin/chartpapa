@@ -20,9 +20,9 @@ class FinamTickerMapper(val finamDownloader: FinamDownloader) : InstrumentMapper
         symbols.groupBy { it.code.toLowerCase() }
     }
 
-    override fun invoke(ticker: String): InstrId {
+    override fun invoke(ticker: String): InstrId? {
         val lst = code2instr[ticker.toLowerCase()]!!
-        return lst.filter { it.market == FinamDownloader.SHARES_MARKET }.firstOrNull()!!
+        return lst.filter { it.market == FinamDownloader.SHARES_MARKET }.firstOrNull()
     }
 }
 

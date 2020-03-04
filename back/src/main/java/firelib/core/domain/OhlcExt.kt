@@ -11,6 +11,7 @@ fun Ohlc.upShadow(): Double = high - close
 fun Ohlc.downShadow(): Double = close - low
 fun Ohlc.bodyLength(): Double = Math.abs(close - open)
 fun Ohlc.ret(): Double = (close - open) / open
+fun Ohlc.retAbs(): Double = (close - open)
 fun Ohlc.isInRange(vv: Double): Boolean = high > vv && vv > low
 fun Ohlc.merge(ohlc: Ohlc): Ohlc {
     return Ohlc(ohlc.endTime, open,

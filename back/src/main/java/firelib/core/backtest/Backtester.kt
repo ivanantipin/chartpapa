@@ -5,6 +5,7 @@ import firelib.core.config.OptResourceParams
 import firelib.core.backtest.opt.ParamsVariator
 import firelib.core.misc.Batcher
 import firelib.core.SimpleRunCtx
+import firelib.core.domain.Interval
 import firelib.core.report.ReportProcessor
 import firelib.core.report.ReportWriter
 import firelib.core.report.ReportWriter.clearReportDir
@@ -14,7 +15,6 @@ import firelib.core.enableOhlcDumping
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -58,7 +58,7 @@ object Backtester{
 
         clearReportDir(cfg.reportTargetPath)
 
-        var ohlcDumpSubscriptionNeeded = cfg.dumpOhlc
+        var ohlcDumpSubscriptionNeeded = cfg.dumpInterval != Interval.None
 
         var jobsList = emptyList<Batcher<Ohlc>>()
 
@@ -112,7 +112,7 @@ object Backtester{
         clearReportDir(cfg.reportTargetPath)
         val ctx = SimpleRunCtx(cfg)
         ctx.addModel(cfg.modelParams)
-        if (cfg.dumpOhlc) {
+        if (cfg.dumpInterval != Interval.None) {
             enableOhlcDumping(
                 config = cfg,
                 marketDataDistributor = ctx.marketDataDistributor,

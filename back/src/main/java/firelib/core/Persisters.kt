@@ -3,7 +3,6 @@ package firelib.core
 import firelib.common.Order
 import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
-import firelib.core.domain.Interval
 import firelib.core.mddistributor.MarketDataDistributor
 import firelib.core.misc.ChannelSubscription
 import firelib.core.misc.StreamTradeCaseGenerator
@@ -15,12 +14,13 @@ import firelib.core.report.orderColsDefs
 import firelib.core.timeseries.nonInterpolatedView
 import firelib.core.domain.Ohlc
 import firelib.core.misc.Batcher
+import firelib.core.report.StreamTradeWriter
 import org.apache.commons.io.FileUtils
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService
 
 
-fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "trades") : Persisting{
+fun enableTradeCasePersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "trade_cases") : Persisting{
     FileUtils.forceMkdir(reportFilePath.parent.toFile())
 
     val tradeCaseWriter = StreamTradeCaseWriter(reportFilePath, tableName)
@@ -73,13 +73,13 @@ fun enableOrdersPersist(model : Model, reportFilePath : Path, ioExecutor : Execu
 
 
 
-fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "singleTrades") : Persisting{
+fun enableTradeRtPersist(model : Model, reportFilePath : Path, ioExecutor : ExecutorService, tableName : String = "trades") : Persisting{
     FileUtils.forceMkdir(reportFilePath.parent.toFile())
 
-    val tradeWriter = StreamTradeCaseWriter(reportFilePath, tableName)
+    val tradeWriter = StreamTradeWriter(reportFilePath, tableName)
 
     val tradesBatcher = Batcher<Trade>({
-        ioExecutor.submit { tradeWriter.insertTrades(it.map { Pair(it, it) }) }.get()
+        ioExecutor.submit { tradeWriter.insertTrades(it)}.get()
     }, "tradesRealtime")
 
     tradesBatcher.start()
@@ -98,10 +98,10 @@ fun enableOhlcDumping(config: ModelBacktestConfig, marketDataDistributor: Market
         val writer = OhlcStreamWriter(config.getReportDbFile())
         val batcher = Batcher<Ohlc>({ executorService.submit({writer.insertOhlcs(instr, it)}).get()  }, instr)
 
-        marketDataDistributor.getOrCreateTs(instrIdx, Interval.Min240, 2)
+        marketDataDistributor.getOrCreateTs(instrIdx, config.dumpInterval, 2)
                 .nonInterpolatedView()
                 .preRollSubscribe {
-                    batcher.add(it[0])
+                    batcher.add(it[0].copy(endTime = it[0].endTime.minusMillis(config.dumpInterval.durationMs)))
                 }
 
         batcher.apply {

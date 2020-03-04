@@ -1,21 +1,36 @@
 package firelib.core.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import firelib.core.store.GlobalConstants
-import firelib.finam.FinamDownloader
-import firelib.core.backtest.Backtester
 import firelib.core.HistoricalSource
+import firelib.core.InstrumentMapper
 import firelib.core.ModelFactory
-import firelib.core.domain.Interval
-import firelib.core.misc.toInstantDefault
-import firelib.model.Model
-import firelib.model.defaultModelFactory
+import firelib.core.TradeGateSwitch
+import firelib.core.backtest.Backtester
 import firelib.core.backtest.opt.OptimizedParameter
+import firelib.core.backtest.tradegate.TradeGateStub
+import firelib.core.domain.InstrId
+import firelib.core.domain.Interval
+import firelib.core.domain.ModelOutput
+import firelib.core.domain.OrderStatus
+import firelib.core.mddistributor.MarketDataDistributorImpl
+import firelib.core.misc.toInstantDefault
+import firelib.core.store.DbReaderFactory
+import firelib.core.store.GlobalConstants
+import firelib.core.store.ReaderFactory
+import firelib.core.store.reader.ReaderSimpleDivAdjusted
+import firelib.core.store.reader.SimplifiedReader
+import firelib.core.timeservice.TimeServiceManaged
+import firelib.finam.FinamDownloader
+import firelib.model.Div
+import firelib.model.DivHelper
+import firelib.model.Model
+import firelib.model.ModelContext
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDate
 import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 
 
 /**
@@ -31,17 +46,48 @@ class ModelBacktestConfig (
 
     var startDateGmt: Instant = Instant.EPOCH
 
+    var interval = Interval.Min10
+
     var endDate: Instant = Instant.now()
 
     fun roundedStartTime() : Instant{
         return interval.roundTime(startDateGmt)
     }
 
-    var interval = Interval.Min10
-
-
     @get:JsonIgnore
     var backtestHistSource : HistoricalSource = FinamDownloader()
+
+    @get:JsonIgnore
+    var gateMapper: InstrumentMapper = object : InstrumentMapper {
+        override fun invoke(p1: String): InstrId {
+            return InstrId(code = p1)
+        }
+    }
+
+    fun makeFac() : ReaderFactory{
+        val factory = DbReaderFactory(
+            backtestHistSource.getName(),
+            interval,
+            roundedStartTime()
+        )
+
+        return if(tickerToDiv != null){
+            object: ReaderFactory{
+                override fun makeReader(security: String): SimplifiedReader {
+                    return ReaderSimpleDivAdjusted(factory.makeReader(security), tickerToDiv!!.getOrDefault(security, emptyList()))
+                }
+            }
+        }else{
+            factory
+        }
+
+    }
+
+    @get:JsonIgnore
+    var backtestReaderFactory : ReaderFactory = makeFac()
+
+
+
 
     fun endDate(ed : LocalDate){
         endDate = ed.toInstantDefault()
@@ -55,6 +101,7 @@ class ModelBacktestConfig (
     var factory : ModelFactory = defaultModelFactory(modelKClass)
 
 
+    var tickerToDiv : Map<String,List<Div>>? = null
 
     fun makeSpreadAdjuster(koeff : Double) : (Double,Double)->Pair<Double,Double>{
         return {bid : Double, ask : Double->Pair(bid - bid*koeff, ask + ask*koeff)}
@@ -62,12 +109,6 @@ class ModelBacktestConfig (
 
     @get:JsonIgnore
     var adjustSpread = makeSpreadAdjuster(0.0)
-
-    /**
-     * market data folder
-     * all instrument configs related to that folder
-     */
-    var dataServerRoot: String = ""
 
     /*
     * report will be written into this directory
@@ -79,7 +120,11 @@ class ModelBacktestConfig (
         return Paths.get(reportTargetPath).resolve("report.db").toAbsolutePath()
     }
 
-    var dumpOhlc = false
+    fun getProdDbFile(): Path {
+        return GlobalConstants.mdFolder.resolve("${modelKClass.simpleName}.db").toAbsolutePath()
+    }
+
+    var dumpInterval = Interval.None
 
 
 
@@ -116,5 +161,12 @@ fun ModelBacktestConfig.runStrat(){
         Backtester.runOptimized(this)
     }else{
         Backtester.runSimple(this)
+    }
+}
+
+fun defaultModelFactory(kl: KClass<out Model>): ModelFactory {
+    val cons = kl.primaryConstructor!!
+    return { a, b ->
+        cons.call(a, b)
     }
 }

@@ -17,16 +17,6 @@ interface HistoricalSource {
     }
 }
 
-interface RealtimeSource{
-    fun listen(instrId: InstrId, callback : (Ohlc)->Unit){}
-}
-
-
-
 enum class SourceName{
     FINAM,TRANSAQ, TCS, DUMMY, VANTAGE, IQFEED
-}
-
-enum class RealtimeSourceName{
-    TRANSAQ
 }

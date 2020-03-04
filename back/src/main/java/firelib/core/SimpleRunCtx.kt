@@ -1,17 +1,14 @@
 package firelib.core
 
-import firelib.core.store.DbReaderFactory
-import firelib.core.config.ModelBacktestConfig
-import firelib.core.mddistributor.MarketDataDistributorImpl
-import firelib.model.Model
-import firelib.model.ModelContext
-import firelib.core.store.reader.SimplifiedReader
-import firelib.core.timeservice.TimeServiceManaged
 import firelib.core.backtest.tradegate.TradeGateStub
-import firelib.core.domain.InstrId
+import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.ModelOutput
 import firelib.core.domain.OrderStatus
-import org.slf4j.LoggerFactory
+import firelib.core.mddistributor.MarketDataDistributorImpl
+import firelib.core.store.reader.SimplifiedReader
+import firelib.core.timeservice.TimeServiceManaged
+import firelib.model.Model
+import firelib.model.ModelContext
 import java.time.Instant
 
 
@@ -29,30 +26,19 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         TimeServiceManaged()
     }
 
-    var gateMapper: InstrumentMapper = object : InstrumentMapper{
-        override fun invoke(p1: String): InstrId {
-            return InstrId(code = p1)
-        }
-    }
-
-    val startTime = modelConfig.interval.roundTime(modelConfig.startDateGmt)
-
     val marketDataDistributor by lazy {
-        MarketDataDistributorImpl(modelConfig.instruments.size, startTime, modelConfig.interval)
+        MarketDataDistributorImpl(modelConfig.instruments.size, modelConfig.roundedStartTime(), modelConfig.interval)
     }
 
     val boundModels = mutableListOf<ModelOutput>()
 
-    val modelContext by lazy {
-        ModelContext(timeService, marketDataDistributor, tradeGate, gateMapper!!, modelConfig)
+    fun makeContext(): ModelContext {
+        return ModelContext(timeService, marketDataDistributor, tradeGate, modelConfig.gateMapper!!, modelConfig)
     }
 
-    val backtestReaderFactory by lazy {
-        DbReaderFactory(modelConfig.backtestHistSource.getName(), modelConfig.interval, modelConfig.roundedStartTime())
-    }
 
     fun addModel(params: Map<String, String>): Model {
-        val model = modelConfig.factory(modelContext, params)
+        val model = modelConfig.factory(makeContext(), params)
         val modelOutput = ModelOutput(model, model.properties())
         boundModels += modelOutput
         model.orderManagers().forEach { om -> om.tradesTopic().subscribe { modelOutput.trades += it } }
@@ -81,12 +67,14 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
     }
 
     fun backtest(endOfHistory: Instant): Instant {
-        val readers = modelConfig.instruments.map { backtestReaderFactory.makeReader(it) }
-        var currentTime = startTime
+        val factory = modelConfig.backtestReaderFactory
+        val readers = modelConfig.instruments.map { factory.makeReader(it) }
+        var currentTime = modelConfig.roundedStartTime()
         while (currentTime < endOfHistory) {
             progress(currentTime, readers)
             currentTime += this.modelConfig.interval.duration
         }
+        boundModels.forEach({it.model.onBacktestEnd()})
         return currentTime
     }
 

@@ -2,8 +2,17 @@ package com.firelib.test
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
+import firelib.core.domain.Interval
 import firelib.core.store.reader.ReaderFactoryImpl
 import firelib.core.domain.Ohlc
+import firelib.core.store.ReaderFactory
+import firelib.core.store.reader.QueueSimplifiedReader
+import firelib.core.store.reader.SimplifiedReader
+import firelib.core.timeseries.TimeSeries
+import firelib.model.CandleMax
+import firelib.model.DivHelper
+import firelib.model.Model
+import firelib.model.ModelContext
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler
@@ -14,155 +23,98 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.Month
+import java.time.*
 import java.time.ZoneId.of
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+
+
+class OhlcTestModel(context: ModelContext) : Model(context, emptyMap()) {
+
+    val startTimesGmt = ArrayList<Instant>();
+
+
+    private var hist: TimeSeries<Ohlc>
+
+
+    var dayHist: TimeSeries<Ohlc>
+
+
+    val uniqTimes = HashSet<Instant>()
+
+
+    val bars = ArrayList<Ohlc>()
+
+
+    init {
+        testHelper.instanceOhlc = this
+        hist = context.mdDistributor.getOrCreateTs(0, Interval.Min5, 10)
+        hist.preRollSubscribe { on5Min(it) }
+        dayHist = context.mdDistributor.getOrCreateTs(0, Interval.Day, 10)
+    }
+
+
+    fun on5Min(ts: TimeSeries<Ohlc>) {
+        if (dayHist.count() > 0 && dayHist[0].endTime.truncatedTo(ChronoUnit.DAYS) != dayHist[0].endTime) {
+            throw Exception("time of day ts not correct");
+        }
+        val currentTime = context.timeService.currentTime()
+        if (currentTime != ts[0].endTime) {
+            throw Exception("time is not equal $currentTime <> ${ts[0].endTime}");
+        }
+        bars += ts[0].copy()
+
+        if (bars.size > 1) {
+            if ((ts[0].endTime.toEpochMilli() - ts[1].endTime.toEpochMilli()) != 5 * 60 * 1000L) {
+                throw Exception("not 5 min diff " + ts[0].endTime + " -- " + ts[1].endTime);
+            }
+        }
+        addOhlc(ts[0]);
+    }
+
+    fun addOhlc(pQuote: Ohlc) {
+        if (uniqTimes.contains(pQuote.endTime)) {
+            throw Exception("dupe time " + pQuote.endTime);
+        }
+        uniqTimes.add(pQuote.endTime)
+
+        if (startTimesGmt.size == 0 || startTimesGmt.last().truncatedTo(ChronoUnit.DAYS) != pQuote.endTime.truncatedTo(
+                ChronoUnit.DAYS)) {
+            startTimesGmt += pQuote.endTime
+        }
+    }
+
+    override fun onBacktestEnd(): Unit {}
+}
 
 
 class BacktestIntegrationTest {
 
-    //FIXME backtest on 2 instruments with several bars intervals
-
-    val zoneId = of("America/New_York")
-
-    fun getUsTime(y: Int, month: Int, d: Int, h: Int, m: Int, s: Int, mil: Int): Instant {
-        val ret: Instant = LocalDateTime.of(y, month, d, h, m, s, mil * 1000000).atZone(zoneId).toInstant()
-        return ret
+    fun genInterval(start : LocalDate, end : LocalDate) : List<Ohlc>{
+        return emptyList()
     }
-
-
-    fun getDsRoot(): String {
-        return Paths.get("/home/ivan/projects/chartpapa/back/src/test/testresources/TestRoot/testDsRoot").toAbsolutePath().toString()
-    }
-
-    fun getReportDir(): String {
-        return Paths.get("/home/ivan/projects/chartpapa/back/src/test/testresources/TestRoot/testReportDir").toAbsolutePath().toString()
-    }
-
 
     @Test
-    fun IntegrationTestTestMins() {
-        val fileName = "MINS/XG_#.csv"
-        val fullFileName: Path = Paths.get(getDsRoot() + "/" + fileName)
-        val iniPath: Path = fullFileName.getParent().resolve("common.ini")
-
-        var d0Gmt = LocalDateTime.of(2013, 3, 8, 5, 0, 0, 0).toInstant(ZoneOffset.UTC)
-
-        var d0 = getUsTime(2013, 3, 8, 0, 0, 0, 0)
-
-        Assert.assertTrue(d0 == d0Gmt)
-        var d1 = getUsTime(2013, 3, 9, 0, 0, 0, 0)
-
-        var d2 = getUsTime(2013, 3, 11, 0, 0, 0, 0)
-        var d3 = getUsTime(2013, 3, 12, 0, 0, 0, 0)
-
-        val quotesNumbers: Pair<Int, Int> = createFiles(fullFileName, Pair(d0, d1), Pair(d2, d3), this::ohlcGen, 5 * 60 * 1000)
-
-        var totalQuotesNumber = quotesNumbers.first + quotesNumbers.second;
-
-        val generator = ParserHandlersProducer(LegacyMarketDataFormatLoader.load(iniPath.toString()))
-
-        val pp = CsvParser<Ohlc>(fullFileName.toString(), generator.handlers as Array<ParseHandler<Ohlc>>) { Ohlc(interpolated = false) }
-
-        pp.seek(d0)
-
-        var directBars = mutableListOf<Ohlc>()
-
-        do {
-            directBars.add(pp.current())
-        } while (pp.read())
-
+    fun test(){
 
         val cfg = ModelBacktestConfig(OhlcTestModel::class).apply {
-            dataServerRoot = getDsRoot()
-            reportTargetPath = getReportDir()
-            instruments += "XG"
-            startDateGmt = LocalDateTime.of(2013, Month.MARCH, 8, 5, 0, 0).toInstant(ZoneOffset.UTC)
-            precacheMarketData = false
-        }
+            interval = Interval.Min10
+            startDate(LocalDate.now().minusDays(3000))
+            instruments = listOf("sber","sberp")
+            backtestReaderFactory = object : ReaderFactory{
+                override fun makeReader(security: String): SimplifiedReader {
+                    return QueueSimplifiedReader()
+                }
 
-        cfg.runStrat()
-
-
-        var idx = -1
-        val modelBars = testHelper.instanceOhlc!!.bars
-
-        val size: Int = modelBars.filter({ !it.interpolated }).size
-
-        Assert.assertTrue("same times", directBars.map { it.endTime }.toSet().minus(modelBars.map { it.endTime }).isEmpty())
-
-        Assert.assertEquals("bars number", totalQuotesNumber - 1, size)
-
-        var curTime = cfg.startDateGmt
-        for (i in 0 until modelBars.size) {
-            Assert.assertEquals(curTime, modelBars[i].endTime)
-            curTime = curTime.plusSeconds(5 * 60)
-            if (!modelBars[i].interpolated) {
-                idx += 1
-            }
-            if (idx != -1) {
-                val rb = directBars[idx]
-                Assert.assertEquals("wrong bar for index $idx", rb.open, modelBars[i].open, 0.00001)
-                Assert.assertEquals(rb.high, modelBars[i].high, 0.00001)
-                Assert.assertEquals(rb.low, modelBars[i].low, 0.00001)
-                Assert.assertEquals(rb.close, modelBars[i].close, 0.00001)
             }
         }
 
-        Assert.assertEquals("days number", 5, testHelper.instanceOhlc!!.startTimesGmt.size)
-    }
+
+        val conf = CandleMax.modelConfig()
+        println(conf.instruments)
+
+        conf.runStrat()
 
 
-    fun createFiles(fullFileName: Path, iterval0: Pair<Instant, Instant>,
-                    interval1: Pair<Instant, Instant>, strGen: (LocalDateTime) -> String, interval: Long,
-                    writeToDisk: Boolean = false): Pair<Int, Int> {
-
-        if (writeToDisk) {
-            Files.deleteIfExists(fullFileName)
-
-            Files.createDirectories(fullFileName.getParent())
-
-            Files.createFile(fullFileName)
-        }
-
-        val lst = generateInterval(iterval0, interval, strGen)
-
-        if (writeToDisk)
-            Files.write(fullFileName, lst, StandardOpenOption.WRITE)
-
-        var lst2 = generateInterval(interval1, interval, strGen)
-
-        if (writeToDisk)
-            Files.write(fullFileName, lst2, StandardOpenOption.APPEND)
-
-        return Pair(lst.size, lst2.size)
-    }
-
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy,HHmmss.SSS")
-
-    fun generateInterval(period: Pair<Instant, Instant>, stepMillis: Long, strGen: (LocalDateTime) -> String): List<String> {
-        var cnt = 0
-        var cursor = period.first.atZone(zoneId).toLocalDateTime()
-        val lst = ArrayList<String>()
-        while (period.second.atZone(zoneId).toLocalDateTime().isAfter(cursor)) {
-            lst += strGen(cursor)
-            cursor = cursor.plusNanos(stepMillis * 1000000)
-            cnt += 1
-        }
-        return lst
-    }
-
-
-    fun ohlcGen(cursor: LocalDateTime): String {
-        var cl = cursor.toLocalTime().toSecondOfDay().toDouble() + 10
-        var close = "%.2f".format(cl)
-        var high = "%.2f".format(cl + 2)
-        var low = "%.2f".format(cl - 2)
-        var open = close
-        val dt = formatter.format(cursor)
-        return "$dt,$open,$high,$low,$close,1000,1"
     }
 }

@@ -115,5 +115,9 @@ object TrqCommandHelper {
         return "<command id=\"cancelorder\"><transactionid>${transactionid}</transactionid></command>"
     }
 
+    fun changePassword(old : String, new : String) : String{
+        return "<command id=\"change_pass\" oldpass=\"${old}\" newpass=\"${new}\"/>"
+    }
+
 
 }

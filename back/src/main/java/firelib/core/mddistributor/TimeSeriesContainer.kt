@@ -22,9 +22,10 @@ class TimeSeriesContainer(val intervalService: IntervalService, val startTime : 
 
     fun addOhlc(ohlc: Ohlc) {
         latestOhlc = ohlc
-        tss.forEach({ ts ->
+
+        tss.forEach { ts ->
             ts[0] = mergeOhlc(ts[0], ohlc)
-        })
+        }
     }
 
     fun roll(interval: Interval, dt: Instant){
@@ -75,6 +76,8 @@ class TimeSeriesContainer(val intervalService: IntervalService, val startTime : 
             require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
             return ohlc.copy(endTime = currOhlc.endTime, interpolated = false)
         } else {
+            require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
+
             return currOhlc.copy(high = Math.max(ohlc.high, currOhlc.high),
                     low = Math.min(ohlc.low, currOhlc.low),
                     close = ohlc.close,

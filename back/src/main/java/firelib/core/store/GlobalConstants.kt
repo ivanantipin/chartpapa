@@ -7,14 +7,18 @@ import java.util.*
 
 object GlobalConstants{
 
-    val env = System.getProperty("env") ?: "test"
+    val env = System.getProperty("env") ?:  System.getenv("env") ?: "test"
+
 
     val props = Properties().apply {
+        println(" ENV set to  ${env}")
         load(FileReader("${System.getProperty("user.home")}/keys/${env}.properties"))
     }
 
     fun getProp(name : String ) : String{
         require(props.containsKey(name), {"prop ${name} is absent"})
+
+
         return props[name]!! as String
     }
 
@@ -22,9 +26,7 @@ object GlobalConstants{
 
     val metaDb = mdFolder.resolve("meta.db")
 
-    val rootReportPath = if(env == "test")
-        Paths.get("/home/ivan/projects/chartpapa/market_research/report_out") else
-        Paths.get(System.getProperty("user.dir"))
+    val rootReportPath = Paths.get("/home/ivan/projects/chartpapa/market_research/report_out")
 
     fun ensureDirsExist(){
         FileUtils.forceMkdir(mdFolder.toFile())

@@ -1,6 +1,5 @@
 package com.firelib.transaq
 
-import com.firelib.TransaqConnectorGrpc
 import firelib.core.domain.InstrId
 import firelib.core.InstrumentMapper
 import firelib.core.store.ReaderFactory
@@ -15,19 +14,17 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
 class TrqRealtimeReaderFactory(
-    val stub: TransaqConnectorGrpc.TransaqConnectorBlockingStub,
+    val dist: TrqMsgDispatcher,
     val interval: Interval,
     val instrumentMapper: InstrumentMapper
-) :
-    ReaderFactory {
+) : ReaderFactory {
 
     val log = LoggerFactory.getLogger(javaClass)
 
-    val dist = MsgCallbacker(stub)
-
-    val ticks =
+    val intervalListeners =
         ConcurrentLinkedQueue<(Instant) -> Unit>()
 
 
@@ -37,7 +34,7 @@ class TrqRealtimeReaderFactory(
         try {
             val instrId = instrumentMapper(sec)!!
             securities[sec] = sec
-            stub.command(TrqCommandHelper.subscribe(instrId.code, instrId.board))
+            dist.stub.command(TrqCommandHelper.subscribe(instrId.code, instrId.board))
         } catch (e: Exception) {
             log.error("exception subscribing to ${sec}", e)
         }
@@ -47,6 +44,8 @@ class TrqRealtimeReaderFactory(
         securities.forEach({ subscribe(it.key) })
     }
 
+    val lastTickReceived = AtomicLong(0)
+
     init {
         Thread {
             timeSequence(
@@ -54,16 +53,25 @@ class TrqRealtimeReaderFactory(
                 interval,
                 100
             ).forEach { time ->
-                ticks.forEach { it(time) }
+                intervalListeners.forEach {
+                    try {
+                        it(time)
+                    } catch (e: Exception) {
+                        log.info("failed to update listener", e)
+                    }
+
+                }
             }
         }.start()
+
+        dist.addSync<AllTrades>({ it is AllTrades }, { lastTickReceived.set(System.currentTimeMillis()) })
 
         val serverStatus = dist.add<ServerStatus> { it is ServerStatus }
 
         Thread {
             while (true) {
                 val status = serverStatus.queue.poll(1, TimeUnit.MINUTES)
-                if ("true" == status?.connected) {
+                if ("true" == status?.connected && (System.currentTimeMillis() - lastTickReceived.get()) > 2 * 60_000) {
                     log.info("resubscribing for ${securities}")
                     resubscribe()
                 }
@@ -71,20 +79,35 @@ class TrqRealtimeReaderFactory(
         }.start()
     }
 
-
     fun map(security: String): InstrId {
-        return instrumentMapper(security)
+        return instrumentMapper(security)!!
     }
 
+    val stat = ConcurrentHashMap<String, AtomicLong>()
+
+    var lastTime = System.currentTimeMillis()
+
     override fun makeReader(security: String): SimplifiedReader {
+        log.info("creating reader for security ${security}")
         val instrId = map(security)
+        log.info("creating reader for security ${security}")
         val ret = QueueSimplifiedReader()
         val receiver = dist.add<AllTrades> { it is AllTrades }
 
-        ticks.add {
+        intervalListeners.add {
             val lst = mutableListOf<AllTrades>()
             receiver.queue.drainTo(lst)
             val ticks = lst.flatMap { it.ticks }.filter { it.seccode == instrId.code && it.board == instrId.board }
+
+            val cnt = stat.computeIfAbsent(security) { AtomicLong(0) }
+            cnt.addAndGet(ticks.size.toLong())
+
+            if (System.currentTimeMillis() - lastTime > 60 * 60_000) {
+                log.info("receidev ticks last hour ${stat}")
+                stat.clear()
+                lastTime = System.currentTimeMillis()
+            }
+
             if (ticks.isNotEmpty()) {
                 ret.queue.offer(
                     Ohlc(

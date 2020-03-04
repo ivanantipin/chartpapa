@@ -304,3 +304,15 @@ data class Positions(
   var sec_position : SecPosition?,
   var money_position : MoneyPosition?
 ) : TrqMsg
+
+data class Message(
+    var date : String?,
+    var urgent : String?,
+    var from : String?,
+    var text : String?
+)
+
+data class Messages(
+    @set:JsonProperty("message")
+    var orders: List<Message>
+) : TrqMsg

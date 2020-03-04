@@ -46,7 +46,7 @@ open class Model(val context: ModelContext, val properties: Map<String, String>)
                 tradeGate = ctx.tradeGate,
                 timeService = ctx.timeService,
                 security = it,
-                instrument = context.instrumentMapper(it),
+                instrument = context.instrumentMapper(it)!!,
                 maxOrderCount = 20
             )
         }

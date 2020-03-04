@@ -65,4 +65,8 @@ class HistoricalSourceEmulator(val interval: Interval) : HistoricalSource {
         return load(instrId)
     }
 
+    override fun mapSecurity(security: String): InstrId {
+        return InstrId(code = security, source = SourceName.DUMMY.name)
+    }
+
 }

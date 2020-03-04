@@ -8,42 +8,74 @@ import firelib.core.misc.atMoscow
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
+
+class TrendModel(context: ModelContext, val props: Map<String, String>) : TrendModelMBean, Model(context, props){
+
+    val daytss = enableSeries(Interval.Day)
+
+    val nonInterpolated = enableSeries(Interval.Day, interpolated = false)
 
     init {
-
-        val tss = enableSeries(Interval.Day, interpolated = false)
-
-        context.mdDistributor.addListener(Interval.Day) { _, _ ->
-            if (tss[0].count() > 40 && currentTime().atMoscow().dayOfWeek == DayOfWeek.MONDAY) {
+        enableSeries(Interval.Min60, interpolated = false)[0].preRollSubscribe {
+            println("hour ohlc received ${it[0]}")
+            if (daytss[0].count() > 40 && currentTime().atMoscow().hour == 18 && currentTime().atMoscow().dayOfWeek == DayOfWeek.THURSDAY) {
 
                 val back = props["period"]!!.toInt()
 
-                val indexed = tss.mapIndexed({ idx, ts -> Pair(idx, (ts[0].close - ts[back].close) / ts[back].close) }).filter { it.second.isFinite() }
+                val num = props["number"]!!.toInt()
 
-                val sorted = indexed.sortedBy { it.second }
+                val indexed = daytss.mapIndexed { idx, ts ->
+                    Pair(idx, (ts[0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close)
+                }
+                    .filter { it.second.isFinite() && it.second > 0}
 
+                if (indexed.size >= num) {
+                    val sortedBy = indexed.sortedBy { -it.second }
+                    val sorted = sortedBy.subList(0, num).map { it.first }
 
-
-                sorted.forEachIndexed { idx, pair ->
-                    if (idx > sorted.size - 5 && pair.second > 0) {
-                        longForMoneyIfFlat(pair.first, 1000_000)
-                    } else {
-                        oms[pair.first].flattenAll()
+                    oms.forEachIndexed { idx, om ->
+                        if (sorted.contains(idx)) {
+                            longForMoneyIfFlat(idx, 15000)
+                        } else {
+                            om.flattenAll()
+                        }
                     }
                 }
             }
         }
+    }
 
+    override fun buy(ticker: String) {
+        val idx = context.config.instruments.indexOfFirst { it.equals(ticker, true) }
+        if(idx >= 0){
+            longForMoneyIfFlat(idx, 1000)
+        }
+    }
+
+    override fun sell(ticker: String) {
+        val idx = context.config.instruments.indexOfFirst { it.equals(ticker, true) }
+        if(idx >= 0){
+            oms[idx].flattenAll("mbean")
+        }
+    }
+}
+
+fun trendModelConfig(): ModelBacktestConfig {
+    return ModelBacktestConfig(TrendModel::class).apply {
+        instruments = tickers.filter { it != "mfon" }
+//        tickerToDiv = DivHelper.getDivs()
+        startDate(LocalDate.now().minusDays(100))
+        param("period", 33)
+        param("number", 5)
     }
 }
 
 fun main() {
-    val conf = ModelBacktestConfig(TrendModel::class).apply {
-        instruments = DivHelper.getDivs().keys.toList().filter { it != "irao" }
-        startDate(LocalDate.now().minusDays(3000))
-        param("period", 37)
-//        opt("period", 5, 45, 2)
-    }
+//    val storageImpl = MdStorageImpl()
+//    val mapper = populateMapping(finamMapperWriter(), { FinamDownloader().symbols() })
+//    tickers.forEach {
+//        storageImpl.updateMarketData(mapper(it.toUpperCase()))
+//    }
+    val conf = trendModelConfig()
     conf.runStrat()
 }

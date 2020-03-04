@@ -7,8 +7,6 @@ import firelib.finam.FinamDownloader
 import firelib.iqfeed.IntervalTransformer
 import firelib.iqfeed.IqFeedHistoricalSource
 import firelib.emulator.HistoricalSourceEmulator
-import firelib.tcs.TcsHistoricalSource
-import firelib.tcs.getContext
 import firelib.vantage.VantageDownloader
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
@@ -42,7 +40,6 @@ class MdDaoContainer(val folder: String = GlobalConstants.mdFolder.toString()) {
 class SourceFactory{
     val sources = mapOf<SourceName, ()->HistoricalSource>(
         SourceName.FINAM to {FinamDownloader()},
-        SourceName.TCS to {TcsHistoricalSource(getContext())},
         SourceName.VANTAGE to {VantageDownloader()},
         SourceName.DUMMY to { HistoricalSourceEmulator(Interval.Sec10) },
         SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))}

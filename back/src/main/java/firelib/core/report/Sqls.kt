@@ -7,29 +7,35 @@ import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Path
 import javax.sql.DataSource
 
+
+data class OmPosition(
+    val position : Int,
+    val posTime : Long
+)
+
 object Sqls {
     val curPosSql = """
-select st.Ticker, st.PosAfter
-from singleTrades st,
-     (select Ticker, max(t.EntryPriceTime) as EntryPriceTime
-      from singleTrades t
+select st.Ticker, st.PosAfter, st.epochTimeMs
+from trades st,
+     (select Ticker, max(t.epochTimeMs) as epochTimeMs
+      from trades t
       group by t.Ticker) le
-where st.EntryPriceTime = le.EntryPriceTime
+where st.epochTimeMs = le.epochTimeMs
   and st.Ticker = le.Ticker
   """.trimIndent()
 
-    fun readCurrentPositions(path: Path): Map<String, Int> {
+    fun readCurrentPositions(path: Path): Map<String, OmPosition> {
         val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
-        if(!checkTableExists(ds, "singleTrades")){
+        if(!checkTableExists(ds, "trades")){
             return emptyMap()
         }
-        return JdbcTemplate(ds).query(curPosSql, { rs, idx ->
-            Pair(rs.getString("ticker"), rs.getInt("posafter"))
-        }).toMap()
+        return JdbcTemplate(ds).query(curPosSql) { rs, idx ->
+            Pair(rs.getString("ticker"), OmPosition(rs.getInt("posafter"), rs.getLong("epochTimeMs")))
+        }.toMap()
     }
 
     fun checkTableExists(ds : DataSource, tableName : String) : Boolean{
-        return JdbcTemplate(ds).queryForObject("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='${tableName.toUpperCase()}'", Int::class.java) > 0
+        return JdbcTemplate(ds).queryForObject("SELECT count(*) FROM sqlite_master WHERE type='table' AND lower(name)='${tableName.toLowerCase()}'", Int::class.java) > 0
     }
 
 }

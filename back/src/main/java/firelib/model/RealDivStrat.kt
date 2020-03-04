@@ -6,6 +6,8 @@ import firelib.core.domain.Interval
 import firelib.core.misc.StreamTradeCaseGenerator
 import firelib.core.misc.atUtc
 import firelib.core.flattenAll
+import firelib.core.misc.atMoscow
+import java.time.LocalDate
 
 
 class RealDivModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
@@ -47,11 +49,9 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
                     }
 
-                    val time = ret[0].endTime.atUtc()
+                    val date = currentTime().atMoscow().toLocalDate()
 
-                    val date = time.toLocalDate()
-
-                    val localTime = time.toLocalTime()
+                    val localTime = currentTime().atMoscow()
 
 
                     if (context.config.verbose && orderManagers()[idx].position() != 0) {
@@ -73,7 +73,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
                             nextIdx = divs.indexOfFirst {
                                 it.lastDayWithDivs.isAfter(prevIdx.lastDayWithDivs) && it.lastDayWithDivs.atStartOfDay().isAfter(
-                                    context.timeService.currentTime().atUtc()
+                                    currentTime().atMoscow()
                                 )
                             }
                             if (nextIdx > 0) {
@@ -110,9 +110,10 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 }
 
 fun main() {
-
     val conf = ModelBacktestConfig(RealDivModel::class).apply {
         instruments = DivHelper.getDivs().keys.toList()
+        tickerToDiv = DivHelper.getDivs()
+        startDate(LocalDate.now().minusDays(300))
     }
 
     conf.runStrat()

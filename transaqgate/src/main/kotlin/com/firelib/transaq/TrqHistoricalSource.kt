@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlockingStub, val kindId : String) : HistoricalSource {
 
-    val dist = MsgCallbacker(stub)
+    val dist = TrqMsgDispatcher(stub)
 
     override fun symbols(): List<InstrId> {
         return dist.add<Securities> {it is Securities}.use {
@@ -28,6 +28,9 @@ class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlocki
                 return emptyList()
             }
             return sec.securities.map {
+                if(it.seccode!!.contains("SBER")){
+                    println(it)
+                }
                 InstrId(code = it.seccode!!, board = it.board!!, lot = it.lotsize!!.toInt(), minPriceIncr = it.minstep!!.toBigDecimal(), name = it.shortname!!, id = it.secid!!)
             }
         }
@@ -86,18 +89,3 @@ class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlocki
         return Interval.Min1
     }
 }
-
-
-class TrqInstrumentMapper(val stub: TransaqConnectorGrpc.TransaqConnectorBlockingStub) : InstrumentMapper{
-
-    val source = TrqHistoricalSource(stub, "1")
-    val symbols = source.symbols().associateBy { it.code }
-
-    override fun invoke(security: String): InstrId {
-        return symbols[security]!!
-    }
-
-}
-
-
-
