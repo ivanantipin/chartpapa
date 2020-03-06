@@ -93,24 +93,29 @@ fun runNeverRun() {
     }
 }
 
+val prodModels = mapOf(
+    "VolatilityBreak" to {VolatilityBreak.modelConfig(15_000)},
+    "TrendModel" to { trendModelConfig()}
+)
 
 
-fun main() {
-    runNeverRun()
-    //runReal()
+
+fun main(args: Array<String>) {
+    //runNeverRun()
+    runReal(args[0])
 }
 
 val runLogger = LoggerFactory.getLogger("runRun")
 
-private fun runReal() {
+private fun runReal(name : String) {
 
     System.setProperty("env","prod")
+
+    val config = prodModels[name]!!()
 
     GlobalConstants.ensureDirsExist()
 
     val executor = Executors.newSingleThreadExecutor { Thread(it, "mainExecutor") }
-
-    val config = VolatilityBreak.modelConfig(15_000)
 
     val stub = makeDefaultStub()
 
@@ -122,9 +127,9 @@ private fun runReal() {
 
     enableReconnect(msgDispatcher)
 
-    val gate = TrqGate(msgDispatcher, executor, "na")
+    val gate = TrqGate(msgDispatcher, executor, "T9009h5")
 
-    val factory = TrqRealtimeReaderFactory(msgDispatcher, Interval.Min1, mapper)
+    val factory = TrqRealtimeReaderFactory(msgDispatcher, Interval.Sec10, mapper)
     try {
         val context = SimpleRunCtx(config)
         ProdRunner.runStrat(

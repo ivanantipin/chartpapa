@@ -25,7 +25,15 @@ class IntervalServiceImpl : IntervalService {
         val ret = ArrayList<Interval>(0)
         for (i in interval2listeners) {
             if (dt.toEpochMilli() % i.first.durationMs == 0L) {
-                i.second.forEach({ it(dt) })
+                i.second.forEach {
+                    try {
+                        it(dt)
+                    }catch (e : Exception){
+                        println("error in listener ${e.message}")
+                        e.printStackTrace()
+                    }
+
+                }
                 ret += i.first
             }
         }

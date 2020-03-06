@@ -8,13 +8,21 @@ import firelib.core.misc.PositionCloser
 import firelib.core.misc.Quantiles
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.nonInterpolatedView
+import java.lang.RuntimeException
 import java.time.Instant
 import java.time.LocalTime
 
 class IdxContext(val model: Model, val idx: Int) {
     val om = model.orderManagers()[idx]
     fun moneyToLots(money: Long): Int {
-        return (money / model.context.mdDistributor.price(idx).close / om.instrument().lot).toInt()
+        val close = model.context.mdDistributor.price(idx).close
+
+        if(close < 0.000000001){
+            throw RuntimeException("not valid price ${close}")
+        }
+
+        val ret = (money / close / om.instrument().lot).toInt()
+        return ret
     }
 
     val price = model.context.mdDistributor.price(idx).close

@@ -48,6 +48,8 @@ class ModelBacktestConfig (
 
     var interval = Interval.Min10
 
+    var disableBacktest = false
+
     var endDate: Instant = Instant.now()
 
     fun roundedStartTime() : Instant{

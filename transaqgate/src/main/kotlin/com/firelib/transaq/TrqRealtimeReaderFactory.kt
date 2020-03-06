@@ -90,7 +90,6 @@ class TrqRealtimeReaderFactory(
     override fun makeReader(security: String): SimplifiedReader {
         log.info("creating reader for security ${security}")
         val instrId = map(security)
-        log.info("creating reader for security ${security}")
         val ret = QueueSimplifiedReader()
         val receiver = dist.add<AllTrades> { it is AllTrades }
 

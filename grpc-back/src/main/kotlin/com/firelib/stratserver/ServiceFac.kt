@@ -72,7 +72,7 @@ object ServiceFac {
 
     fun makeContext(): SimpleRunCtx {
         println("Starting strats")
-        val conf = modelConfig()
+        val conf = modelConfig(100_000)
         val context = SimpleRunCtx(conf)
         context.addModelWithDefaultParams()
         return context

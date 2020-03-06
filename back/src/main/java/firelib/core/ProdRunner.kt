@@ -7,6 +7,7 @@ import firelib.core.report.OmPosition
 import firelib.core.report.ReportWriter
 import firelib.core.report.Sqls.readCurrentPositions
 import firelib.core.store.ReaderFactory
+import org.apache.commons.math3.geometry.euclidean.oned.Interval
 import org.slf4j.LoggerFactory
 import java.lang.Exception
 import java.time.Instant
@@ -31,30 +32,36 @@ object ProdRunner {
 
         val ioExecutor = Executors.newSingleThreadExecutor()
 
-        val endTime = updateMd(cfg, false)
+        var nextTimeToProgress = cfg.interval.roundTime(Instant.now())
 
-        val persistings = listOf(enableOrdersPersist(model, cfg.getReportDbFile(), ioExecutor),
-            enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor))
+        if(!cfg.disableBacktest){
+            log.info("end of hist time is ${updateMd(cfg, false)}")
 
+            val persistings = listOf(enableOrdersPersist(model, cfg.getReportDbFile(), ioExecutor),
+                enableTradeCasePersist(model, cfg.getReportDbFile(), ioExecutor))
 
-        log.info("end of hist time is ${endTime}")
+            val fut = executorService.submit(Callable<Instant> {
+                context.backtest(cfg.interval.roundTime(Instant.now()))
+            })
 
-        val fut = executorService.submit(Callable<Instant> {
-            context.backtest(cfg.interval.roundTime(Instant.now()))
-        })
+            nextTimeToProgress = fut.get()
+
+            log.info("backtest ended starting from ${nextTimeToProgress}")
+
+            executorService.submit {
+                model.orderManagers().forEach {it.flattenAll("switching gate")}
+            }.get()
+
+            persistings.forEach {it.cancelAndJoin()}
+
+            ioExecutor.submit {
+                ReportWriter.clearReportDir(cfg.reportTargetPath)
+                ReportWriter.writeReport(context.boundModels.first(),cfg)
+            }.get()
+
+        }
 
         val curentPoses = readCurrentPositions(cfg.getProdDbFile())
-
-        var nextTimeToProgress = fut.get()
-
-        log.info("backtest ended starting from ${nextTimeToProgress}")
-
-        executorService.submit {
-            model.orderManagers().forEach {it.flattenAll("switching gate")}
-        }.get()
-
-
-        persistings.forEach {it.cancelAndJoin()}
 
         executorService.submit {
             model.orderManagers().forEach {
@@ -64,14 +71,7 @@ object ProdRunner {
             }
         }.get()
 
-
         context.tradeGate.setActiveReal(realGate)
-
-
-        ioExecutor.submit {
-            ReportWriter.clearReportDir(cfg.reportTargetPath)
-            ReportWriter.writeReport(context.boundModels.first(),cfg)
-        }.get()
 
         val realReaders = cfg.instruments.map {
             realReaderFactory.makeReader(it)

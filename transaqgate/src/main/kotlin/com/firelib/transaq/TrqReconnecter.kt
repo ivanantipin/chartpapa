@@ -36,8 +36,6 @@ fun enableReconnect(trqMsgDispatcher : TrqMsgDispatcher) {
             }
         }
     }.apply { isDaemon = true }.start()
-
-    trqMsgDispatcher.stub.command(loginCmd)
 }
 
 val msgLogger = LoggerFactory.getLogger("msglogger")

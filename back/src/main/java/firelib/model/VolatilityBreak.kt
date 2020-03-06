@@ -12,6 +12,7 @@ import firelib.core.positionDuration
 import firelib.model.VolatilityBreak.Companion.modelConfig
 import firelib.indicators.ATR
 import firelib.indicators.Donchian
+import java.time.Instant
 import java.time.LocalDate
 
 
@@ -75,9 +76,16 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
             currentTime().atMoscow().hour.toDouble()
         }
 
+        enableSeries(Interval.Min10)[0].preRollSubscribe {
+            if(Instant.now().epochSecond - currentTime().epochSecond < 100){
+                println("ohlc ${context.config.instruments[0]} -- ${it[0]}")
+            }
+        }
+
 
         tenMins.forEachIndexed { idx, it ->
             it.preRollSubscribe {
+
                 val timeSeries = daytss[idx]
                 if (it[0].endTime.atMoscow().hour == 18 && timeSeries.count() > period )  {
                     val vola = quantiles[idx].getQuantile(mas[idx].value())
