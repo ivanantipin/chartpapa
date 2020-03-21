@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 object TrqParser{
 
-    internal val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
+    val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
         setDefaultUseWrapper(false)
     }).registerKotlinModule()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
@@ -32,7 +32,15 @@ object TrqParser{
         } else if (str.startsWith("<sec_info_upd")) {
             return kotlinXmlMapper.readValue(str, SecInfoUpd::class.java)
         } else if (str.startsWith("<markets")) {
-            return kotlinXmlMapper.readValue(str, Markets::class.java)
+            val idToMarket = mapOf(
+                "0" to "Collateral",
+                "4" to "FORTS",
+                "14" to "MMA",
+                "15" to "ETS"
+            )
+
+            val ret = kotlinXmlMapper.readValue(str, Markets::class.java)
+            return ret.copy(markets = ret.markets.map { it.copy(text = idToMarket.getOrDefault(it.id, "NA")) })
         } else if (str.startsWith("<portfolio_tplus")) {
             return kotlinXmlMapper.readValue(str, TrqPortfolio::class.java)
         }else if (str.startsWith("<orders")) {

@@ -28,9 +28,6 @@ class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlocki
                 return emptyList()
             }
             return sec.securities.map {
-                if(it.seccode!!.contains("SBER")){
-                    println(it)
-                }
                 InstrId(code = it.seccode!!, board = it.board!!, lot = it.lotsize!!.toInt(), minPriceIncr = it.minstep!!.toBigDecimal(), name = it.shortname!!, id = it.secid!!)
             }
         }

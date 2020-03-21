@@ -4,10 +4,10 @@ import firelib.core.timeseries.TimeSeries
 import firelib.core.domain.Ohlc
 
 class Ema(
-        val period: Int,
-        val ts: TimeSeries<Ohlc>,
-        val func: (Ohlc) -> Double = { it.close })
-    : (TimeSeries<Ohlc>) -> Unit {
+    val period: Int,
+    val ts: TimeSeries<Ohlc>,
+    val func: (Ohlc) -> Double = { it.close }
+) : (TimeSeries<Ohlc>) -> Unit {
 
     fun koeffFunc(): Double {
         return 2.0 / (period + 1)

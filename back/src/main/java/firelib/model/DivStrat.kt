@@ -19,7 +19,7 @@ import java.time.Month
 import java.time.ZoneOffset
 
 
-data class Div(val ticker: String, val lastDayWithDivs: LocalDate, val div: Double)
+data class Div(val ticker: String, val lastDayWithDivs: LocalDate, val div: Double, val status : String)
 
 object DivHelper {
 
@@ -36,7 +36,7 @@ object DivHelper {
         var trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
 
         if(trdDays.isEmpty()){
-            UtilsHandy.updateRussianStockSimple("sber")
+            UtilsHandy.updateTicker("sber")
             trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
         }
 
@@ -52,7 +52,7 @@ object DivHelper {
             }
 
 
-            Div(row.getString("ticker"), divDate, row.getDouble("div"))
+            Div(row.getString("ticker"), divDate, row.getDouble("div"),"na")
         })
         return divs.groupBy { it.ticker }.mapValues { it.value.sortedBy { div -> div.lastDayWithDivs } }
     }

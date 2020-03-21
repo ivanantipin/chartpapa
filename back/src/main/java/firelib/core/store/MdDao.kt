@@ -98,7 +98,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     fun normName(name: String): String {
-        return name.replace('-', '_');
+        return name.replace('-', '_').replace('.','_');
     }
 
     fun queryLast(codeIn: String): Optional<Ohlc> {

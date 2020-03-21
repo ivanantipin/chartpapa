@@ -55,7 +55,7 @@ class OrderManagerImpl(
         return positionTime
     }
 
-    var idCounter = AtomicLong(0)
+    var idCounter = AtomicLong(System.currentTimeMillis())
 
     override fun liveOrders(): List<Order> {
         return id2Order.values.map { it.order }

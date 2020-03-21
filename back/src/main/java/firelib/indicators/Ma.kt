@@ -5,11 +5,10 @@ import firelib.core.domain.Ohlc
 import kotlinx.coroutines.runBlocking
 
 
-class Ma(val period: Int, val ts: TimeSeries<Ohlc>, val calcSko: Boolean = false)
-    : (TimeSeries<Ohlc>) -> Unit {
+class Ma(val period: Int, val ts: TimeSeries<Ohlc>, val calcSko: Boolean = false) : (TimeSeries<Ohlc>) -> Unit {
 
     init {
-        ts.preRollSubscribe({ runBlocking { invoke(it)  }})
+        ts.preRollSubscribe({ runBlocking { invoke(it) } })
     }
 
     val maa = SimpleMovingAverage(period, calcSko)

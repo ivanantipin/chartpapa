@@ -36,9 +36,10 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * configuration for model backtest
  */
-class ModelBacktestConfig (
+class ModelBacktestConfig(
     @get:JsonIgnore
-    val modelKClass : KClass<out Model>){
+    val modelKClass: KClass<out Model>
+) {
     /**
      * instruments configuration
      */
@@ -52,12 +53,12 @@ class ModelBacktestConfig (
 
     var endDate: Instant = Instant.now()
 
-    fun roundedStartTime() : Instant{
+    fun roundedStartTime(): Instant {
         return interval.roundTime(startDateGmt)
     }
 
     @get:JsonIgnore
-    var backtestHistSource : HistoricalSource = FinamDownloader()
+    var backtestHistSource: HistoricalSource = FinamDownloader()
 
     @get:JsonIgnore
     var gateMapper: InstrumentMapper = object : InstrumentMapper {
@@ -66,47 +67,30 @@ class ModelBacktestConfig (
         }
     }
 
-    fun makeFac() : ReaderFactory{
-        val factory = DbReaderFactory(
-            backtestHistSource.getName(),
-            interval,
-            roundedStartTime()
-        )
-
-        return if(tickerToDiv != null){
-            object: ReaderFactory{
-                override fun makeReader(security: String): SimplifiedReader {
-                    return ReaderSimpleDivAdjusted(factory.makeReader(security), tickerToDiv!!.getOrDefault(security, emptyList()))
-                }
-            }
-        }else{
-            factory
-        }
-
-    }
-
     @get:JsonIgnore
-    var backtestReaderFactory : ReaderFactory = makeFac()
+    var backtestReaderFactory: ReaderFactory = DbReaderFactory(
+        backtestHistSource.getName(),
+        interval,
+        roundedStartTime()
+    )
 
 
-
-
-    fun endDate(ed : LocalDate){
+    fun endDate(ed: LocalDate) {
         endDate = ed.toInstantDefault()
     }
 
-    fun startDate(ed : LocalDate){
-        startDateGmt = ed.toInstantDefault().plusSeconds(13*3600)
+    fun startDate(ed: LocalDate) {
+        startDateGmt = ed.toInstantDefault().plusSeconds(13 * 3600)
     }
 
     @get:JsonIgnore
-    var factory : ModelFactory = defaultModelFactory(modelKClass)
+    var factory: ModelFactory = defaultModelFactory(modelKClass)
 
 
-    var tickerToDiv : Map<String,List<Div>>? = null
+    var tickerToDiv: Map<String, List<Div>>? = null
 
-    fun makeSpreadAdjuster(koeff : Double) : (Double,Double)->Pair<Double,Double>{
-        return {bid : Double, ask : Double->Pair(bid - bid*koeff, ask + ask*koeff)}
+    fun makeSpreadAdjuster(koeff: Double): (Double, Double) -> Pair<Double, Double> {
+        return { bid: Double, ask: Double -> Pair(bid - bid * koeff, ask + ask * koeff) }
     }
 
     @get:JsonIgnore
@@ -129,7 +113,6 @@ class ModelBacktestConfig (
     var dumpInterval = Interval.None
 
 
-
     val verbose = false
 
     /*
@@ -142,28 +125,45 @@ class ModelBacktestConfig (
      * params passed to model apply method
      * can not be optimized
      */
-    val modelParams : MutableMap<String, String> = mutableMapOf()
+    val modelParams: MutableMap<String, String> = mutableMapOf()
 
     /*
     * optimization config, used only for BacktestMode.Optimize
      */
     val optConfig: OptimizationConfig = OptimizationConfig()
 
-    fun opt(name : String, start : Int, end : Int, step : Int){
-        optConfig.params += OptimizedParameter(name,start,end,step)
+    fun opt(name: String, start: Int, end: Int, step: Int) {
+        optConfig.params += OptimizedParameter(name, start, end, step)
     }
 
-    fun param(name : String, value : Int){
+    fun param(name: String, value: Int) {
         modelParams += (name to value.toString())
     }
 }
 
-fun ModelBacktestConfig.runStrat(){
-    if(this.optConfig.params.isNotEmpty()){
+fun ModelBacktestConfig.runStrat() {
+    if (this.optConfig.params.isNotEmpty()) {
         Backtester.runOptimized(this)
-    }else{
+    } else {
         Backtester.runSimple(this)
     }
+}
+
+fun ModelBacktestConfig.enableDivs(divs: Map<String, List<Div>>) {
+    this.tickerToDiv = divs
+
+    val delegate = this.backtestReaderFactory
+
+    this.backtestReaderFactory = object : ReaderFactory {
+        override fun makeReader(security: String): SimplifiedReader {
+            return ReaderSimpleDivAdjusted(
+                delegate.makeReader(security),
+                tickerToDiv!!.getOrDefault(security, emptyList())
+            )
+        }
+    }
+
+
 }
 
 fun defaultModelFactory(kl: KClass<out Model>): ModelFactory {
@@ -172,3 +172,5 @@ fun defaultModelFactory(kl: KClass<out Model>): ModelFactory {
         cons.call(a, b)
     }
 }
+
+

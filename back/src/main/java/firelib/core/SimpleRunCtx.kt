@@ -6,6 +6,7 @@ import firelib.core.domain.ModelOutput
 import firelib.core.domain.OrderStatus
 import firelib.core.mddistributor.MarketDataDistributorImpl
 import firelib.core.store.reader.SimplifiedReader
+import firelib.core.store.reader.skipUntil
 import firelib.core.timeservice.TimeServiceManaged
 import firelib.model.Model
 import firelib.model.ModelContext
@@ -70,6 +71,9 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         val factory = modelConfig.backtestReaderFactory
         val readers = modelConfig.instruments.map { factory.makeReader(it) }
         var currentTime = modelConfig.roundedStartTime()
+
+        readers.forEach {it.skipUntil(currentTime)}
+
         while (currentTime < endOfHistory) {
             progress(currentTime, readers)
             currentTime += this.modelConfig.interval.duration

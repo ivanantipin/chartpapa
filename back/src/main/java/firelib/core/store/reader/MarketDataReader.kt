@@ -44,6 +44,12 @@ class SimplifiedReaderAdapter(val mdReader : MarketDataReader<Ohlc>) : Simplifie
 
 }
 
+fun SimplifiedReader.skipUntil(time : Instant){
+    while (peek() != null && peek()!!.time() < time){
+        poll()
+    }
+}
+
 fun MarketDataReader<Ohlc>.toSequence(): SimplifiedReader {
     return SimplifiedReaderAdapter(this)
 }

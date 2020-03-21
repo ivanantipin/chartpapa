@@ -1,78 +1,123 @@
 package firelib.indicators
 
+import org.apache.commons.collections.MultiMap
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-class MarketProfile  {
+class MarketProfile {
 
-    private val pocChangeListeners = ArrayList<(MarketProfile)->Unit>()
+    private val pocChangeListeners = ArrayList<(MarketProfile) -> Unit>()
 
     var pocPrice: Long = 0
 
-    val priceToVol = TreeMap<Long,Long>()
+    val priceToVol = TreeMap<Long, Long>()
 
-    fun size(): Int {return priceToVol.size}
+    val hist = HashMap<Long,ArrayList<Long>>()
 
-    fun pocVolume(): Long { return priceToVol[pocPrice]!!}
+    fun size(): Int {
+        return priceToVol.size
+    }
 
-    fun getMap (): NavigableMap<Long, Long> = Collections.unmodifiableNavigableMap(priceToVol)
+    fun pocVolume(): Long {
+        return priceToVol[pocPrice]!!
+    }
 
-    fun add(price: Long, volume: Long): Unit {
-        priceToVol.putIfAbsent(price, 0)
-        priceToVol[price] = priceToVol[price]!! + volume
-        if (price != pocPrice && priceToVol[price]!! > priceToVol.getOrDefault(pocPrice,-1)) {
+    var allVolume = 0L
+
+    fun add(price: Long, volume: Long) {
+        priceToVol.compute(price) { k, v -> if (v == null) volume else v + volume }
+
+        hist.computeIfAbsent(price,{ArrayList<Long>()}).add(volume)
+
+        allVolume += volume
+
+        if (price != pocPrice && priceToVol[price]!! > priceToVol.getOrDefault(pocPrice, -1)) {
             pocPrice = price
             firePocChange()
         }
     }
 
 
-    fun calcVa (): Pair<Long,Long> {
+    fun calcVaRange(): Pair<Long, Long> {
         val allVol: Long = allVolume()
         var vol = allVol - pocVolume()
         var lowKey = priceToVol.lowerEntry(pocPrice)
         var upKey = priceToVol.higherEntry(pocPrice)
 
-        while ((lowKey != null || upKey != null) && vol.toDouble()/allVol > 0.2){
-            if(lowKey == null){
+        while ((lowKey != null || upKey != null) && vol.toDouble() / allVol > 0.3) {
+            if (lowKey == null) {
                 vol -= upKey.value
-                upKey = priceToVol.higherEntry(pocPrice)
-            }else if(upKey == null){
+                upKey = priceToVol.higherEntry(upKey.key)
+            } else if (upKey == null) {
                 vol -= lowKey.value
-                lowKey = priceToVol.lowerEntry(pocPrice)
-            }else{
-                if(lowKey.value > upKey.value){
+                lowKey = priceToVol.lowerEntry(lowKey.key)
+            } else {
+                if (lowKey.value > upKey.value) {
                     vol -= lowKey.value
-                    lowKey = priceToVol.lowerEntry(pocPrice)
-                }else{
+                    lowKey = priceToVol.lowerEntry(lowKey.key)
+                } else {
                     vol -= upKey.value
-                    upKey = priceToVol.higherEntry(pocPrice)
+                    upKey = priceToVol.higherEntry(upKey.key)
                 }
             }
         }
         val l: Long = if (lowKey == null) priceToVol.firstKey() else lowKey.key
         val h: Long = if (upKey == null) priceToVol.lastKey() else upKey.key
-        return Pair(l ,h)
+        return Pair(l, h)
     }
 
-    fun listenPocChanges(ls : (MarketProfile)->Unit) : Unit {pocChangeListeners += ls}
+    fun listenPocChanges(ls: (MarketProfile) -> Unit) {
+        pocChangeListeners += ls
+    }
 
-    private fun firePocChange(): Unit = pocChangeListeners.forEach({it(this)})
+    fun printStr() : String{
+        return "${priceToVol.firstEntry().key} | ${priceToVol.values.joinToString (separator = ",")} | ${priceToVol.lastEntry().key}"
+    }
 
-    fun reduceBy(price: Long, volume: Long) : Unit {
-        var nvol = priceToVol[price]!! - volume
-        priceToVol[price] = nvol
+
+    private fun firePocChange(): Unit = pocChangeListeners.forEach({ it(this) })
+
+
+    fun reduceBy(price: Long, volume: Long): Unit {
+        allVolume -= volume
+        priceToVol.compute(price) { k, v ->
+            require(v!! >= volume)
+            v - volume
+        }
         if (price == pocPrice) {
             recalcPoc()
         }
-        assert(nvol >= 0, {"must never be negative"})
     }
 
     private fun recalcPoc() {
-        pocPrice = priceToVol.maxBy{it.value}!!.key
+        pocPrice = priceToVol.maxBy { it.value }!!.key
         firePocChange()
     }
 
-    fun allVolume(): Long = priceToVol.values.sum()
+    fun allVolume(): Long = allVolume
 
-    fun volumeAtPrice(price: Long): Long = priceToVol.getOrDefault(price, 0)
+    operator fun get(price : Long) = priceToVol.getOrDefault(price, 0)
+
+}
+
+fun main() {
+    val profile = MarketProfile()
+
+    for(i in 1..10){
+        profile.add(i.toLong(), i.toLong())
+    }
+
+    println(profile.calcVaRange())
+    println(profile.pocPrice)
+
+    profile.reduceBy(10L, 10L)
+    profile.reduceBy(9L, 9L)
+    profile.reduceBy(8L, 8L)
+
+    println(profile.calcVaRange())
+    println(profile.pocPrice)
+
+
+
 }

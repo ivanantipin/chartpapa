@@ -15,11 +15,6 @@ mobile app:
 
 finam todo
 
-5. ensure availability
-2. docker for python
-remove copying of report db / rsync
-1. test reconnect
-3. remove hacks
-4. jmx
-
-32nt8d
+mobil app sequenta
+ensure robot works
+foreign markets - market data csvs

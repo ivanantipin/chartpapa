@@ -19,7 +19,6 @@ val tickers = listOf(
     "vtbr",
     "hydr",
     "nlmk",
-    "mfon",
     "irao",
     "mtss",
     "magn",

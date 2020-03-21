@@ -95,13 +95,14 @@ fun runNeverRun() {
 
 val prodModels = mapOf(
     "VolatilityBreak" to {VolatilityBreak.modelConfig(15_000)},
-    "TrendModel" to { trendModelConfig()}
+    "TrendModel" to { trendModelConfig()},
+    "SpreadModel" to { spreadModel()}
 )
 
 
 
 fun main(args: Array<String>) {
-    //runNeverRun()
+
     runReal(args[0])
 }
 

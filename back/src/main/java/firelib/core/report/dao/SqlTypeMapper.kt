@@ -2,9 +2,10 @@ package firelib.core.report.dao
 
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 import kotlin.reflect.KType
 
-object SqlTypeMapper{
+object SqlTypeMapper {
 
     fun mapType(retType: KType): String {
         if (retType.classifier == String::class) {
@@ -28,7 +29,9 @@ object SqlTypeMapper{
             return "INT"
         }
 
-
+        if (retType.classifier == LocalDate::class) {
+            return "INT"
+        }
 
         if (retType.classifier == Instant::class) {
             return "TIMESTAMPTZ"
@@ -37,16 +40,21 @@ object SqlTypeMapper{
         throw RuntimeException("not supported type $retType")
     }
 
-    fun fromDb(retType: KType): (Any)->(Any) {
+    fun fromDb(retType: KType): (Any) -> (Any) {
         if (retType.classifier == String::class) {
-            return {it}
+            return { it }
         }
         if (retType.classifier == Double::class) {
-            return {it}
+            return { it }
         }
         if (retType.classifier == Int::class) {
-            return {it}
+            return { it }
         }
+
+        if (retType.classifier == LocalDate::class) {
+            return { LocalDate.ofEpochDay(it as Long) }
+        }
+
         if (retType.classifier == Long::class) {
             return { (it as Number).toLong() }
         }
@@ -59,43 +67,41 @@ object SqlTypeMapper{
             return { Instant.ofEpochMilli((it as Int).toLong() * 1000) }
         }
         if (retType.classifier == Boolean::class) {
-            return {it}
+            return { it }
         }
 
         throw RuntimeException("not supported type $retType")
     }
 
-    fun toDb(retType: KType): (Any)->(Any) {
+    fun toDb(retType: KType): (Any) -> (Any) {
         if (retType.classifier == String::class) {
-            return {it}
+            return { it }
         }
         if (retType.classifier == Double::class) {
-            return {it}
+            return { it }
         }
         if (retType.classifier == BigDecimal::class) {
-            return {(it as BigDecimal).toDouble()}
+            return { (it as BigDecimal).toDouble() }
         }
 
         if (retType.classifier == Int::class) {
-            return {it}
+            return { it }
         }
         if (retType.classifier == Long::class) {
-            return { it  }
+            return { it }
         }
 
         if (retType.classifier == Boolean::class) {
-            return { it  }
+            return { it }
         }
 
+        if (retType.classifier == LocalDate::class) {
+            return { (it as LocalDate).toEpochDay() }
+        }
 
         if (retType.classifier == Instant::class) {
-            return {(it as Instant).toEpochMilli()/1000}
+            return { (it as Instant).toEpochMilli() / 1000 }
         }
-
         throw RuntimeException("not supported type $retType")
     }
-
-
-
-
 }

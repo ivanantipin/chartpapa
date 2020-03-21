@@ -44,7 +44,10 @@ class ReaderDivAdjusted(val delegate: MarketDataReader<Ohlc>, val divs : List<Di
     }
 }
 
-class ReaderSimpleDivAdjusted(val delegate: SimplifiedReader, val divs : List<Div>) : SimplifiedReader {
+class ReaderSimpleDivAdjusted(val delegate: SimplifiedReader, val divsin : List<Div>) : SimplifiedReader {
+
+    var divs = divsin.sortedBy { it.lastDayWithDivs }
+
     var nextDt : Instant = Instant.MAX
     var currentAdjustment : Double = 0.0
     init {

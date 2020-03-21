@@ -45,8 +45,6 @@ class TrqGate(
         } catch (e: Exception) {
             order.reject("uncknown error ${e.message}")
         }
-
-
     }
 
     init {
@@ -97,8 +95,10 @@ class TrqGate(
             is AllTrades -> {
             }
             is TrqClient -> {
-                log.info("client id received ${msgTrq.id}")
-                clientId = msgTrq.id!!
+                if(msgTrq.market == "1"){
+                    log.info("client  received ${msgTrq}")
+                    clientId = msgTrq.id!!
+                }
             }
             is TrqTrades -> {
                 msgTrq.trades.forEach { trade ->

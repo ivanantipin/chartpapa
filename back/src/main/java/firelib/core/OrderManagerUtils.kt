@@ -8,9 +8,9 @@ import java.math.RoundingMode
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) {
+fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) : Order?{
     if(this.hasPendingState()){
-        return
+        return null
     }
     var diff = getOrderForDiff(this.position(), pos)
     if(diff != null){
@@ -24,6 +24,7 @@ fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) {
         }
         this.submitOrders(listOf(diff))
     }
+    return diff
 }
 
 

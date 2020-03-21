@@ -20,6 +20,10 @@ interface TimeSeries<T> {
 
 }
 
+fun TimeSeries<Ohlc>.ret(last : Int) : Double{
+    return (this[0].close - this[last].close)/this[last].close
+}
+
 fun TimeSeries<Ohlc>.nonInterpolatedView() : TimeSeries<Ohlc>{
     val ret = TimeSeriesImpl(this.capacity(), { Ohlc() })
     this.preRollSubscribe {

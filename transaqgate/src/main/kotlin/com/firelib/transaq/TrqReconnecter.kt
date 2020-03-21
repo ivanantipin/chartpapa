@@ -40,8 +40,8 @@ fun enableReconnect(trqMsgDispatcher : TrqMsgDispatcher) {
 
 val msgLogger = LoggerFactory.getLogger("msglogger")
 
-fun enableMsgLogging(trqMsgDispatcher: TrqMsgDispatcher){
-    trqMsgDispatcher.addSync<TrqMsg>({ true }, {
+fun enableMsgLogging(trqMsgDispatcher: TrqMsgDispatcher, predicate : (TrqMsg)->Boolean = {true}){
+    trqMsgDispatcher.addSync<TrqMsg>(predicate, {
         msgLogger.info("got transaq message ${it}")
     })
 }

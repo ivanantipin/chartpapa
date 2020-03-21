@@ -162,7 +162,7 @@ class BacktestResults(object):
         self.seasonalMapFunc = {'weekday': lambda x: x.weekday(), 'month': lambda x: x.month, 'hour': lambda x: x.hour}
         self.seasonalAggFunc = {'pf': MetricsCalculator.pf, 'cnt': len}
         self.seasonalAggColors = ['r', 'g']
-        self.lastStaticColumnInTrades = 'PosAfter'
+        self.lastStaticColumnInTrades = 'MFE'
         self.load(filename)
 
 

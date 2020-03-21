@@ -4,13 +4,16 @@ import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.flattenAll
 import firelib.core.makePositionEqualsTo
+import firelib.core.mddistributor.MarketDataDistributor
 import firelib.core.misc.PositionCloser
 import firelib.core.misc.Quantiles
+import firelib.core.positionDuration
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.nonInterpolatedView
 import java.lang.RuntimeException
 import java.time.Instant
 import java.time.LocalTime
+import java.util.concurrent.TimeUnit
 
 class IdxContext(val model: Model, val idx: Int) {
     val om = model.orderManagers()[idx]
@@ -68,10 +71,22 @@ fun Model.quantiles(window : Int) : List<Quantiles<Double>>{
     }
 }
 
-fun Model.longForMoneyIfFlat(idx: Int, money: Long) {
-    idxContext(idx).run {
+fun Model.position(idx : Int) : Int{
+    return idxContext(idx).position
+}
+
+fun Model.flattenAll(idx : Int, reason : String = "NA"){
+    idxContext(idx).om.flattenAll(reason)
+}
+
+
+fun Model.longForMoneyIfFlat(idx: Int, money: Long) : Boolean{
+    return idxContext(idx).run {
         if (position <= 0 && !hasPendingState) {
             om.makePositionEqualsTo(moneyToLots(money), price)
+            true
+        }else{
+            false
         }
     }
 }
@@ -95,9 +110,21 @@ fun Model.closePosByCondition(condition : (idx: Int)->Boolean
     val interval = this.context.config.interval
     context.mdDistributor.getOrCreateTs(0,interval, 1).preRollSubscribe {
         orderManagers().forEachIndexed { index, orderManager ->
-            if(condition(index)){
+            if(orderManager.position() != 0 && condition(index)){
                 orderManager.flattenAll()
             }
         }
     }
+}
+
+fun Model.prerollSubscribe(interval: Interval, listener : (Instant, MarketDataDistributor) -> Unit){
+    context.mdDistributor.addListener(interval, listener)
+}
+
+fun Model.instruments() : List<String>{
+    return context.config.instruments
+}
+
+fun Model.positionDuration(idx : Int, unit : TimeUnit = TimeUnit.HOURS): Long {
+    return orderManagers()[idx].positionDuration(currentTime(), unit)
 }

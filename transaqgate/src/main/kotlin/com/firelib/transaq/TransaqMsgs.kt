@@ -2,6 +2,8 @@ package com.firelib.transaq
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRawValue
+import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText
 import java.util.*
 
 //marker interface
@@ -76,15 +78,15 @@ data class Securities(
     @set:JsonProperty(value = "security")
     var securities: List<Security>
 ) : TrqMsg
+
 /*
 server_status server_tz="Russian Standard Time" id="0" connected="true"/>
  */
-data class ServerStatus(val server_tz : String?, var id : String?, var connected : String?) : TrqMsg
+data class ServerStatus(val server_tz: String?, var id: String?, var connected: String?) : TrqMsg
 
 data class Market(
     var id: String?,
-    @JsonRawValue
-    var content: String?
+    var text: String?
 )
 
 data class Markets(
@@ -248,8 +250,6 @@ data class TrqPortfolio(
 ) : TrqMsg
 
 
-
-
 data class TrqOrders(
     @set:JsonProperty("order")
     var orders: List<TrqOrder>
@@ -257,62 +257,67 @@ data class TrqOrders(
 
 
 data class TrqClient(
-    var id : String?,
-    var remove : Boolean?,
-    var market : String?,
-    var currency : String?,
-    var type : String?,
+    var id: String?,
+    var remove: Boolean?,
+    var market: String?,
+    var currency: String?,
+    var type: String?,
     var union: String?,
     var forts_acc: String?
 ) : TrqMsg
 
 data class MoneyPosition(
-var register :  String?,
-var asset :  String?,
-var client :  String?,
-var union :  String?,
-var shortname :  String?,
-var saldoin :  String?,
-var bought :  String?,
-var sold :  String?,
-var saldo :  String?,
-var ordbuy :  String?,
-var ordbuycond :  String?,
-var comission :  String?
+    var register: String?,
+    var asset: String?,
+    var client: String?,
+    var union: String?,
+    var shortname: String?,
+    var saldoin: String?,
+    var bought: String?,
+    var sold: String?,
+    var saldo: String?,
+    var ordbuy: String?,
+    var ordbuycond: String?,
+    var comission: String?
 )
 
 data class SecPosition(
-var secid :  String?,
-var market :  String?,
-var seccode :  String?,
-var register :  String?,
-var client :  String?,
-var union :  String?,
-var shortname :  String?,
-var saldoin :  String?,
-var saldomin :  String?,
-var bought :  String?,
-var sold :  String?,
-var saldo :  String?,
-var ordbuy :  String?,
-var ordsell :  String?,
-var amount :  String?,
-var equity :  String?
+    var secid: String?,
+    var market: String?,
+    var seccode: String?,
+    var register: String?,
+    var client: String?,
+    var union: String?,
+    var shortname: String?,
+    var saldoin: String?,
+    var saldomin: String?,
+    var bought: String?,
+    var sold: String?,
+    var saldo: String?,
+    var ordbuy: String?,
+    var ordsell: String?,
+    var amount: String?,
+    var equity: String?
 )
 
 data class Positions(
-  var sec_position : SecPosition?,
-  var money_position : MoneyPosition?
+    var sec_position: SecPosition?,
+    var money_position: MoneyPosition?
 ) : TrqMsg
 
 data class Message(
-    var date : String?,
-    var urgent : String?,
-    var from : String?,
-    var text : String?
+    var date: String?,
+    var urgent: String?,
+    var from: String?,
+    var text: String?
 )
 
 data class Messages(
     @set:JsonProperty("message")
     var orders: List<Message>
 ) : TrqMsg
+
+fun main() {
+    println(TrqParser.kotlinXmlMapper.readValue<Market>("<market>some</market>", Market::class.java))
+
+}

@@ -119,5 +119,9 @@ object TrqCommandHelper {
         return "<command id=\"change_pass\" oldpass=\"${old}\" newpass=\"${new}\"/>"
     }
 
+    fun markets() : String{
+        return "<command id=\"get_markets\"/>"
+    }
+
 
 }

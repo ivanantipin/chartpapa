@@ -171,6 +171,7 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
         private val log = LoggerFactory.getLogger(FinamDownloader::class.java)
         val SOURCE = SourceName.FINAM
         val SHARES_MARKET = "1"
+        val FX_MARKET = "45"
     }
 
     val parser = CSVParserBuilder().withQuoteChar('\'').build()
