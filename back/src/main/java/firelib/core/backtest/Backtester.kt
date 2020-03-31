@@ -6,6 +6,7 @@ import firelib.core.backtest.opt.ParamsVariator
 import firelib.core.misc.Batcher
 import firelib.core.SimpleRunCtx
 import firelib.core.domain.Interval
+import firelib.core.domain.ModelOutput
 import firelib.core.report.ReportProcessor
 import firelib.core.report.ReportWriter
 import firelib.core.report.ReportWriter.clearReportDir
@@ -15,18 +16,16 @@ import firelib.core.enableOhlcDumping
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.*
 
-object Backtester{
+object Backtester {
 
     val log = LoggerFactory.getLogger(javaClass)
 
 
-    val ioExecutor = Executors.newSingleThreadExecutor {Thread(it).apply  { isDaemon=true }}
+    val ioExecutor = Executors.newSingleThreadExecutor { Thread(it).apply { isDaemon = true } }
 
-    init{
+    init {
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             throwable.printStackTrace()
         }
@@ -38,16 +37,18 @@ object Backtester{
         val startTime = System.currentTimeMillis()
 
         val optCfg = cfg.optConfig
-        val reportProcessor = ReportProcessor(optCfg.optimizedMetric,
-                optCfg.params.map {it.name},
-                minNumberOfTrades = optCfg.minNumberOfTrades)
+        val reportProcessor = ReportProcessor(
+            optCfg.optimizedMetric,
+            optCfg.params.map { it.name },
+            minNumberOfTrades = optCfg.minNumberOfTrades
+        )
 
         val variator = ParamsVariator(optCfg.params)
 
         val startDtGmt = cfg.interval.roundTime(cfg.startDateGmt)
         val endDtGmt = cfg.interval.roundTime(cfg.endDate)
 
-        val endOfOptimize =  if(optCfg.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
+        val endOfOptimize = if (optCfg.optimizedPeriodDays < 0) endDtGmt.plusMillis(100)
         else startDtGmt.plus(optCfg.optimizedPeriodDays, ChronoUnit.DAYS)
 
         log.info("total number of models to test : ${variator.combinations()}")
@@ -65,15 +66,15 @@ object Backtester{
         sequence {
             yieldAll(variator)
         }.map {
-            cfg.modelParams + it.mapValues { "${it.value}"}
+            cfg.modelParams + it.mapValues { "${it.value}" }
         }.chunked(optResourceParams.batchSize).map { paramsVar ->
             val ctx = SimpleRunCtx(cfg)
             paramsVar.forEach { p ->
                 ctx.addModel(p)
             }
             ctx
-        }.forEach { ctx->
-            if(ohlcDumpSubscriptionNeeded){
+        }.forEach { ctx ->
+            if (ohlcDumpSubscriptionNeeded) {
                 jobsList = enableOhlcDumping(cfg, ctx.marketDataDistributor, ioExecutor)
                 ohlcDumpSubscriptionNeeded = false
             }
@@ -86,11 +87,13 @@ object Backtester{
 
 
         executor.shutdown()
-        executor.awaitTermination(1,TimeUnit.DAYS)
+        executor.awaitTermination(1, TimeUnit.DAYS)
 
-        jobsList.forEach {it.cancelAndJoin()}
+        jobsList.forEach { it.cancelAndJoin() }
 
-        require(reportProcessor.bestModels().isNotEmpty(), {"no models get produced!! probably because they did not generated enough trades"})
+        require(
+            reportProcessor.bestModels().isNotEmpty(),
+            { "no models get produced!! probably because they did not generated enough trades" })
 
         log.info("Model optimized in ${(System.currentTimeMillis() - startTime) / 1000} sec")
 
@@ -110,7 +113,37 @@ object Backtester{
 
     fun runSimple(cfg: ModelBacktestConfig) {
         clearReportDir(cfg.reportTargetPath)
-        val ctx = SimpleRunCtx(cfg)
+
+        val cachedExec = Executors.newCachedThreadPool()
+
+        val chunk = if(cfg.parallelTickersBacktest)  Math.max(cfg.instruments.size / 5,1) else cfg.instruments.size
+
+        val ctxts = cfg.instruments.chunked(chunk).map {
+            runBacktest(cfg, it, cachedExec)
+        }
+
+        val trades = ctxts.flatMap { it.get().boundModels.first().trades }
+        val statuses = ctxts.flatMap { it.get().boundModels.first().orderStates }
+
+        val model = ctxts.first().get().boundModels.first()
+
+        val output = ModelOutput(model.model, cfg.modelParams)
+        output.trades += trades
+        output.orderStates += statuses
+
+        cachedExec.shutdown()
+
+        writeReport(output, cfg)
+    }
+
+    private fun runBacktest(
+        cfg: ModelBacktestConfig,
+        it: List<String>,
+        cachedExec: ExecutorService
+    ): Future<SimpleRunCtx> {
+        val copy = cfg.clone()
+        copy.instruments = it
+        val ctx = SimpleRunCtx(copy)
         ctx.addModel(cfg.modelParams)
         if (cfg.dumpInterval != Interval.None) {
             enableOhlcDumping(
@@ -119,8 +152,12 @@ object Backtester{
                 executorService = ioExecutor
             )
         }
-        ctx.backtest(Instant.now())
-        writeReport(ctx.boundModels.first(), cfg)
+        return cachedExec.submit(object : Callable<SimpleRunCtx> {
+            override fun call(): SimpleRunCtx {
+                ctx.backtest(Instant.now())
+                return ctx
+            }
+        })
     }
 }
 

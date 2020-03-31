@@ -9,6 +9,7 @@ import firelib.indicators.sequenta.SignalType
 import firelib.core.misc.atUtc
 import firelib.core.domain.Ohlc
 import firelib.core.domain.range
+import firelib.indicators.sequenta.calcStop
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -81,7 +82,8 @@ labelOptions: {
 
                         labels.add(baseLabel.withAttribute("text", "" + s.reference.completedSignal + recycle))
                         val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]
-                        var hline = HLine(ohlcs[ci - 3].endTime.atUtc(), endOh.endTime.atUtc(), calcStopLine(ohlcs, ci, s))
+
+                        var hline = HLine(ohlcs[ci - 3].endTime.atUtc(), endOh.endTime.atUtc(), sequenta.calcStop(s.reference.up, s.reference.start, sequenta.data.size ))
 
 
                         hline = hline.withAttribute("color", if (s.reference.up) "red" else "green")
@@ -117,21 +119,4 @@ labelOptions: {
         return Annotations(labels, lines)
     }
 
-    private fun calcStopLine(ohlcs: List<Ohlc>, ci: Int, s: Signal): Double {
-        var curLevel: Double
-        if (s.reference.up) {
-            curLevel = java.lang.Double.MIN_VALUE
-            for (i in s.reference.start..ci) {
-                val ohh = ohlcs[i]
-                curLevel = Math.max(curLevel, ohh.high + ohh.range())
-            }
-        } else {
-            curLevel = java.lang.Double.MAX_VALUE
-            for (i in s.reference.start until ci) {
-                val ohh = ohlcs[i]
-                curLevel = Math.min(curLevel, ohh.low - ohh.range())
-            }
-        }
-        return curLevel
-    }
 }

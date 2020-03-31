@@ -23,8 +23,12 @@ class TradeGateStub(val cfg: ModelBacktestConfig, val timeService: TimeService) 
         MarketOrderStub(timeService)
     }.toTypedArray()
 
+    val bidAdjuster = cfg.makeBidAdjuster(cfg.spreadAdjustKoeff)
+    val askAdjuster = cfg.makeBidAdjuster(cfg.spreadAdjustKoeff)
+
     fun updateBidAsks(i: Int, time: Instant, price: Double) {
-        val (bid, ask) = cfg.adjustSpread(price, price)
+        val bid = bidAdjuster(price)
+        val ask = askAdjuster(price)
         limitBooks[i].updateBidAsk(bid, ask, time)
         stopBooks[i].updateBidAsk(bid, ask, time)
         marketSubs[i].updateBidAsk(bid, ask, time)

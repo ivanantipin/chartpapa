@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter
 
 val dateStringFormatOfDateUtils = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 
+val dateFormat = DateTimeFormatter.ofPattern("yyyy.MM.dd")
+
 
 fun parseAtZone(str : String, zone : ZoneId) : Instant {
     return LocalDateTime.parse(str,dateStringFormatOfDateUtils).atZone(zone).toInstant()
@@ -28,6 +30,7 @@ val moscowZoneId = ZoneId.of("Europe/Moscow")
 
 fun Instant.atUtc (): LocalDateTime = LocalDateTime.ofInstant(this,ZoneOffset.UTC)
 fun Instant.atMoscow (): LocalDateTime = LocalDateTime.ofInstant(this, moscowZoneId)
+fun Instant.atNy (): LocalDateTime = LocalDateTime.ofInstant(this, nyZoneId)
 
 fun Instant.toStandardString (): String = if(this == null) "null" else dateStringFormatOfDateUtils.format(this.atZone(ZoneOffset.UTC))
 

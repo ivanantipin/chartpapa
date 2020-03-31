@@ -65,7 +65,6 @@ fun spreadModel(): ModelBacktestConfig {
         param("period", 10)
 //        opt("period", 3,20, 1)
         instruments = listOf("sber", "sberp")
-        adjustSpread = makeSpreadAdjuster(0.01/100.0)
     }
 }
 

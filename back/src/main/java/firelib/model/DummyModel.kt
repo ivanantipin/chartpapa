@@ -34,7 +34,6 @@ class DummyModel(context: ModelContext, properties: Map<String, String>) : Model
                 instruments = listOf("SBER")
                 startDate(LocalDate.now().minusDays(1))
                 interval = Interval.Min1
-                adjustSpread = makeSpreadAdjuster(0.0005)
             }
             return cfg
         }

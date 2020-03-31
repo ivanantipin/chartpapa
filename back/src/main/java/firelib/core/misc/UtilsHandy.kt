@@ -4,20 +4,22 @@ import firelib.core.domain.InstrId
 import firelib.finam.FinamDownloader
 import firelib.core.store.MdStorageImpl
 import firelib.core.InstrumentMapper
+import firelib.core.SourceName
 import firelib.core.misc.UtilsHandy.updateTicker
+import firelib.core.store.GlobalConstants
 import firelib.core.store.finamMapperWriter
 import firelib.model.DivHelper
 import org.slf4j.LoggerFactory
 import java.time.Instant
 
 
-class FinamTickerMapper(val finamDownloader: FinamDownloader) : InstrumentMapper{
+class FinamTickerMapper(val finamDownloader: FinamDownloader) : InstrumentMapper {
 
     val symbols by lazy {
         finamDownloader.symbols()
     }
 
-    val code2instr by lazy{
+    val code2instr by lazy {
         symbols.groupBy { it.code.toLowerCase() }
     }
 
@@ -32,17 +34,19 @@ object UtilsHandy {
 
     val log = LoggerFactory.getLogger(javaClass)
 
-    fun updateRussianDivStocks(market : String = FinamDownloader.SHARES_MARKET): List<Pair<String, Instant>> {
+    fun updateRussianDivStocks(market: String = FinamDownloader.SHARES_MARKET): List<Pair<String, Instant>> {
         log.info("updating tickers that have a divs")
         val divs = DivHelper.getDivs()
         log.info("tickers to update ${divs.keys}")
         val storageImpl = MdStorageImpl()
         val finamDownloader = FinamDownloader()
-        val symbols = finamDownloader.symbols().filter { divs.containsKey(it.code.toLowerCase()) && it.market == market }
+        val symbols =
+            finamDownloader.symbols().filter { divs.containsKey(it.code.toLowerCase()) && it.market == market }
         return symbols.map { Pair(it.code, storageImpl.updateMarketData(it)) }
     }
 
-    fun updateTicker(ticker: String, market : String = FinamDownloader.SHARES_MARKET) {
+
+    fun updateTicker(ticker: String, market: String = FinamDownloader.SHARES_MARKET) {
         val downloader = FinamDownloader()
 
         val symbols = downloader.symbols()
@@ -64,6 +68,15 @@ object UtilsHandy {
 
 fun main(args: Array<String>) {
 
-    updateTicker("SPFB.Si", "14")
+    GlobalConstants.mdFolder.resolve("/ddisk/globaldatabase/1MIN/STK").toFile().list().toList()
+        .map { it.replace("_1.csv", "") }.forEach({
+        MdStorageImpl().updateMarketData(InstrId(code = it, source = SourceName.IQFEED.name))
+    }
+    )
+
+
+    //MdStorageImpl().updateMarketData(InstrId(code="VLO",source = SourceName.IQFEED.name ))
+
+    //updateTicker("SPFB.Si", "14")
 //    updateRussianDivStocks()
 }

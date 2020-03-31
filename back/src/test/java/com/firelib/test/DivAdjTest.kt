@@ -27,7 +27,7 @@ class DivAdjTest{
 
         val divSize = 1.0
 
-        val divs = listOf(Div("some", startDt.plusDays(15), divSize))
+        val divs = listOf(Div("some", startDt.plusDays(15), divSize, ""))
 
 
         var reader = object : MarketDataReader<Ohlc>{

@@ -1,18 +1,24 @@
 package firelib.core.store
 
-import firelib.core.misc.toInstantDefault
 import firelib.core.domain.Ohlc
+import firelib.core.misc.toInstantDefault
+import firelib.core.report.Sqls
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.ResultSetExtractor
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.sqlite.SQLiteDataSource
+import org.sqlite.core.CoreStatement
+import org.sqlite.jdbc3.JDBC3ResultSet
 import java.sql.ResultSet
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.ArrayList
 
 class MdDao(internal val ds: SQLiteDataSource) {
 
@@ -85,28 +91,47 @@ class MdDao(internal val ds: SQLiteDataSource) {
         }
     }
 
-    private fun mapOhlc(rs: ResultSet): Ohlc {
-        return Ohlc(
-            rs.getTimestamp("DT").toInstant(),
-            rs.getDouble("o"),
-            rs.getDouble("h"),
-            rs.getDouble("l"),
-            rs.getDouble("c"),
-            volume = rs.getLong("v"),
-            interpolated = false
-        )
+    private fun mapOhlc(rs: ResultSet, expectedSize : Int = 1): List<Ohlc> {
+
+        val sqLiteRs = rs as JDBC3ResultSet
+
+        val stmt = sqLiteRs.statement as CoreStatement
+
+        val db = stmt.datbase
+
+        val ret = ArrayList<Ohlc>(expectedSize)
+
+        while (rs.next()) {
+            // highly optimized code
+            val oh = Ohlc(
+                Instant.ofEpochMilli(db.column_long(stmt.pointer, 0)),
+                db.column_double(stmt.pointer, 1),
+                db.column_double(stmt.pointer, 2),
+                db.column_double(stmt.pointer, 3),
+                db.column_double(stmt.pointer, 4),
+                volume = db.column_long(stmt.pointer, 5),
+                interpolated = false
+            )
+            ret.add(oh)
+        }
+        return ret;
+
     }
 
     fun normName(name: String): String {
-        return name.replace('-', '_').replace('.','_');
+        return name.replace('-', '_').replace('.', '_');
     }
 
     fun queryLast(codeIn: String): Optional<Ohlc> {
         val code = normName(codeIn)
         ensureExist(code)
-        val ret = NamedParameterJdbcTemplate(ds).query("select * from $code order by dt desc LIMIT 1 ") { rs, rowNum ->
-            mapOhlc(rs)
-        }
+        val ret = NamedParameterJdbcTemplate(ds).query(
+            "select * from $code order by dt desc LIMIT 1 ",
+            object : ResultSetExtractor<List<Ohlc>> {
+                override fun extractData(rs: ResultSet): List<Ohlc>? {
+                    return mapOhlc(rs)
+                }
+            })
         return if (ret.size == 0) Optional.empty() else Optional.of(ret[0])
     }
 
@@ -116,7 +141,10 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun queryAll(codeIn: String, start: LocalDateTime, limit: Int = 10_000_000): List<Ohlc> {
         val code = normName(codeIn)
-        ensureExist(code)
+        if(!Sqls.checkTableExists(ds, code)){
+            println("table not existisi!!!!! ${code}")
+            return emptyList()
+        }
 
         val map = mapOf(
             "DT" to start.toInstantDefault().toEpochMilli(),
@@ -124,7 +152,11 @@ class MdDao(internal val ds: SQLiteDataSource) {
         )
         return NamedParameterJdbcTemplate(ds).query(
             "select * from $code where dt > :DT order by dt asc LIMIT :LIMIT",
-            map
-        ) { rs, _ -> mapOhlc(rs) }
+            map,object : ResultSetExtractor<List<Ohlc>> {
+                override fun extractData(rs: ResultSet): List<Ohlc> {
+                    return mapOhlc(rs, limit)
+                }
+            }
+        )
     }
 }

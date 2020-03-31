@@ -2,48 +2,52 @@ package firelib.indicators.sequenta
 
 import firelib.core.misc.atUtc
 import firelib.core.domain.Ohlc
+import firelib.core.domain.range
 import java.time.LocalDateTime
 
 
 class Sequenta {
-     var counts = arrayOf(13, 21)
+    var counts = arrayOf(13, 21)
 
-     var data: MutableList<Ohlc> = ArrayList()
+    var data: MutableList<Ohlc> = ArrayList()
 
-     var pendingSetups: MutableList<Setup> = ArrayList()
+    var pendingSetups: MutableList<Setup> = ArrayList()
 
-     val currentTrend: Boolean
+    val currentTrend: Boolean
         get() {
             return past(1).close > past(5).close
         }
 
-     var currentSetup: Setup = Setup(0,0,false)
+    var currentSetup: Setup = Setup(0, 0, false)
 
-     fun past(bars: Int): Ohlc {
+    fun past(bars: Int): Ohlc {
         return data[data.size - bars]
     }
 
     inner class Setup(var start: Int, var end: Int, var up: Boolean) {
         var countDowns: MutableList<Int> = ArrayList()
-         var pendingSignal = 0
-         var cancelledRef: Setup? = null
-         var recycleRef: Setup? = null
+        var pendingSignal = 0
+        var cancelledRef: Setup? = null
+        var recycleRef: Setup? = null
 
-         var closesBeyondTdst = 0
+        val isUp get() =  up
+        val isDown get() = !up
 
-         var min: Double = 0.toDouble()
-         var max: Double = 0.toDouble()
+        var closesBeyondTdst = 0
+
+        var min: Double = 0.toDouble()
+        var max: Double = 0.toDouble()
 
         val tdst: Double
             get() = if (up) min else max
 
-         val isCancelled: Boolean
+        val isCancelled: Boolean
             get() = cancelledRef != null
 
-         val isCompleted: Boolean
+        val isCompleted: Boolean
             get() = pendingSignal == counts.size
 
-         val isExpired: Boolean
+        val isExpired: Boolean
             get() = data.size - start > 150
 
 
@@ -52,7 +56,7 @@ class Sequenta {
                 -1
             } else counts[pendingSignal - 1]
 
-         fun updateEnd(idx: Int) {
+        fun updateEnd(idx: Int) {
             end = idx
             calcRange()
         }
@@ -70,7 +74,7 @@ class Sequenta {
         }
 
 
-         fun calcRange() {
+        fun calcRange() {
             this.min = java.lang.Double.MAX_VALUE
             this.max = java.lang.Double.MIN_VALUE
             for (i in start..end) {
@@ -79,11 +83,11 @@ class Sequenta {
             }
         }
 
-         fun range(): Double {
+        fun range(): Double {
             return max - min
         }
 
-         fun length(): Int {
+        fun length(): Int {
             return end - start
         }
 
@@ -93,15 +97,15 @@ class Sequenta {
             } else recycleRef!!.range() / this.range()
         }
 
-         fun reached(): Boolean {
+        fun reached(): Boolean {
             return end - start >= SETUP_LENGTH - 1
         }
 
-         fun invalidated(): Boolean {
+        fun invalidated(): Boolean {
             return closesBeyondTdst > 5
         }
 
-         fun checkCountDown(): List<Signal> {
+        fun checkCountDown(): List<Signal> {
             val idx = data.size - 1
             val ret = ArrayList<Signal>()
 
@@ -147,7 +151,7 @@ class Sequenta {
         }
     }
 
-     fun last(idx: Int): Ohlc {
+    fun last(idx: Int): Ohlc {
         return data[data.size - idx]
     }
 
@@ -163,7 +167,8 @@ class Sequenta {
         val ret = runCurrent().toMutableList()
 
         this.pendingSetups.forEach { ps -> ret.addAll(ps.checkCountDown()) }
-        this.pendingSetups = this.pendingSetups.filter{ ps -> !ps.isCompleted && !ps.isExpired && !ps.invalidated() }.toMutableList()
+        this.pendingSetups =
+            this.pendingSetups.filter { ps -> !ps.isCompleted && !ps.isExpired && !ps.invalidated() }.toMutableList()
         return ret
     }
 
@@ -213,4 +218,23 @@ class Sequenta {
     companion object {
         val SETUP_LENGTH = 9
     }
+}
+
+
+fun Sequenta.calcStop(up : Boolean, start : Int, end : Int): Double {
+    var curLevel: Double
+    if (up) {
+        curLevel = java.lang.Double.MIN_VALUE
+        for (i in start until end) {
+            val ohh = data[i]
+            curLevel = Math.max(curLevel, ohh.high + ohh.range())
+        }
+    } else {
+        curLevel = java.lang.Double.MAX_VALUE
+        for (i in start until end) {
+            val ohh = data[i]
+            curLevel = Math.min(curLevel, ohh.low - ohh.range())
+        }
+    }
+    return curLevel
 }

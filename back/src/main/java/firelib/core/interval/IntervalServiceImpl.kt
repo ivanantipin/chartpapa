@@ -24,7 +24,8 @@ class IntervalServiceImpl : IntervalService {
     fun onStep(dt: Instant) : List<Interval>{
         val ret = ArrayList<Interval>(0)
         for (i in interval2listeners) {
-            if (dt.toEpochMilli() % i.first.durationMs == 0L) {
+            val interval = i.first
+            if ((dt.toEpochMilli() - interval.offset)  % interval.durationMs == 0L) {
                 i.second.forEach {
                     try {
                         it(dt)
@@ -34,7 +35,7 @@ class IntervalServiceImpl : IntervalService {
                     }
 
                 }
-                ret += i.first
+                ret += interval
             }
         }
         return ret

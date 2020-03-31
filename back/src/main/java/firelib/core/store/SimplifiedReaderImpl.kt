@@ -17,7 +17,7 @@ class SimplifiedReaderImpl(val mdDao: MdDao, val code : String, val startTime : 
     var done = false
 
     fun read(){
-        val list = mdDao.queryAll(code, lastRead.atUtc(), 50_000)
+        val list = mdDao.queryAll(code, lastRead.atUtc(), 10_000)
         if(list.isNotEmpty()){
             buffer.addAll(list)
             lastRead = list.last().endTime

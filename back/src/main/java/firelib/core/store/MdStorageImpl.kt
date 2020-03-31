@@ -15,6 +15,7 @@ import firelib.core.misc.atUtc
 import firelib.core.report.dao.GeGeWriter
 import firelib.core.misc.SqlUtils
 import firelib.core.domain.Ohlc
+import firelib.core.mddistributor.MarketDataDistributorImpl
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -139,6 +140,13 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             e.printStackTrace()
         }
         return instant
+    }
+
+    fun transform(instrId: InstrId, from : Interval, to : Interval){
+        val dao = md.getDao(instrId.sourceEnum(), from)
+        val daoTo = md.getDao(instrId.sourceEnum(), to)
+        val toOhlc = IntervalTransformer.transform(to, dao.queryAll(instrId.code))
+        daoTo.insertOhlc(toOhlc, dao.normName(instrId.code))
     }
 }
 

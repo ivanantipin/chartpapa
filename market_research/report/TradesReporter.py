@@ -257,30 +257,43 @@ class BacktestResults(object):
         plt.title(title)
         return ret
 
+    def chunks(self, lst, n):
+        return [lst[i:i + n] for i in range(0, len(lst), n)]
 
-    def makeTickersTab(self):
-        cont=[ widgets.Output() for i in range(1 + len(self.tickers()))]
+    def subSub(self, tickers_in):
+        cont=[ widgets.Output() for i in range(len(tickers_in))]
 
         mc = MetricsCalculator()
 
         tab = widgets.Tab(children = cont)
-        for i in range(len(self.tickers())):
-            tab.set_title(i + 1,self.tickers()[i])
-
-        tab.set_title(0,'Overall stat')
+        for i in range(len(tickers_in)):
+            tab.set_title(i,tickers_in[i])
 
         for idx,out in enumerate(cont):
             with out:
-                if idx == 0:
-                    display(HTML(mc.statToHtml(self.trades).to_html()))
-                    self.plot_equity_d2d_for_ticker()
-                    plt.show()
-                else:
-                    ticker=self.tickers()[idx - 1]
-                    self.plot_equity_d2d_for_ticker(ticker)
-                    plt.show()
-                    display(HTML(mc.statToHtml(self.trades[self.trades.Ticker == ticker]).to_html()))
+                ticker=tickers_in[idx]
+                self.plot_equity_d2d_for_ticker(ticker)
+                plt.show()
+                display(HTML(mc.statToHtml(self.trades[self.trades.Ticker == ticker]).to_html()))
         return tab
+
+
+    def makeGenStat(self):
+        out=widgets.Output()
+        mc = MetricsCalculator()
+        with out:
+            display(HTML(mc.statToHtml(self.trades).to_html()))
+            self.plot_equity_d2d_for_ticker()
+            plt.show()
+        return out
+
+
+    def makeTickersTab(self):
+        ch = [self.subSub(aa) for aa in self.chunks(self.tickers(), 10)]
+        ch.insert(0,self.makeGenStat())
+        widgets_tab = widgets.Tab(children=ch)
+        widgets_tab.set_title(0, 'gen stat')
+        return widgets_tab
 
     def plotSeasonalitiesPnls(self, pnls : pd.DataFrame):
         if pnls.size == 0:

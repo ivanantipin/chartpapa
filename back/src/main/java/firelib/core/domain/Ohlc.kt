@@ -1,7 +1,6 @@
 package firelib.core.domain
 
-import firelib.core.misc.toStandardString
-import firelib.core.misc.toStringAtMoscow
+import firelib.core.misc.*
 import java.time.Instant
 
 data class Ohlc(
@@ -31,4 +30,13 @@ data class Ohlc(
         val dtStr: String = endTime.toStringAtMoscow()
         return "OHLC($open/$high/$low/$close/$dtStr/${volume}/$interpolated)"
     }
+
+    fun toStrMtDay() : String {
+
+
+
+        val dtStr: String = endTime.atNy().format(dateFormat)
+        return "${dtStr},${"%.5f".format(open)},${"%.5f".format(high)},${"%.5f".format(low)},${"%.5f".format(close)},${volume}"
+    }
+
 }

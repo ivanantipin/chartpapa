@@ -4,27 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import firelib.core.HistoricalSource
 import firelib.core.InstrumentMapper
 import firelib.core.ModelFactory
-import firelib.core.TradeGateSwitch
 import firelib.core.backtest.Backtester
 import firelib.core.backtest.opt.OptimizedParameter
-import firelib.core.backtest.tradegate.TradeGateStub
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
-import firelib.core.domain.ModelOutput
-import firelib.core.domain.OrderStatus
-import firelib.core.mddistributor.MarketDataDistributorImpl
 import firelib.core.misc.toInstantDefault
 import firelib.core.store.DbReaderFactory
 import firelib.core.store.GlobalConstants
 import firelib.core.store.ReaderFactory
 import firelib.core.store.reader.ReaderSimpleDivAdjusted
 import firelib.core.store.reader.SimplifiedReader
-import firelib.core.timeservice.TimeServiceManaged
 import firelib.finam.FinamDownloader
 import firelib.model.Div
-import firelib.model.DivHelper
 import firelib.model.Model
-import firelib.model.ModelContext
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
@@ -36,10 +28,10 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * configuration for model backtest
  */
-class ModelBacktestConfig(
+data class ModelBacktestConfig(
     @get:JsonIgnore
     val modelKClass: KClass<out Model>
-) {
+) : Cloneable{
     /**
      * instruments configuration
      */
@@ -50,6 +42,8 @@ class ModelBacktestConfig(
     var interval = Interval.Min10
 
     var disableBacktest = false
+
+    val parallelTickersBacktest = false
 
     var endDate: Instant = Instant.now()
 
@@ -89,12 +83,14 @@ class ModelBacktestConfig(
 
     var tickerToDiv: Map<String, List<Div>>? = null
 
-    fun makeSpreadAdjuster(koeff: Double): (Double, Double) -> Pair<Double, Double> {
-        return { bid: Double, ask: Double -> Pair(bid - bid * koeff, ask + ask * koeff) }
-    }
+    var spreadAdjustKoeff = 0.0
 
-    @get:JsonIgnore
-    var adjustSpread = makeSpreadAdjuster(0.0)
+    fun makeBidAdjuster(koeff : Double) : (Double)->Double{
+        return {bid->bid - bid*koeff}
+    }
+    fun makeAskAdjuster(koeff : Double) : (Double)->Double{
+        return {ask->ask + ask*koeff}
+    }
 
     /*
     * report will be written into this directory
@@ -138,6 +134,10 @@ class ModelBacktestConfig(
 
     fun param(name: String, value: Int) {
         modelParams += (name to value.toString())
+    }
+
+    public override fun clone(): ModelBacktestConfig {
+        return super.clone() as ModelBacktestConfig
     }
 }
 

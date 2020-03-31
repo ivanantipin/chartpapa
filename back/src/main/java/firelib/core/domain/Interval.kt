@@ -4,7 +4,9 @@ import java.time.Duration
 import java.time.Instant
 
 
-enum class Interval(val durationMs: Long, val offset : Long = (1440 * 60 * 1000) * 3) {
+val defaultOffset : Long  = (1440 * 60 * 1000) * 3
+
+enum class Interval(val durationMs: Long, val offset : Long = defaultOffset) {
 
     None(-1),
     Ms100(100),
@@ -21,6 +23,7 @@ enum class Interval(val durationMs: Long, val offset : Long = (1440 * 60 * 1000)
     Min120(120 * 60 * 1000),
     Min240(240 * 60 * 1000),
     Day( 24* 60 * 60 * 1000),
+    AmericanDay( 24* 60 * 60 * 1000, defaultOffset + 4*3600*1000L ),
     Week(Day.durationMs*7);
 
     fun resolveFromMs(ms: Long): Interval {
