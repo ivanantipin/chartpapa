@@ -10,7 +10,12 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 
-class GeGeWriter<T : Any>(val name: String, val path: Path, val type: KClass<T>, val pk : List<String> = emptyList()) {
+class GeGeWriter<T : Any>(
+    val path: Path,
+    val type: KClass<T>,
+    val pk: List<String> = emptyList(),
+    val name: String = type.simpleName!!
+) {
 
     val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
     val tman = DataSourceTransactionManager(ds)

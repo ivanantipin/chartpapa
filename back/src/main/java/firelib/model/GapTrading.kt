@@ -58,9 +58,9 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
     override fun onBacktestEnd() {
         super.onBacktestEnd()
         val writer = GeGeWriter<GapStat>(
-            "gaps",
             context.config.getReportDbFile(),
-            GapStat::class
+            GapStat::class,
+            name = "gaps"
         )
         writer.write(stat)
     }

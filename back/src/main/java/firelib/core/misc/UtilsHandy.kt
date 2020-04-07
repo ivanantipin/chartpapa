@@ -1,16 +1,28 @@
 package firelib.core.misc
 
+import firelib.core.HistoricalSource
 import firelib.core.domain.InstrId
 import firelib.finam.FinamDownloader
 import firelib.core.store.MdStorageImpl
 import firelib.core.InstrumentMapper
 import firelib.core.SourceName
+import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
 import firelib.core.misc.UtilsHandy.updateTicker
 import firelib.core.store.GlobalConstants
 import firelib.core.store.finamMapperWriter
 import firelib.model.DivHelper
+import firelib.vantage.VantageDownloader
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.FileReader
+import java.lang.Double
+import java.nio.charset.Charset
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 
 class FinamTickerMapper(val finamDownloader: FinamDownloader) : InstrumentMapper {
@@ -65,18 +77,51 @@ object UtilsHandy {
 
 }
 
+val mt5formate = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")
+
+fun parseMt5(str: String): Ohlc? {
+    try {
+        val arr = str.split(",").toTypedArray()
+        return Ohlc(
+            LocalDateTime.parse(arr[0], mt5formate).toInstant(ZoneOffset.UTC),
+            Double.parseDouble(arr[1]),
+            Double.parseDouble(arr[2]), Double.parseDouble(arr[3]), Double.parseDouble(arr[4]), 0, arr[6].toLong(), false)
+    } catch (e: Exception) {
+        println("not valid entry " + str + " because " + e.message)
+        return null
+    }
+}
+
+
+class Mt5CsvSource : HistoricalSource{
+    override fun symbols(): List<InstrId> {
+        return File("/home/ivan/transaq/md/").list().map {
+            InstrId(code = it!!)
+        }
+    }
+
+    override fun load(instrId: InstrId): Sequence<Ohlc> {
+        val reade = FileReader("/home/ivan/transaq/md/${instrId.code}H4.csv", Charset.forName("unicode"))
+        return sequence<Ohlc> {
+            yieldAll(reade.readLines().map({parseMt5(it)!!}))
+        }
+    }
+
+    override fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc> {
+        return load(instrId)
+    }
+
+    override fun getName(): SourceName {
+        return SourceName.MT5
+    }
+
+    override fun getDefaultInterval(): Interval {
+        return Interval.Min240
+    }
+
+}
+
 
 fun main(args: Array<String>) {
-
-    GlobalConstants.mdFolder.resolve("/ddisk/globaldatabase/1MIN/STK").toFile().list().toList()
-        .map { it.replace("_1.csv", "") }.forEach({
-        MdStorageImpl().updateMarketData(InstrId(code = it, source = SourceName.IQFEED.name))
-    }
-    )
-
-
-    //MdStorageImpl().updateMarketData(InstrId(code="VLO",source = SourceName.IQFEED.name ))
-
-    //updateTicker("SPFB.Si", "14")
-//    updateRussianDivStocks()
+    MdStorageImpl().updateMarketData(InstrId(code = "FUTSP500CONT", source = SourceName.MT5.name));
 }

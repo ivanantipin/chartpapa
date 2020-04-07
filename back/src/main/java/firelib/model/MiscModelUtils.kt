@@ -8,6 +8,8 @@ import firelib.core.mddistributor.MarketDataDistributor
 import firelib.core.misc.PositionCloser
 import firelib.core.misc.Quantiles
 import firelib.core.positionDuration
+import firelib.core.report.dao.GeGeWriter
+import firelib.core.store.GlobalConstants
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.nonInterpolatedView
 import java.lang.RuntimeException
@@ -64,6 +66,12 @@ fun Model.enableSeries(interval: Interval,
     }
     return ret
 }
+
+
+data class GoogTrend(val word : String, val dt : Instant, val start : Instant, val idx : Long)
+
+data class GoogTrendMulti(val dt : Instant, val word2idx : Map<String,Long> )
+
 
 fun Model.quantiles(window : Int) : List<Quantiles<Double>>{
     return context.config.instruments.map {
@@ -128,3 +136,4 @@ fun Model.instruments() : List<String>{
 fun Model.positionDuration(idx : Int, unit : TimeUnit = TimeUnit.HOURS): Long {
     return orderManagers()[idx].positionDuration(currentTime(), unit)
 }
+

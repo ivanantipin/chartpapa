@@ -64,7 +64,7 @@ object SqlTypeMapper {
         }
 
         if (retType.classifier == Instant::class) {
-            return { Instant.ofEpochMilli((it as Int).toLong() * 1000) }
+            return { Instant.ofEpochMilli((it as Number).toLong() * 1000) }
         }
         if (retType.classifier == Boolean::class) {
             return { it }

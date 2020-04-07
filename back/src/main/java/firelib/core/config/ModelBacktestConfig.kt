@@ -43,7 +43,7 @@ data class ModelBacktestConfig(
 
     var disableBacktest = false
 
-    val parallelTickersBacktest = false
+    var parallelTickersBacktest = false
 
     var endDate: Instant = Instant.now()
 

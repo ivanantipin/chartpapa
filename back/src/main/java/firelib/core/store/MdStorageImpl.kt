@@ -15,7 +15,7 @@ import firelib.core.misc.atUtc
 import firelib.core.report.dao.GeGeWriter
 import firelib.core.misc.SqlUtils
 import firelib.core.domain.Ohlc
-import firelib.core.mddistributor.MarketDataDistributorImpl
+import firelib.core.misc.Mt5CsvSource
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -43,7 +43,8 @@ class SourceFactory{
         SourceName.FINAM to {FinamDownloader()},
         SourceName.VANTAGE to {VantageDownloader()},
         SourceName.DUMMY to { HistoricalSourceEmulator(Interval.Sec10) },
-        SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))}
+        SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))},
+        SourceName.MT5 to { Mt5CsvSource() }
     )
 
     val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()
@@ -60,16 +61,16 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     val log = LoggerFactory.getLogger(javaClass)
 
     val requestedDao = GeGeWriter<InstrId>(
-        "requested",
         Paths.get("$folder/meta.db"),
         InstrId::class,
-        listOf("code")
+        listOf("code"),
+        "requested"
     )
     val symbolsDao = GeGeWriter<InstrId>(
-        "symbols",
         Paths.get("$folder/meta.db"),
         InstrId::class,
-        listOf("code")
+        listOf("code"),
+        "symbols"
     )
 
     val md = MdDaoContainer()

@@ -18,6 +18,9 @@ dependencies {
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
     compile group: 'com.opencsv', name: 'opencsv', version: '4.2'
 
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+
+
 
 
 

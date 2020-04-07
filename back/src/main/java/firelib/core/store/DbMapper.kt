@@ -22,28 +22,28 @@ class DbMapper(val readWrite: GeGeWriter<InstrId>, filter: (InstrId) -> Boolean 
 
 fun trqMapperWriter(): GeGeWriter<InstrId> {
     return GeGeWriter(
-        "trq_instruments",
         GlobalConstants.metaDb,
         InstrId::class,
-        listOf("code", "board")
+        listOf("code", "board"),
+        "trq_instruments"
     )
 }
 
 fun finamMapperWriter(): GeGeWriter<InstrId> {
     return GeGeWriter(
-        "finam_instruments",
         GlobalConstants.metaDb,
         InstrId::class,
-        listOf("id", "code", "market")
+        listOf("id", "code", "market"),
+        "finam_instruments"
     )
 }
 
 fun dummyMapperWriter(): GeGeWriter<InstrId> {
     return GeGeWriter(
-        "dummy_instruments",
         GlobalConstants.metaDb,
         InstrId::class,
-        listOf("code")
+        listOf("code"),
+        "dummy_instruments"
     )
 }
 

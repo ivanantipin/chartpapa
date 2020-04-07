@@ -17,4 +17,3 @@ finam todo
 
 mobil app sequenta
 ensure robot works
-foreign markets - market data csvs

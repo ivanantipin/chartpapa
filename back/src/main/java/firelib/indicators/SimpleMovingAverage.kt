@@ -28,8 +28,8 @@ class SimpleMovingAverage(val period: Int, val calcSko: Boolean) {
         if (calcSko) {
             val value = value()
             currentSko = Math.pow(closes.sumByDouble {
-                it - value
-            }/period, 0.5);
+                Math.pow(it - value, 2.0)
+            }/period, 0.5)
         }
     }
 }

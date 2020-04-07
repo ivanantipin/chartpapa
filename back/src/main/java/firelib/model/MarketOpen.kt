@@ -63,9 +63,9 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
     override fun onBacktestEnd() {
         super.onBacktestEnd()
         val writer = GeGeWriter<GapStat>(
-            "gaps",
             context.config.getReportDbFile(),
-            GapStat::class
+            GapStat::class,
+            name = "gaps"
         )
         writer.write(stat)
     }

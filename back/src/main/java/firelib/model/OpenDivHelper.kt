@@ -78,7 +78,7 @@ fun main() {
     val allDivs = fetchDivs(LocalDate.of(2010, 10, 10))
 
 
-    val writer = GeGeWriter<Div>("open_divs", GlobalConstants.metaDb, Div::class, listOf("ticker", "LastDayWithDivs"))
+    val writer = GeGeWriter<Div>(GlobalConstants.metaDb, Div::class, listOf("ticker", "LastDayWithDivs"), "open_divs")
 
     writer.write(allDivs)
 }

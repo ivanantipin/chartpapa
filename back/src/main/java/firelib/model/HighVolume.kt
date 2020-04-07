@@ -41,9 +41,9 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
 
 
         val dumper = GeGeWriter(
-            "highvolume",
             Paths.get(context.config.reportTargetPath).resolve("stat.db"),
-            HVStat::class
+            HVStat::class,
+            name = "highvolume"
         )
         daytss.forEachIndexed{ idx, it ->
             it.preRollSubscribe {

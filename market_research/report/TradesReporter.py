@@ -55,6 +55,7 @@ def _str_to_datetime(d):
         return None
 
 
+
 def vect_str_to_datetime(d):
     return np.vectorize(_str_to_datetime)(d)
 
@@ -66,6 +67,10 @@ def _get_main_script_filename():
 
 def displayTitle(title):
     return HTML('<h3 align="center">$T</h3>'.replace('$T', title))
+
+
+def pctPnl(row: pd.Series):
+    return  row.BuySell*(row['ExitPrice'] - row['EntryPrice']) / row['EntryPrice'] * 100
 
 
 class MetricsCalculator:
@@ -109,8 +114,13 @@ class MetricsCalculator:
         self.metricsMap = {'sharpe': self.sharpe, 'mean': self.mean, 'pl': self.pl, 'pf': self.pf, 'cnt': self.cnt,
                            'max': self.maxStat, 'min': self.minStat, 'median': self.medianStat}
 
-    def statToHtml(self, tradesDF : pd.DataFrame):
 
+
+    def annRet(self, pnls , holdHours : float):
+        years = holdHours/(24.0*365)
+        return np.power(1 + np.sum(pnls), 1.0 / years) - 1
+
+    def statToHtml(self, tradesDF: pd.DataFrame):
         tradesDF = tradesDF.copy()
 
         tradesDF['HoldTimeHours'] = (tradesDF['ExitDate'] - tradesDF['EntryDate']).map(
@@ -119,16 +129,20 @@ class MetricsCalculator:
         buysDF = tradesDF[tradesDF.BuySell > 0]
         sellsDF = tradesDF[tradesDF.BuySell < 0]
 
-        buys = buysDF['Pnl'].dropna()
-        sells = sellsDF['Pnl'].dropna()
+        buys = buysDF.apply(pctPnl, axis=1)
+        sells = sellsDF.apply(pctPnl, axis=1)
 
         buyDict = dict((k, None if len(buys) == 0 else v(buys)) for k, v in self.metricsMap.items())
         sellDict = dict((k, None if len(sells) == 0 else v(sells)) for k, v in self.metricsMap.items())
 
         buyDict['HoldTimeMeanHours'] = None if len(buys) == 0 else buysDF['HoldTimeHours'].mean()
         buyDict['HoldTimeMedianHours'] = None if len(buys) == 0 else buysDF['HoldTimeHours'].median()
+        buyDict['AnnRet'] = self.annRet(buys, buysDF.HoldTimeHours.sum())
+
+
         sellDict['HoldTimeMeanHours'] = None if len(sells) == 0 else sellsDF['HoldTimeHours'].mean()
         sellDict['HoldTimeMedianHours'] = None if len(sells) == 0 else sellsDF['HoldTimeHours'].median()
+        sellDict['AnnRet'] = None if len(sells) == 0 else self.annRet(sells, sellsDF.HoldTimeHours.sum())
 
         return pd.DataFrame(
             {
@@ -144,8 +158,7 @@ class BacktestResults(object):
     Class that wraps backtest results (contains pandas.DataFrame with trades and some methods to calc stats, plot graphs e.t.c.)
     """
 
-
-    def __init__(self,filename : str, tz=pytz.UTC):
+    def __init__(self, filename: str, tz=pytz.UTC):
         """
         public self.trades attribute contains a pandas.DataFrame with the following columns:
 
@@ -165,17 +178,16 @@ class BacktestResults(object):
         self.lastStaticColumnInTrades = 'MFE'
         self.load(filename)
 
-
-
-    def load(self, filename, tableName = "trades"):
+    def load(self, filename, tableName="trades"):
 
         # Create your connection.
         cnx = sqlite3.connect(filename)
 
         self.trades = pd.read_sql_query(sql="SELECT * FROM trades",
-                                        con=cnx ,
+                                        con=cnx,
                                         # 2013-04-08T10:00:00Z
-                                        parse_dates={'EntryDate' : '%Y-%m-%dT%H:%M:%SZ', 'ExitDate' : '%Y-%m-%dT%H:%M:%SZ'})
+                                        parse_dates={'EntryDate': '%Y-%m-%dT%H:%M:%SZ',
+                                                     'ExitDate': '%Y-%m-%dT%H:%M:%SZ'})
 
         # print(self.trades)
 
@@ -194,7 +206,6 @@ class BacktestResults(object):
             self.opts.sort_values(by=[self.opts.columns[0]], inplace=True)
         except:
             print('no opts')
-
 
     def sort(self):
         """
@@ -261,25 +272,24 @@ class BacktestResults(object):
         return [lst[i:i + n] for i in range(0, len(lst), n)]
 
     def subSub(self, tickers_in):
-        cont=[ widgets.Output() for i in range(len(tickers_in))]
+        cont = [widgets.Output() for i in range(len(tickers_in))]
 
         mc = MetricsCalculator()
 
-        tab = widgets.Tab(children = cont)
+        tab = widgets.Tab(children=cont)
         for i in range(len(tickers_in)):
-            tab.set_title(i,tickers_in[i])
+            tab.set_title(i, tickers_in[i])
 
-        for idx,out in enumerate(cont):
+        for idx, out in enumerate(cont):
             with out:
-                ticker=tickers_in[idx]
+                ticker = tickers_in[idx]
                 self.plot_equity_d2d_for_ticker(ticker)
                 plt.show()
                 display(HTML(mc.statToHtml(self.trades[self.trades.Ticker == ticker]).to_html()))
         return tab
 
-
     def makeGenStat(self):
-        out=widgets.Output()
+        out = widgets.Output()
         mc = MetricsCalculator()
         with out:
             display(HTML(mc.statToHtml(self.trades).to_html()))
@@ -287,38 +297,36 @@ class BacktestResults(object):
             plt.show()
         return out
 
-
     def makeTickersTab(self):
         ch = [self.subSub(aa) for aa in self.chunks(self.tickers(), 10)]
-        ch.insert(0,self.makeGenStat())
+        ch.insert(0, self.makeGenStat())
         widgets_tab = widgets.Tab(children=ch)
         widgets_tab.set_title(0, 'gen stat')
         return widgets_tab
 
-    def plotSeasonalitiesPnls(self, pnls : pd.DataFrame):
+    def plotSeasonalitiesPnls(self, pnls: pd.DataFrame):
         if pnls.size == 0:
             return
 
         seasonalMapFunc = self.seasonalMapFunc
 
-        outputs=list([widgets.Output() for i in seasonalMapFunc])
+        outputs = list([widgets.Output() for i in seasonalMapFunc])
 
-        tab = widgets.Tab(children = outputs)
+        tab = widgets.Tab(children=outputs)
 
         for idx, mapTitle in enumerate(seasonalMapFunc):
-            tab.set_title(idx,mapTitle)
+            tab.set_title(idx, mapTitle)
             mapFun = seasonalMapFunc[mapTitle]
             grp = pnls.groupby(mapFun)
             with outputs[idx]:
                 grp.aggregate(len).plot(ax=plt.gca(), color='red', marker='o')
-                plt.gca().set_ylabel('Count',color='red')
+                plt.gca().set_ylabel('Count', color='red')
                 grp.aggregate(MetricsCalculator.pf).plot(ax=plt.gca().twinx(), color='green', marker='o')
-                plt.gca().set_ylabel('Pf',color='green')
+                plt.gca().set_ylabel('Pf', color='green')
                 #             plt.gca().get_yticklabels().set_color('green')
                 plt.gcf().set_size_inches(15, 6)
                 plt.show()
         return tab
-
 
     def plotSeasonalities(self):
         tr = self.trades.copy()
@@ -330,30 +338,29 @@ class BacktestResults(object):
 
     def plotFactors(self):
         cols = self.getFactorCols()
-        if(len(cols) == 0):
+        if (len(cols) == 0):
             return
-        cont=[ widgets.Output() for i in range(1 + len(cols))]
-        tab = widgets.Tab(children = cont)
+        cont = [widgets.Output() for i in range(1 + len(cols))]
+        tab = widgets.Tab(children=cont)
 
-        for idx,out in enumerate(cont):
-            tab.set_title(idx,cols[idx - 1])
+        for idx, out in enumerate(cont):
+            tab.set_title(idx, cols[idx - 1])
             cat = pd.cut(self.trades[cols[idx - 1]], 10, duplicates='drop')
-            grp=self.trades['Pnl'].groupby(cat)
+            grp = self.trades['Pnl'].groupby(cat)
 
             with out:
                 grp.aggregate(len).plot(ax=plt.gca(), color='red', marker='o')
-                plt.gca().set_ylabel('Count',color='red')
+                plt.gca().set_ylabel('Count', color='red')
                 grp.aggregate(MetricsCalculator.pf).plot(ax=plt.gca().twinx(), color='green', marker='o')
-                plt.gca().set_ylabel('Pf',color='green')
+                plt.gca().set_ylabel('Pf', color='green')
                 #             plt.gca().get_yticklabels().set_color('green')
                 plt.gcf().set_size_inches(15, 6)
                 plt.show()
         return tab
 
-
     def plotOptimization(self):
 
-        optCols = [i for i in self.opts.columns if i.startswith('opt_') ]
+        optCols = [i for i in self.opts.columns if i.startswith('opt_')]
 
         # optCols=filter(lambda x : len(x) > 0,optCols.split(';'))
         dfOpt = self.opts
@@ -376,35 +383,18 @@ class BacktestResults(object):
             ax = plt.plot(X, Y1)
 
 
-
-
-
 def test():
     import sys
 
-
-    sys.path.append('/home/ivan/projects/chartpapa/market_research/report_tmp/')
+    sys.path.append('/home/ivan/projects/chartpapa/market_research/report/')
     #
     # importlib.reload(tr)
-    bs = BacktestResults("/home/ivan/projects/chartpapa/market_research/report_tmp/report.db")
+    bs = BacktestResults("/home/ivan/projects/chartpapa/market_research/report/report.db")
 
     print(bs.trades)
 
-
-    mc=MetricsCalculator()
+    mc = MetricsCalculator()
     # display(displayTitle('Overall stat '))
-    mc.statToHtml(bs.trades)
+    return mc.statToHtml(bs.trades)
 
-
-    bs.getFactorCols()
-    # bs.plotSeasonalities()
-    # plt.show()
-
-
-# test()
-
-# bs.plot_equity_d2d_for_ticker(ticker='RSX')
-# plt.show()
-
-
-print("")
+# df = test()

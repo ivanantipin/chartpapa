@@ -1,5 +1,6 @@
 package firelib.model
 
+import firelib.core.SourceName
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
@@ -10,7 +11,9 @@ import firelib.core.timeseries.TimeSeries
 import firelib.core.domain.Ohlc
 import firelib.core.misc.Quantiles
 import firelib.core.misc.atMoscow
+import firelib.core.store.DbReaderFactory
 import firelib.core.store.MdStorageImpl
+import firelib.core.store.ReaderFactory
 import firelib.core.store.finamMapperWriter
 import java.time.LocalDate
 import kotlin.math.abs
@@ -20,7 +23,7 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
     val period = props["period"]!!.toInt()
 
     init {
-        val tss = enableSeries(Interval.Min10,100, false)
+        val tss = enableSeries(Interval.Min240,1000, false)
 
         val quantiles = Quantiles<Double>(200);
 
@@ -41,13 +44,11 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
             println("quantile is ${q}")
 
             if(q > 0.95){
-//                shortForMoneyIfFlat(0, 100_000)
-                longForMoneyIfFlat(1, 5000)
-                flattenAll(0)
+                longForMoneyIfFlat(1, 100_000)
+                shortForMoneyIfFlat(0, 100_000)
             }else if(q < 0.05){
-                longForMoneyIfFlat(0, 5000)
-                flattenAll(1)
-//                shortForMoneyIfFlat(1, 100_000)
+                longForMoneyIfFlat(0, 100_000)
+                shortForMoneyIfFlat(1, 100_000)
             }else{
                 flattenAll(0)
                 flattenAll(1)
@@ -62,9 +63,15 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
 fun spreadModel(): ModelBacktestConfig {
     return ModelBacktestConfig(SpreadModel::class).apply{
         startDate(LocalDate.now().minusDays(1500))
-        param("period", 10)
-//        opt("period", 3,20, 1)
-        instruments = listOf("sber", "sberp")
+        opt("period", 10,500, 5)
+        //param("period", 10)
+        interval = Interval.Min240
+        backtestReaderFactory = DbReaderFactory(
+            SourceName.MT5,
+            Interval.Min240,
+            roundedStartTime()
+        )
+        instruments = listOf("BNO", "USO")
     }
 }
 

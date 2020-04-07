@@ -7,16 +7,14 @@ from pandas import Grouper
 import numpy as np
 
 
-cnx = sqlite3.connect("/home/ivan/projects/chartpapa/market_research/report_out/SiStrat/report.db")
+cnx = sqlite3.connect("/home/ivan/projects/chartpapa/market_research/report_out/RegressionModel/report.db")
 
-df=pd.read_sql_query(con=cnx, sql="select * from si_stat where  idx =  34 and ret < 1")
-
-
+df=pd.read_sql_query(con=cnx, sql="select * from RegParam")
 
 
-pp=df.plot.scatter(x='gap', y='ret')
 
-pp.grid(True, which='both')
+
+pp=df.plot()
 
 plt.show()
 

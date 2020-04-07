@@ -77,9 +77,9 @@ class DivModel( context: ModelContext,  props: Map<String, String>) : Model(cont
         val nextIdxes = context.config.instruments.map { -1 }.toIntArray()
 
         val dumper = GeGeWriter<Stat>(
-            "divstat",
             Paths.get(context.config.reportTargetPath).resolve("stat.db"),
-            Stat::class
+            Stat::class,
+            name = "divstat"
         )
 
         context.config.instruments.forEachIndexed({ idx, instrument ->

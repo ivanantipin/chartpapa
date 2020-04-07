@@ -10,6 +10,7 @@ import firelib.core.timeseries.ret
 import firelib.indicators.Ma
 import firelib.indicators.SimpleMovingAverage
 import java.time.LocalDate
+import java.util.*
 
 
 class SiStratReal(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
@@ -17,42 +18,34 @@ class SiStratReal(context: ModelContext, val props: Map<String, String>) : Model
     init {
 
         val intraTs = enableSeries(Interval.Min60, 100, false)[0]
-        val dayTs = enableSeries(Interval.Day, interpolated = true)[0]
 
-        val longQQ = Quantiles<Any>(100)
+        val trend  = GoogleTrendsReader.read("курс доллара")
 
-        val period = props["period"]!!.toInt()
-
-        val ma = SimpleMovingAverage(20,false)
+        val trends = GoogMaDiff(trend.map { Pair(it.dt, it.idx.toDouble()) }, 8)
 
         intraTs.preRollSubscribe {
-            val mm = it[0].close - ma.value()
-            val qq = longQQ.getQuantile(mm)
-            if(qq < 0.1){
+
+            val diff = trends.getDiff(currentTime())
+            println("diff is ${diff}")
+            println("sko  is ${trends.trendma.sko()}")
+
+            if(diff > 0){
+                longForMoneyIfFlat(0,100_000)
+            }else if(diff < 0){
                 shortForMoneyIfFlat(0,100_000)
+            }else{
+                flattenAll(0)
             }
-        }
 
-        dayTs.preRollSubscribe {
-            if(!it[0].interpolated){
-                longQQ.add(it[0].close - ma.value())
-                ma.add(it[0].close)
-            }
         }
-
-        closePosByCondition { idx->
-            positionDuration(0) > 24 && position(idx) != 0
-        }
-
     }
 }
 
 fun siReal(): ModelBacktestConfig {
     return ModelBacktestConfig(SiStratReal::class).apply {
         instruments = listOf("SPFB_Si")
-        opt("period", 2, 30, 2)
-        dumpInterval = Interval.Min30
-        startDate(LocalDate.now().minusDays(1500))
+        //dumpInterval = Interval.Min30
+        startDate(LocalDate.now().minusDays(5000))
     }
 }
 

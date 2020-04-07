@@ -184,7 +184,8 @@ fun seqModel(): ModelBacktestConfig {
     return ModelBacktestConfig(SequentaModel::class).apply {
         interval = Interval.Min30
         startDate(LocalDate.now().minusDays(1000))
-        backtestReaderFactory = DbReaderFactory(SourceName.IQFEED, Interval.Min1, roundedStartTime())
+        parallelTickersBacktest = true
+        backtestReaderFactory = DbReaderFactory(SourceName.IQFEED, Interval.Min30, roundedStartTime())
 //        instruments = listOf("GOOG")
         instruments = GlobalConstants.mdFolder.resolve("/ddisk/globaldatabase/1MIN/STK").toFile().list().toList()
             .map { it.replace("_1.csv", "") }.filter { it != "ON" && it != "ALL" }.subList(0, 200)
