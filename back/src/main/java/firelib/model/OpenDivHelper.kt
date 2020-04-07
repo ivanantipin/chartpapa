@@ -53,7 +53,6 @@ Status	"A"
 
         val format = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-
         val str = template.getForObject<String>("https://api.open-broker.ru/data/v2.0/corporate_events/dividends?date_from=${dateFrom.format(format)}&rowsOffset=0&date_to=&rowsCount=10000&orderBy=FixingDate+&status=&instrument_Id=&search_text=")
 
         var mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).registerModule(KotlinModule())
@@ -63,7 +62,6 @@ Status	"A"
         val jsonNode = tree["Dividends"]
 
         return jsonNode.map {
-            println(it)
             Div(ticker = it["InstrumentCode"]!!.textValue(),
                 div = it["PaymentPerUnit"]!!.doubleValue(),
                 lastDayWithDivs = ZonedDateTime.parse(it["LastDayCanBuy"]?.textValue()!!).toLocalDate(),
@@ -77,8 +75,12 @@ fun main() {
 
     val allDivs = fetchDivs(LocalDate.of(2010, 10, 10))
 
+    allDivs.forEach {
+        println(it)
+    }
 
-    val writer = GeGeWriter<Div>(GlobalConstants.metaDb, Div::class, listOf("ticker", "LastDayWithDivs"), "open_divs")
 
-    writer.write(allDivs)
+//    val writer = GeGeWriter<Div>(GlobalConstants.metaDb, Div::class, listOf("ticker", "LastDayWithDivs"), "open_divs")
+//
+//    writer.write(allDivs)
 }

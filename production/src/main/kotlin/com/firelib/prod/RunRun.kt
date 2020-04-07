@@ -13,6 +13,8 @@ import firelib.emulator.GateEmulator
 import firelib.emulator.HistoricalSourceEmulator
 import firelib.emulator.RtReaderEmulator
 import firelib.model.*
+import firelib.model.prod.VolatilityBreak
+import firelib.model.prod.trendModelConfig
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 
@@ -94,15 +96,14 @@ fun runNeverRun() {
 }
 
 val prodModels = mapOf(
-    "VolatilityBreak" to {VolatilityBreak.modelConfig(15_000)},
-    "TrendModel" to { trendModelConfig()},
+    "VolatilityBreak" to { VolatilityBreak.modelConfig(15_000)},
+    "TrendModel" to { trendModelConfig() },
     "SpreadModel" to { spreadModel()}
 )
 
 
 
 fun main(args: Array<String>) {
-
     runReal(args[0])
 }
 
@@ -120,7 +121,7 @@ private fun runReal(name : String) {
 
     val stub = makeDefaultStub()
 
-    val mapper = DbMapper(trqMapperWriter())
+    val mapper = DbMapper(trqMapperWriter(), {it.board == "TQBR"})
 
     config.gateMapper = mapper
 

@@ -1,18 +1,20 @@
-package firelib.model
+package firelib.model.prod
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
+import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.flattenAll
 import firelib.core.misc.atMoscow
 import firelib.core.store.DbMapper
 import firelib.core.store.MdStorageImpl
 import firelib.core.store.finamMapperWriter
+import firelib.model.*
 import java.time.Instant
 import java.time.LocalDate
 
 
-class TrendModel(context: ModelContext, val props: Map<String, String>) : TrendModelMBean, Model(context, props) {
+class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
     val daytss = enableSeries(Interval.Day)
 
@@ -31,10 +33,10 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : TrendM
                     Pair(idx, (ts[0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close)
                 }
 
-
                 val indexed = idxToRet.filter { it.second.isFinite() && it.second > 0 }
 
                 val sortedBy = indexed.sortedBy { -it.second }
+
                 val sorted = sortedBy.subList(0, Math.min(num, indexed.size)).map { it.first }
 
                 if(Instant.now().epochSecond - currentTime().epochSecond < 24*3600){
@@ -50,7 +52,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : TrendM
 
                 oms.forEachIndexed { idx, om ->
                     if (sorted.contains(idx)) {
-                        longForMoneyIfFlat(idx, 15000)
+                        longForMoneyIfFlat(idx, tradeSize())
                     } else {
                         om.flattenAll()
                     }
@@ -59,43 +61,20 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : TrendM
             }
         }
     }
-
-    override fun buy(ticker: String) {
-        val idx = context.config.instruments.indexOfFirst { it.equals(ticker, true) }
-        if (idx >= 0) {
-            longForMoneyIfFlat(idx, 1000)
-        }
-    }
-
-    override fun sell(ticker: String) {
-        val idx = context.config.instruments.indexOfFirst { it.equals(ticker, true) }
-        if (idx >= 0) {
-            oms[idx].flattenAll("mbean")
+    companion object{
+        fun modelConfig(tradeSize : Int = 10_000): ModelBacktestConfig {
+            return ModelBacktestConfig(TrendModel::class).apply {
+                instruments = tickers
+                startDate(LocalDate.now().minusDays(200))
+                setTradeSize(tradeSize)
+                param("period", 33)
+                param("number", 5)
+            }
         }
     }
 }
 
-fun trendModelConfig(): ModelBacktestConfig {
-    return ModelBacktestConfig(TrendModel::class).apply {
-        instruments = tickers
-//        tickerToDiv = DivHelper.getDivs()
-        startDate(LocalDate.now().minusDays(200))
-        param("period", 33)
-        param("number", 5)
-    }
-}
 
 fun main() {
-    val storageImpl = MdStorageImpl()
-
-
-    val mapper = DbMapper(finamMapperWriter(), { it.market == "1" })
-
-//    tickers.forEach {
-//        storageImpl.updateMarketData(mapper(it.toUpperCase()))
-//    }
-
-
-    val conf = trendModelConfig()
-    conf.runStrat()
+    TrendModel.modelConfig().runStrat()
 }

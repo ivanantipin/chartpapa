@@ -7,24 +7,8 @@ dependencies {
     compile project(':transaqgate')
 }
 
-//startScripts.enabled = false
-//
-//task modelRun(type: CreateStartScripts) {
-//
-//    applicationName ="prod0"
-//    outputDir = new File(project.buildDir, 'tmp')
-//    classpath = startScripts.classpath
-//}
-
-// '
-
 application {
     mainClassName = 'com.firelib.prod.RunRunKt'
-    applicationDefaultJvmArgs = ['-Xms128m','-Xmx1024m', '-Dcom.sun.management.jmxremote.port=9999', '-Dcom.sun.management.jmxremote.authenticate=false', '-Dcom.sun.management.jmxremote.ssl=false']
+    //'-Dcom.sun.management.jmxremote.port=9999', '-Dcom.sun.management.jmxremote.authenticate=false', '-Dcom.sun.management.jmxremote.ssl=false'
+    applicationDefaultJvmArgs = ['-Xms128m', '-Xmx1024m']
 }
-
-
-//applicationDistribution.into('bin') {
-//    from(modelRun)
-//    fileMode = 0755
-//}

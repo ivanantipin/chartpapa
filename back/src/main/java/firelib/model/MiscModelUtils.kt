@@ -87,6 +87,10 @@ fun Model.flattenAll(idx : Int, reason : String = "NA"){
     idxContext(idx).om.flattenAll(reason)
 }
 
+fun Model.tradeSize() : Long{
+    return this.context.config.modelParams["trade_size"]!!.toLong()
+}
+
 
 fun Model.longForMoneyIfFlat(idx: Int, money: Long) : Boolean{
     return idxContext(idx).run {

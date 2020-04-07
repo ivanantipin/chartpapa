@@ -151,9 +151,7 @@ fun ModelBacktestConfig.runStrat() {
 
 fun ModelBacktestConfig.enableDivs(divs: Map<String, List<Div>>) {
     this.tickerToDiv = divs
-
     val delegate = this.backtestReaderFactory
-
     this.backtestReaderFactory = object : ReaderFactory {
         override fun makeReader(security: String): SimplifiedReader {
             return ReaderSimpleDivAdjusted(
@@ -162,9 +160,12 @@ fun ModelBacktestConfig.enableDivs(divs: Map<String, List<Div>>) {
             )
         }
     }
-
-
 }
+
+fun ModelBacktestConfig.setTradeSize(tradeSize : Int) {
+    this.param("trade_size", tradeSize)
+}
+
 
 fun defaultModelFactory(kl: KClass<out Model>): ModelFactory {
     val cons = kl.primaryConstructor!!

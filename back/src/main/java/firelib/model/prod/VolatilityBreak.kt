@@ -1,7 +1,8 @@
-package firelib.model
+package firelib.model.prod
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
+import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.domain.downShadow
 import firelib.core.domain.range
@@ -9,16 +10,13 @@ import firelib.core.domain.upShadow
 import firelib.core.misc.Quantiles
 import firelib.core.misc.atMoscow
 import firelib.core.positionDuration
-import firelib.model.VolatilityBreak.Companion.modelConfig
+import firelib.model.prod.VolatilityBreak.Companion.modelConfig
 import firelib.indicators.ATR
 import firelib.indicators.Donchian
+import firelib.model.*
 import java.time.Instant
 import java.time.LocalDate
 
-
-/*
-research model for simple breakout after low volatility period
- */
 
 class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : Model(context, properties) {
 
@@ -47,7 +45,6 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
     }
 
     init {
-
         val tradeSize = properties["trade_size"]!!.toInt()
 
         enableFactor("volatility") {
@@ -85,7 +82,6 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
         tenMins.forEachIndexed { idx, it ->
             it.preRollSubscribe {
-
                 val timeSeries = daytss[idx]
                 if (it[0].endTime.atMoscow().hour == 18 && timeSeries.count() > period )  {
                     val vola = quantiles[idx].getQuantile(mas[idx].value())
@@ -129,11 +125,10 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
         fun modelConfig(tradeSize : Int): ModelBacktestConfig {
             return ModelBacktestConfig(VolatilityBreak::class).apply {
                 param("hold_hours", 30)
-                param("trade_size", tradeSize)
+                setTradeSize(tradeSize)
                 interval = Interval.Min10
                 startDate(LocalDate.now().minusDays(3000))
                 instruments = tickers
-//                adjustSpread = makeSpreadAdjuster(0.0005)
             }
         }
     }
@@ -141,9 +136,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
 
 fun main() {
-//    updateRussianDivStocks()
     val conf = modelConfig(1000_000)
-    println(conf.instruments)
     conf.dumpInterval = Interval.Day
     conf.runStrat()
 }

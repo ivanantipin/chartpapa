@@ -1,11 +1,13 @@
-package firelib.model
+package firelib.model.prod
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
+import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
+import firelib.model.*
 import java.time.LocalDate
 
 
@@ -15,6 +17,7 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
         val daytss = enableSeries(Interval.Day, interpolated = true)
         val hh = enableSeries(Interval.Min240, interpolated = false)
         val hourTs = enableSeries(Interval.Min10, interpolated = false)
+        val tradeSize = props["trade_size"]!!.toLong()
 
         hh.forEachIndexed { idx, hts ->
             val sequenta = Sequenta()
@@ -28,9 +31,10 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
                                 flattenAll(idx)
                             }
                         }
-                    siggis.filter { it.type == SignalType.Signal && it.reference.recycleRef == null && it.reference.isUp }.forEach {
-                        flattenAll(idx)
-                    }
+                    siggis.filter { it.type == SignalType.Signal && it.reference.recycleRef == null && it.reference.isUp }
+                        .forEach {
+                            flattenAll(idx)
+                        }
                 }
             }
         }
@@ -65,7 +69,7 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
                             dayts[0].close > setup!!.tdst &&
                             dayts[2].close < setup!!.tdst
                         ) {
-                            longForMoneyIfFlat(idx, 100_000)
+                            longForMoneyIfFlat(idx, tradeSize)
                             setup = null;
                         }
                     }
@@ -73,15 +77,19 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
             }
         }
     }
-}
 
-fun reverseModel(): ModelBacktestConfig {
-    return ModelBacktestConfig(ReverseModel::class).apply {
-        instruments = tickers.filter { it != "irao" }
-        startDate(LocalDate.now().minusDays(3000))
+    companion object{
+        fun modelConfig(tradeSize : Int = 10_000) : ModelBacktestConfig{
+            return ModelBacktestConfig(ReverseModel::class).apply {
+                instruments = tickers.filter { it != "irao" }
+                setTradeSize(tradeSize)
+                startDate(LocalDate.now().minusDays(3000))
+            }
+        }
     }
 }
 
+
 fun main() {
-    reverseModel().runStrat()
+    ReverseModel.modelConfig().runStrat()
 }
