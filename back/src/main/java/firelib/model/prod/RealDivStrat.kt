@@ -22,7 +22,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
             if(Instant.now().epochSecond - currentTime().epochSecond < 5000){
                 try {
                     divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1)).groupBy { it.ticker.toLowerCase() }
-                    log.info("divs updated")
+                    log.info("divs updated ${divMap}")
                 }catch (e : Exception){
                     log.info("error updating divs", e)
                 }
@@ -30,15 +30,23 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
         }
 
         context.config.instruments.forEachIndexed { idx, instrument ->
+
+            var counter = 0
+
             tss[idx].preRollSubscribe {
 
-                val divs = divMap[instrument]!!.associateBy { it.lastDayWithDivs }
+                if(++counter % 10 == 0){
+                    logRealtime { "i am alive ${instrument} -  ${it[0]}" }
+                }
+
+                val divs = divMap.getOrDefault(instrument, emptyList()).associateBy { it.lastDayWithDivs }
 
                 val localTime = currentTime().atMoscow()
 
                 val date = localTime.toLocalDate()
 
                 if (localTime.hour == 18 && localTime.minute == 30 && divs.containsKey(date)) {
+                    logRealtime { "long for ${instrument} as it has a div ${divs[date]}" }
                     longForMoneyIfFlat(idx, tradeSize())
                 }else if (localTime.hour == 18 && localTime.minute == 20 && position(idx) != 0) {
                     flattenAll(idx)

@@ -39,15 +39,13 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
                 val sorted = sortedBy.subList(0, Math.min(num, indexed.size)).map { it.first }
 
-                if(Instant.now().epochSecond - currentTime().epochSecond < 24*3600){
-                    idxToRet.forEach {
-                        log.info("return for ticker ${instruments()[it.first]} is ${it.second}")
-                    }
-
-                    log.info("=====")
-
-                    log.info("top is ${sorted}")
+                idxToRet.forEach {
+                    logRealtime { "return for ticker ${instruments()[it.first]} is ${it.second}"}
                 }
+
+                logRealtime{"====="}
+
+                logRealtime { ("top is ${sorted.map{instruments()[it]}}")}
 
 
                 oms.forEachIndexed { idx, om ->

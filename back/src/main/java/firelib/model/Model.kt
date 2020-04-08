@@ -4,6 +4,7 @@ import firelib.core.OrderManager
 import firelib.core.OrderManagerImpl
 import firelib.core.flattenAll
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 /**
 
@@ -16,6 +17,12 @@ open class Model(val context: ModelContext, val properties: Map<String, String>)
 
     fun properties(): Map<String, String> {
         return properties
+    }
+
+    fun logRealtime(msg : ()->String){
+        if(Instant.now().toEpochMilli() - currentTime().toEpochMilli() < 60*60*1000 ){
+            log.info(msg())
+        }
     }
 
     fun name(): String {
@@ -49,6 +56,7 @@ open class Model(val context: ModelContext, val properties: Map<String, String>)
                 instrument = context.instrumentMapper(it)!!,
                 maxOrderCount = 20
             )
+
         }
     }
 

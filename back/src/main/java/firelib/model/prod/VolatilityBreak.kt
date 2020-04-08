@@ -88,6 +88,7 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
                     val vol = volumeQuantiles[idx].getQuantile(timeSeries.last().volume.toDouble())
                     val vol1 = volumeQuantiles[idx].getQuantile(timeSeries[1].volume.toDouble())
                     val barQuantLow = barQuantLowFun(idx)
+                    logRealtime { "checking condition ${instruments()[idx]} is ${donchians[idx].max} vs close ${it[0].close} bar quant ${barQuantLow}"}
                     if (it[0].close > donchians[idx].max && barQuantLow > 0.8) {
                         longForMoneyIfFlat(idx, tradeSize.toLong())
                     }
@@ -100,6 +101,9 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
                 if(!it[0].interpolated){
                     volumeQuantiles[idx].add(it[0].volume.toDouble())
                     donchians[idx].add(it[0])
+
+                    logRealtime { "donchian for ticker ${instruments()[idx]} is ${donchians[idx].min} - ${donchians[idx].max}"}
+
                 }
             }
         }

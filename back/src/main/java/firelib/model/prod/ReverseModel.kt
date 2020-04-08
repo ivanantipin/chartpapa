@@ -17,7 +17,6 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
         val daytss = enableSeries(Interval.Day, interpolated = true)
         val hh = enableSeries(Interval.Min240, interpolated = false)
         val hourTs = enableSeries(Interval.Min10, interpolated = false)
-        val tradeSize = props["trade_size"]!!.toLong()
 
         hh.forEachIndexed { idx, hts ->
             val sequenta = Sequenta()
@@ -28,12 +27,16 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
                         .filter { it.type == SignalType.SetupReach }
                         .forEach {
                             if (position(idx) > 0 && it.reference.isDown) {
+                                logRealtime { "flattening because of counter setup developed on 4h"}
                                 flattenAll(idx)
                             }
                         }
                     siggis.filter { it.type == SignalType.Signal && it.reference.recycleRef == null && it.reference.isUp }
                         .forEach {
-                            flattenAll(idx)
+                            if(position(idx) > 0){
+                                logRealtime { "flattening because of signal non recycled" }
+                                flattenAll(idx)
+                            }
                         }
                 }
             }
@@ -44,9 +47,11 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
             val sequenta = Sequenta()
             dayts.preRollSubscribe { ts ->
                 if (!ts[0].interpolated) {
+                    logRealtime { "day roll ${instruments()[idx]} -  ${ts[0]}" }
                     sequenta.onOhlc(ts[0])
                         .filter { it.type == SignalType.SetupReach }
                         .forEach {
+                            logRealtime { "established setup for tdst ${it.reference.tdst}" }
                             setup = it.reference
                         }
                 }
@@ -54,12 +59,19 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
 
             hourTs[idx].preRollSubscribe { ts ->
                 if (!ts[0].interpolated && currentTime().atMoscow().hour == 18) {
+
+                    logRealtime { "checking setup ${instruments()[idx]} -  ${ts[0]}" }
+
                     if (setup != null && setup!!.isUp) {
                         if (dayts[0].close < dayts[1].close &&
                             dayts[0].close < setup!!.tdst &&
                             dayts[2].close > setup!!.tdst
                         ) {
-                            flattenAll(idx)
+                            if(position(idx) > 0){
+                                logRealtime { "flattening because break of tdst ${setup!!.tdst}" }
+                                flattenAll(idx)
+                            }
+
                             setup = null;
                             //shortForMoneyIfFlat(idx, 100_000)
                         }
@@ -69,7 +81,7 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
                             dayts[0].close > setup!!.tdst &&
                             dayts[2].close < setup!!.tdst
                         ) {
-                            longForMoneyIfFlat(idx, tradeSize)
+                            longForMoneyIfFlat(idx, tradeSize())
                             setup = null;
                         }
                     }
