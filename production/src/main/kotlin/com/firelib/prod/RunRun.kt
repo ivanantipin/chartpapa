@@ -13,8 +13,10 @@ import firelib.emulator.GateEmulator
 import firelib.emulator.HistoricalSourceEmulator
 import firelib.emulator.RtReaderEmulator
 import firelib.model.*
+import firelib.model.prod.RealDivModel
+import firelib.model.prod.ReverseModel
+import firelib.model.prod.TrendModel
 import firelib.model.prod.VolatilityBreak
-import firelib.model.prod.trendModelConfig
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 
@@ -96,9 +98,10 @@ fun runNeverRun() {
 }
 
 val prodModels = mapOf(
-    "VolatilityBreak" to { VolatilityBreak.modelConfig(15_000)},
-    "TrendModel" to { trendModelConfig() },
-    "SpreadModel" to { spreadModel()}
+    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(15_000)},
+    TrendModel::class.simpleName!! to { TrendModel.modelConfig(15_000) },
+    RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(30_000)},
+    ReverseModel::class.simpleName!! to { ReverseModel.modelConfig(30_000)}
 )
 
 
