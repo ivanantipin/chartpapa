@@ -1,4 +1,5 @@
 import collections
+
 import six
 
 from .config import FINAM_CHARSET

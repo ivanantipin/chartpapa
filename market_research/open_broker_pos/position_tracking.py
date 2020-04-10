@@ -1,7 +1,8 @@
 import sqlite3
-from lxml import etree
-import requests
+
 import pandas as pd
+import requests
+from lxml import etree
 
 dataFolder = '/hdd2-archive/edgar/'
 

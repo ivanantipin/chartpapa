@@ -1,17 +1,11 @@
 import gzip
+import os
 import shutil
-import urllib
-import os.path
-
-
 import sqlite3
-
 import sys
+import urllib
 
 import filingsExtractor as fe
-
-import os
-
 
 startYear = 2010
 endYear = 2018

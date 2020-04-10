@@ -1,4 +1,4 @@
-from xbrl import XBRLParser, GAAP, GAAPSerializer
+from xbrl import XBRLParser
 
 xbrl_parser = XBRLParser()
 xbrl = xbrl_parser.parse(open("data/aapl-20170701.xml"))
