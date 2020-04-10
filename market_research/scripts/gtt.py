@@ -1,17 +1,5 @@
-from pandas._libs.tslibs.timestamps import Timestamp
-from pytrends.request import TrendReq
-import sqlite3
-import datetime as dt
-import numpy as np
-
-import pandas as pd
-import sqlite3
-
 import matplotlib.pyplot as plt
-
-from pandas import Grouper
-import numpy as np
-
+from pytrends.request import TrendReq
 
 pytrend = TrendReq()
 

@@ -2,7 +2,6 @@ package com.firelib.prod
 
 import com.firelib.transaq.*
 import firelib.common.Order
-import firelib.core.domain.Interval
 import firelib.core.domain.OrderType
 import firelib.core.domain.Side
 import firelib.core.store.DbMapper

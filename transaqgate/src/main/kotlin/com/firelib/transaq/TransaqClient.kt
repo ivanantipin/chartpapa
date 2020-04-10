@@ -1,7 +1,6 @@
 package com.firelib.transaq
 
 import com.firelib.TransaqConnectorGrpc
-import io.grpc.Deadline
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext
@@ -11,14 +10,16 @@ import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
 
-class TransaqGrpcClientExample  {
+class TransaqClient {
     var channel: io.grpc.ManagedChannel
     val blockingStub: TransaqConnectorGrpc.TransaqConnectorBlockingStub
 
 
-    private fun buildSslContext(trustCertCollectionFilePath: String,
-                                clientCertChainFilePath: String,
-                                clientPrivateKeyFilePath: String): SslContext {
+    private fun buildSslContext(
+        trustCertCollectionFilePath: String,
+        clientCertChainFilePath: String,
+        clientPrivateKeyFilePath: String
+    ): SslContext {
         val builder: SslContextBuilder = GrpcSslContexts.forClient()
         if (trustCertCollectionFilePath != null) {
             builder.trustManager(File(trustCertCollectionFilePath))
@@ -35,12 +36,14 @@ class TransaqGrpcClientExample  {
 
             .maxInboundMessageSize(30_000_000)
 //                .overrideAuthority("foo.test.google.fr")  /* Only for using provided test certs. */
-                .sslContext(
-                        buildSslContext(
-                                "${System.getProperty("user.home")}/keys/ca.crt",
-                                "${System.getProperty("user.home")}/keys/client.crt",
-                                "${System.getProperty("user.home")}/keys/client.pem"))
-                .build()
+            .sslContext(
+                buildSslContext(
+                    "${System.getProperty("user.home")}/keys/ca.crt",
+                    "${System.getProperty("user.home")}/keys/client.crt",
+                    "${System.getProperty("user.home")}/keys/client.pem"
+                )
+            ).overrideAuthority("localhost")
+            .build()
         blockingStub = TransaqConnectorGrpc.newBlockingStub(channel)
     }
 
@@ -49,8 +52,7 @@ class TransaqGrpcClientExample  {
     }
 
     companion object {
-        private val logger = Logger.getLogger(TransaqGrpcClientExample::class.java.getName())
+        private val logger = Logger.getLogger(TransaqClient::class.java.getName())
 
     }
-
 }

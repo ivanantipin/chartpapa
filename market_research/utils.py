@@ -1,16 +1,16 @@
 import sqlite3
 import sys
 import time
+import typing
 from functools import reduce
+
 # from fredapi import Fred
 import numpy as np
 import pandas as pd
 import requests
 from lxml import etree
-import typing
 
 from finam.export import Timeframe, Exporter, Market
-
 
 julTabs = ['acc150592','acc150592i']
 nadiaTabs = ['acc172926']

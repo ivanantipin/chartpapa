@@ -1,6 +1,5 @@
 package firelib.indicators
 
-import java.lang.RuntimeException
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 

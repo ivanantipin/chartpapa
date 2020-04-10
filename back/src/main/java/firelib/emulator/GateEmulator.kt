@@ -1,12 +1,12 @@
 package firelib.emulator
 
-import firelib.core.domain.InstrId
 import firelib.common.Order
-import firelib.core.domain.OrderStatus
 import firelib.common.Trade
 import firelib.core.InstrumentMapper
 import firelib.core.TradeGate
+import firelib.core.domain.InstrId
 import firelib.core.domain.OrderState
+import firelib.core.domain.OrderStatus
 import java.time.Instant
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

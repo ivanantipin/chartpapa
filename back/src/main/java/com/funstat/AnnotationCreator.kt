@@ -3,12 +3,10 @@ package com.funstat
 import com.funstat.domain.Annotations
 import com.funstat.domain.HLine
 import com.funstat.domain.Label
-import firelib.indicators.sequenta.Sequenta
-import firelib.indicators.sequenta.Signal
-import firelib.indicators.sequenta.SignalType
-import firelib.core.misc.atUtc
 import firelib.core.domain.Ohlc
-import firelib.core.domain.range
+import firelib.core.misc.atUtc
+import firelib.indicators.sequenta.Sequenta
+import firelib.indicators.sequenta.SignalType
 import firelib.indicators.sequenta.calcStop
 import java.text.DecimalFormat
 import java.util.*

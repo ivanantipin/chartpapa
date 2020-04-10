@@ -1,6 +1,5 @@
 package firelib.indicators
 
-import org.apache.commons.collections.MultiMap
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap

@@ -1,9 +1,9 @@
 package firelib.core.misc
 
 import firelib.core.domain.Interval
-import firelib.model.Model
 import firelib.core.makePositionEqualsTo
 import firelib.core.timeseries.nonInterpolatedView
+import firelib.model.Model
 import java.time.LocalTime
 
 

@@ -4,19 +4,9 @@ import firelib.core.SourceName
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.misc.UtilsHandy
-import firelib.core.flattenAll
-import firelib.core.makePositionEqualsTo
-import firelib.core.timeseries.TimeSeries
-import firelib.core.domain.Ohlc
 import firelib.core.misc.Quantiles
-import firelib.core.misc.atMoscow
 import firelib.core.store.DbReaderFactory
-import firelib.core.store.MdStorageImpl
-import firelib.core.store.ReaderFactory
-import firelib.core.store.finamMapperWriter
 import java.time.LocalDate
-import kotlin.math.abs
 
 class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model(context,props){
 

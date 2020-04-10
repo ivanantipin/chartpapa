@@ -1,16 +1,17 @@
 package com.firelib.transaq
 
-import firelib.core.domain.InstrId
 import firelib.core.InstrumentMapper
-import firelib.core.store.ReaderFactory
-import firelib.core.misc.timeSequence
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
+import firelib.core.misc.atMoscow
+import firelib.core.misc.timeSequence
+import firelib.core.store.ReaderFactory
 import firelib.core.store.reader.QueueSimplifiedReader
 import firelib.core.store.reader.SimplifiedReader
-import firelib.core.domain.Ohlc
 import org.slf4j.LoggerFactory
-import java.lang.Exception
 import java.time.Instant
+import java.time.LocalTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
@@ -71,7 +72,11 @@ class TrqRealtimeReaderFactory(
         Thread {
             while (true) {
                 val status = serverStatus.queue.poll(1, TimeUnit.MINUTES)
-                if ("true" == status?.connected && (System.currentTimeMillis() - lastTickReceived.get()) > 2 * 60_000) {
+                if ("true" == status?.connected
+                    && (System.currentTimeMillis() - lastTickReceived.get()) > 2 * 60_000
+                    && Instant.now().atMoscow().toLocalTime() >= LocalTime.of(10,0)
+                    && Instant.now().atMoscow().toLocalTime() < LocalTime.of(19,0) // fixme would not work for other markets
+                ) {
                     log.info("resubscribing for ${securities}")
                     resubscribe()
                 }
@@ -101,7 +106,7 @@ class TrqRealtimeReaderFactory(
             val cnt = stat.computeIfAbsent(security) { AtomicLong(0) }
             cnt.addAndGet(ticks.size.toLong())
 
-            if (System.currentTimeMillis() - lastTime > 60 * 60_000) {
+            if (System.currentTimeMillis() - lastTime > 60 * 60_000  ) {
                 log.info("receidev ticks last hour ${stat}")
                 stat.clear()
                 lastTime = System.currentTimeMillis()

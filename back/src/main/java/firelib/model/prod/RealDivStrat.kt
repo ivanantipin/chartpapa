@@ -58,7 +58,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
         fun modelConfig(tradeSize : Int = 10_000) : ModelBacktestConfig{
             val divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1300)).groupBy { it.ticker.toLowerCase() }
             return ModelBacktestConfig(RealDivModel::class).apply {
-                instruments = divMap.keys.toList()
+                instruments = divMap.keys.filter { tickers.contains(it) }
                 setTradeSize(tradeSize)
                 startDate(LocalDate.now().minusDays(1300))
                 enableDivs(divMap)

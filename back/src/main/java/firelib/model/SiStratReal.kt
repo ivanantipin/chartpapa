@@ -3,14 +3,7 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.domain.ret
-import firelib.core.misc.Quantiles
-import firelib.core.misc.atMoscow
-import firelib.core.timeseries.ret
-import firelib.indicators.Ma
-import firelib.indicators.SimpleMovingAverage
 import java.time.LocalDate
-import java.util.*
 
 
 class SiStratReal(context: ModelContext, val props: Map<String, String>) : Model(context, props) {

@@ -1,20 +1,20 @@
 package firelib.core
 
-import firelib.common.Order
 import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.domain.Ohlc
+import firelib.core.domain.OrderState
 import firelib.core.mddistributor.MarketDataDistributor
+import firelib.core.misc.Batcher
 import firelib.core.misc.ChannelSubscription
 import firelib.core.misc.StreamTradeCaseGenerator
-import firelib.model.Model
-import firelib.core.report.dao.ColDefDao
 import firelib.core.report.OhlcStreamWriter
 import firelib.core.report.StreamTradeCaseWriter
+import firelib.core.report.StreamTradeWriter
+import firelib.core.report.dao.ColDefDao
 import firelib.core.report.orderColsDefs
 import firelib.core.timeseries.nonInterpolatedView
-import firelib.core.domain.Ohlc
-import firelib.core.misc.Batcher
-import firelib.core.report.StreamTradeWriter
+import firelib.model.Model
 import org.apache.commons.io.FileUtils
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService
@@ -54,7 +54,7 @@ fun enableOrdersPersist(model : Model, reportFilePath : Path, ioExecutor : Execu
     FileUtils.forceMkdir(reportFilePath.parent.toFile())
 
     val orderWriter = ColDefDao(reportFilePath, orderColsDefs, tableName)
-    val orderBatcher = Batcher<Order>({
+    val orderBatcher = Batcher<OrderState>({
         ioExecutor.submit {
             orderWriter.upsert(it)
         }.get()
@@ -63,7 +63,7 @@ fun enableOrdersPersist(model : Model, reportFilePath : Path, ioExecutor : Execu
 
     val subscriptions = model.orderManagers().map { om ->
         om.orderStateTopic().subscribe {
-            orderBatcher.add(it.order)
+            orderBatcher.add(it)
         }
     }
 

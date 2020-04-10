@@ -1,4 +1,4 @@
-import {timeParse, timeFormat} from "d3-time-format";
+import {timeFormat, timeParse} from "d3-time-format";
 
 let specifier = "%Y-%m-%dT%H:%M:%S";
 let parser = timeParse(specifier);

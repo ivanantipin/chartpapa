@@ -1,8 +1,8 @@
 package firelib.core.store.reader
 
+import firelib.core.domain.Ohlc
 import firelib.core.store.reader.binary.BinaryReaderRecordDescriptor
 import firelib.core.store.reader.binary.OhlcDesc
-import firelib.core.domain.Ohlc
 import firelib.parser.CsvParser
 import firelib.parser.LegacyMarketDataFormatLoader
 import firelib.parser.ParseHandler

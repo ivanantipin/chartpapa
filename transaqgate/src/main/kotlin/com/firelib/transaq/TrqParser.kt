@@ -34,6 +34,7 @@ object TrqParser{
         } else if (str.startsWith("<markets")) {
             val idToMarket = mapOf(
                 "0" to "Collateral",
+                "1" to "MICEX",
                 "4" to "FORTS",
                 "14" to "MMA",
                 "15" to "ETS"

@@ -1,6 +1,7 @@
 from __future__ import division
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 df=pd.read_csv('/ddisk/globaldatabase/spy.csv',names=['ts','close'],index_col='ts')

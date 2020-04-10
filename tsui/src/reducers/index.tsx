@@ -2,7 +2,6 @@ import {MainStore} from "../components/types";
 import {Action} from "../actions";
 
 
-
 const def : MainStore = {
     instruments : [],
     widgets : []

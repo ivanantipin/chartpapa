@@ -1,10 +1,10 @@
 package firelib.core.store.reader
 
+import firelib.core.domain.Timed
 import firelib.core.misc.toStandardString
 import firelib.core.store.reader.binary.BinaryReader
 import firelib.core.store.reader.binary.BinaryReaderRecordDescriptor
 import firelib.core.store.reader.binary.BinaryWriter
-import firelib.core.domain.Timed
 import org.apache.commons.io.FileUtils
 import java.nio.file.Path
 import java.nio.file.Paths

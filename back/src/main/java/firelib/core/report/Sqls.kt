@@ -1,10 +1,9 @@
 package firelib.core.report
 
 import firelib.core.misc.SqlUtils
-import firelib.core.report.Sqls.readCurrentPositions
-import firelib.model.DummyModel
 import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Path
+import java.nio.file.Paths
 import javax.sql.DataSource
 
 
@@ -27,6 +26,7 @@ where st.epochTimeMs = le.epochTimeMs
     fun readCurrentPositions(path: Path): Map<String, OmPosition> {
         val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
         if(!checkTableExists(ds, "trades")){
+            println("empty trades for path ${path} no positions to be restored")
             return emptyMap()
         }
         return JdbcTemplate(ds).query(curPosSql) { rs, idx ->
@@ -38,4 +38,9 @@ where st.epochTimeMs = le.epochTimeMs
         return JdbcTemplate(ds).queryForObject("SELECT count(*) FROM sqlite_master WHERE type='table' AND lower(name)='${tableName.toLowerCase()}'", Int::class.java) > 0
     }
 
+}
+
+
+fun main() {
+    println(Sqls.readCurrentPositions(Paths.get("/home/ivan/tmp/VolatilityBreak.db")))
 }

@@ -1,6 +1,6 @@
-import firelib.iqfeed.IntervalTransformer
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
+import firelib.iqfeed.IntervalTransformer
 import org.junit.Test
 import java.time.LocalDateTime
 import java.time.ZoneOffset

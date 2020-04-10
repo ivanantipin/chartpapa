@@ -1,25 +1,20 @@
 package firelib.core.misc
 
 import firelib.core.HistoricalSource
-import firelib.core.domain.InstrId
-import firelib.finam.FinamDownloader
-import firelib.core.store.MdStorageImpl
 import firelib.core.InstrumentMapper
 import firelib.core.SourceName
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
-import firelib.core.misc.UtilsHandy.updateTicker
-import firelib.core.store.GlobalConstants
-import firelib.core.store.finamMapperWriter
+import firelib.core.store.MdStorageImpl
+import firelib.finam.FinamDownloader
 import firelib.model.DivHelper
-import firelib.vantage.VantageDownloader
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileReader
 import java.lang.Double
 import java.nio.charset.Charset
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -36,7 +31,11 @@ class FinamTickerMapper(val finamDownloader: FinamDownloader) : InstrumentMapper
     }
 
     override fun invoke(ticker: String): InstrId? {
-        val lst = code2instr[ticker.toLowerCase()]!!
+
+        val lticker = ticker.toLowerCase()
+        require(code2instr.containsKey(lticker), {"no ticker found ${lticker}"})
+
+        val lst = code2instr[lticker]!!
         return lst.filter { it.market == FinamDownloader.SHARES_MARKET }.firstOrNull()
     }
 }

@@ -4,11 +4,11 @@ import com.firelib.DatePoint
 import com.firelib.Level
 import com.firelib.Levels
 import com.firelib.OhlcPeriod
+import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
+import firelib.core.misc.toInstantDefault
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
-import firelib.core.domain.Interval
-import firelib.core.misc.toInstantDefault
-import firelib.core.domain.Ohlc
 import java.util.*
 
 class LevelsGen(val broadcaster: Broadcaster<Levels>, val ticker: String) {

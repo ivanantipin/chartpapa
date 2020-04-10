@@ -1,8 +1,8 @@
 package firelib.indicators
 
-import firelib.core.timeseries.TimeSeries
 import firelib.core.domain.Ohlc
 import firelib.core.domain.range
+import firelib.core.timeseries.TimeSeries
 
 class ATR(val period: Int, val ts: TimeSeries<Ohlc>) {
 

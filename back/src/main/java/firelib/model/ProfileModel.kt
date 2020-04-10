@@ -3,20 +3,8 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.domain.range
-import firelib.core.domain.ret
-import firelib.core.flattenAll
-import firelib.core.misc.Quantiles
-import firelib.core.misc.atMoscow
-import firelib.core.store.DbMapper
-import firelib.core.store.MdStorageImpl
-import firelib.core.store.finamMapperWriter
-import firelib.core.store.populateMapping
-import firelib.finam.FinamDownloader
 import firelib.indicators.Ma
 import firelib.indicators.MarketProfile
-import java.lang.Double.min
-import java.time.DayOfWeek
 import java.time.LocalDate
 
 

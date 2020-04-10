@@ -3,6 +3,7 @@ import {EditorState} from 'draft-js';
 import ReactDOM from 'react-dom';
 import 'draft-js/dist/Draft.css'
 import '../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
 var wys =  require('react-draft-wysiwyg');
 
 //@ts-ignore

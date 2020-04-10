@@ -1,33 +1,5 @@
 package com.firelib.test
 
-import firelib.core.config.ModelBacktestConfig
-import firelib.core.config.runStrat
-import firelib.core.domain.Interval
-import firelib.core.store.reader.ReaderFactoryImpl
-import firelib.core.domain.Ohlc
-import firelib.core.store.ReaderFactory
-import firelib.core.store.reader.QueueSimplifiedReader
-import firelib.core.store.reader.SimplifiedReader
-import firelib.core.timeseries.TimeSeries
-import firelib.model.CandleMax
-import firelib.model.DivHelper
-import firelib.model.Model
-import firelib.model.ModelContext
-import firelib.parser.CsvParser
-import firelib.parser.LegacyMarketDataFormatLoader
-import firelib.parser.ParseHandler
-import firelib.parser.ParserHandlersProducer
-import org.junit.Assert
-import org.junit.Test
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
-import java.time.*
-import java.time.ZoneId.of
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-
 //
 //class OhlcTestModel(context: ModelContext) : Model(context, emptyMap()) {
 //

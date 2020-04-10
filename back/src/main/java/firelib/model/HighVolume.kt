@@ -3,10 +3,10 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
 import firelib.core.misc.Quantiles
 import firelib.core.report.dao.GeGeWriter
 import firelib.core.timeseries.TimeSeries
-import firelib.core.domain.Ohlc
 import java.nio.file.Paths
 
 

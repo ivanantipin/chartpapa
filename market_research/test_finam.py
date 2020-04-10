@@ -1,6 +1,6 @@
 import logging
 
-from market_research.finam.export import  Exporter, Market, LookupComparator
+from market_research.finam.export import Exporter, Market
 
 # from finam.export import Exporter, Market, LookupComparator
 

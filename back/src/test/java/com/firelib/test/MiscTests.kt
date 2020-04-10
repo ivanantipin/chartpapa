@@ -1,8 +1,8 @@
 package com.firelib.test
 
-import firelib.core.domain.InstrId
 import firelib.common.Order
 import firelib.common.Trade
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.OrderType
 import firelib.core.domain.Side

@@ -3,8 +3,8 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.report.dao.GeGeWriter
 import firelib.core.domain.ret
+import firelib.core.report.dao.GeGeWriter
 
 
 class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(context, fac) {

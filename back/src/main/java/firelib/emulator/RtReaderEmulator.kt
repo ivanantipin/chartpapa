@@ -1,10 +1,10 @@
 package firelib.emulator
 
-import firelib.core.misc.timeSequence
 import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
+import firelib.core.misc.timeSequence
 import firelib.core.store.reader.QueueSimplifiedReader
 import firelib.core.store.reader.SimplifiedReader
-import firelib.core.domain.Ohlc
 import java.time.Instant
 
 class RtReaderEmulator(val interval : Interval) : SimplifiedReader {

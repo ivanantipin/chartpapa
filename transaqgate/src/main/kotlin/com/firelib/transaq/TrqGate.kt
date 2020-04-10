@@ -7,6 +7,7 @@ import firelib.common.Order
 import firelib.common.Trade
 import firelib.core.TradeGate
 import firelib.core.domain.*
+import firelib.core.report.dao.GeGeWriter
 import firelib.core.store.GlobalConstants
 import io.grpc.Deadline
 import org.apache.commons.text.StringEscapeUtils
@@ -17,6 +18,19 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+
+
+val clientsDao = GeGeWriter<TrqClientDb>(GlobalConstants.metaDb, TrqClientDb::class, listOf("id"), "trq_clients")
+
+data class TrqClientDb(
+    val id : String,
+    var market: String,
+    var currency: String,
+    var type: String
+)
+
+
+
 
 class TrqGate(
     val dispatcherTrq: TrqMsgDispatcher,
@@ -51,6 +65,10 @@ class TrqGate(
         dispatcherTrq.addSync<TrqMsg>({ true }, { msg ->
             executor.execute({ processMsg(msg) })
         })
+
+        clientId = clientsDao.read().filter { it.market == "1" }[0].id
+
+        log.info("client id set to ${clientId}")
     }
 
 
@@ -157,10 +175,8 @@ fun main() {
 
 
 fun makeDefaultStub(): TransaqConnectorGrpc.TransaqConnectorBlockingStub {
-    return TransaqGrpcClientExample("localhost", 50052).blockingStub
+    return TransaqClient("192.168.0.10", 50052).blockingStub
 }
-
-val logger = LoggerFactory.getLogger("command")
 
 fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str: String): TrqResponse {
     return parseTrqResponse(
@@ -186,8 +202,6 @@ val loginCmd = TrqCommandHelper.connectCmd(
     GlobalConstants.getProp("host"),
     GlobalConstants.getProp("port")
 )
-//val loginCmd = TrqCommandHelper.connectCmd("FBTC277A", "x8Er8EuU", "tr1.finambank.ru", "3324")
-
 
 fun makeDefaultTransaqGate(executor: Executor): TrqGate {
     val stub = makeDefaultStub()

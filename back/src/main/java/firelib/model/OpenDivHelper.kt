@@ -3,8 +3,6 @@ package firelib.model
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import firelib.core.report.dao.GeGeWriter
-import firelib.core.store.GlobalConstants
 import firelib.model.OpenDivHelper.fetchDivs
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForObject

@@ -1,14 +1,14 @@
 package firelib.finam
 
-import firelib.core.domain.InstrId
 import com.google.common.io.CharStreams.readLines
 import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
-import firelib.core.misc.FinamTickerMapper
 import firelib.core.domain.Ohlc
+import firelib.core.misc.FinamTickerMapper
 import firelib.core.misc.moscowZoneId
 import io.netty.util.concurrent.DefaultThreadFactory
 import org.apache.commons.io.IOUtils
@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URL
-import java.nio.charset.Charset
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 

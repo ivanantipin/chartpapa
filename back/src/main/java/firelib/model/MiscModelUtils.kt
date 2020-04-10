@@ -8,11 +8,8 @@ import firelib.core.mddistributor.MarketDataDistributor
 import firelib.core.misc.PositionCloser
 import firelib.core.misc.Quantiles
 import firelib.core.positionDuration
-import firelib.core.report.dao.GeGeWriter
-import firelib.core.store.GlobalConstants
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.nonInterpolatedView
-import java.lang.RuntimeException
 import java.time.Instant
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit

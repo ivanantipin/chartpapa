@@ -1,9 +1,10 @@
+import datetime as dt
+import sqlite3
+
+import numpy as np
 from pandas._libs.tslibs.timestamps import Timestamp
 from pytrends.request import TrendReq
-import sqlite3
-import datetime as dt
-import numpy as np
-import time
+
 pytrend = TrendReq()
 
 dbPath = '/ddisk/globaldatabase/md/meta.db'

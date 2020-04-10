@@ -1,10 +1,10 @@
 package firelib.core.backtest.tradegate
 
 import firelib.common.Order
-import firelib.core.config.ModelBacktestConfig
 import firelib.core.TradeGate
-import firelib.core.timeservice.TimeService
+import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.OrderType
+import firelib.core.timeservice.TimeService
 import java.time.Instant
 
 

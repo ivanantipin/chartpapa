@@ -3,16 +3,9 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.misc.Quantiles
-import firelib.core.report.dao.GeGeWriter
-import firelib.core.timeseries.TimeSeries
-import firelib.core.domain.Ohlc
-import firelib.core.misc.UtilsHandy
 import firelib.core.misc.atMoscow
-import firelib.core.misc.toInstantDefault
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
-import java.nio.file.Paths
 import java.time.LocalDate
 import java.util.*
 

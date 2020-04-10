@@ -1,7 +1,7 @@
 package firelib.core.store.reader.binary
 
-import firelib.core.store.reader.MarketDataReader
 import firelib.core.domain.Timed
+import firelib.core.store.reader.MarketDataReader
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.time.Instant

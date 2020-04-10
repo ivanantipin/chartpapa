@@ -3,14 +3,13 @@ import inspect
 import os
 import sqlite3
 
+import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytz
 from IPython.display import HTML
 from scipy.interpolate import griddata
-import ipywidgets as widgets
-import sys
 
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 

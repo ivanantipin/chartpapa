@@ -15,7 +15,6 @@ object SqlUtils{
 
     fun makeCreateSqlStmtFromHeader(table: String, header: Map<String, String>, pk : List<String> = emptyList()): String {
         val t0 = header.toList().map { "${it.first} ${it.second} not NULL" }.joinToString(separator = ",")
-
         val ppk = if(pk.isEmpty()) "" else ", primary key (${pk.joinToString (separator = ",")})"
         return  "create table if not exists $table ( ${t0} ${ppk} ) ;"
     }

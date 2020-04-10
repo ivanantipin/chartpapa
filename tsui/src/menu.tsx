@@ -1,5 +1,5 @@
 /* eslint no-nested-ternary:0 */
-import { Menu, ActivityIndicator, NavBar } from 'antd-mobile';
+import {ActivityIndicator, Menu, NavBar} from 'antd-mobile';
 import {Component, default as React} from "react";
 
 import './menu.css'

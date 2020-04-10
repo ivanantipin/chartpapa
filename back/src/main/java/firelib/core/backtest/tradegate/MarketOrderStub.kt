@@ -1,11 +1,11 @@
 package firelib.core.backtest.tradegate
 
 import firelib.common.Order
-import firelib.core.domain.OrderStatus
 import firelib.common.Trade
-import firelib.core.timeservice.TimeService
 import firelib.core.domain.OrderState
+import firelib.core.domain.OrderStatus
 import firelib.core.domain.Side
+import firelib.core.timeservice.TimeService
 import java.time.Instant
 
 

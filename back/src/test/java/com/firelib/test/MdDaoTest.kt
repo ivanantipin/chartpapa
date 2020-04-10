@@ -1,8 +1,8 @@
 package com.firelib.test
 
-import firelib.core.store.MdDao
-import firelib.core.misc.SqlUtils
 import firelib.core.domain.Ohlc
+import firelib.core.misc.SqlUtils
+import firelib.core.store.MdDao
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Ignore

@@ -1,8 +1,8 @@
 package firelib.core.report
 
-import firelib.core.store.MdDao
-import firelib.core.misc.SqlUtils
 import firelib.core.domain.Ohlc
+import firelib.core.misc.SqlUtils
+import firelib.core.store.MdDao
 import java.nio.file.Path
 
 class OhlcStreamWriter(val path: Path) {

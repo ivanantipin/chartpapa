@@ -1,18 +1,18 @@
 package firelib.core.backtest
 
+import firelib.core.SimpleRunCtx
+import firelib.core.backtest.opt.ParamsVariator
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.OptResourceParams
-import firelib.core.backtest.opt.ParamsVariator
-import firelib.core.misc.Batcher
-import firelib.core.SimpleRunCtx
 import firelib.core.domain.Interval
 import firelib.core.domain.ModelOutput
+import firelib.core.domain.Ohlc
+import firelib.core.enableOhlcDumping
+import firelib.core.misc.Batcher
 import firelib.core.report.ReportProcessor
 import firelib.core.report.ReportWriter
 import firelib.core.report.ReportWriter.clearReportDir
 import firelib.core.report.ReportWriter.writeReport
-import firelib.core.domain.Ohlc
-import firelib.core.enableOhlcDumping
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit

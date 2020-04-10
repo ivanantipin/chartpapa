@@ -5,7 +5,6 @@ import firelib.core.config.runStrat
 import firelib.core.domain.*
 import firelib.core.misc.Quantiles
 import firelib.core.misc.atMoscow
-import firelib.core.misc.atUtc
 import firelib.core.positionDuration
 import firelib.indicators.ATR
 import java.time.LocalDate

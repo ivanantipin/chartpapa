@@ -1,8 +1,8 @@
 package firelib.core.report
 
-import firelib.core.domain.OrderStatus
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.ModelOutput
+import firelib.core.domain.OrderStatus
 import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
@@ -52,7 +52,7 @@ object ReportWriter{
             }
         }
 
-        ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates.filter { it.status == OrderStatus.New }.map { it.order })
+        ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates.filter { it.status == OrderStatus.New })
     }
 
     fun copyPythonFiles(cfg: ModelBacktestConfig) {

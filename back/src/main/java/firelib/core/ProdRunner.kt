@@ -1,15 +1,13 @@
 package firelib.core
 
-import firelib.core.store.MdStorageImpl
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.misc.timeSequence
 import firelib.core.report.OmPosition
 import firelib.core.report.ReportWriter
 import firelib.core.report.Sqls.readCurrentPositions
+import firelib.core.store.MdStorageImpl
 import firelib.core.store.ReaderFactory
-import org.apache.commons.math3.geometry.euclidean.oned.Interval
 import org.slf4j.LoggerFactory
-import java.lang.Exception
 import java.time.Instant
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
@@ -65,7 +63,7 @@ object ProdRunner {
 
         executorService.submit {
             model.orderManagers().forEach {
-                val pos = curentPoses.getOrDefault(it.security().toUpperCase(), OmPosition(0,0))
+                val pos = curentPoses.getOrDefault(it.security().toLowerCase(), OmPosition(0,0))
                 log.info("restored position for ${it.security()} to ${pos}")
                 it.updatePosition(pos.position, Instant.ofEpochMilli(pos.posTime))
             }

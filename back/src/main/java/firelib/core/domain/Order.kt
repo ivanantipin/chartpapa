@@ -1,12 +1,12 @@
 package firelib.common
 
 import firelib.core.domain.InstrId
-import firelib.core.misc.DurableChannel
-import firelib.core.misc.dbl2Str
-import firelib.core.misc.toStandardString
 import firelib.core.domain.OrderState
 import firelib.core.domain.OrderType
 import firelib.core.domain.Side
+import firelib.core.misc.DurableChannel
+import firelib.core.misc.dbl2Str
+import firelib.core.misc.toStandardString
 import java.time.Instant
 
 data class Order(val orderType: OrderType,

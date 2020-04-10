@@ -1,7 +1,7 @@
 package firelib.core.store
 
-import firelib.core.domain.InstrId
 import firelib.core.SourceName
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 

@@ -1,10 +1,10 @@
 package com.firelib.test
 
+import firelib.core.domain.Ohlc
 import firelib.core.misc.toInstantDefault
-import firelib.model.Div
 import firelib.core.store.reader.MarketDataReader
 import firelib.core.store.reader.ReaderDivAdjusted
-import firelib.core.domain.Ohlc
+import firelib.model.Div
 import org.junit.Assert
 import org.junit.Test
 import java.time.Instant

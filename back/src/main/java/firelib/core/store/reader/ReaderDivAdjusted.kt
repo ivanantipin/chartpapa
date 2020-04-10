@@ -1,8 +1,8 @@
 package firelib.core.store.reader
 
+import firelib.core.domain.Ohlc
 import firelib.core.misc.atUtc
 import firelib.model.Div
-import firelib.core.domain.Ohlc
 import java.time.Instant
 import java.time.ZoneOffset
 

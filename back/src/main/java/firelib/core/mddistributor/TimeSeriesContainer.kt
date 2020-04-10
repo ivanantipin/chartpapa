@@ -1,10 +1,10 @@
 package firelib.core.mddistributor
 
 import firelib.core.domain.Interval
+import firelib.core.domain.Ohlc
 import firelib.core.interval.IntervalService
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.TimeSeriesImpl
-import firelib.core.domain.Ohlc
 import java.time.Instant
 
 class TimeSeriesContainer(val intervalService: IntervalService, val startTime : Instant) {
