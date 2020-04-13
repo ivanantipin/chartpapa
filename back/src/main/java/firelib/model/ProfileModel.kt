@@ -3,95 +3,139 @@ package firelib.model
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.indicators.Ma
+import firelib.core.misc.atMoscow
+import firelib.core.report.dao.GeGeWriter
 import firelib.indicators.MarketProfile
+import firelib.indicators.defineLevels
+import firelib.model.prod.avgBarQuantLow
+import firelib.model.prod.enableBarQuantLowFactor
+import firelib.model.prod.enablePocFactor
 import java.time.LocalDate
 
 
+data class ProfileEntry(
+    val name : String,
+    val price : Double,
+    val value : Long,
+    val entryPrice : Double,
+    val levelFalse0 : Double,
+    val levelFalse1 : Double,
+    val levelTrue0 : Double,
+    val levelTrue1 : Double,
+    val prevPrice : Double,
+    val incr : Double
+
+)
+
 class ProfileModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
-
+    val geGeWriter = GeGeWriter<ProfileEntry>(context.config.getReportDbFile(), ProfileEntry::class)
     init {
 
-        val priceIncr = instruments().map { Double.NaN }.toDoubleArray()
+        val window = props["window"]!!.toInt()
+        val diff = props["diff"]!!.toInt()
 
-        fun priceToLong(idx : Int, price : Double) : Long{
-            if(priceIncr[idx].isNaN()){
-                priceIncr[idx] = price / 100.0;
-            }
-            return (price / priceIncr[idx]).toLong()
-        }
-
-        val profiles = instruments().map { MarketProfile() }
-
-        val series = enableSeries(Interval.Min10, interpolated = false, historyLen = 1300)
-
+        val series = enableSeries(Interval.Min10, interpolated = false, historyLen = window + 200)
         val daySeries = enableSeries(Interval.Day, interpolated = true, historyLen = 5)
 
-        series.forEachIndexed { idx, ts->
-            ts.preRollSubscribe {
-                val lprice = priceToLong  (idx, ts[0].close)
-                profiles[idx].add(lprice, (ts[0].volume * ts[0].close).toLong())
+        val profiles = instruments().map { MarketProfile() }
+        val increms = DoubleArray(instruments().size, { Double.NaN})
 
-                if (ts.count() > 1250) {
-                    val ohlc = ts[1200]
-                    val rlprice = priceToLong(idx, ohlc.close)
-                    profiles[idx].reduceBy(rlprice, (ohlc.volume * ohlc.close).toLong())
+        enablePocFactor(profiles,increms)
+
+//        enableVolumeFactor()
+        enableBarQuantLowFactor()
+
+        avgBarQuantLow(2)
+        avgBarQuantLow(3)
+        avgBarQuantLow(5)
+//        enableMaDiffFactor(20)
+//        enableMaDiffFactor(30)
+//        enableMaDiffFactor(10)
+//        enableMaDiffFactor(3)
+
+        instruments().forEachIndexed({ idx, ticker ->
+            val ts = series[idx]
+            val dayts = daySeries[idx]
+            val profile = profiles[idx]
+
+            fun priceToLong(price: Double): Int {
+                if (increms[idx].isNaN()) {
+                    increms[idx] = price / 200.0;
                 }
+                return (price / increms[idx]).toInt()
             }
-        }
 
-        val mas = daySeries.map {
-            Ma(30, it)
-        }
+            var levelsFalse = emptyList<Int>()
+            var levelsTrue = emptyList<Long>()
 
-        val maQuantiles = quantiles(1000)
-
-
-        enableFactor("ma30") {
-            val ret = maQuantiles[it].getQuantile(daySeries[it][0].close - mas[it].value())
-            if(ret.isNaN()) 0.5 else ret
-        }
-
-        daySeries.forEachIndexed{idx, ts->
             ts.preRollSubscribe {
-                if(it.count() > 30){
-                    maQuantiles[idx].add(daySeries[idx][0].close - mas[idx].value())
-                }
-            }
-        }
+                val lprice = priceToLong(ts[0].close)
+                profile.add(lprice, (ts[0].volume * ts[0].close).toLong())
 
-        prerollSubscribe(Interval.Min30) { time, md ->
-            profiles.forEachIndexed { idx, prof ->
-                if(!series[idx][0].interpolated && series[idx].count() > 1200){
-                    val range = prof.calcVaRange()
-                    if ((prof.pocPrice - range.first).toDouble() / (range.second - range.first).toDouble() < 0.1) {
-                        longForMoneyIfFlat(idx, 100_000)
+                if (ts.count() > window) {
+                    val ohlc = ts[window]
+                    val rlprice = priceToLong(ohlc.close)
+                    profile.reduceBy(rlprice, (ohlc.volume * ohlc.close).toLong())
+                }
+
+                if (currentTime().atMoscow().hour == 18 && currentTime().atMoscow().minute == 0) {
+                    levelsFalse = profile.defineLevels(diff, false).map { it.first }
+                }
+
+                if (currentTime().atMoscow().hour == 18) {
+
+                    val price0 = priceToLong(dayts[0].close)
+                    val price1 = priceToLong(dayts[1].close)
+
+
+
+
+//                    if (position(idx) > 0) {
+//                        levelsTrue = profile.defineLevels(8, true).map { it.first }
+//                        if (levelsTrue.any { it >= price1 && it < price0 }) {
+//                            flattenAll(idx)
+//                        }
+//                    }
+
+                    if (levelsFalse.any { it >= price1 && it < price0 }) {
+                        if(longForMoneyIfFlat(idx, 100_000)){
+                            val name = "${ticker}_${currentTime()}"
+
+//                            geGeWriter.write(profile.priceToVol.map {
+//                                ProfileEntry(name, it.key*priceIncr, it.value, dayts[0].close,
+//                                    levelsFalse[0]*priceIncr,
+//                                    levelsFalse[1]*priceIncr,
+//                                    levelsTrue[0]*priceIncr,
+//                                    levelsTrue[1]*priceIncr, price1*priceIncr, priceIncr)
+//                            }.subList(1,profile.priceToVol.size))
+
+                        }
                     }
                 }
             }
-        }
+
+        })
 
         closePosByCondition {
-            !series[it][0].interpolated && positionDuration(it) > 3*24
+            !series[it][0].interpolated && positionDuration(it) > 3 * 24
         }
     }
-
-
 
 }
 
 fun profileModelConfig(): ModelBacktestConfig {
     return ModelBacktestConfig(ProfileModel::class).apply {
         instruments = tickers
-//        tickerToDiv = DivHelper.getDivs()
+        param("window", 13000)
+        param("diff", 18)
         startDate(LocalDate.now().minusDays(3000))
-        param("period", 33)
-        param("number", 5)
     }
 }
 
+
 fun main() {
+//    testProfile()
     val conf = profileModelConfig()
     conf.runStrat()
 }

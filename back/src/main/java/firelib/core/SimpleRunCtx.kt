@@ -63,7 +63,6 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
             val oh = marketDataDistributor.price(i)
             tradeGate.backtestGate.updateBidAsks(i, oh.endTime, oh.close)
         }
-        boundModels.forEach { it.model.update() }
         marketDataDistributor.roll(time)
     }
 

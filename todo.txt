@@ -1,4 +1,4 @@
+1. multiple strats in one go
 2. logging and notification of trade
 3. benchmark in strategy backtest
-
 

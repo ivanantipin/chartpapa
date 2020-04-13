@@ -77,11 +77,11 @@ fun Model.quantiles(window : Int) : List<Quantiles<Double>>{
 }
 
 fun Model.position(idx : Int) : Int{
-    return idxContext(idx).position
+    return orderManagers()[idx].position()
 }
 
 fun Model.flattenAll(idx : Int, reason : String = "NA"){
-    idxContext(idx).om.flattenAll(reason)
+    orderManagers()[idx].flattenAll(reason)
 }
 
 fun Model.tradeSize() : Long{

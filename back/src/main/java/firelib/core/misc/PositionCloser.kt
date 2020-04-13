@@ -35,8 +35,6 @@ object PositionCloser {
                 ) {
                     val price = md.price(idx)
 
-
-
                     oms.makePositionEqualsTo(0, price.close)
                 }
             }

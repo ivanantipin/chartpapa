@@ -33,7 +33,6 @@ open class Model(val context: ModelContext, val properties: Map<String, String>)
         return oms
     }
 
-    open fun update() {}
 
     fun modelContext(): ModelContext {
         return context

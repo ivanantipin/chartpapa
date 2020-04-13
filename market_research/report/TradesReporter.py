@@ -116,8 +116,7 @@ class MetricsCalculator:
 
 
     def annRet(self, pnls , holdHours : float):
-        years = holdHours/(24.0*365)
-        return np.power(1 + np.sum(pnls), 1.0 / years) - 1
+        return pnls.sum() / (holdHours/(24.0*365))
 
     def statToHtml(self, tradesDF: pd.DataFrame):
         tradesDF = tradesDF.copy()
