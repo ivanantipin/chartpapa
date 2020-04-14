@@ -1,10 +1,16 @@
 package firelib.model
 
+import firelib.core.Model
+import firelib.core.ModelContext
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.domain.ret
+import firelib.core.enableSeries
+import firelib.core.instruments
 import firelib.core.report.dao.GeGeWriter
+import java.time.LocalDate
 
 
 class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(context, fac) {
@@ -22,19 +28,18 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
 
     init {
 
-        val dayRolled = context.config.instruments.map { false }.toMutableList()
+        val dayRolled = instruments().map { false }.toMutableList()
 
-        val tssDay = context.config.instruments.mapIndexed { idx, tick ->
-            val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Day, 10)
-            ret.preRollSubscribe {
-                if (!ret[0].interpolated) {
+        val tssDay = enableSeries(Interval.Day)
+        tssDay.forEachIndexed{ idx, ts->
+            ts.preRollSubscribe {
+                if (!ts[0].interpolated) {
                     dayRolled[idx] = true
                 }
             }
-            ret
         }
 
-        context.config.instruments.forEachIndexed { idx, tick ->
+        instruments().forEachIndexed { idx, tick ->
             val ret = context.mdDistributor.getOrCreateTs(idx, Interval.Min60, 1000)
             ret.preRollSubscribe {
                 if (dayRolled[idx] && it[5].interpolated && !it[4].interpolated) {
@@ -63,18 +68,26 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
     override fun onBacktestEnd() {
         super.onBacktestEnd()
         val writer = GeGeWriter<GapStat>(
-            context.config.getReportDbFile(),
+            context.config.runConfig.getReportDbFile(),
             GapStat::class,
             name = "gaps"
         )
         writer.write(stat)
     }
 
+    companion object {
+        fun modelConfig(): ModelConfig {
+            return ModelConfig(MarketOpen::class, ModelBacktestConfig().apply {
+                instruments = tickers
+                startDate(LocalDate.now().minusDays(5000))
+            })
+        }
+
+    }
+
+
 }
 
 fun main() {
-    val conf = ModelBacktestConfig(MarketOpen::class).apply {
-        instruments = DivHelper.getDivs().keys.toList()
-    }
-    conf.runStrat()
+    MarketOpen.modelConfig().runStrat()
 }

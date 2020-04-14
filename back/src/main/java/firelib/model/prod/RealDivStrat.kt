@@ -1,9 +1,7 @@
 package firelib.model.prod
 
-import firelib.core.config.ModelBacktestConfig
-import firelib.core.config.enableDivs
-import firelib.core.config.runStrat
-import firelib.core.config.setTradeSize
+import firelib.core.*
+import firelib.core.config.*
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
 import firelib.model.*
@@ -14,7 +12,7 @@ import java.time.LocalDate
 class RealDivModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
     init {
-        var divMap = context.config.tickerToDiv!!
+        var divMap = runConfig().tickerToDiv!!
 
         val tss = enableSeries(Interval.Min10, interpolated = false)
 
@@ -29,7 +27,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
             }
         }
 
-        context.config.instruments.forEachIndexed { idx, instrument ->
+        instruments().forEachIndexed { idx, instrument ->
 
             var counter = 0
 
@@ -55,15 +53,20 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
         }
     }
     companion object{
-        fun modelConfig(tradeSize : Int = 10_000) : ModelBacktestConfig{
-            val divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1300)).groupBy { it.ticker.toLowerCase() }
-            return ModelBacktestConfig(RealDivModel::class).apply {
-                instruments = divMap.keys.filter { tickers.contains(it) }
+        fun modelConfig(tradeSize : Int = 10_000) : ModelConfig{
+            return ModelConfig(RealDivModel::class, commonRunConfig()).apply {
                 setTradeSize(tradeSize)
-                startDate(LocalDate.now().minusDays(1300))
-                enableDivs(divMap)
             }
         }
+    }
+}
+
+fun commonRunConfig() : ModelBacktestConfig{
+    val divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1300)).groupBy { it.ticker.toLowerCase() }
+    return ModelBacktestConfig("RussianStocks").apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(1300))
+        enableDivs(divMap)
     }
 }
 

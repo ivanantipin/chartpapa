@@ -1,13 +1,15 @@
 package firelib.model
 
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
-import firelib.core.misc.Quantiles
 import firelib.core.report.dao.GeGeWriter
 import firelib.core.timeseries.TimeSeries
 import java.nio.file.Paths
+import java.time.LocalDate
 
 
 /*
@@ -35,13 +37,10 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
     init {
         val daytss = enableSeries(Interval.Day, interpolated = false)
 
-        val quantiles = context.config.instruments.map {
-            Quantiles<Double>(1000);
-        }
-
+        val quantiles = quantiles(1000)
 
         val dumper = GeGeWriter(
-            Paths.get(context.config.reportTargetPath).resolve("stat.db"),
+            Paths.get(runConfig().reportTargetPath).resolve("stat.db"),
             HVStat::class,
             name = "highvolume"
         )
@@ -59,7 +58,7 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
                                 makeRet(it, 3, 8),
                                 makeRet(it, 3, 11),
                                 makeRet(it, 3, 18),
-                                context.config.instruments[idx]
+                                instruments()[idx]
                         )
                         dumper.write(listOf(hvStat))
                     }
@@ -71,11 +70,18 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
 
     private fun makeRet(it: TimeSeries<Ohlc>, end: Int, start: Int) = (it[end].close - it[start].close) / it[start].close
 
+    companion object {
+        fun modelConfig(): ModelConfig {
+            return ModelConfig(HighVolume::class, ModelBacktestConfig().apply {
+                instruments = tickers
+                startDate(LocalDate.now().minusDays(3000))
+            })
+        }
+
+    }
+
 }
 
 fun main() {
-    val conf = ModelBacktestConfig(HighVolume::class).apply {
-        instruments = DivHelper.getDivs().keys.toList()
-    }
-    conf.runStrat()
+    HighVolume.modelConfig().runStrat()
 }

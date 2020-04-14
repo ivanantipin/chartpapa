@@ -18,7 +18,9 @@ class OrderManagerImpl(
     val timeService: TimeService,
     val security: String,
     val maxOrderCount: Int = 20,
-    val instrument: InstrId
+    val instrument: InstrId,
+    val modelName : String
+
 ) : OrderManager {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -69,42 +71,41 @@ class OrderManagerImpl(
         return orderStateChannel
     }
 
-    override fun cancelOrders(orders: List<Order>) {
-        for (order in orders) {
-            val ord = id2Order.get(order.id)
-            if (ord != null) {
-                tradeGate.cancelOrder(order)
-                ord.statuses += OrderStatus.PendingCancel
-                orderStateChannel.publish(OrderState(ord.order, OrderStatus.PendingCancel, timeService.currentTime()))
-            } else {
-                log.error("cancelling non existing order {}", order)
-            }
+    override fun cancelOrders(order: Order) {
+        val ord = id2Order.get(order.id)
+        if (ord != null) {
+            tradeGate.cancelOrder(order)
+            ord.statuses += OrderStatus.PendingCancel
+            orderStateChannel.publish(OrderState(ord.order, OrderStatus.PendingCancel, timeService.currentTime()))
+        } else {
+            log.error("cancelling non existing order {}", order)
         }
+
+    }
+
+    override fun modelName(): String {
+        return modelName
     }
 
 
-    override fun submitOrders(orders: List<Order>) {
+    override fun submitOrders(order: Order) {
         if (this.id2Order.size > maxOrderCount) {
-            log.error("max order count reached rejecting orders {}", orders)
-            orders.forEach {
-                orderStateChannel.publish(
-                    OrderState(
-                        it,
-                        OrderStatus.Rejected,
-                        timeService.currentTime()
-                    )
+            log.error("max order count reached rejecting order {}", order)
+            orderStateChannel.publish(
+                OrderState(
+                    order,
+                    OrderStatus.Rejected,
+                    timeService.currentTime()
                 )
-            }
+            )
         } else {
-            orders.forEach { order ->
-                val orderWithState = OrderWithState(order)
-                this.id2Order[order.id] = orderWithState
-                orders.forEach { orderStateChannel.publish(OrderState(it, OrderStatus.New, timeService.currentTime())) }
-                log.info("submitting order {}", order)
-                order.tradeSubscription.subscribe { onTrade(it, orderWithState) }
-                order.orderSubscription.subscribe { onOrderState(it) }
-                tradeGate.sendOrder(order)
-            }
+            val orderWithState = OrderWithState(order)
+            this.id2Order[order.id] = orderWithState
+            orderStateChannel.publish(OrderState(order, OrderStatus.New, timeService.currentTime()))
+            log.info("submitting order {}", order)
+            order.tradeSubscription.subscribe { onTrade(it, orderWithState) }
+            order.orderSubscription.subscribe { onOrderState(it) }
+            tradeGate.sendOrder(order)
         }
     }
 

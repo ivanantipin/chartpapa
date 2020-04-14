@@ -1,8 +1,5 @@
-package firelib.model
+package firelib.core
 
-import firelib.core.OrderManager
-import firelib.core.OrderManagerImpl
-import firelib.core.flattenAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
 
@@ -47,15 +44,15 @@ open class Model(val context: ModelContext, val properties: Map<String, String>)
 
 
     fun makeOrderManagers(ctx: ModelContext): List<OrderManager> {
-        return ctx.config.instruments.map {
+        return instruments().map {
             OrderManagerImpl(
                 tradeGate = ctx.tradeGate,
                 timeService = ctx.timeService,
                 security = it,
                 instrument = context.instrumentMapper(it)!!,
-                maxOrderCount = 20
+                maxOrderCount = 20,
+                modelName = name()
             )
-
         }
     }
 

@@ -3,6 +3,7 @@ package firelib.core.backtest
 import firelib.core.SimpleRunCtx
 import firelib.core.backtest.opt.ParamsVariator
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.OptResourceParams
 import firelib.core.domain.Interval
 import firelib.core.domain.ModelOutput
@@ -31,12 +32,14 @@ object Backtester {
         }
     }
 
-    fun runOptimized(cfg: ModelBacktestConfig) {
+    fun runOptimized(mc: ModelConfig) {
         log.info("Starting")
+
+        val cfg = mc.runConfig
 
         val startTime = System.currentTimeMillis()
 
-        val optCfg = cfg.optConfig
+        val optCfg = mc.optConfig
         val reportProcessor = ReportProcessor(
             optCfg.optimizedMetric,
             optCfg.params.map { it.name },
@@ -66,11 +69,11 @@ object Backtester {
         sequence {
             yieldAll(variator)
         }.map {
-            cfg.modelParams + it.mapValues { "${it.value}" }
+            mc.modelParams + it.mapValues { "${it.value}" }
         }.chunked(optResourceParams.batchSize).map { paramsVar ->
             val ctx = SimpleRunCtx(cfg)
             paramsVar.forEach { p ->
-                ctx.addModel(p)
+                ctx.addModel(p, mc)
             }
             ctx
         }.forEach { ctx ->
@@ -111,7 +114,10 @@ object Backtester {
         return executor
     }
 
-    fun runSimple(cfg: ModelBacktestConfig) {
+    fun runSimple(mc: ModelConfig) {
+
+        val cfg = mc.runConfig
+
         clearReportDir(cfg.reportTargetPath)
 
         val cachedExec = Executors.newCachedThreadPool()
@@ -119,7 +125,7 @@ object Backtester {
         val chunk = if(cfg.parallelTickersBacktest)  Math.max(cfg.instruments.size / 5,1) else cfg.instruments.size
 
         val ctxts = cfg.instruments.chunked(chunk).map {
-            runBacktest(cfg, it, cachedExec)
+            runBacktest(mc, it, cachedExec)
         }
 
         val trades = ctxts.flatMap { it.get().boundModels.first().trades }
@@ -127,7 +133,7 @@ object Backtester {
 
         val model = ctxts.first().get().boundModels.first()
 
-        val output = ModelOutput(model.model, cfg.modelParams)
+        val output = ModelOutput(model.model, mc.modelParams)
         output.trades += trades
         output.orderStates += statuses
 
@@ -137,14 +143,15 @@ object Backtester {
     }
 
     private fun runBacktest(
-        cfg: ModelBacktestConfig,
+        mc: ModelConfig,
         it: List<String>,
         cachedExec: ExecutorService
     ): Future<SimpleRunCtx> {
+        val cfg = mc.runConfig
         val copy = cfg.clone()
         copy.instruments = it
         val ctx = SimpleRunCtx(copy)
-        ctx.addModel(cfg.modelParams)
+        ctx.addModel(mc.modelParams, mc)
         if (cfg.dumpInterval != Interval.None) {
             enableOhlcDumping(
                 config = cfg,

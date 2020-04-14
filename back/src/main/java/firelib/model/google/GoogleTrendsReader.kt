@@ -1,5 +1,6 @@
-package firelib.model
+package firelib.model.google
 
+import firelib.core.GoogTrend
 import firelib.core.report.dao.GeGeWriter
 import firelib.core.store.GlobalConstants
 import java.time.Instant
@@ -51,5 +52,9 @@ object GoogleTrendsReader{
 }
 
 fun main() {
-    GeGeWriter<GoogTrend>(GlobalConstants.metaDb, GoogTrend::class, name = "output_15d").write(GoogleTrendsReader.read("sell stocks"))
+    GeGeWriter<GoogTrend>(GlobalConstants.metaDb, GoogTrend::class, name = "output_15d").write(
+        GoogleTrendsReader.read(
+            "sell stocks"
+        )
+    )
 }

@@ -22,7 +22,7 @@ fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) : Order?
             println("round price is ${roundPrice}")
 
         }
-        this.submitOrders(listOf(diff))
+        this.submitOrders(diff)
     }
     return diff
 }
@@ -30,29 +30,29 @@ fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) : Order?
 
 
 fun OrderManager.buyAtLimit(price: Double, vol: Int = 1) {
-    this.submitOrders(listOf(Order(OrderType.Limit, price, vol, Side.Buy, security(), nextOrderId(),currentTime(), instrument())))
+    this.submitOrders(Order(OrderType.Limit, price, vol, Side.Buy, security(), nextOrderId(),currentTime(), instrument(), modelName()))
 }
 
 fun OrderManager.sellAtLimit(price: Double, vol: Int = 1) {
-    submitOrders(listOf(Order(OrderType.Limit, price, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument())))
+    submitOrders(Order(OrderType.Limit, price, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument(), modelName()))
 }
 
 fun OrderManager.sellAtMarket(vol: Int = 1) {
-    submitOrders(listOf(Order(OrderType.Market, 0.0, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument())))
+    submitOrders(Order(OrderType.Market, 0.0, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument(), modelName()))
 }
 
 fun OrderManager.buyAtStop(price: Double, vol: Int = 1) {
-    submitOrders(listOf(Order(OrderType.Stop, price, vol, Side.Buy, security(), nextOrderId(), currentTime(), instrument())))
+    submitOrders(Order(OrderType.Stop, price, vol, Side.Buy, security(), nextOrderId(), currentTime(), instrument(), modelName()))
 }
 
 fun OrderManager.sellAtStop(price: Double, vol: Int = 1) {
-    submitOrders(listOf(Order(OrderType.Stop, price, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument())))
+    submitOrders(Order(OrderType.Stop, price, vol, Side.Sell, security(), nextOrderId(), currentTime(), instrument(), modelName()))
 }
 
 fun OrderManager.getOrderForDiff(currentPosition: Int, targetPos: Int): Order? {
     val vol = targetPos - currentPosition
     if (vol != 0) {
-        return Order(OrderType.Market, 0.0, Math.abs(vol), if (vol > 0) Side.Buy else Side.Sell, security(), nextOrderId(), currentTime(), instrument())
+        return Order(OrderType.Market, 0.0, Math.abs(vol), if (vol > 0) Side.Buy else Side.Sell, security(), nextOrderId(), currentTime(), instrument(), modelName())
     }
     return null
 }
@@ -62,7 +62,11 @@ fun OrderManager.flattenAll(reason: String? = null) {
     makePositionEqualsTo(0)
 }
 
-fun OrderManager.cancelAllOrders() {cancelOrders(liveOrders().filter({ o->o.orderType != OrderType.Market}))}
+fun OrderManager.cancelAllOrders() {
+    liveOrders().filter({ o->o.orderType != OrderType.Market}).forEach {
+        cancelOrders(it)
+    }
+}
 
 
 

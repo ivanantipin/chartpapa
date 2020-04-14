@@ -4,8 +4,8 @@ package com.firelib.test
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.timeseries.TimeSeries
-import firelib.model.Model
-import firelib.model.ModelContext
+import firelib.core.Model
+import firelib.core.ModelContext
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 

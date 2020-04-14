@@ -1,13 +1,11 @@
-package firelib.model
+package firelib.core
 
+import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
-import firelib.core.flattenAll
-import firelib.core.makePositionEqualsTo
 import firelib.core.mddistributor.MarketDataDistributor
 import firelib.core.misc.PositionCloser
 import firelib.core.misc.Quantiles
-import firelib.core.positionDuration
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.nonInterpolatedView
 import java.time.Instant
@@ -52,12 +50,11 @@ fun Model.currentTime() : Instant {
 }
 
 fun Model.enableSeries(interval: Interval,
-                       historyLen: Int = 100, interpolated: Boolean = true): List<TimeSeries<Ohlc>> {
+                                                       historyLen: Int = 100, interpolated: Boolean = true): List<TimeSeries<Ohlc>> {
     val context = this.modelContext()
-    val ret = context.config.instruments.mapIndexed { idx, _ ->
+    val ret = instruments().mapIndexed { idx, _ ->
         context.mdDistributor.getOrCreateTs(idx, interval, historyLen)
     }
-
     if (!interpolated) {
         return ret.map { it.nonInterpolatedView() }
     }
@@ -71,7 +68,7 @@ data class GoogTrendMulti(val dt : Instant, val word2idx : Map<String,Long> )
 
 
 fun Model.quantiles(window : Int) : List<Quantiles<Double>>{
-    return context.config.instruments.map {
+    return instruments().map {
         Quantiles<Double>(window);
     }
 }
@@ -108,15 +105,15 @@ fun Model.shortForMoneyIfFlat(idx: Int, money: Long) {
 }
 
 fun Model.closePositionByTimeout(afterTime: LocalTime? = null,
-                                 periods: Int,
-                                 interval: Interval
+                                                                 periods: Int,
+                                                                 interval: Interval
 ) {
     PositionCloser.closePosByTimeoutAndTimeOfDay(this, afterTime, periods, interval)
 }
 
 fun Model.closePosByCondition(condition : (idx: Int)->Boolean
 ) {
-    val interval = this.context.config.interval
+    val interval = this.context.config.runConfig.interval
     context.mdDistributor.getOrCreateTs(0,interval, 1).preRollSubscribe {
         orderManagers().forEachIndexed { index, orderManager ->
             if(orderManager.position() != 0 && condition(index)){
@@ -130,8 +127,12 @@ fun Model.prerollSubscribe(interval: Interval, listener : (Instant, MarketDataDi
     context.mdDistributor.addListener(interval, listener)
 }
 
+fun Model.runConfig() : ModelBacktestConfig{
+    return context.config.runConfig
+}
+
 fun Model.instruments() : List<String>{
-    return context.config.instruments
+    return context.config.runConfig.instruments
 }
 
 fun Model.positionDuration(idx : Int, unit : TimeUnit = TimeUnit.HOURS): Long {

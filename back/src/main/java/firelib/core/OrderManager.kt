@@ -29,7 +29,7 @@ interface OrderManager {
 
     fun instrument() : InstrId
 
-    fun submitOrders(orders: List<Order>)
+    fun submitOrders(order : Order)
 
     fun liveOrders(): List<Order>
 
@@ -39,7 +39,9 @@ interface OrderManager {
 
     fun orderStateTopic() : SubChannel<OrderState>
 
-    fun cancelOrders(orders: List<Order>)
+    fun cancelOrders(orders: Order)
+
+    fun modelName() : String
 
     fun nextOrderId (): String
 

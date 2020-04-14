@@ -12,25 +12,27 @@ data class OmPosition(
     val posTime : Long
 )
 
+data class ModelNameTicker(val modelName : String, val ticker : String)
+
 object Sqls {
     val curPosSql = """
-select st.Ticker, st.PosAfter, st.epochTimeMs
+select st.ModelName, st.Ticker, st.PosAfter, st.epochTimeMs
 from trades st,
-     (select Ticker, max(t.epochTimeMs) as epochTimeMs
+     (select ModelName, Ticker, max(t.epochTimeMs) as epochTimeMs
       from trades t
-      group by t.Ticker) le
+      group by t.Ticker, t.ModelName) le
 where st.epochTimeMs = le.epochTimeMs
-  and st.Ticker = le.Ticker
+  and st.Ticker = le.Ticker and st.ModelName = le.ModelName
   """.trimIndent()
 
-    fun readCurrentPositions(path: Path): Map<String, OmPosition> {
+    fun readCurrentPositions(path: Path): Map<ModelNameTicker, OmPosition> {
         val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
         if(!checkTableExists(ds, "trades")){
             println("empty trades for path ${path} no positions to be restored")
             return emptyMap()
         }
         return JdbcTemplate(ds).query(curPosSql) { rs, idx ->
-            Pair(rs.getString("ticker"), OmPosition(rs.getInt("posafter"), rs.getLong("epochTimeMs")))
+            Pair(ModelNameTicker(rs.getString("ModelName"), rs.getString("ticker")), OmPosition(rs.getInt("posafter"), rs.getLong("epochTimeMs")))
         }.toMap()
     }
 

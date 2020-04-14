@@ -1,6 +1,8 @@
 package firelib.model
 
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
@@ -14,22 +16,23 @@ import java.time.LocalDate
 
 
 data class ProfileEntry(
-    val name : String,
-    val price : Double,
-    val value : Long,
-    val entryPrice : Double,
-    val levelFalse0 : Double,
-    val levelFalse1 : Double,
-    val levelTrue0 : Double,
-    val levelTrue1 : Double,
-    val prevPrice : Double,
-    val incr : Double
+    val name: String,
+    val price: Double,
+    val value: Long,
+    val entryPrice: Double,
+    val levelFalse0: Double,
+    val levelFalse1: Double,
+    val levelTrue0: Double,
+    val levelTrue1: Double,
+    val prevPrice: Double,
+    val incr: Double
 
 )
 
 class ProfileModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
-    val geGeWriter = GeGeWriter<ProfileEntry>(context.config.getReportDbFile(), ProfileEntry::class)
+    val geGeWriter = GeGeWriter<ProfileEntry>(runConfig().getReportDbFile(), ProfileEntry::class)
+
     init {
 
         val window = props["window"]!!.toInt()
@@ -39,9 +42,9 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         val daySeries = enableSeries(Interval.Day, interpolated = true, historyLen = 5)
 
         val profiles = instruments().map { MarketProfile() }
-        val increms = DoubleArray(instruments().size, { Double.NaN})
+        val increms = DoubleArray(instruments().size, { Double.NaN })
 
-        enablePocFactor(profiles,increms)
+        enablePocFactor(profiles, increms)
 
 //        enableVolumeFactor()
         enableBarQuantLowFactor()
@@ -89,8 +92,6 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
                     val price1 = priceToLong(dayts[1].close)
 
 
-
-
 //                    if (position(idx) > 0) {
 //                        levelsTrue = profile.defineLevels(8, true).map { it.first }
 //                        if (levelsTrue.any { it >= price1 && it < price0 }) {
@@ -99,7 +100,7 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
 //                    }
 
                     if (levelsFalse.any { it >= price1 && it < price0 }) {
-                        if(longForMoneyIfFlat(idx, 100_000)){
+                        if (longForMoneyIfFlat(idx, 100_000)) {
                             val name = "${ticker}_${currentTime()}"
 
 //                            geGeWriter.write(profile.priceToVol.map {
@@ -122,20 +123,22 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         }
     }
 
-}
+    companion object {
+        fun modelConfig(): ModelConfig {
+            return ModelConfig(ProfileModel::class, ModelBacktestConfig().apply {
+                instruments = tickers
+                startDate(LocalDate.now().minusDays(5000))
+            }).apply {
+                param("window", 13000)
+                param("diff", 18)
+            }
+        }
 
-fun profileModelConfig(): ModelBacktestConfig {
-    return ModelBacktestConfig(ProfileModel::class).apply {
-        instruments = tickers
-        param("window", 13000)
-        param("diff", 18)
-        startDate(LocalDate.now().minusDays(3000))
     }
-}
 
+
+}
 
 fun main() {
-//    testProfile()
-    val conf = profileModelConfig()
-    conf.runStrat()
+    ProfileModel.modelConfig().runStrat()
 }

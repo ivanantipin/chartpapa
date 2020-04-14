@@ -1,6 +1,8 @@
 package firelib.model
 
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.domain.ret
@@ -44,15 +46,18 @@ class SiStrat(context: ModelContext, val props: Map<String, String>) : Model(con
     override fun onBacktestEnd() {
         super.onBacktestEnd()
         println("writitng ${finalBuffer.size}")
-        GenericMapWriter.write(context.config.getReportDbFile(), finalBuffer, "si_stat")
+        GenericMapWriter.write(runConfig().getReportDbFile(), finalBuffer, "si_stat")
     }
 }
 
-fun siModel(): ModelBacktestConfig {
-    return ModelBacktestConfig(SiStrat::class).apply {
+fun siModel(): ModelConfig {
+    return ModelConfig(SiStrat::class, ModelBacktestConfig().apply {
         instruments = listOf("SPFB_Si")
-        startDate(LocalDate.now().minusDays(1500))
+        startDate(LocalDate.now().minusDays(5000))
+    }).apply {
+        param("hold_hours", 30)
     }
+
 }
 
 fun main() {

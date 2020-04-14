@@ -1,13 +1,13 @@
 package firelib.model
 
-import firelib.core.config.ModelBacktestConfig
+import firelib.core.*
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.*
 import firelib.core.misc.Quantiles
 import firelib.core.misc.atMoscow
-import firelib.core.positionDuration
 import firelib.indicators.ATR
-import java.time.LocalDate
+import firelib.model.prod.commonRunConfig
 
 
 /*
@@ -22,12 +22,9 @@ class CandleMax(context: ModelContext, properties: Map<String, String>) : Model(
 
     val tenMins = enableSeries(interval = Interval.Min10, interpolated = false)
 
-    val quantiles = context.config.instruments.map {
-        Quantiles<Double>(100);
-    }
-    val volumeQuantiles = context.config.instruments.map {
-        Quantiles<Double>(100);
-    }
+    val quantiles =  quantiles(100)
+
+    val volumeQuantiles = quantiles(100)
 
     val mas = daytss.mapIndexed { idx, it ->
         val atr = ATR(period, it)
@@ -101,13 +98,9 @@ class CandleMax(context: ModelContext, properties: Map<String, String>) : Model(
 
 
     companion object {
-        fun modelConfig(): ModelBacktestConfig {
-            return ModelBacktestConfig(CandleMax::class).apply {
+        fun modelConfig(): ModelConfig {
+            return ModelConfig(CandleMax::class, commonRunConfig()).apply {
                 param("hold_hours", 30)
-                interval = Interval.Min10
-                startDate(LocalDate.now().minusDays(3000))
-                instruments = DivHelper.getDivs().keys.toList()
-//                adjustSpread = makeSpreadAdjuster(0.0005)
             }
         }
     }
@@ -117,7 +110,6 @@ class CandleMax(context: ModelContext, properties: Map<String, String>) : Model(
 fun main() {
     //updateRussianDivStocks()
     val conf = CandleMax.modelConfig()
-    println(conf.instruments)
-    conf.dumpInterval = Interval.Day
+    conf.runConfig.dumpInterval = Interval.Day
     conf.runStrat()
 }

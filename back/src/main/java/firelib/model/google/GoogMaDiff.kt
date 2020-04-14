@@ -1,4 +1,4 @@
-package firelib.model
+package firelib.model.google
 
 import firelib.indicators.SimpleMovingAverage
 import java.time.Instant

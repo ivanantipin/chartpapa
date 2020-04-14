@@ -16,7 +16,8 @@ data class Order(val orderType: OrderType,
                  val security: String,
                  val id: String,
                  val placementTime: Instant,
-                 val instr: InstrId
+                 val instr: InstrId,
+                 val modelName : String
 
 ) {
     val tradeSubscription: DurableChannel<Trade> = DurableChannel()

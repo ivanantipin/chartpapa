@@ -1,10 +1,11 @@
 package firelib.model
 
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
-import firelib.core.misc.Quantiles
 import firelib.core.timeseries.TimeSeries
 import java.time.LocalDate
 
@@ -20,9 +21,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
     init {
 
-        val quantiles = context.config.instruments.map {
-            Quantiles<Double>(100);
-        }
+        val quantiles = quantiles(100)
 
 
         val daytss = enableSeries(Interval.Day, interpolated = false)
@@ -30,9 +29,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
         // periods of previos price as factors
         val factors = setOf(3, 5, 8, 13).associateBy({ it }, {
-            context.config.instruments.map {
-                Quantiles<Double>(200);
-            }
+            quantiles(200)
         })
 
         factors.forEach { facLen, lst ->
@@ -61,16 +58,24 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
         closePositionByTimeout(periods = 3, interval = Interval.Day)
     }
 
-    private fun makeRet(it: TimeSeries<Ohlc>, end: Int, length: Int) = (it[end].close - it[end + length].close) / it[end + length].close
+    private fun makeRet(it: TimeSeries<Ohlc>, end: Int, length: Int) =
+        (it[end].close - it[end + length].close) / it[end + length].close
+
+    companion object {
+        fun modelConfig(): ModelConfig {
+            return ModelConfig(HighVolumeTrade::class, ModelBacktestConfig().apply {
+                instruments = tickers
+                startDate(LocalDate.now().minusDays(3000))
+            }).apply {
+                opt("length", 1, 10, 1)
+            }
+        }
+
+    }
+
 
 }
 
 fun main() {
-    val conf = ModelBacktestConfig(HighVolumeTrade::class).apply {
-        endDate(LocalDate.of(2016, 1, 1))
-        instruments = DivHelper.getDivs().keys.toList()
-        opt("length", 1, 10, 1)
-    }
-
-    conf.runStrat()
+    HighVolumeTrade.modelConfig().runStrat()
 }

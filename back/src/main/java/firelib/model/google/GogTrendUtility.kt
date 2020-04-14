@@ -1,5 +1,7 @@
-package firelib.model
+package firelib.model.google
 
+import firelib.core.GoogTrend
+import firelib.core.GoogTrendMulti
 import firelib.core.report.dao.GeGeWriter
 import firelib.core.store.GlobalConstants
 import java.time.Instant
@@ -25,7 +27,11 @@ object GogTrendUtility{
     }
 
     fun getMaDiff(word : Array<String>, period: Int, funk : (GoogTrendMulti)->Double ) : GoogMaDiff {
-        return GoogMaDiff(getTrends(word).map({ Pair(it.dt, funk(it)) }), period)
+        return GoogMaDiff(
+            getTrends(
+                word
+            ).map({ Pair(it.dt, funk(it)) }), period
+        )
     }
 
 }

@@ -14,7 +14,6 @@ import firelib.core.report.StreamTradeWriter
 import firelib.core.report.dao.ColDefDao
 import firelib.core.report.orderColsDefs
 import firelib.core.timeseries.nonInterpolatedView
-import firelib.model.Model
 import org.apache.commons.io.FileUtils
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService

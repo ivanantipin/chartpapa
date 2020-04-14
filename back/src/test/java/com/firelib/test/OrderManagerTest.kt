@@ -139,7 +139,7 @@ class OrderManagerTest {
 
         val timeService = TimeServiceManaged()
 
-        val config = ModelBacktestConfig(OhlcTestModel::class)
+        val config = ModelBacktestConfig()
         config.instruments = listOf("SBER")
 
         val tg = TradeGateStub(config, timeService)
@@ -151,7 +151,7 @@ class OrderManagerTest {
             timeService,
             "sec",
             20,
-            InstrId.dummyInstrument("sec")
+            InstrId.dummyInstrument("sec"), "TestModel"
         )
         val trades =  ArrayList<Trade>()
         om.tradesTopic().subscribe {trades += it}
@@ -168,7 +168,7 @@ class OrderManagerTest {
         update(tg,1.0, 3.0)
 
         om.buyAtLimit(1.5,qty)
-        om.submitOrders( listOf( Order(OrderType.Market, 2.5, sellQty, Side.Sell,om.security(),"id", Instant.now(),  InstrId.dummyInstrument("sec"))))
+        om.submitOrders(  Order(OrderType.Market, 2.5, sellQty, Side.Sell,om.security(),"id", Instant.now(),  InstrId.dummyInstrument("sec"), "modelName"))
 
         update(tg,1.0, 3.0)
 

@@ -1,8 +1,12 @@
 package firelib.model
 
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
+import firelib.model.google.GoogMaDiff
+import firelib.model.google.GoogleTrendsReader
 import java.time.LocalDate
 
 
@@ -32,16 +36,22 @@ class SiStratReal(context: ModelContext, val props: Map<String, String>) : Model
 
         }
     }
-}
 
-fun siReal(): ModelBacktestConfig {
-    return ModelBacktestConfig(SiStratReal::class).apply {
-        instruments = listOf("SPFB_Si")
-        //dumpInterval = Interval.Min30
-        startDate(LocalDate.now().minusDays(5000))
+
+    companion object{
+        fun modelConfig(): ModelConfig {
+            return ModelConfig(SiStratReal::class, ModelBacktestConfig().apply {
+                instruments = listOf("SPFB_Si")
+                startDate(LocalDate.now().minusDays(5000))
+            }).apply {
+                param("hold_hours", 30)
+            }
+        }
+
     }
 }
 
+
 fun main() {
-    siReal().runStrat()
+    SiStratReal.modelConfig().runStrat()
 }

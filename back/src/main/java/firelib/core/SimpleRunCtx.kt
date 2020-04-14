@@ -2,14 +2,13 @@ package firelib.core
 
 import firelib.core.backtest.tradegate.TradeGateStub
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.domain.ModelOutput
 import firelib.core.domain.OrderStatus
 import firelib.core.mddistributor.MarketDataDistributorImpl
 import firelib.core.store.reader.SimplifiedReader
 import firelib.core.store.reader.skipUntil
 import firelib.core.timeservice.TimeServiceManaged
-import firelib.model.Model
-import firelib.model.ModelContext
 import java.time.Instant
 
 
@@ -33,13 +32,19 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
 
     val boundModels = mutableListOf<ModelOutput>()
 
-    fun makeContext(): ModelContext {
-        return ModelContext(timeService, marketDataDistributor, tradeGate, modelConfig.gateMapper!!, modelConfig)
+    fun makeContext(mc: ModelConfig): ModelContext {
+        return ModelContext(
+            timeService,
+            marketDataDistributor,
+            tradeGate,
+            modelConfig.gateMapper,
+            mc
+        )
     }
 
 
-    fun addModel(params: Map<String, String>): Model {
-        val model = modelConfig.factory(makeContext(), params)
+    fun addModel(params: Map<String, String>, mc: ModelConfig): Model {
+        val model = mc.factory(makeContext(mc), params)
         val modelOutput = ModelOutput(model, model.properties())
         boundModels += modelOutput
         model.orderManagers().forEach { om -> om.tradesTopic().subscribe { modelOutput.trades += it } }
@@ -79,10 +84,5 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         }
         boundModels.forEach({it.model.onBacktestEnd()})
         return currentTime
-    }
-
-    fun addModelWithDefaultParams(): Model {
-        require(boundModels.size == 0, { "only single model allowed for default params" })
-        return addModel(modelConfig.modelParams)
     }
 }

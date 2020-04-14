@@ -1,7 +1,8 @@
 package firelib.model
 
-import firelib.core.SourceName
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.misc.Quantiles
@@ -50,11 +51,9 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
     }
 }
 
-fun spreadModel(): ModelBacktestConfig {
-    return ModelBacktestConfig(SpreadModel::class).apply{
+fun spreadModel(): ModelConfig {
+    val runConfig = ModelBacktestConfig().apply {
         startDate(LocalDate.now().minusDays(1500))
-        opt("period", 10,500, 5)
-        //param("period", 10)
         interval = Interval.Min240
         backtestReaderFactory = DbReaderFactory(
             SourceName.MT5,
@@ -62,6 +61,10 @@ fun spreadModel(): ModelBacktestConfig {
             roundedStartTime()
         )
         instruments = listOf("BNO", "USO")
+
+    }
+    return ModelConfig(SpreadModel::class, runConfig).apply{
+        opt("period", 10,500, 5)
     }
 }
 

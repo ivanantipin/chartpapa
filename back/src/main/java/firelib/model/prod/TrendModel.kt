@@ -1,10 +1,11 @@
 package firelib.model.prod
 
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
-import firelib.core.flattenAll
 import firelib.core.misc.atMoscow
 import firelib.model.*
 import java.time.LocalDate
@@ -56,13 +57,15 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
         }
     }
     companion object{
-        fun modelConfig(tradeSize : Int = 10_000): ModelBacktestConfig {
-            return ModelBacktestConfig(TrendModel::class).apply {
+        fun modelConfig(tradeSize : Int = 10_000): ModelConfig {
+            return ModelConfig(TrendModel::class, ModelBacktestConfig().apply {
                 instruments = tickers
                 startDate(LocalDate.now().minusDays(200))
+            }).apply {
                 setTradeSize(tradeSize)
                 param("period", 33)
                 param("number", 5)
+
             }
         }
     }

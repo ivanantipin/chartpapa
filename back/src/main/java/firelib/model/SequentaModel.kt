@@ -1,8 +1,9 @@
 package firelib.model
 
 import firelib.common.Trade
-import firelib.core.SourceName
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -184,16 +185,17 @@ class SequentaModel(context: ModelContext, properties: Map<String, String>) : Mo
     }
 }
 
-fun seqModel(): ModelBacktestConfig {
-    return ModelBacktestConfig(SequentaModel::class).apply {
+fun seqModel(): ModelConfig {
+
+    return ModelConfig(SequentaModel::class, ModelBacktestConfig().apply {
+        instruments = GlobalConstants.mdFolder.resolve("/ddisk/globaldatabase/1MIN/STK").toFile().list().toList()
+            .map { it.replace("_1.csv", "") }.filter { it != "ON" && it != "ALL" }.subList(0, 200)
         interval = Interval.Min30
         startDate(LocalDate.now().minusDays(1000))
         parallelTickersBacktest = true
         backtestReaderFactory = DbReaderFactory(SourceName.IQFEED, Interval.Min30, roundedStartTime())
-//        instruments = listOf("GOOG")
-        instruments = GlobalConstants.mdFolder.resolve("/ddisk/globaldatabase/1MIN/STK").toFile().list().toList()
-            .map { it.replace("_1.csv", "") }.filter { it != "ON" && it != "ALL" }.subList(0, 200)
-
+    }).apply {
+        param("hold_hours", 30)
     }
 }
 

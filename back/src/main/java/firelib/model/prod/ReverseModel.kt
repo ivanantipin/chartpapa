@@ -1,6 +1,8 @@
 package firelib.model.prod
 
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
@@ -91,11 +93,12 @@ class ReverseModel(context: ModelContext, val props: Map<String, String>) : Mode
     }
 
     companion object{
-        fun modelConfig(tradeSize : Int = 10_000) : ModelBacktestConfig{
-            return ModelBacktestConfig(ReverseModel::class).apply {
+        fun modelConfig(tradeSize : Int = 10_000) : ModelConfig{
+            return ModelConfig(ReverseModel::class, ModelBacktestConfig().apply {
                 instruments = tickers.filter { it != "irao" }
-                setTradeSize(tradeSize)
                 startDate(LocalDate.now().minusDays(3000))
+            }).apply {
+                setTradeSize(tradeSize)
             }
         }
     }

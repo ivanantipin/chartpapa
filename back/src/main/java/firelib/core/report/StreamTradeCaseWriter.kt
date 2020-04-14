@@ -37,6 +37,7 @@ val tradeCaseColDefs: Array<ColDef<Pair<Trade, Trade>, out Any>> = arrayOf(
 
 val tradeColDefs: Array<ColDef<Trade, out Any>> = arrayOf(
     makeMetric("Ticker", { it.security() }),
+    makeMetric("ModelName", { it.order.modelName }),
     makeMetric("OrderId0", { it.order.id }),
     makeMetric("epochTimeMs") { it.dtGmt.toEpochMilli() },
     makeMetric("EntryPriceTime") { it.priceTime },

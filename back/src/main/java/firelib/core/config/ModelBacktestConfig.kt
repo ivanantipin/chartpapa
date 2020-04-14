@@ -5,7 +5,6 @@ import firelib.core.HistoricalSource
 import firelib.core.InstrumentMapper
 import firelib.core.ModelFactory
 import firelib.core.backtest.Backtester
-import firelib.core.backtest.opt.OptimizedParameter
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.toInstantDefault
@@ -16,7 +15,7 @@ import firelib.core.store.reader.ReaderSimpleDivAdjusted
 import firelib.core.store.reader.SimplifiedReader
 import firelib.finam.FinamDownloader
 import firelib.model.Div
-import firelib.model.Model
+import firelib.core.Model
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
@@ -28,10 +27,7 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * configuration for model backtest
  */
-data class ModelBacktestConfig(
-    @get:JsonIgnore
-    val modelKClass: KClass<out Model>
-) : Cloneable{
+class ModelBacktestConfig(val name: String = "NoName") : Cloneable{
     /**
      * instruments configuration
      */
@@ -77,71 +73,44 @@ data class ModelBacktestConfig(
         startDateGmt = ed.toInstantDefault().plusSeconds(13 * 3600)
     }
 
-    @get:JsonIgnore
-    var factory: ModelFactory = defaultModelFactory(modelKClass)
-
 
     var tickerToDiv: Map<String, List<Div>>? = null
 
     var spreadAdjustKoeff = 0.0
 
-    fun makeBidAdjuster(koeff : Double) : (Double)->Double{
-        return {bid->bid - bid*koeff}
+    fun makeBidAdjuster(koeff: Double): (Double) -> Double {
+        return { bid -> bid - bid * koeff }
     }
-    fun makeAskAdjuster(koeff : Double) : (Double)->Double{
-        return {ask->ask + ask*koeff}
+
+    fun makeAskAdjuster(koeff: Double): (Double) -> Double {
+        return { ask -> ask + ask * koeff }
     }
 
     /*
     * report will be written into this directory
      */
-    var reportTargetPath: String = GlobalConstants.rootReportPath.resolve(modelKClass.simpleName).toString()
+    var reportTargetPath: String = GlobalConstants.rootReportPath.resolve(name).toString()
+
+    fun getProdDbFile(): Path {
+        return GlobalConstants.mdFolder.resolve("${name}.db").toAbsolutePath()
+    }
 
 
     fun getReportDbFile(): Path {
         return Paths.get(reportTargetPath).resolve("report.db").toAbsolutePath()
     }
 
-    fun getProdDbFile(): Path {
-        return GlobalConstants.mdFolder.resolve("${modelKClass.simpleName}.db").toAbsolutePath()
-    }
 
     var dumpInterval = Interval.None
 
-
-    val verbose = false
-
-    /*
-    * translatest csv data to binary format to speedup backtest
-    * that increase read speed from 300k msg/sec -> 10 mio msg/sec
-     */
-    var precacheMarketData: Boolean = false
-
-    /**
-     * params passed to model apply method
-     * can not be optimized
-     */
-    val modelParams: MutableMap<String, String> = mutableMapOf()
-
-    /*
-    * optimization config, used only for BacktestMode.Optimize
-     */
-    val optConfig: OptimizationConfig = OptimizationConfig()
-
-    fun opt(name: String, start: Int, end: Int, step: Int) {
-        optConfig.params += OptimizedParameter(name, start, end, step)
-    }
-
-    fun param(name: String, value: Int) {
-        modelParams += (name to value.toString())
-    }
 
     public override fun clone(): ModelBacktestConfig {
         return super.clone() as ModelBacktestConfig
     }
 }
 
-fun ModelBacktestConfig.runStrat() {
+
+fun ModelConfig.runStrat() {
     if (this.optConfig.params.isNotEmpty()) {
         Backtester.runOptimized(this)
     } else {
@@ -162,7 +131,7 @@ fun ModelBacktestConfig.enableDivs(divs: Map<String, List<Div>>) {
     }
 }
 
-fun ModelBacktestConfig.setTradeSize(tradeSize : Int) {
+fun ModelConfig.setTradeSize(tradeSize: Int) {
     this.param("trade_size", tradeSize)
 }
 

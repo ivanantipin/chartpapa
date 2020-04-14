@@ -1,7 +1,8 @@
 package firelib.model
 
-import firelib.core.SourceName
+import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
+import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
@@ -11,7 +12,6 @@ import firelib.core.store.DbReaderFactory
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.ret
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression
-import java.time.LocalDate
 import java.util.*
 
 
@@ -97,10 +97,10 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
     }
 
     override fun onBacktestEnd() {
-        val writer = GeGeWriter(context.config.getReportDbFile(), StatDd::class)
+        val writer = GeGeWriter(runConfig().getReportDbFile(), StatDd::class)
         writer.write(lst)
 
-        val ppw = GeGeWriter(context.config.getReportDbFile(), RegParam::class)
+        val ppw = GeGeWriter(runConfig().getReportDbFile(), RegParam::class)
         ppw.write(lst1)
 
 
@@ -108,24 +108,28 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
 
     private fun notInterpolatedLast(tss: List<TimeSeries<Ohlc>>, idx : Int) =
         !tss[0][idx].interpolated && !tss[1][idx].interpolated && !tss[2][idx].interpolated
-}
 
-fun regressModel(): ModelBacktestConfig {
-    return ModelBacktestConfig(RegressionModel::class).apply{
-        startDate(LocalDate.now().minusDays(3000))
-        //opt("period", 10,500, 5)
-        param("period", 10)
-        interval = Interval.Min240
-        backtestReaderFactory = DbReaderFactory(
-            SourceName.MT5,
-            Interval.Min240,
-            roundedStartTime()
-        )
+    companion object {
+        fun modelConfig(): ModelConfig {
+            return ModelConfig(RegressionModel::class, ModelBacktestConfig().apply {
+                interval = Interval.Min240
+                backtestReaderFactory = DbReaderFactory(
+                    SourceName.MT5,
+                    Interval.Min240,
+                    roundedStartTime()
+                )
 
-        instruments = listOf("ALLFUTRTSI","ALLFUTBRENT","FUTSP500CONT")
+                instruments = listOf("ALLFUTRTSI","ALLFUTBRENT","FUTSP500CONT")
+
+            }).apply {
+                param("period", 10)
+            }
+        }
     }
+
 }
+
 
 fun main() {
-    regressModel().runStrat()
+    RegressionModel.modelConfig().runStrat()
 }
