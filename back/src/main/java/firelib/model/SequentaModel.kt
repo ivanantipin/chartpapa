@@ -192,7 +192,6 @@ fun seqModel(): ModelConfig {
             .map { it.replace("_1.csv", "") }.filter { it != "ON" && it != "ALL" }.subList(0, 200)
         interval = Interval.Min30
         startDate(LocalDate.now().minusDays(1000))
-        parallelTickersBacktest = true
         backtestReaderFactory = DbReaderFactory(SourceName.IQFEED, Interval.Min30, roundedStartTime())
     }).apply {
         param("hold_hours", 30)

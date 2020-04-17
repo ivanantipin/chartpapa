@@ -4,6 +4,7 @@ import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
+import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
 import firelib.core.report.dao.GeGeWriter
@@ -47,7 +48,7 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         enablePocFactor(profiles, increms)
 
 //        enableVolumeFactor()
-        enableBarQuantLowFactor()
+        val barQuantFactor = enableBarQuantLowFactor()
 
         avgBarQuantLow(2)
         avgBarQuantLow(3)
@@ -99,7 +100,7 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
 //                        }
 //                    }
 
-                    if (levelsFalse.any { it >= price1 && it < price0 }) {
+                    if (levelsFalse.any { it >= price1 && it < price0 } && barQuantFactor(idx) > 0.8) {
                         if (longForMoneyIfFlat(idx, 100_000)) {
                             val name = "${ticker}_${currentTime()}"
 
@@ -124,11 +125,12 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
     }
 
     companion object {
-        fun modelConfig(): ModelConfig {
+        fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
             return ModelConfig(ProfileModel::class, ModelBacktestConfig().apply {
                 instruments = tickers
-                startDate(LocalDate.now().minusDays(5000))
+                startDate(LocalDate.now().minusDays(500))
             }).apply {
+                setTradeSize(tradeSize)
                 param("window", 13000)
                 param("diff", 18)
             }

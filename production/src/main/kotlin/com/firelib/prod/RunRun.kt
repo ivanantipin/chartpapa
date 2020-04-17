@@ -7,6 +7,7 @@ import firelib.core.SimpleRunCtx
 import firelib.core.domain.Interval
 import firelib.core.store.GlobalConstants
 import firelib.core.store.trqMapperWriter
+import firelib.model.DummyModel
 import firelib.model.prod.RealDivModel
 import firelib.model.prod.ReverseModel
 import firelib.model.prod.TrendModel
@@ -18,16 +19,22 @@ val prodModels = mapOf(
     VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(15_000) },
     TrendModel::class.simpleName!! to { TrendModel.modelConfig(15_000) },
     RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(30_000) },
-    ReverseModel::class.simpleName!! to { ReverseModel.modelConfig(30_000) }
+    ReverseModel::class.simpleName!! to { ReverseModel.modelConfig(30_000) },
+    "DummyModel" to { DummyModel.modelConfig() }
 )
 
 
 fun main(args: Array<String>) {
+
+    runReal("DummyModel")
+
+/*
     if (args[0] == "reconnect") {
         runReconnect()
     } else {
         runReal(args[0])
     }
+*/
 
 }
 
@@ -45,9 +52,9 @@ private fun runReal(name: String) {
 
     val stub = makeDefaultStub()
 
-    val mapper = DbMapper(trqMapperWriter(), { it.board == "TQBR" })
+    val mapper = DbMapper(trqMapperWriter(), { it.board == "FUT" })
 
-    config.gateMapper = mapper
+    config.runConfig.gateMapper = mapper
 
     val msgDispatcher = TrqMsgDispatcher(stub)
 
@@ -55,12 +62,13 @@ private fun runReal(name: String) {
 
     val factory = TrqRealtimeReaderFactory(msgDispatcher, Interval.Sec10, mapper)
     try {
-        val context = SimpleRunCtx(config)
+        val context = SimpleRunCtx(config.runConfig)
         ProdRunner.runStrat(
             executor,
             context,
             gate,
-            factory
+            factory,
+            listOf(config)
         )
     } catch (e: Exception) {
         runLogger.error("failed to start strategy", e)

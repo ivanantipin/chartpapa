@@ -23,7 +23,7 @@ open class Model(val context: ModelContext, val properties: Map<String, String>)
     }
 
     fun name(): String {
-        return this.javaClass.name
+        return this.javaClass.simpleName
     }
 
     fun orderManagers(): List<OrderManager> {

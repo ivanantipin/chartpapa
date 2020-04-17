@@ -16,7 +16,7 @@ data class Trade(
         order.side
     ),
     val positionAfter: Int = 0,
-    val tradeNo : String = "na"
+    val tradeNo : String = order.id
 ) {
 
     init {

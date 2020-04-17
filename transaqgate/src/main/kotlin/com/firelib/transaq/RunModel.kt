@@ -32,13 +32,13 @@ fun main() {
     val gate = GateEmulator(executor)
 
     try {
-        val context = SimpleRunCtx(DummyModel.modelConfig())
+        val context = SimpleRunCtx(DummyModel.modelConfig().runConfig)
 
         ProdRunner.runStrat(
             executor,
             context,
             gate,
-            factory
+            factory, listOf(DummyModel.modelConfig())
         )
     } catch (e: Exception) {
         e.printStackTrace()

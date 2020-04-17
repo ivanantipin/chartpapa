@@ -47,7 +47,7 @@ object ReportWriter{
         if (model.trades.size == 0) {
             log.info("no trades generated")
         }else{
-            model.trades.groupBy { it.security() }.values.forEach {
+            model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.forEach {
                 StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
             }
         }

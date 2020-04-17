@@ -162,7 +162,7 @@ fun main() {
     val instrId =
         InstrId(code = "SBER", board = "TQBR", minPriceIncr = BigDecimal(0.1))
 
-    val order = Order(OrderType.Limit, 256.0, 1, Side.Buy, "sber", "0", Instant.now(), instrId)
+    val order = Order(OrderType.Limit, 256.0, 1, Side.Buy, "sber", "0", Instant.now(), instrId, "NoName")
     order.orderSubscription.subscribe { println(it) }
 
     gate.sendOrder(order)

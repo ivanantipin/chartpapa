@@ -1,89 +1,20 @@
 {
-  "instruments" : [ {
-    "ticker" : "sber"
-  }, {
-    "ticker" : "lkoh"
-  }, {
-    "ticker" : "gazp"
-  }, {
-    "ticker" : "alrs"
-  }, {
-    "ticker" : "moex"
-  }, {
-    "ticker" : "gmkn"
-  }, {
-    "ticker" : "mgnt"
-  }, {
-    "ticker" : "rosn"
-  }, {
-    "ticker" : "chmf"
-  }, {
-    "ticker" : "aflt"
-  }, {
-    "ticker" : "sberp"
-  }, {
-    "ticker" : "nvtk"
-  }, {
-    "ticker" : "vtbr"
-  }, {
-    "ticker" : "hydr"
-  }, {
-    "ticker" : "nlmk"
-  }, {
-    "ticker" : "mfon"
-  }, {
-    "ticker" : "mtss"
-  }, {
-    "ticker" : "magn"
-  }, {
-    "ticker" : "sngs"
-  }, {
-    "ticker" : "plzl"
-  }, {
-    "ticker" : "mtlr"
-  }, {
-    "ticker" : "fees"
-  }, {
-    "ticker" : "tatn"
-  }, {
-    "ticker" : "sibn"
-  }, {
-    "ticker" : "mrkp"
-  }, {
-    "ticker" : "rtkm"
-  }, {
-    "ticker" : "afks"
-  } ],
+  "name" : "NoName",
+  "instruments" : [ "sber", "lkoh", "gazp", "alrs", "moex", "gmkn", "mgnt", "rosn", "tatn", "tatnp", "sngs", "chmf", "aflt", "sberp", "nvtk", "vtbr", "hydr", "nlmk", "irao", "mtss", "magn", "sngs", "plzl", "trnfp", "mtlr", "yndx", "rual", "fees", "tatn", "sibn", "poly", "mrkp", "rtkm", "afks" ],
   "startDateGmt" : {
-    "epochSecond" : -31557014167219200,
-    "nano" : 0
+    "nano" : 0,
+    "epochSecond" : 1543842000
   },
+  "interval" : "Min10",
+  "disableBacktest" : false,
   "endDate" : {
-    "epochSecond" : 1562191166,
-    "nano" : 137000000
+    "nano" : 870846000,
+    "epochSecond" : 1587017267
   },
-  "dataServerRoot" : "",
-  "reportTargetPath" : "/home/ivan/reports/trendVolumeModel",
-  "dumpOhlc" : true,
-  "verbose" : false,
-  "precacheMarketData" : false,
-  "modelParams" : { },
-  "optConfig" : {
-    "params" : [ {
-      "name" : "holddays",
-      "start" : 2,
-      "end" : 50,
-      "step" : 1,
-      "value" : 49
-    } ],
-    "resourceStrategy" : {
-      "threadsNumber" : 1,
-      "batchSize" : 100
-    },
-    "minNumberOfTrades" : 50,
-    "optimizedPeriodDays" : -1,
-    "optimizedMetric" : "Pf"
-  },
-  "calculatedMetrics" : [ "Pf", "Pnl", "Sharpe", "AvgPnl" ],
-  "reportDbFile" : "file:///home/ivan/reports/trendVolumeModel/report.db"
+  "tickerToDiv" : null,
+  "spreadAdjustKoeff" : 0.0,
+  "reportTargetPath" : "/home/ivan/projects/chartpapa/market_research/report_out/NoName",
+  "dumpInterval" : "None",
+  "reportDbFile" : "file:///home/ivan/projects/chartpapa/market_research/report_out/NoName/report.db",
+  "prodDbFile" : "file:///ddisk/globaldatabase/md/NoName.db"
 }

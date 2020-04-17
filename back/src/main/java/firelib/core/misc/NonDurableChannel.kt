@@ -12,7 +12,14 @@ class NonDurableChannel<T> : Channel<T>{
     val listeners = LinkedList<(T)->Unit>()
 
     override fun publish(t : T) {
-        listeners.forEach {it(t)}
+        listeners.forEach {
+            try{
+                it(t)
+            }catch (e : Exception){
+                //fixme switch to log
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun subscribe(lsn : (T)->Unit) : ChannelSubscription {

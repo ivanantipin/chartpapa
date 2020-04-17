@@ -114,58 +114,42 @@ object Backtester {
         return executor
     }
 
-    fun runSimple(mc: ModelConfig) {
-
-        val cfg = mc.runConfig
-
-        clearReportDir(cfg.reportTargetPath)
-
-        val cachedExec = Executors.newCachedThreadPool()
-
-        val chunk = if(cfg.parallelTickersBacktest)  Math.max(cfg.instruments.size / 5,1) else cfg.instruments.size
-
-        val ctxts = cfg.instruments.chunked(chunk).map {
-            runBacktest(mc, it, cachedExec)
-        }
-
-        val trades = ctxts.flatMap { it.get().boundModels.first().trades }
-        val statuses = ctxts.flatMap { it.get().boundModels.first().orderStates }
-
-        val model = ctxts.first().get().boundModels.first()
-
-        val output = ModelOutput(model.model, mc.modelParams)
-        output.trades += trades
-        output.orderStates += statuses
-
-        cachedExec.shutdown()
-
-        writeReport(output, cfg)
+    fun runSimple(mc: ModelConfig, runConfig : ModelBacktestConfig = mc.runConfig) {
+        runSimple(listOf(mc), runConfig)
     }
 
-    private fun runBacktest(
-        mc: ModelConfig,
-        it: List<String>,
-        cachedExec: ExecutorService
-    ): Future<SimpleRunCtx> {
-        val cfg = mc.runConfig
-        val copy = cfg.clone()
-        copy.instruments = it
-        val ctx = SimpleRunCtx(copy)
-        ctx.addModel(mc.modelParams, mc)
-        if (cfg.dumpInterval != Interval.None) {
+    //fixme - provide backtest config separatele
+    fun runSimple(mc: List<ModelConfig>, runConfig : ModelBacktestConfig = mc[0].runConfig) {
+
+        clearReportDir(runConfig.reportTargetPath)
+
+        val ctx = SimpleRunCtx(runConfig)
+
+        mc.forEach {
+            ctx.addModel(it.modelParams, it)
+        }
+
+        if (runConfig.dumpInterval != Interval.None) {
             enableOhlcDumping(
-                config = cfg,
+                config = runConfig,
                 marketDataDistributor = ctx.marketDataDistributor,
                 executorService = ioExecutor
             )
         }
-        return cachedExec.submit(object : Callable<SimpleRunCtx> {
-            override fun call(): SimpleRunCtx {
-                ctx.backtest(Instant.now())
-                return ctx
-            }
-        })
+
+        ctx.backtest(Instant.now())
+
+        val trades = ctx.boundModels.flatMap { it.trades }
+        val statuses =  ctx.boundModels.flatMap { it.orderStates }
+
+        //fixme crap - need to change report to incorporate multiple models
+        val output = ModelOutput(ctx.boundModels[0].model, mc[0].modelParams)
+        output.trades += trades
+        output.orderStates += statuses
+
+        writeReport(output, runConfig)
     }
+
 }
 
 

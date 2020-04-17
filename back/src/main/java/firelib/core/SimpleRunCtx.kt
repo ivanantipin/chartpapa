@@ -1,5 +1,6 @@
 package firelib.core
 
+import firelib.core.backtest.tradegate.TradeGateRiskManager
 import firelib.core.backtest.tradegate.TradeGateStub
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
@@ -14,6 +15,10 @@ import java.time.Instant
 
 class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
 
+    val timeService by lazy {
+        TimeServiceManaged()
+    }
+
     val backtestGate by lazy {
         TradeGateStub(modelConfig, timeService)
     }
@@ -22,9 +27,8 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         TradeGateSwitch(backtestGate)
     }
 
-    val timeService by lazy {
-        TimeServiceManaged()
-    }
+    val riskTradeGate  = TradeGateRiskManager(1000_000, tradeGate)
+
 
     val marketDataDistributor by lazy {
         MarketDataDistributorImpl(modelConfig.instruments.size, modelConfig.roundedStartTime(), modelConfig.interval)
@@ -36,7 +40,7 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         return ModelContext(
             timeService,
             marketDataDistributor,
-            tradeGate,
+            riskTradeGate,
             modelConfig.gateMapper,
             mc
         )
@@ -64,8 +68,12 @@ class SimpleRunCtx(val modelConfig: ModelBacktestConfig) {
         }
 
         timeService.updateTime(time)
+
+
+
         for (i in 0 until modelConfig.instruments.size) {
             val oh = marketDataDistributor.price(i)
+            riskTradeGate.updateBidAsks(modelConfig.instruments[i], oh.close)
             tradeGate.backtestGate.updateBidAsks(i, oh.endTime, oh.close)
         }
         marketDataDistributor.roll(time)

@@ -19,11 +19,15 @@ fun Model.enableBarQuantFactor(){
 
 }
 
-fun Model.enableBarQuantLowFactor(){
+fun Model.enableBarQuantLowFactor() : (idx : Int)->Double{
     val daytss = enableSeries(Interval.Day)
-    enableFactor("barQuantLow") {
-        daytss[it][0].downShadow() / daytss[it][0].range()
+    val ret = {idx : Int->
+        daytss[idx][0].downShadow() / daytss[idx][0].range()
     }
+    enableFactor("barQuantLow") {
+        ret(it)
+    }
+    return ret
 }
 
 fun Model.avgBarQuantLow(period : Int){

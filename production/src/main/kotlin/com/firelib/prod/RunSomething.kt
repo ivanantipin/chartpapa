@@ -37,7 +37,7 @@ fun main() {
 
     stub.command(TrqCommandHelper.markets())
 
-    val order = Order(OrderType.Market, 0.0, 1, Side.Buy, "eurusd", "idd1", Instant.now(), dbMapper("aapl"))
+    val order = Order(OrderType.Market, 0.0, 1, Side.Buy, "eurusd", "idd1", Instant.now(), dbMapper("aapl"), "NoName")
     gate.sendOrder(order)
     order.orderSubscription.subscribe {
         println(it)

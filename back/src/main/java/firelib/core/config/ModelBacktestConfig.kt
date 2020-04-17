@@ -39,8 +39,6 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable{
 
     var disableBacktest = false
 
-    var parallelTickersBacktest = false
-
     var endDate: Instant = Instant.now()
 
     fun roundedStartTime(): Instant {
