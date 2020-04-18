@@ -168,7 +168,7 @@ class Sequenta {
 
         this.pendingSetups.forEach { ps -> ret.addAll(ps.checkCountDown()) }
         this.pendingSetups =
-            this.pendingSetups.filter { ps -> !ps.isCompleted && !ps.isExpired && !ps.invalidated() }.toMutableList()
+            this.pendingSetups.filter { !it.isCompleted && !it.isExpired && !it.invalidated() }.toMutableList()
         return ret
     }
 
@@ -188,7 +188,8 @@ class Sequenta {
         } else {
             ret.add(Signal(SignalType.SetupCount, currentSetup))
         }
-        if (currentSetup.reached() && !pendingSetups.contains(currentSetup)) {
+        //check completed because sometimes setup not flipped untill 21
+        if (currentSetup.reached() && !pendingSetups.contains(currentSetup) && !currentSetup.isCompleted) {
             pendingSetups.add(currentSetup)
             ret.add(Signal(SignalType.SetupReach, currentSetup))
         }

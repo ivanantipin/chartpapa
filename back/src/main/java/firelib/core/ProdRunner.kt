@@ -28,7 +28,7 @@ object ProdRunner {
 
         val log = LoggerFactory.getLogger(javaClass)
 
-        val cfg = context.modelConfig
+        val cfg = context.runConfig
 
         val models =  modelConfigs.map { context.addModel(it.modelParams, it) }
 

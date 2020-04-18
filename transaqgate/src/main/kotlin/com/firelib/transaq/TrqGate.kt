@@ -34,10 +34,8 @@ data class TrqClientDb(
 
 class TrqGate(
     val dispatcherTrq: TrqMsgDispatcher,
-    val executor: Executor,
-    var clientId: String
+    val executor: Executor
 ) : TradeGate {
-
     private val log = LoggerFactory.getLogger(javaClass)
 
     val orderByTransactionId = ConcurrentHashMap<String, Order>()
@@ -45,6 +43,7 @@ class TrqGate(
 
     val orderNoToTransactionId = ConcurrentHashMap<String, String>()
 
+    val clientId: String
 
     override fun sendOrder(order: Order) {
 
@@ -111,12 +110,6 @@ class TrqGate(
                 }
             }
             is AllTrades -> {
-            }
-            is TrqClient -> {
-                if(msgTrq.market == "1"){
-                    log.info("client  received ${msgTrq}")
-                    clientId = msgTrq.id!!
-                }
             }
             is TrqTrades -> {
                 msgTrq.trades.forEach { trade ->
@@ -205,7 +198,7 @@ val loginCmd = TrqCommandHelper.connectCmd(
 
 fun makeDefaultTransaqGate(executor: Executor): TrqGate {
     val stub = makeDefaultStub()
-    return TrqGate(TrqMsgDispatcher(stub), executor, "virt/9952")
+    return TrqGate(TrqMsgDispatcher(stub), executor)
 }
 
 

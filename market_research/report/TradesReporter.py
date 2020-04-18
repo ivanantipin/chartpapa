@@ -10,7 +10,7 @@ import pandas as pd
 from IPython.display import HTML
 from IPython.display import display
 from scipy.interpolate import griddata
-from typing import List
+from typing import List, Callable
 
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
@@ -179,11 +179,7 @@ def plot_equity_d2d_for_ticker(trades: pd.DataFrame, title, figsize=(18, 7)):
     return ret
 
 
-seasonalMapFunc = {'weekday': lambda x: x.weekday(), 'month': lambda x: x.month, 'hour': lambda x: x.hour}
-seasonalAggFunc = {'pf': pf, 'cnt': len}
-seasonalAggColors = ['r', 'g']
 lastStaticColumnInTrades = 'MFE'
-
 
 def tickers(trades: pd.DataFrame):
     return trades['Ticker'].unique()
@@ -224,9 +220,9 @@ def subSub(trades: pd.DataFrame, tickers_in: List[str]):
 
 
 def makeTickersTab(trades: pd.DataFrame, title: str):
-    ch = [subSub(trades, tickers) for tickers in chunks(tickers(trades), 10)]
-    ch.insert(0, renderTrades(trades, 'gen stat'))
-    widgets_tab = widgets.Tab(children=ch)
+    # ch = [subSub(trades, tickers) for tickers in chunks(tickers(trades), 10)]
+    # ch.insert(0, renderTrades(trades, 'gen stat'))
+    widgets_tab = widgets.Tab(children=[renderTrades(trades, 'gen stat')])
     widgets_tab.set_title(0, f'Overall stat for {title}')
     return widgets_tab
 
@@ -244,36 +240,6 @@ def makeTickersTabTop(trades: pd.DataFrame):
 
     return ret
 
-
-def plotSeasonalitiesPnls(pnls: pd.Series):
-    if pnls.size == 0:
-        return
-
-    outputs = list([widgets.Output() for i in seasonalMapFunc])
-
-    tab = widgets.Tab(children=outputs)
-
-    for idx, mapTitle in enumerate(seasonalMapFunc):
-        tab.set_title(idx, mapTitle)
-        mapFun = seasonalMapFunc[mapTitle]
-        grp = pnls.groupby(mapFun)
-        with outputs[idx]:
-            grp.aggregate(len).plot(ax=plt.gca(), color='red', marker='o')
-            plt.gca().set_ylabel('Count', color='red')
-            grp.aggregate(pf).plot(ax=plt.gca().twinx(), color='green', marker='o')
-            plt.gca().set_ylabel('Pf', color='green')
-            #             plt.gca().get_yticklabels().set_color('green')
-            plt.gcf().set_size_inches(15, 6)
-            plt.show()
-    return tab
-
-
-def plotSeasonalities(trades: pd.DataFrame):
-    tr = trades.copy()
-    tr.set_index(keys='EntryDate', inplace=True)
-    return plotSeasonalitiesPnls(tr.Pnl)
-
-
 nonFactorCols=['TradeId','Pnl']
 
 def getFactorCols(trades: pd.DataFrame):
@@ -287,14 +253,17 @@ def plotFactors(trades: pd.DataFrame):
     cols = getFactorCols(trades)
     if (len(cols) == 0):
         return
-    cont = [widgets.Output() for i in range(1 + len(cols))]
+    cont = [widgets.Output() for i in range(len(cols))]
     tab = widgets.Tab(children=cont)
 
     for idx, out in enumerate(cont):
-        tab.set_title(idx, cols[idx - 1])
-        cat = pd.cut(trades[cols[idx - 1]], 10, duplicates='drop')
-        grp = trades['Pnl'].groupby(cat)
-
+        tab.set_title(idx, cols[idx])
+        if cols[idx].endswith('_int'):
+            grp=trades.groupby(cols[idx])['Pnl']
+        else:
+            trd=trades[trades[cols[idx]] != -1.0]
+            cat = pd.cut(trd[cols[idx]], 10, duplicates='drop')
+            grp =  trd['Pnl'].groupby(cat)
         with out:
             grp.aggregate(len).plot(ax=plt.gca(), color='red', marker='o')
             plt.gca().set_ylabel('Count', color='red')
@@ -303,6 +272,7 @@ def plotFactors(trades: pd.DataFrame):
             #             plt.gca().get_yticklabels().set_color('green')
             plt.gcf().set_size_inches(15, 6)
             plt.show()
+
     return tab
 
 
@@ -320,8 +290,11 @@ def loadWithFactors(filename : str, modelName : str ) -> pd.DataFrame:
         return None
 
 
-def displayFactors(filename : str, models : List[str]):
-    ch = [plotFactors(loadWithFactors(filename, model)) for model in models]
+def noOpFilter(data : pd.DataFrame)->pd.DataFrame:
+    return data
+
+def displayFactors(filename : str, models : List[str], fltr : Callable[[pd.DataFrame],pd.DataFrame] = noOpFilter):
+    ch = [plotFactors(fltr(loadWithFactors(filename, model))) for model in models]
     widgets_tab = widgets.Tab(children=ch)
     for idx, mm in enumerate(models):
         widgets_tab.set_title(idx, mm)
@@ -358,5 +331,8 @@ def test():
     models = getModels(trades)
     print(models)
     displayFactors(fileName, models)
-    return statToHtml(trades)
+    return trades
+
+df=test()
+
 

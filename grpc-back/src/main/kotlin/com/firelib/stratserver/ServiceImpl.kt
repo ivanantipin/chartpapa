@@ -18,7 +18,7 @@ class ServiceImpl() : StratServiceGrpc.StratServiceImplBase() {
 
     val distributor = context.marketDataDistributor
 
-    val tickers = context.modelConfig.instruments
+    val tickers = context.runConfig.instruments
 
     val strats = makeStratBc(context)
 

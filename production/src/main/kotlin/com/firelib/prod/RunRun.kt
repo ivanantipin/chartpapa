@@ -9,7 +9,7 @@ import firelib.core.store.GlobalConstants
 import firelib.core.store.trqMapperWriter
 import firelib.model.DummyModel
 import firelib.model.prod.RealDivModel
-import firelib.model.prod.ReverseModel
+import firelib.model.prod.ReversModel
 import firelib.model.prod.TrendModel
 import firelib.model.prod.VolatilityBreak
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ val prodModels = mapOf(
     VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(15_000) },
     TrendModel::class.simpleName!! to { TrendModel.modelConfig(15_000) },
     RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(30_000) },
-    ReverseModel::class.simpleName!! to { ReverseModel.modelConfig(30_000) },
+    ReversModel::class.simpleName!! to { ReversModel.modelConfig(30_000) },
     "DummyModel" to { DummyModel.modelConfig() }
 )
 

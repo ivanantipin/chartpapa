@@ -121,6 +121,10 @@ object Backtester {
     //fixme - provide backtest config separatele
     fun runSimple(mc: List<ModelConfig>, runConfig : ModelBacktestConfig = mc[0].runConfig) {
 
+        mc.forEach {
+            it.runConfig = runConfig
+        }
+
         clearReportDir(runConfig.reportTargetPath)
 
         val ctx = SimpleRunCtx(runConfig)

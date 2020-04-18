@@ -71,7 +71,7 @@ Status	"A"
 
 fun main() {
 
-    val allDivs = fetchDivs(LocalDate.of(2010, 10, 10))
+    val allDivs = fetchDivs(LocalDate.now())
 
     allDivs.forEach {
         println(it)

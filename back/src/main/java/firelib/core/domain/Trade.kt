@@ -3,6 +3,7 @@ package firelib.common
 import firelib.core.domain.TradeStat
 import firelib.core.misc.dbl2Str
 import java.time.Instant
+import kotlin.math.absoluteValue
 
 
 data class Trade(
@@ -23,6 +24,10 @@ data class Trade(
         require(qty >= 0, { "amount can't be negative" })
         require(order != null, { "order must be present" })
         require(!price.isNaN(), { "price must be valid" })
+
+        if(price.absoluteValue < 0.000001){
+            println()
+        }
     }
 
     fun security() = order.security

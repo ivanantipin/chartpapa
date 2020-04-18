@@ -1,4 +1,4 @@
-package firelib.model
+package firelib.model.prod
 
 import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
@@ -10,9 +10,7 @@ import firelib.core.misc.atMoscow
 import firelib.core.report.dao.GeGeWriter
 import firelib.indicators.MarketProfile
 import firelib.indicators.defineLevels
-import firelib.model.prod.avgBarQuantLow
-import firelib.model.prod.enableBarQuantLowFactor
-import firelib.model.prod.enablePocFactor
+import firelib.model.tickers
 import java.time.LocalDate
 
 
@@ -45,14 +43,14 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         val profiles = instruments().map { MarketProfile() }
         val increms = DoubleArray(instruments().size, { Double.NaN })
 
-        enablePocFactor(profiles, increms)
+        factorPoc(profiles, increms)
 
 //        enableVolumeFactor()
-        val barQuantFactor = enableBarQuantLowFactor()
+        val barQuantFactor = factorBarQuantLow()
 
-        avgBarQuantLow(2)
-        avgBarQuantLow(3)
-        avgBarQuantLow(5)
+        factorAvgBarQuantLow(2)
+        factorAvgBarQuantLow(3)
+        factorAvgBarQuantLow(5)
 //        enableMaDiffFactor(20)
 //        enableMaDiffFactor(30)
 //        enableMaDiffFactor(10)
@@ -128,7 +126,7 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
             return ModelConfig(ProfileModel::class, ModelBacktestConfig().apply {
                 instruments = tickers
-                startDate(LocalDate.now().minusDays(500))
+                startDate(LocalDate.now().minusDays(3000))
             }).apply {
                 setTradeSize(tradeSize)
                 param("window", 13000)

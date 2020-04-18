@@ -52,7 +52,7 @@ object ReportWriter{
             }
         }
 
-        ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates.filter { it.status == OrderStatus.New })
+        ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates)
     }
 
     fun copyPythonFiles(cfg: ModelBacktestConfig) {

@@ -122,5 +122,6 @@ class Mt5CsvSource : HistoricalSource{
 
 
 fun main(args: Array<String>) {
-    MdStorageImpl().updateMarketData(InstrId(code = "FUTSP500CONT", source = SourceName.MT5.name));
+    //MdStorageImpl().updateMarketData(InstrId(code = "FUTSP500CONT", source = SourceName.MT5.name));
+    UtilsHandy.updateTicker("irao")
 }

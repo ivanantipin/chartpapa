@@ -6,22 +6,33 @@ import firelib.core.domain.downShadow
 import firelib.core.domain.range
 import firelib.core.domain.upShadow
 import firelib.core.misc.Quantiles
+import firelib.core.misc.atMoscow
 import firelib.indicators.MarketProfile
 import firelib.indicators.SimpleMovingAverage
 import java.lang.Exception
 
 
-fun Model.enableBarQuantFactor(){
-    val daytss = enableSeries(Interval.Day)
-    enableFactor("barQuant") {
-        daytss[it][0].upShadow()/daytss[it][0].range()
+fun Model.factorWeekday() {
+    enableFactor("weekday_int") {
+        currentTime().atMoscow().toLocalDate().dayOfWeek.value.toDouble()
     }
-
+}
+fun Model.factorHour() {
+    enableFactor("hour_int") {
+        currentTime().atMoscow().hour.toDouble()
+    }
 }
 
-fun Model.enableBarQuantLowFactor() : (idx : Int)->Double{
+fun Model.factorBarQuant() {
     val daytss = enableSeries(Interval.Day)
-    val ret = {idx : Int->
+    enableFactor("barQuant") {
+        daytss[it][0].upShadow() / daytss[it][0].range()
+    }
+}
+
+fun Model.factorBarQuantLow(): (idx: Int) -> Double {
+    val daytss = enableSeries(Interval.Day)
+    val ret = { idx: Int ->
         daytss[idx][0].downShadow() / daytss[idx][0].range()
     }
     enableFactor("barQuantLow") {
@@ -30,22 +41,22 @@ fun Model.enableBarQuantLowFactor() : (idx : Int)->Double{
     return ret
 }
 
-fun Model.avgBarQuantLow(period : Int){
+fun Model.factorAvgBarQuantLow(period: Int) {
     val daytss = enableSeries(Interval.Day)
 
-    val mas = instruments().map { SimpleMovingAverage(period,false) }
+    val mas = instruments().map { SimpleMovingAverage(period, false) }
 
-    fun fac(idx : Int) : Double{
+    fun fac(idx: Int): Double {
         return daytss[idx][0].downShadow() / daytss[idx][0].range()
     }
 
     enableFactor("avgBarQuantLow${period}") {
-        (mas[it].value()*period + fac(it))/(period + 1.0)
+        (mas[it].value() * period + fac(it)) / (period + 1.0)
     }
 
-    daytss.forEachIndexed{idx,ts->
+    daytss.forEachIndexed { idx, ts ->
         ts.preRollSubscribe {
-            if(!it[0].interpolated){
+            if (!it[0].interpolated) {
                 mas[idx].add(fac(idx))
             }
         }
@@ -53,15 +64,14 @@ fun Model.avgBarQuantLow(period : Int){
 }
 
 
-
-fun Model.enablePocFactor(profiles : List<MarketProfile>, increments : DoubleArray){
+fun Model.factorPoc(profiles: List<MarketProfile>, increments: DoubleArray) {
     val daytss = enableSeries(Interval.Day)
     val quantiles = quantiles(300)
 
-    fun calcFactor(idx : Int) : Double {
+    fun calcFactor(idx: Int): Double {
         try {
-            return daytss[idx][0].close - profiles[idx].pocPrice*increments[idx]
-        }catch (e : Exception){
+            return daytss[idx][0].close - profiles[idx].pocPrice * increments[idx]
+        } catch (e: Exception) {
             e.printStackTrace()
             return 0.0
         }
@@ -69,22 +79,19 @@ fun Model.enablePocFactor(profiles : List<MarketProfile>, increments : DoubleArr
     }
     enableFactor("poc") {
         val ret = quantiles[it].getQuantile(calcFactor(it))
-        if(ret.isFinite()) ret else -1.0
+        if (ret.isFinite()) ret else -1.0
     }
 
     daytss.forEachIndexed { idx, it ->
         it.preRollSubscribe {
-            if(!it[0].interpolated){
+            if (!it[0].interpolated) {
                 quantiles[idx].add(calcFactor(idx))
             }
         }
     }
 }
 
-
-
-
-fun Model.enableVolumeFactor(){
+fun Model.factorVolume() {
     val daytss = enableSeries(Interval.Day)
     val volumeQuantiles = quantiles(300)
 
@@ -95,7 +102,7 @@ fun Model.enableVolumeFactor(){
 
     daytss.forEachIndexed { idx, it ->
         it.preRollSubscribe {
-            if(!it[0].interpolated){
+            if (!it[0].interpolated) {
                 volumeQuantiles[idx].add(it[0].volume.toDouble())
             }
         }
@@ -103,7 +110,7 @@ fun Model.enableVolumeFactor(){
 
 }
 
-fun Model.enableMaDiffFactor(period : Int = 30){
+fun Model.factorMaDiff(period: Int = 30) {
     val daytss = enableSeries(Interval.Day)
     val quantiles = instruments().map {
         Quantiles<Double>(300);
@@ -118,12 +125,9 @@ fun Model.enableMaDiffFactor(period : Int = 30){
 
     daytss.forEachIndexed { idx, it ->
         it.preRollSubscribe {
-            if(!it[0].interpolated){
+            if (!it[0].interpolated) {
                 quantiles[idx].add(it[0].close - mas[idx].value())
             }
         }
     }
-
 }
-
-
