@@ -2,13 +2,14 @@ package firelib.core.interval
 
 import firelib.core.domain.Interval
 import java.time.Instant
+import java.util.concurrent.Callable
 
 
 class IntervalServiceImpl : IntervalService {
 
-    var interval2listeners = listOf<Pair<Interval, List<(Instant) -> Unit>>>()
+    var interval2listeners = listOf<Pair<Interval, List<IServiceAction>>>()
 
-    override fun addListener(interval: Interval, action: (Instant) -> Unit) {
+    override fun addListener(interval: Interval, action: IServiceAction) {
         if(!interval2listeners.any { it.first == interval }){
             interval2listeners += Pair(interval, emptyList())
         }
@@ -26,7 +27,8 @@ class IntervalServiceImpl : IntervalService {
         for (i in interval2listeners) {
             val interval = i.first
             if ((dt.toEpochMilli() - interval.offset)  % interval.durationMs == 0L) {
-                i.second.forEach {
+                i.second.
+                forEach {
                     try {
                         it(dt)
                     }catch (e : Exception){

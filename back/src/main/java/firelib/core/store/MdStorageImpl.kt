@@ -7,12 +7,13 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
-import firelib.core.misc.Mt5CsvSource
+import firelib.mt5csv.Mt5CsvSource
 import firelib.core.misc.SqlUtils
 import firelib.core.misc.atUtc
 import firelib.core.report.dao.GeGeWriter
 import firelib.emulator.HistoricalSourceEmulator
 import firelib.finam.FinamDownloader
+import firelib.finam.MoexSource
 import firelib.iqfeed.IntervalTransformer
 import firelib.iqfeed.IqFeedHistoricalSource
 import firelib.vantage.VantageDownloader
@@ -42,7 +43,8 @@ class SourceFactory{
     val sources = mapOf<SourceName, ()->HistoricalSource>(
         SourceName.FINAM to {FinamDownloader()},
         SourceName.VANTAGE to {VantageDownloader()},
-        SourceName.DUMMY to { HistoricalSourceEmulator(Interval.Sec10) },
+        SourceName.DUMMY to { HistoricalSourceEmulator() },
+        SourceName.MOEX to { MoexSource() },
         SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))},
         SourceName.MT5 to { Mt5CsvSource() }
     )
@@ -81,58 +83,42 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         FileUtils.forceMkdir(File(folder))
     }
 
-    fun getSourceDefaultInterval(source: SourceName): Interval {
-        return sources[source].getDefaultInterval()
-    }
-
-
-    override fun read(instrId: InstrId, interval: Interval): List<Ohlc> {
+    override fun read(instrId: InstrId, interval: Interval, targetInterval: Interval): List<Ohlc> {
         requestedDao.write(listOf(instrId))
-        val dao = md.getDao(instrId.sourceEnum(), sources[instrId.sourceEnum()].getDefaultInterval())
-        val target = interval
-        val startTime = LocalDateTime.now().minusSeconds(target.durationMs * 600 / 1000)
+        val dao = md.getDao(instrId.sourceEnum(), interval)
+        val startTime = LocalDateTime.now().minusSeconds(targetInterval.durationMs * 600 / 1000)
         var ret = dao.queryAll(instrId.code, startTime)
-
         if (ret.isEmpty()) {
-            updateMarketData(instrId)
+            updateMarketData(instrId, interval)
             ret = dao.queryAll(instrId.code, startTime)
         }
         val start = System.currentTimeMillis()
         try {
-            return IntervalTransformer.transform(target, ret)
+            return IntervalTransformer.transform(targetInterval, ret)
         } finally {
             log.info("transformed in " + (System.currentTimeMillis() - start) / 1000.0 + " s. " + ret.size + " min bars")
         }
-    }
-
-    override fun save(code: String, source: SourceName, interval: Interval, data: List<Ohlc>) {
-        md.getDao(source, interval).insertOhlc(data, code)
     }
 
     override fun meta(): List<InstrId> {
         return symbolsDao.read()
     }
 
-    override fun updateRequested(code: String) {
-        requestedDao.read().filter { it.code == code }.forEach { symbol -> updateMarketData(symbol) }
-    }
-
-
-    fun updateMarketData(instrId: InstrId): Instant {
+    fun updateMarketData(instrId: InstrId, interval: Interval): Instant {
         val source = sources[instrId.sourceEnum()]
-        return updateMd(instrId, source)
+        return updateMd(instrId, source, interval)
     }
 
-    fun updateMd(instrId: InstrId, source: HistoricalSource): Instant {
+    fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
         var instant = Instant.now()
         try {
-            val dao = md.getDao(instrId.sourceEnum(), source.getDefaultInterval())
+            val dao = md.getDao(instrId.sourceEnum(), interval)
             val startTime = dao.queryLast(instrId.code).map { oh -> oh.endTime.atUtc().minusDays(2) }
-                .orElse(LocalDateTime.now().minusDays(3000))
+                .orElse(LocalDateTime.now().minusDays(5000))
 
             log.info("start time is ${startTime}")
 
-            source.load(instrId, startTime).chunked(5000).forEach {
+            source.load(instrId, startTime, interval).chunked(5000).forEach {
                 instant = it.last().endTime
                 dao.insertOhlc(it, instrId.code)
             }

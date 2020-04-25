@@ -7,10 +7,9 @@ import java.time.LocalDateTime
 
 interface HistoricalSource {
     fun symbols(): List<InstrId>
-    fun load(instrId: InstrId): Sequence<Ohlc>
-    fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc>
+    fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc>
+    fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc>
     fun getName(): SourceName
-    fun getDefaultInterval(): Interval
 
     fun mapSecurity(security : String) : InstrId {
         return InstrId(code = security)
@@ -18,5 +17,5 @@ interface HistoricalSource {
 }
 
 enum class SourceName{
-    FINAM,TRANSAQ, TCS, DUMMY, VANTAGE, IQFEED,MT5
+    FINAM,TRANSAQ, TCS, DUMMY, VANTAGE, IQFEED,MT5,MOEX
 }

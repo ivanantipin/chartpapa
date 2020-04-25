@@ -9,7 +9,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import kotlin.random.Random
 
-class HistoricalSourceEmulator(val interval: Interval) : HistoricalSource {
+class HistoricalSourceEmulator() : HistoricalSource {
 
     companion object{
         val SOURCE = SourceName.DUMMY
@@ -31,10 +31,6 @@ class HistoricalSourceEmulator(val interval: Interval) : HistoricalSource {
         )
     }
 
-    override fun getDefaultInterval(): Interval {
-        return interval
-    }
-
     fun makeRandomOhlc(time : Instant) : Ohlc {
         val open = Random.nextDouble(5.0, 10.0)
         val high = open + Random.nextDouble(1.0, 3.0)
@@ -51,7 +47,7 @@ class HistoricalSourceEmulator(val interval: Interval) : HistoricalSource {
 
     }
 
-    override fun load(instrId: InstrId): Sequence<Ohlc> {
+    override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
         return sequence {
             val first = interval.ceilTime(Instant.now()).minusSeconds(9)
 
@@ -61,8 +57,8 @@ class HistoricalSourceEmulator(val interval: Interval) : HistoricalSource {
         }
     }
 
-    override fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc> {
-        return load(instrId)
+    override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+        return load(instrId, interval)
     }
 
     override fun mapSecurity(security: String): InstrId {

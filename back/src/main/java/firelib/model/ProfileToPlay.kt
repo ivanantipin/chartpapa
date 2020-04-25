@@ -1,4 +1,4 @@
-package firelib.model.prod
+package firelib.model
 
 import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
@@ -7,27 +7,36 @@ import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
-import firelib.core.report.dao.GeGeWriter
+import firelib.core.store.DbReaderFactory
 import firelib.indicators.MarketProfile
 import firelib.indicators.defineLevels
-import firelib.model.tickers
+import firelib.model.prod.factorAvgBarQuantLow
+import firelib.model.prod.factorBarQuantLow
+import firelib.model.prod.factorPoc
+import firelib.model.prod.factorVolume
 import java.time.LocalDate
 
 
-class ProfileModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
+class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
     init {
 
         val window = props["window"]!!.toInt()
         val diff = props["diff"]!!.toInt()
 
-        val series = enableSeries(Interval.Min10, interpolated = false, historyLen = window + 200)
+        val series = enableSeries(Interval.Min15, interpolated = false, historyLen = window + 200)
         val daySeries = enableSeries(Interval.Day, interpolated = true, historyLen = 5)
 
         val profiles = instruments().map { MarketProfile() }
         val increms = DoubleArray(instruments().size, { Double.NaN })
 
+        factorPoc(profiles, increms)
+        factorVolume()
         val barQuantFactor = factorBarQuantLow()
+
+        factorAvgBarQuantLow(2)
+        factorAvgBarQuantLow(3)
+        factorAvgBarQuantLow(5)
 
         instruments().forEachIndexed({ idx, ticker ->
             val ts = series[idx]
@@ -58,9 +67,11 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
                 }
 
                 if (currentTime().atMoscow().hour == 18) {
+
                     val price0 = priceToLong(dayts[0].close)
                     val price1 = priceToLong(dayts[1].close)
-                    if (levelsFalse.any { it >= price1 && it < price0 } && barQuantFactor(idx) > 0.8) {
+
+                    if (levelsFalse.any { it >= price1 && it < price0 } ) {
                         longForMoneyIfFlat(idx, 100_000)
                     }
                 }
@@ -74,10 +85,13 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
     }
 
     companion object {
+        //MdStorageImpl().updateMarketData(InstrId(code = "ALLFUTSi", source = SourceName.MT5.name), interval = Interval.Min15);
         fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
-            return ModelConfig(ProfileModel::class, ModelBacktestConfig().apply {
-                instruments = tickers
+            return ModelConfig(ProfileToPlay::class, ModelBacktestConfig().apply {
+                instruments = listOf("ALLFUTSi")
+                interval= Interval.Min15
                 startDate(LocalDate.now().minusDays(3000))
+                histSourceName = SourceName.MT5
             }).apply {
                 setTradeSize(tradeSize)
                 param("window", 13000)
@@ -91,5 +105,5 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
 }
 
 fun main() {
-    ProfileModel.modelConfig().runStrat()
+    ProfileToPlay.modelConfig().runStrat()
 }

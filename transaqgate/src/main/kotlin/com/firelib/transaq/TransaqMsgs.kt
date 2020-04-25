@@ -12,6 +12,11 @@ data class Kind(
     var name: String?
 )
 
+
+/*
+CandleKinds(kinds=[Kind(id=1, period=60, name=1 минута), Kind(id=2, period=300, name=5 минут), Kind(id=3, period=900, name=15 минут), Kind(id=4, period=3600, name=1 час), Kind(id=5, period=86400, name=1 сутки), Kind(id=6, period=604800, name=1 неделя)])
+ */
+
 data class CandleKinds(
     @set:JsonProperty("kind")
     var kinds: List<Kind>

@@ -7,6 +7,7 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.toInstantDefault
+import firelib.core.store.trqMapperWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
@@ -42,14 +43,20 @@ class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlocki
 
     internal var pattern = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
 
-    override fun load(instrId: InstrId): Sequence<Ohlc> {
+    override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
+        //fixme hook with interval
         return dist.add<Candles> { it is Candles }.use {
             val queue = it.queue
-            val response = stub.command(TrqCommandHelper.getHistory(instrId.code, instrId.board, kindId, 2000000))
+            val response = stub.command(TrqCommandHelper.getHistory(instrId.code, instrId.board, kindId, 2000_000))
+            println(response)
             if(response.success){
                 sequence {
                     while (true){
+
                         var candles = queue.poll(1, TimeUnit.MINUTES)
+                        if(candles == null){
+                            break
+                        }
                         yieldAll(candles.candles.map {
                             Ohlc(endTime =  LocalDateTime.parse(it.date!!, pattern).toInstantDefault(),
                                 open = it.open!!,
@@ -73,15 +80,30 @@ class TrqHistoricalSource(val stub : TransaqConnectorGrpc.TransaqConnectorBlocki
         }
     }
 
-    override fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc> {
-        return load(instrId)
+    override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+        return load(instrId, interval)
     }
 
     override fun getName(): SourceName {
         return SourceName.TRANSAQ
     }
+}
 
-    override fun getDefaultInterval(): Interval {
-        return Interval.Min1
-    }
+fun main() {
+    val stub = makeDefaultStub()
+    val dispatcher = TrqMsgDispatcher(stub)
+
+    stub.command(loginCmd)
+
+    val source = TrqHistoricalSource(stub, "2")
+
+    enableMsgLogging(dispatcher,{it is Candles})
+
+    val instr = trqMapperWriter().read().filter { it.code == "SBER" }.first()
+
+    val lst = source.load(instr, Interval.Min5).toList()
+    println(lst.first())
+    println(lst.last())
+
+
 }

@@ -8,10 +8,7 @@ import firelib.core.domain.Interval
 import firelib.core.store.GlobalConstants
 import firelib.core.store.trqMapperWriter
 import firelib.model.DummyModel
-import firelib.model.prod.RealDivModel
-import firelib.model.prod.ReversModel
-import firelib.model.prod.TrendModel
-import firelib.model.prod.VolatilityBreak
+import firelib.model.prod.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 
@@ -20,31 +17,32 @@ val prodModels = mapOf(
     TrendModel::class.simpleName!! to { TrendModel.modelConfig(15_000) },
     RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(30_000) },
     ReversModel::class.simpleName!! to { ReversModel.modelConfig(30_000) },
+    ProfileModel::class.simpleName!! to { ProfileModel.modelConfig(30_000) },
     "DummyModel" to { DummyModel.modelConfig() }
 )
 
 
+fun getTrqMicexMapper() : DbMapper{
+    return DbMapper(trqMapperWriter(), { it.board == "TQBR" })
+}
+
 fun main(args: Array<String>) {
-
-    runReal("DummyModel")
-
-/*
     if (args[0] == "reconnect") {
         runReconnect()
     } else {
-        runReal(args[0])
+        runReal(args.toList())
     }
-*/
-
 }
 
 val runLogger = LoggerFactory.getLogger("runRun")
 
-private fun runReal(name: String) {
+private fun runReal(names: List<String>) {
 
     System.setProperty("env", "prod")
 
-    val config = prodModels[name]!!()
+    val modelConfigs = names.map { prodModels[it]!!() }
+
+    val runConfig = modelConfigs[0].runConfig
 
     GlobalConstants.ensureDirsExist()
 
@@ -52,23 +50,23 @@ private fun runReal(name: String) {
 
     val stub = makeDefaultStub()
 
-    val mapper = DbMapper(trqMapperWriter(), { it.board == "FUT" })
+    val mapper = getTrqMicexMapper()
 
-    config.runConfig.gateMapper = mapper
+    runConfig.gateMapper = mapper
 
     val msgDispatcher = TrqMsgDispatcher(stub)
 
-    val gate = TrqGate(msgDispatcher, executor, "T9009h5")
+    val gate = TrqGate(msgDispatcher, executor)
 
     val factory = TrqRealtimeReaderFactory(msgDispatcher, Interval.Sec10, mapper)
     try {
-        val context = SimpleRunCtx(config.runConfig)
+        val context = SimpleRunCtx(runConfig)
         ProdRunner.runStrat(
             executor,
             context,
             gate,
             factory,
-            listOf(config)
+            modelConfigs
         )
     } catch (e: Exception) {
         runLogger.error("failed to start strategy", e)
@@ -97,5 +95,4 @@ fun runReconnect() {
         )
         runLogger.info("written client ${it}")
     })
-
 }

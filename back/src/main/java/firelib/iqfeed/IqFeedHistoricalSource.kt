@@ -34,11 +34,12 @@ class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
         }
     }
 
-    override fun load(instrId: InstrId): Sequence<Ohlc> {
-        return load(instrId, LocalDateTime.now().minusDays(600));
+    override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
+        return load(instrId, LocalDateTime.now().minusDays(600), interval);
     }
 
-    override fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc> {
+    override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+        require(interval == Interval.Min1)
         val iniFile = csvPath.resolve("common.ini").toAbsolutePath().toString()
         val load = LegacyMarketDataFormatLoader.load(iniFile)
         val producer = ParserHandlersProducer(load)
@@ -56,9 +57,6 @@ class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
         return SourceName.IQFEED
     }
 
-    override fun getDefaultInterval(): Interval {
-        return Interval.Min1
-    }
 
     companion object {
         val SOURCE = SourceName.IQFEED
@@ -81,7 +79,7 @@ fun main(args: Array<String>) {
     val minBars = IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")).load(
         InstrId(
             code = "SPY"
-        )
+        ),Interval.Min1
     )
             .filter { it.endTime.atUtc().toLocalTime().hour != 0 }
             .toList()

@@ -29,7 +29,7 @@ class VantageDownloader : HistoricalSource {
         return ArrayList()
     }
 
-    override fun load(instrId: InstrId): Sequence<Ohlc> {
+    override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
         val template = RestTemplate()
 
         val url = "https://www.alphavantage.co/query"
@@ -50,16 +50,13 @@ class VantageDownloader : HistoricalSource {
 
     }
 
-    override fun load(instrId: InstrId, dateTime: LocalDateTime): Sequence<Ohlc> {
-        return load(instrId)
+    override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+        require(interval == Interval.Day)
+        return load(instrId, interval)
     }
 
     override fun getName(): SourceName {
         return SourceName.VANTAGE
-    }
-
-    override fun getDefaultInterval(): Interval {
-        return Interval.Day
     }
 
     companion object {
@@ -78,7 +75,7 @@ class VantageDownloader : HistoricalSource {
                     "RASP.MOS",
                     "RASP.MOS",
                     "RASP.MOS"
-                )
+                ), Interval.Day
             )
             println(load)
 

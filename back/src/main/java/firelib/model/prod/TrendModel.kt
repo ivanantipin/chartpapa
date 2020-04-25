@@ -26,8 +26,15 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
                 val num = props["number"]!!.toInt()
 
+                val margin = 0.0 // half of percent
+
                 val idxToRet = daytss.mapIndexed { idx, ts ->
-                    Pair(idx, (ts[0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close)
+                    var ret = (ts[0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close
+                    if(position(idx) > 0){
+                        ret += margin
+                    }
+
+                    Pair(idx, ret)
                 }
 
                 val indexed = idxToRet.filter { it.second.isFinite() && it.second > 0 }
@@ -60,7 +67,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
         fun modelConfig(tradeSize : Int = 10_000): ModelConfig {
             return ModelConfig(TrendModel::class, ModelBacktestConfig().apply {
                 instruments = tickers
-                startDate(LocalDate.now().minusDays(200))
+                startDate(LocalDate.now().minusDays(600))
             }).apply {
                 setTradeSize(tradeSize)
                 param("period", 33)

@@ -142,7 +142,7 @@ class OrderManagerTest {
         val config = ModelBacktestConfig()
         config.instruments = listOf("SBER")
 
-        val tg = TradeGateStub(config, timeService)
+        val tg = TradeGateStub(config.instruments, timeService)
 
         timeService.updateTime(Instant.now())
 

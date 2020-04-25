@@ -54,7 +54,8 @@ class GoogTrends(context: ModelContext, val props: Map<String, String>) : Model(
         fun modelConfig(): ModelConfig {
             return ModelConfig(GoogTrends::class, ModelBacktestConfig().apply {
                 instruments = listOf("XLY","XLP")
-                backtestReaderFactory = DbReaderFactory(SourceName.IQFEED, Interval.Min30, roundedStartTime())
+                interval = Interval.Min30
+                histSourceName = SourceName.IQFEED
                 startDate(LocalDate.now().minusDays(2000))
             })
         }

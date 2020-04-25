@@ -11,7 +11,6 @@ import firelib.core.domain.Ohlc
 import firelib.core.domain.merge
 import firelib.core.misc.atNy
 import firelib.core.misc.atUtc
-import firelib.core.store.DbReaderFactory
 import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
 import firelib.indicators.sequenta.Sequenta
@@ -192,7 +191,7 @@ fun seqModel(): ModelConfig {
             .map { it.replace("_1.csv", "") }.filter { it != "ON" && it != "ALL" }.subList(0, 200)
         interval = Interval.Min30
         startDate(LocalDate.now().minusDays(1000))
-        backtestReaderFactory = DbReaderFactory(SourceName.IQFEED, Interval.Min30, roundedStartTime())
+        histSourceName = SourceName.IQFEED
     }).apply {
         param("hold_hours", 30)
     }

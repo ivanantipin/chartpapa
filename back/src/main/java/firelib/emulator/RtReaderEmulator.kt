@@ -12,7 +12,7 @@ class RtReaderEmulator(val interval : Interval) : SimplifiedReader {
     val delegate = QueueSimplifiedReader()
 
     init {
-        val historicalSourceEmulator = HistoricalSourceEmulator(interval)
+        val historicalSourceEmulator = HistoricalSourceEmulator()
         Thread{
             val start = interval.roundTime(Instant.now())
             timeSequence(start, interval, 0).forEach {

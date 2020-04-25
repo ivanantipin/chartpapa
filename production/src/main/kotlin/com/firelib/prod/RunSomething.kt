@@ -31,7 +31,7 @@ fun main() {
 
     val dist = TrqMsgDispatcher(stub)
 
-    val gate = TrqGate(dist, Executors.newSingleThreadExecutor(), "1Y65S/1Y65S")
+    val gate = TrqGate(dist, Executors.newSingleThreadExecutor())
 
     enableMsgLogging(dist, {it is Markets || it is TrqClient})
 

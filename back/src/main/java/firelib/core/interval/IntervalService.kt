@@ -6,6 +6,9 @@ import java.time.Instant
 /**
  * interval service to check intervals end and send notification to listeners
  */
+
+typealias IServiceAction = (Instant) -> Unit
+
 interface IntervalService  {
-    fun addListener(interval: Interval, action: (Instant) -> Unit)
+    fun addListener(interval: Interval, action: IServiceAction)
 }

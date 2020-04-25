@@ -55,11 +55,7 @@ fun spreadModel(): ModelConfig {
     val runConfig = ModelBacktestConfig().apply {
         startDate(LocalDate.now().minusDays(1500))
         interval = Interval.Min240
-        backtestReaderFactory = DbReaderFactory(
-            SourceName.MT5,
-            Interval.Min240,
-            roundedStartTime()
-        )
+        histSourceName = SourceName.MT5
         instruments = listOf("BNO", "USO")
 
     }

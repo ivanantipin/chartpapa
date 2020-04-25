@@ -29,6 +29,8 @@ fun trqMapperWriter(): GeGeWriter<InstrId> {
     )
 }
 
+
+
 fun finamMapperWriter(): GeGeWriter<InstrId> {
     return GeGeWriter(
         GlobalConstants.metaDb,

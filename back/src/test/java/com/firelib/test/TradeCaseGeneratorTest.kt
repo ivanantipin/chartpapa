@@ -18,12 +18,12 @@ class TradeCaseGeneratorTest {
     fun TestSplittingToCases() {
 
         val trds = listOf(
-                Trade(1, 10.0, Order(OrderType.Market, 1.0, 10, Side.Buy, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec")), Instant.now(), Instant.now()),
-                Trade(2, 11.0, Order(OrderType.Market, 2.0, 11, Side.Buy, "sec", "id", Instant.now( ), InstrId.dummyInstrument("sec")), Instant.now(), Instant.now()),
-                Trade(3, 12.0, Order(OrderType.Market, 3.0, 12, Side.Buy, "sec", "id", Instant.now( ), InstrId.dummyInstrument("sec")), Instant.now(), Instant.now()),
-                Trade(3, 13.0, Order(OrderType.Market, 1.0, 13, Side.Sell, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec")), Instant.now(), Instant.now()),
-                Trade(2, 14.0, Order(OrderType.Market, 2.0, 14, Side.Sell, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec")), Instant.now(), Instant.now()),
-                Trade(1, 15.0, Order(OrderType.Market, 3.0, 15, Side.Sell, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec")), Instant.now(), Instant.now())
+                Trade(1, 10.0, Order(OrderType.Market, 1.0, 10, Side.Buy, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec"), ""), Instant.now(), Instant.now()),
+                Trade(2, 11.0, Order(OrderType.Market, 2.0, 11, Side.Buy, "sec", "id", Instant.now( ), InstrId.dummyInstrument("sec"), ""), Instant.now(), Instant.now()),
+                Trade(3, 12.0, Order(OrderType.Market, 3.0, 12, Side.Buy, "sec", "id", Instant.now( ), InstrId.dummyInstrument("sec"), ""), Instant.now(), Instant.now()),
+                Trade(3, 13.0, Order(OrderType.Market, 1.0, 13, Side.Sell, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec"),""), Instant.now(), Instant.now()),
+                Trade(2, 14.0, Order(OrderType.Market, 2.0, 14, Side.Sell, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec"),""), Instant.now(), Instant.now()),
+                Trade(1, 15.0, Order(OrderType.Market, 3.0, 15, Side.Sell, "sec", "id", Instant.now(), InstrId.dummyInstrument("sec"),""), Instant.now(), Instant.now())
         )
 
         var cases = trds.toTradingCases()

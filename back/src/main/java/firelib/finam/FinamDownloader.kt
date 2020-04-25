@@ -79,12 +79,13 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
     }
 
-    override fun load(instrIdSpec: InstrId): Sequence<Ohlc> {
-        return load(instrIdSpec, LocalDateTime.now().minusDays(3000))
+    override fun load(instrIdSpec: InstrId, interval: Interval): Sequence<Ohlc> {
+        return load(instrIdSpec, LocalDateTime.now().minusDays(3000), interval)
     }
 
     @Synchronized
-    override fun load(instrId: InstrId, start: LocalDateTime): Sequence<Ohlc> {
+    override fun load(instrId: InstrId, start: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+        require(interval == Interval.Min10)
         var mstart = start
         return sequence {
             while (mstart < LocalDateTime.now()) {
@@ -135,6 +136,9 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
         val url = "http://export.finam.ru/table.csv?" + params.map { "${it.first}=${it.second}" }.joinToString(separator = "&")
 
+//        request.UserAgent = ;
+//        request.Accept = ;
+//        request.Headers.Add(HttpRequestHeader.AcceptLanguage, "en-us,en;q=0.5");
 
         val ret = SettableFuture.create<List<String>>()
         log.info(url)
@@ -159,10 +163,6 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
     override fun getName(): SourceName {
         return SourceName.FINAM
-    }
-
-    override fun getDefaultInterval(): Interval {
-        return Interval.Min10
     }
 
     companion object{

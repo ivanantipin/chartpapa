@@ -21,7 +21,7 @@ class MainController {
 
     val log = LoggerFactory.getLogger(javaClass)
 
-    internal var storage: MdStorage = CachedStorage(MdStorageImpl(GlobalConstants.mdFolder.toString()))
+    internal var storage: MdStorage = MdStorageImpl(GlobalConstants.mdFolder.toString())
 
     internal var allMetas: MutableList<Metadata> = ArrayList()
 
@@ -61,24 +61,20 @@ class MainController {
 
 
     fun getOhlcs(instrId: InstrId, interval: Interval): Collection<Ohlc> {
-        return storage.read(instrId, interval)
+        return storage.read(instrId, interval, interval)
     }
 
     fun getAnnotations(instrId: InstrId, interval: Interval): Annotations {
-        val ohlcs = storage.read(instrId, interval)
+        val ohlcs = storage.read(instrId, interval, interval)
         return AnnotationCreator.createAnnotations(ohlcs)
     }
 
     fun getSeries(codes: Array<InstrId>, interval: Interval): Map<String, Collection<TimePoint>> {
         val mm = HashMap<String, Collection<TimePoint>>()
         Arrays.stream(codes).forEach { c ->
-            mm[c.code] = storage.read(c, interval).map { oh -> TimePoint(oh.endTime.atUtc(), oh.close) }.sorted()
+            mm[c.code] = storage.read(c, interval, interval).map { oh -> TimePoint(oh.endTime.atUtc(), oh.close) }.sorted()
         }
         return mm
-    }
-
-    fun update(ticker : String){
-        storage.updateRequested(ticker)
     }
 
 }

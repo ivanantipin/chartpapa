@@ -1,9 +1,7 @@
 package firelib.core.config
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import firelib.core.HistoricalSource
-import firelib.core.InstrumentMapper
-import firelib.core.ModelFactory
+import firelib.core.*
 import firelib.core.backtest.Backtester
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -15,7 +13,6 @@ import firelib.core.store.reader.ReaderSimpleDivAdjusted
 import firelib.core.store.reader.SimplifiedReader
 import firelib.finam.FinamDownloader
 import firelib.model.Div
-import firelib.core.Model
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
@@ -27,7 +24,7 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * configuration for model backtest
  */
-class ModelBacktestConfig(val name: String = "NoName") : Cloneable{
+class ModelBacktestConfig(val name: String = "NoName") : Cloneable {
     /**
      * instruments configuration
      */
@@ -47,8 +44,7 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable{
         return interval.roundTime(startDateGmt)
     }
 
-    @get:JsonIgnore
-    var backtestHistSource: HistoricalSource = FinamDownloader()
+    var histSourceName: SourceName = SourceName.MOEX
 
     @get:JsonIgnore
     var gateMapper: InstrumentMapper = object : InstrumentMapper {
@@ -58,11 +54,13 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable{
     }
 
     @get:JsonIgnore
-    var backtestReaderFactory: ReaderFactory = DbReaderFactory(
-        backtestHistSource.getName(),
-        interval,
-        roundedStartTime()
-    )
+    val backtestReaderFactory by lazy {
+        DbReaderFactory(
+            histSourceName,
+            interval,
+            roundedStartTime()
+        )
+    }
 
 
     fun endDate(ed: LocalDate) {
@@ -89,7 +87,7 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable{
     /*
     * report will be written into this directory
      */
-    var reportTargetPath: String = GlobalConstants.rootReportPath.resolve(name).toString()
+    var reportTargetPath: String = GlobalConstants.rootReportPath.toString()
 
     fun getProdDbFile(): Path {
         return GlobalConstants.mdFolder.resolve("${name}.db").toAbsolutePath()
@@ -121,14 +119,15 @@ fun ModelConfig.runStrat() {
 fun ModelBacktestConfig.enableDivs(divs: Map<String, List<Div>>) {
     this.tickerToDiv = divs
     val delegate = this.backtestReaderFactory
-    this.backtestReaderFactory = object : ReaderFactory {
-        override fun makeReader(security: String): SimplifiedReader {
-            return ReaderSimpleDivAdjusted(
-                delegate.makeReader(security),
-                tickerToDiv!!.getOrDefault(security, emptyList())
-            )
-        }
-    }
+    //fixme does not work
+//    this.backtestReaderFactory = object : ReaderFactory {
+//        override fun makeReader(security: String): SimplifiedReader {
+//            return ReaderSimpleDivAdjusted(
+//                delegate.makeReader(security),
+//                tickerToDiv!!.getOrDefault(security, emptyList())
+//            )
+//        }
+//    }
 }
 
 fun ModelConfig.setTradeSize(tradeSize: Int) {

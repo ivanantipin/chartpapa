@@ -1,7 +1,13 @@
 package firelib.core
 
+import firelib.common.Order
+import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
+import firelib.core.domain.InstrId
+import firelib.core.domain.OrderType
+import firelib.core.domain.Side
+import firelib.core.misc.TelegramMsg
 import firelib.core.misc.timeSequence
 import firelib.core.report.ModelNameTicker
 import firelib.core.report.OmPosition
@@ -69,7 +75,7 @@ object ProdRunner {
                 model.orderManagers().forEach {
                     val key = ModelNameTicker(it.modelName(), it.security().toLowerCase())
                     val pos = curentPoses.getOrDefault(key, OmPosition(0,0))
-                    log.info("restored position for ${it.security()} to $pos")
+                    log.info("restored position for model security ${key} to $pos")
                     it.updatePosition(pos.position, Instant.ofEpochMilli(pos.posTime))
                 }
             }
@@ -87,25 +93,59 @@ object ProdRunner {
             enableTradeRtPersist(model, cfg.getProdDbFile(), ioExecutor)
         }
 
+        models.forEach {
+            it.oms.forEach({
+                it.tradesTopic().subscribe {
+                    sendTradeMsg(it)
+                }
+            })
+        }
+
         timeSequence(nextTimeToProgress, cfg.interval).forEach {
             try{
                 executorService.submit {
                     context.progress(it, realReaders)
                 }.get()
             }catch (e : Exception){
+                TelegramMsg.sendMsg("error in the loop ${e.message}")
                 log.error("error iterating loop for timestamp $it", e)
             }
 
         }
     }
 
+    fun sendTradeMsg(it: Trade) {
+        TelegramMsg.sendMsg(
+            """
+        ${it.security()} ${it.side()} 
+        modelName=${it.order.modelName} 
+        price=${it.price} 
+        qty=${it.qty * it.order.instr.lot}
+        currentPosition=${it.positionAfter*it.order.instr.lot}
+    """.trimIndent()
+        )
+    }
+
     fun updateMd(cfg: ModelBacktestConfig, useMin : Boolean): Instant {
         val storageImpl = MdStorageImpl()
-        val updated = cfg.instruments.map(cfg.backtestHistSource::mapSecurity).associateBy ({},
-            {            storageImpl.updateMd(it, cfg.backtestHistSource)})
+        val source = storageImpl.sources[cfg.histSourceName]
+        val updated = cfg.instruments.map(source::mapSecurity).associateBy ({},
+            {            storageImpl.updateMd(it, source, cfg.interval)})
 
         println("updated data to $updated")
         return if(useMin) updated.values.min()!! else updated.values.max()!!
     }
+}
+
+fun main() {
+    System.setProperty("env","prod")
+    val trd = Trade(
+        1,
+        10.0,
+        Order(OrderType.Market, 1.0, 10, Side.Buy, "SBER", "id", Instant.now(), InstrId.dummyInstrument("SBER"), "modelName"),
+        Instant.now(),
+        Instant.now()
+    )
+    ProdRunner.sendTradeMsg(trd)
 }
 

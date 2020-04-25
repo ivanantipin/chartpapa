@@ -45,11 +45,11 @@ object ServiceFac {
 
     fun makeInterServiceBc(mdDistributor: MarketDataDistributor, tickers: List<String>): Broadcaster<OhlcTO> {
         val defferer = Defferer()
-        val dayTss = tickers.mapIndexed({ idx, ticker ->
+        val dayTss = tickers.mapIndexed({ idx, _ ->
             mdDistributor.getOrCreateTs(idx, Interval.Day, 2)
         })
         val intraPrices = Broadcaster<OhlcTO>("intra prices", historyKey = { l -> l.ticker })
-        mdDistributor.addListener(Interval.Min10, { time, md ->
+        mdDistributor.addListener(Interval.Min10, { _, md ->
             dayTss.forEachIndexed({ idx, ts ->
                 val ticker = tickers[idx]
                 defferer.executeLater(ticker) {
