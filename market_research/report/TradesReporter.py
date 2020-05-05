@@ -332,7 +332,3 @@ def test():
     print(models)
     displayFactors(fileName, models)
     return trades
-
-df=test()
-
-

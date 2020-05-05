@@ -30,14 +30,6 @@ class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Mod
         val profiles = instruments().map { MarketProfile() }
         val increms = DoubleArray(instruments().size, { Double.NaN })
 
-        factorPoc(profiles, increms)
-        factorVolume()
-        val barQuantFactor = factorBarQuantLow()
-
-        factorAvgBarQuantLow(2)
-        factorAvgBarQuantLow(3)
-        factorAvgBarQuantLow(5)
-
         instruments().forEachIndexed({ idx, ticker ->
             val ts = series[idx]
             val dayts = daySeries[idx]
@@ -46,6 +38,7 @@ class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Mod
             fun priceToLong(price: Double): Int {
                 if (increms[idx].isNaN()) {
                     increms[idx] = price / 200.0;
+                    println("incr = ${increms[idx]}")
                 }
                 return (price / increms[idx]).toInt()
             }
@@ -53,6 +46,7 @@ class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Mod
             var levelsFalse = emptyList<Int>()
 
             ts.preRollSubscribe {
+
                 val lprice = priceToLong(ts[0].close)
                 profile.add(lprice, (ts[0].volume * ts[0].close).toLong())
 
@@ -62,14 +56,15 @@ class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Mod
                     profile.reduceBy(rlprice, (ohlc.volume * ohlc.close).toLong())
                 }
 
-                if (currentTime().atMoscow().hour == 18 && currentTime().atMoscow().minute == 0) {
+                if (currentTime().atMoscow().hour == 18 && currentTime().atMoscow().minute == 30) {
                     levelsFalse = profile.defineLevels(diff, false).map { it.first }
                 }
 
-                if (currentTime().atMoscow().hour == 18) {
+                if (currentTime().atMoscow().hour == 18 && currentTime().atMoscow().minute == 30) {
 
                     val price0 = priceToLong(dayts[0].close)
                     val price1 = priceToLong(dayts[1].close)
+
 
                     if (levelsFalse.any { it >= price1 && it < price0 } ) {
                         longForMoneyIfFlat(idx, 100_000)
@@ -88,14 +83,14 @@ class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Mod
         //MdStorageImpl().updateMarketData(InstrId(code = "ALLFUTSi", source = SourceName.MT5.name), interval = Interval.Min15);
         fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
             return ModelConfig(ProfileToPlay::class, ModelBacktestConfig().apply {
-                instruments = listOf("ALLFUTSi")
+                instruments = listOf("ALLFUTRTSI")
                 interval= Interval.Min15
-                startDate(LocalDate.now().minusDays(3000))
+                startDate(LocalDate.now().minusDays(5000))
                 histSourceName = SourceName.MT5
             }).apply {
                 setTradeSize(tradeSize)
-                param("window", 13000)
-                param("diff", 18)
+                param("window", 1300)
+                param("diff", 4)
             }
         }
 

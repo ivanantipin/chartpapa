@@ -14,8 +14,6 @@ class TrqMsgDispatcher(val stub: TransaqConnectorGrpc.TransaqConnectorBlockingSt
 
     val listeners = ConcurrentLinkedQueue<Receiver<Any>>()
 
-
-
     init {
         Thread {
             while (true) {
@@ -28,7 +26,6 @@ class TrqMsgDispatcher(val stub: TransaqConnectorGrpc.TransaqConnectorBlockingSt
                             listeners.forEach {
                                 if(!it.isCancelled.get()){
                                     if(it.predicate(msg)){
-                                        println("pushing msg of type ${msg::class}")
                                         it.pub(msg)
                                     }
                                 }else{

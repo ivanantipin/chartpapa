@@ -22,7 +22,7 @@ val tickers = listOf(
     "irao",
     "mtss",
     "magn",
-    "sngs",
+    "sngsp",
     "plzl",
     "trnfp",
     "mtlr",

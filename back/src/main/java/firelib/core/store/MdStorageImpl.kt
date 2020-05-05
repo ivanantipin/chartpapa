@@ -16,6 +16,8 @@ import firelib.finam.FinamDownloader
 import firelib.finam.MoexSource
 import firelib.iqfeed.IntervalTransformer
 import firelib.iqfeed.IqFeedHistoricalSource
+import firelib.mt5.MTSafe
+import firelib.mt5.MTraderAPI
 import firelib.vantage.VantageDownloader
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
@@ -46,7 +48,7 @@ class SourceFactory{
         SourceName.DUMMY to { HistoricalSourceEmulator() },
         SourceName.MOEX to { MoexSource() },
         SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))},
-        SourceName.MT5 to { Mt5CsvSource() }
+        SourceName.MT5 to { MTSafe() }
     )
 
     val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()

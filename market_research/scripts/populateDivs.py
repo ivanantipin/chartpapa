@@ -31,7 +31,7 @@ tickers = [
     'irao',
     'mtss',
     'magn',
-    'sngs',
+    'sngsp',
     'plzl',
     'five',
     'trnfp',

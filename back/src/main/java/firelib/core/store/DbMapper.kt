@@ -29,6 +29,16 @@ fun trqMapperWriter(): GeGeWriter<InstrId> {
     )
 }
 
+fun mt5MapperWriter(): GeGeWriter<InstrId> {
+    return GeGeWriter(
+        GlobalConstants.metaDb,
+        InstrId::class,
+        listOf("code"),
+        "mt5_instruments"
+    )
+}
+
+
 
 
 fun finamMapperWriter(): GeGeWriter<InstrId> {

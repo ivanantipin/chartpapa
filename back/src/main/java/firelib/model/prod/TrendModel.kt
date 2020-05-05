@@ -7,7 +7,7 @@ import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
-import firelib.model.*
+import firelib.model.tickers
 import java.time.LocalDate
 
 
@@ -17,23 +17,21 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
     val nonInterpolated = enableSeries(Interval.Day, interpolated = false)
 
-
     init {
+        val back = props["period"]!!.toInt()
 
         enableSeries(Interval.Min60, interpolated = false)[0].preRollSubscribe {
+
             if (daytss[0].count() > 40 && currentTime().atMoscow().hour == 18) {
-                val back = props["period"]!!.toInt()
+
 
                 val num = props["number"]!!.toInt()
 
-                val margin = 0.0 // half of percent
-
                 val idxToRet = daytss.mapIndexed { idx, ts ->
-                    var ret = (ts[0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close
+                    var ret = (nonInterpolated[idx][0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close
                     if(position(idx) > 0){
-                        ret += margin
+                        ret += 0.005
                     }
-
                     Pair(idx, ret)
                 }
 
@@ -67,12 +65,11 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
         fun modelConfig(tradeSize : Int = 10_000): ModelConfig {
             return ModelConfig(TrendModel::class, ModelBacktestConfig().apply {
                 instruments = tickers
-                startDate(LocalDate.now().minusDays(600))
+                startDate(LocalDate.now().minusDays(500))
             }).apply {
                 setTradeSize(tradeSize)
                 param("period", 33)
                 param("number", 5)
-
             }
         }
     }

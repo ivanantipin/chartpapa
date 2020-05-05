@@ -3,19 +3,67 @@ package firelib.model
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import firelib.core.domain.Interval
+import firelib.core.misc.SqlUtils
+import firelib.core.misc.UtilsHandy
+import firelib.core.misc.atUtc
+import firelib.core.store.GlobalConstants
+import firelib.core.store.MdDaoContainer
+import firelib.core.store.MdStorageImpl
+import firelib.finam.FinamDownloader
 import firelib.model.OpenDivHelper.fetchDivs
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForObject
 import java.time.LocalDate
+import java.time.Month
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+
+
+data class Div(val ticker: String, val lastDayWithDivs: LocalDate, val div: Double, val status : String)
+
+object DivHelper {
+
+    val tSwitch = LocalDate.of(2013, Month.SEPTEMBER, 2)
+
+    fun getDivs(): Map<String, List<Div>> {
+
+        val storage = MdStorageImpl()
+
+        val mdDaoContainer = MdDaoContainer()
+
+        val dao = mdDaoContainer.getDao(FinamDownloader.SOURCE, Interval.Min10)
+
+        var trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
+
+        if(trdDays.isEmpty()){
+            UtilsHandy.updateTicker("sber")
+            trdDays = dao.queryAll("sber").map { it.endTime.atUtc().toLocalDate()!! }.toSet()
+        }
+
+        val dsForFile = SqlUtils.getDsForFile(GlobalConstants.mdFolder.resolve("meta.db").toAbsolutePath().toString())
+        val divs = JdbcTemplate(dsForFile).query("select * from dividends", { row, _ ->
+            var divDate = LocalDate.ofEpochDay(row.getLong("DT"))!!
+            var cntDif = if (divDate.isAfter(tSwitch)) 2 else 0;
+            while (cntDif > 0) {
+                divDate = divDate.minusDays(1)
+                if (trdDays.contains(divDate)) {
+                    cntDif--
+                }
+            }
+
+
+            Div(row.getString("ticker"), divDate, row.getDouble("div"),"na")
+        })
+        return divs.groupBy { it.ticker }.mapValues { it.value.sortedBy { div -> div.lastDayWithDivs } }
+    }
+}
+
+
 object OpenDivHelper {
 
-
-    data class ODiv(
-        val Id : String?
-    )
 
     val str = """
 	
