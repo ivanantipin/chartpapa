@@ -14,6 +14,7 @@ class TimeSeriesImpl<T>(val capacity: Int, val func: (Int) -> T) : TimeSeries<T>
         channel.subscribe(listener)
     }
 
+
     var data = RingBuffer<T>(capacity, func)
 
     override fun count(): Int {

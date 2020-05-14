@@ -29,15 +29,7 @@ data class Ohlc(
         return "OHLC($open/$high/$low/$close/$dtStr/${volume}/$interpolated)"
     }
 
-    fun toStrAtMoscow() : String {
-        val dtStr: String = endTime.toStringAtMoscow()
-        return "OHLC($open/$high/$low/$close/$dtStr/${volume}/$interpolated)"
-    }
-
     fun toStrMtDay() : String {
-
-
-
         val dtStr: String = endTime.atNy().format(dateFormat)
         return "${dtStr},${"%.5f".format(open)},${"%.5f".format(high)},${"%.5f".format(low)},${"%.5f".format(close)},${volume}"
     }

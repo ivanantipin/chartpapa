@@ -40,6 +40,9 @@ where st.epochTimeMs = le.epochTimeMs
         return JdbcTemplate(ds).queryForObject("SELECT count(*) FROM sqlite_master WHERE type='table' AND lower(name)='${tableName.toLowerCase()}'", Int::class.java) > 0
     }
 
+    fun listAllTables(ds : DataSource) : List<String>{
+        return JdbcTemplate(ds).queryForList("SELECT name FROM sqlite_master WHERE type='table' ", String::class.java)
+    }
 }
 
 

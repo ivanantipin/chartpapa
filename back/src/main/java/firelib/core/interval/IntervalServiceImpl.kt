@@ -27,8 +27,7 @@ class IntervalServiceImpl : IntervalService {
         for (i in interval2listeners) {
             val interval = i.first
             if ((dt.toEpochMilli() - interval.offset)  % interval.durationMs == 0L) {
-                i.second.
-                forEach {
+                i.second.forEach {
                     try {
                         it(dt)
                     }catch (e : Exception){

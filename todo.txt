@@ -1,5 +1,34 @@
-3. benchmark in strategy backtest
+support resistance
+vwap as measure of momentum
+move money to finam
+restart daily transaq in service
+benchmark in strategy backtest
 
--Dsun.java2d.renderer=sun.java2d.marlin.MarlinRenderingEngine
 
+Банк получатель
 
+АО «Тинькофф Банк»
+
+Корр. счёт
+
+30101810145250000974
+
+БИК
+
+044525974
+
+Получатель
+
+Антипина Надежда Ивановна
+
+Счёт получателя платежа
+
+40817810800000217159
+
+Назначение платежа
+
+Перевод средств по договору № 5002531829 Антипина Надежда Ивановна НДС не облагается
+
+ИНН
+
+Укажите ваш ИНН, если его нет, поле оставьте пустым (при строгой необходимости заполнять поле – укажите 7710140679)

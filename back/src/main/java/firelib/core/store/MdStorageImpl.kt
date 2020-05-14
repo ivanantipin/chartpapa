@@ -7,7 +7,6 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
-import firelib.mt5csv.Mt5CsvSource
 import firelib.core.misc.SqlUtils
 import firelib.core.misc.atUtc
 import firelib.core.report.dao.GeGeWriter
@@ -16,8 +15,7 @@ import firelib.finam.FinamDownloader
 import firelib.finam.MoexSource
 import firelib.iqfeed.IntervalTransformer
 import firelib.iqfeed.IqFeedHistoricalSource
-import firelib.mt5.MTSafe
-import firelib.mt5.MTraderAPI
+import firelib.mt5.MT5SourceSafe
 import firelib.vantage.VantageDownloader
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
@@ -38,6 +36,7 @@ class MdDaoContainer(val folder: String = GlobalConstants.mdFolder.toString()) {
             MdDao(SqlUtils.getDsForFile("$folder$interval.db"))
         }
     }
+
 }
 
 
@@ -48,7 +47,7 @@ class SourceFactory{
         SourceName.DUMMY to { HistoricalSourceEmulator() },
         SourceName.MOEX to { MoexSource() },
         SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))},
-        SourceName.MT5 to { MTSafe() }
+        SourceName.MT5 to { MT5SourceSafe() }
     )
 
     val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()

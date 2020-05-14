@@ -1,4 +1,4 @@
-package firelib.model.prod
+package firelib.model
 
 import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
@@ -7,11 +7,12 @@ import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
+import firelib.indicators.VWAP
 import firelib.model.tickers
 import java.time.LocalDate
 
 
-class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
+class TrendModelToPlay(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
     val daytss = enableSeries(Interval.Day)
 
@@ -19,23 +20,38 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
     init {
         val back = props["period"]!!.toInt()
+        val num = props["number"]!!.toInt()
 
-        enableSeries(Interval.Min10, interpolated = false)[0].preRollSubscribe {
+        val vwaps = instruments().mapIndexed {idx, _->
+            val vwap = VWAP(back)
+            nonInterpolated[idx].preRollSubscribe {
+                vwap.addOhlc(it[0])
+            }
+            vwap
+        }
+
+        enableSeries(Interval.Min60, interpolated = false)[0].preRollSubscribe {
             if (daytss[0].count() > 40 && currentTime().atMoscow().hour == 18) {
-                val num = props["number"]!!.toInt()
+
                 val idxToRet = daytss.mapIndexed { idx, ts ->
                     var ret = (nonInterpolated[idx][0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close
+                    var vwpaDiff = (nonInterpolated[idx][0].close - vwaps[idx].value()) / vwaps[idx].value()
                     if(position(idx) > 0){
                         ret += 0.005
                     }
-                    Pair(idx, ret)
+                    Triple(idx, ret,vwpaDiff)
                 }
 
                 val indexed = idxToRet.filter { it.second.isFinite() && it.second > 0 }
 
                 val sortedBy = indexed.sortedBy { -it.second }
 
-                val sorted = sortedBy.subList(0, Math.min(num, indexed.size)).map { it.first }
+                val sorted = sortedBy
+                    .subList(0, Math.min(num, indexed.size))
+                    .sortedBy { it.third }
+                    .subList(0, Math.min(num/2, indexed.size))
+                    .map { it.first }
+
 
                 idxToRet.forEach {
                     logRealtime { "return for ticker ${instruments()[it.first]} is ${it.second}"}
@@ -47,16 +63,10 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
 
                 oms.forEachIndexed { idx, om ->
-                    if(currentTime().atMoscow().minute == 10){
-                        if (!sorted.contains(idx)) {
-                            om.flattenAll()
-                        }
-                    }else{
-                        if (sorted.contains(idx)) {
-                            longForMoneyIfFlat(idx, tradeSize())
-                        } else {
-                            om.flattenAll()
-                        }
+                    if (sorted.contains(idx)) {
+                        longForMoneyIfFlat(idx, tradeSize())
+                    } else {
+                        om.flattenAll()
                     }
                 }
 
@@ -65,13 +75,13 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
     }
     companion object{
         fun modelConfig(tradeSize : Int = 10_000): ModelConfig {
-            return ModelConfig(TrendModel::class, ModelBacktestConfig().apply {
+            return ModelConfig(TrendModelToPlay::class, ModelBacktestConfig().apply {
                 instruments = tickers
-                startDate(LocalDate.now().minusDays(500))
+                startDate(LocalDate.now().minusDays(3000))
             }).apply {
                 setTradeSize(tradeSize)
                 param("period", 33)
-                param("number", 5)
+                param("number", 10)
             }
         }
     }
@@ -79,5 +89,5 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
 
 fun main() {
-    TrendModel.modelConfig().runStrat()
+    TrendModelToPlay.modelConfig().runStrat()
 }

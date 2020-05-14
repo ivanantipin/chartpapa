@@ -38,7 +38,7 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable {
 
     var endDate: Instant = Instant.now()
 
-    var maxRiskMoney = 1000_000L
+    var maxRiskMoney = 1000_000_000L
 
     fun roundedStartTime(): Instant {
         return interval.roundTime(startDateGmt)

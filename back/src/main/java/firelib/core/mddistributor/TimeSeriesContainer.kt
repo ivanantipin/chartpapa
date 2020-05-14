@@ -6,6 +6,8 @@ import firelib.core.interval.IntervalService
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.TimeSeriesImpl
 import java.time.Instant
+import kotlin.math.max
+import kotlin.math.min
 
 class TimeSeriesContainer(val intervalService: IntervalService, val startTime : Instant) {
 
@@ -69,24 +71,46 @@ class TimeSeriesContainer(val intervalService: IntervalService, val startTime : 
         return map[interval] as TimeSeriesImpl<Ohlc>
     }
 
-    fun mergeOhlc(currOhlc: Ohlc, ohlc: Ohlc): Ohlc {
-        require(!ohlc.interpolated, { "should not be interpolated" })
-
-        if (currOhlc.interpolated) {
-            require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
-            return ohlc.copy(endTime = currOhlc.endTime, interpolated = false)
-        } else {
-            require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
-
-            return currOhlc.copy(high = Math.max(ohlc.high, currOhlc.high),
-                    low = Math.min(ohlc.low, currOhlc.low),
-                    close = ohlc.close,
-                    Oi = currOhlc.Oi + ohlc.Oi,
-                    volume = currOhlc.volume + ohlc.volume
-            )
-        }
-    }
 
 
 }
+
+fun mergeOhlc(currOhlc: Ohlc, ohlc: Ohlc): Ohlc {
+    require(!ohlc.interpolated, { "should not be interpolated" })
+
+    if (currOhlc.interpolated) {
+        require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
+        return ohlc.copy(endTime = currOhlc.endTime, interpolated = false)
+    } else {
+        require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
+
+        return currOhlc.copy(high = Math.max(ohlc.high, currOhlc.high),
+            low = Math.min(ohlc.low, currOhlc.low),
+            close = ohlc.close,
+            Oi = currOhlc.Oi + ohlc.Oi,
+            volume = currOhlc.volume + ohlc.volume
+        )
+    }
+}
+
+fun Ohlc.forceMerge(ohlc : Ohlc){
+    endTime = ohlc.endTime
+    close = ohlc.close
+    if (this.interpolated) {
+        open = ohlc.open
+        high = ohlc.high
+        low = ohlc.low
+        Oi = ohlc.Oi
+        volume = ohlc.volume
+        interpolated = false
+    } else {
+        high = max(high,ohlc.high)
+        low = min(low, ohlc.low)
+        Oi = Oi + ohlc.Oi
+        volume = volume + ohlc.volume
+    }
+}
+
+
+
 

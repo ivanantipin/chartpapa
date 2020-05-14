@@ -5,6 +5,7 @@ import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
 import firelib.core.domain.InstrId
+import firelib.core.domain.OrderState
 import firelib.core.domain.OrderType
 import firelib.core.domain.Side
 import firelib.core.misc.TelegramMsg
@@ -98,6 +99,9 @@ object ProdRunner {
                 it.tradesTopic().subscribe {
                     sendTradeMsg(it)
                 }
+                it.orderStateTopic().subscribe {
+                    sendOrderMsg(it)
+                }
             })
         }
 
@@ -125,6 +129,19 @@ object ProdRunner {
     """.trimIndent()
         )
     }
+
+    fun sendOrderMsg(it: OrderState) {
+        TelegramMsg.sendMsg(
+            """ Order:
+        ${it.order.security} ${it.order.side}
+         status=${it.status}
+         msg=${it.msg}
+        modelName=${it.order.modelName}  
+        qty=${it.order.qtyLots * it.order.instr.lot} 
+    """.trimIndent()
+        )
+    }
+
 
     fun updateMd(cfg: ModelBacktestConfig, useMin : Boolean): Instant {
         val storageImpl = MdStorageImpl()

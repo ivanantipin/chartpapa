@@ -41,6 +41,15 @@ class MdDao(internal val ds: SQLiteDataSource) {
         }
     }
 
+    fun listAvailableInstruments() : List<String>{
+        return JdbcTemplate(ds).queryForList("""SELECT    name
+                FROM
+                sqlite_master  
+                WHERE  
+                    type ='table' AND  
+                    name NOT LIKE 'sqlite_%' """, String::class.java)!!
+    }
+
 
     fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
         val table = normName(tableIn)
@@ -91,7 +100,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
         }
     }
 
-    private fun mapOhlc(rs: ResultSet, expectedSize : Int = 1): List<Ohlc> {
+    private fun mapOhlc(rs: ResultSet, expectedSize: Int = 1): List<Ohlc> {
 
         val sqLiteRs = rs as JDBC3ResultSet
 
@@ -139,10 +148,14 @@ class MdDao(internal val ds: SQLiteDataSource) {
         return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC))
     }
 
+    val existingTables by lazy {
+        Sqls.listAllTables(ds).map { it.toLowerCase() }.toSet()
+    }
+
     fun queryAll(codeIn: String, start: LocalDateTime, limit: Int = 10_000_000): List<Ohlc> {
         val code = normName(codeIn)
-        if(!Sqls.checkTableExists(ds, code)){
-            println("table not existisi!!!!! ${code}")
+        if (!existingTables.contains(code.toLowerCase())) {
+            println("table does not exists!!!!! ${code}")
             return emptyList()
         }
 
@@ -152,11 +165,11 @@ class MdDao(internal val ds: SQLiteDataSource) {
         )
         return NamedParameterJdbcTemplate(ds).query(
             "select * from $code where dt > :DT order by dt asc LIMIT :LIMIT",
-            map,object : ResultSetExtractor<List<Ohlc>> {
+            map, object : ResultSetExtractor<List<Ohlc>> {
                 override fun extractData(rs: ResultSet): List<Ohlc> {
                     return mapOhlc(rs, limit)
                 }
             }
-        )
+        )!!
     }
 }
