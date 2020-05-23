@@ -81,6 +81,8 @@ class VantageDownloader : HistoricalSource {
 
         }
 
+
+
         fun parse(str: String): Ohlc? {
             try {
                 val arr = str.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()

@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 
 val prodModels = mapOf(
-    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(15_000) },
-    TrendModel::class.simpleName!! to { TrendModel.modelConfig(15_000) },
-    RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(30_000) },
+    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(250_000) },
+    TrendModel::class.simpleName!! to { TrendModel.modelConfig(250_000) },
+    RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(250_000) },
     ReversModel::class.simpleName!! to { ReversModel.modelConfig(30_000) },
     ProfileModel::class.simpleName!! to { ProfileModel.modelConfig(30_000) },
     "DummyModel" to { DummyModel.modelConfig() }
@@ -43,6 +43,11 @@ private fun runReal(names: List<String>) {
     val modelConfigs = names.map { prodModels[it]!!() }
 
     val runConfig = modelConfigs[0].runConfig
+
+    //fixme crap
+    runConfig.maxRiskMoney = 2_300_000
+    runConfig.maxRiskMoneyPerSec = 300_000
+
 
     GlobalConstants.ensureDirsExist()
 

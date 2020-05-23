@@ -38,7 +38,9 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable {
 
     var endDate: Instant = Instant.now()
 
-    var maxRiskMoney = 1000_000_000L
+    var maxRiskMoney = 1_500_000L
+
+    var maxRiskMoneyPerSec = 250_000L
 
     fun roundedStartTime(): Instant {
         return interval.roundTime(startDateGmt)
@@ -55,11 +57,27 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable {
 
     @get:JsonIgnore
     val backtestReaderFactory by lazy {
-        DbReaderFactory(
-            histSourceName,
-            interval,
-            roundedStartTime()
-        )
+        if (tickerToDiv != null) {
+            val delegate = DbReaderFactory(
+                histSourceName,
+                interval,
+                roundedStartTime()
+            )
+            object : ReaderFactory {
+                override fun makeReader(security: String): SimplifiedReader {
+                    return ReaderSimpleDivAdjusted(
+                        delegate.makeReader(security),
+                        tickerToDiv!!.getOrDefault(security, emptyList())
+                    )
+                }
+            }
+        }else{
+            DbReaderFactory(
+                histSourceName,
+                interval,
+                roundedStartTime()
+            )
+        }
     }
 
 
@@ -118,16 +136,6 @@ fun ModelConfig.runStrat() {
 
 fun ModelBacktestConfig.enableDivs(divs: Map<String, List<Div>>) {
     this.tickerToDiv = divs
-    val delegate = this.backtestReaderFactory
-    //fixme does not work
-//    this.backtestReaderFactory = object : ReaderFactory {
-//        override fun makeReader(security: String): SimplifiedReader {
-//            return ReaderSimpleDivAdjusted(
-//                delegate.makeReader(security),
-//                tickerToDiv!!.getOrDefault(security, emptyList())
-//            )
-//        }
-//    }
 }
 
 fun ModelConfig.setTradeSize(tradeSize: Int) {

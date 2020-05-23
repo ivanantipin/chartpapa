@@ -22,15 +22,17 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         val diff = props["diff"]!!.toInt()
 
         val series = enableSeries(Interval.Min10, interpolated = false, historyLen = window + 200)
+        val minSeries = enableSeries(Interval.Min1, interpolated = false, historyLen = window + 200)
         val daySeries = enableSeries(Interval.Day, interpolated = true, historyLen = 5)
 
         val profiles = instruments().map { MarketProfile() }
         val increms = DoubleArray(instruments().size, { Double.NaN })
-
         val barQuantFactor = factorBarQuantLow()
+
 
         instruments().forEachIndexed({ idx, ticker ->
             val ts = series[idx]
+            val minSer = series[idx]
             val dayts = daySeries[idx]
             val profile = profiles[idx]
 
@@ -43,7 +45,7 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
 
             var levelsFalse = emptyList<Int>()
 
-            ts.preRollSubscribe {
+            minSer.preRollSubscribe {
                 val lprice = priceToLong(ts[0].close)
                 profile.add(lprice, (ts[0].volume * ts[0].close).toLong())
 
@@ -52,6 +54,9 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
                     val rlprice = priceToLong(ohlc.close)
                     profile.reduceBy(rlprice, (ohlc.volume * ohlc.close).toLong())
                 }
+            }
+
+            ts.preRollSubscribe {
 
                 if (currentTime().atMoscow().hour == 18 && currentTime().atMoscow().minute == 0) {
                     levelsFalse = profile.defineLevels(diff, false).map { it.first }
@@ -77,7 +82,9 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
             return ModelConfig(ProfileModel::class, ModelBacktestConfig().apply {
                 instruments = tickers
-                startDate(LocalDate.now().minusDays(3000))
+                interval = Interval.Min1
+                histSourceName = SourceName.FINAM
+                startDate(LocalDate.now().minusDays(600))
             }).apply {
                 setTradeSize(tradeSize)
                 param("window", 13000)

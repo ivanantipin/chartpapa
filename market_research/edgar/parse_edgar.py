@@ -1,5 +1,5 @@
 # Generate the list of index files archived in EDGAR since start_year (earliest: 1993) until the most recent quarter
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 flds = [
     'issuercik',

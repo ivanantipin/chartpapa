@@ -29,7 +29,7 @@ class SimpleRunCtx(val runConfig: ModelBacktestConfig) {
         TradeGateSwitch(backtestGate)
     }
 
-    val riskTradeGate  = TradeGateRiskManager(runConfig.maxRiskMoney, tradeGate, runConfig.instruments)
+    val riskTradeGate  = TradeGateRiskManager(runConfig.maxRiskMoney,  tradeGate, runConfig.instruments, runConfig.maxRiskMoneyPerSec)
 
     val marketDataDistributor by lazy {
         MarketDataDistributorImpl(runConfig.instruments.size, runConfig.roundedStartTime(), runConfig.interval)

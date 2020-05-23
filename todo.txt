@@ -5,30 +5,12 @@ restart daily transaq in service
 benchmark in strategy backtest
 
 
-Банк получатель
+select ticker, sum(posAfter) from (
 
-АО «Тинькофф Банк»
-
-Корр. счёт
-
-30101810145250000974
-
-БИК
-
-044525974
-
-Получатель
-
-Антипина Надежда Ивановна
-
-Счёт получателя платежа
-
-40817810800000217159
-
-Назначение платежа
-
-Перевод средств по договору № 5002531829 Антипина Надежда Ивановна НДС не облагается
-
-ИНН
-
-Укажите ваш ИНН, если его нет, поле оставьте пустым (при строгой необходимости заполнять поле – укажите 7710140679)
+select st.ModelName, st.Ticker, st.PosAfter, st.epochTimeMs
+from trades st,
+     (select ModelName, Ticker, max(t.epochTimeMs) as epochTimeMs
+      from trades t
+      group by t.Ticker, t.ModelName) le
+where st.epochTimeMs = le.epochTimeMs
+  and st.Ticker = le.Ticker and st.ModelName = le.ModelName) agg group by ticker

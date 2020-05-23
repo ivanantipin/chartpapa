@@ -10,6 +10,7 @@ import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.FinamTickerMapper
 import firelib.core.misc.moscowZoneId
+import firelib.core.store.MdStorageImpl
 import io.netty.util.concurrent.DefaultThreadFactory
 import org.apache.commons.io.IOUtils
 import org.asynchttpclient.DefaultAsyncHttpClient
@@ -51,7 +52,7 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
     override fun symbols(): List<InstrId> {
         try {
-            val ins = URL("https://www.finam.ru/cache/icharts/icharts.js").openStream()
+            val ins = URL("https://www.finam.ru/cache/N72Hgd54/icharts/icharts.js").openStream()
             val lines : List<String> = IOUtils.readLines(ins, "cp1251") as List<String>
 
             val map = HashMap<String, Array<String>>()
@@ -85,18 +86,23 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
 
     @Synchronized
     override fun load(instrId: InstrId, start: LocalDateTime, interval: Interval): Sequence<Ohlc> {
-        require(interval == Interval.Min10)
+
         var mstart = start
         return sequence {
             while (mstart < LocalDateTime.now()) {
-                val finish = mstart.plusDays(1005)
-                yieldAll(loadSome(instrId, mstart, finish))
+                val finish = mstart.plusDays(100)
+                yieldAll(loadSome(instrId, interval, mstart, finish))
                 mstart = finish.minusDays(2)
             }
         }
     }
 
-    private fun loadSome(instrId: InstrId, start: LocalDateTime, finishI: LocalDateTime): List<Ohlc> {
+    private fun loadSome(
+        instrId: InstrId,
+        interval: Interval,
+        start: LocalDateTime,
+        finishI: LocalDateTime
+    ): List<Ohlc> {
         while (System.currentTimeMillis() - lastFinamCall < 1100) {
             try {
                 Thread.sleep(100)
@@ -119,7 +125,7 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
                 "sep" to "3",
                 "sep2" to "1",
                 // "at" to "1", header
-                "p" to "${Period.TEN_MINUTES.id}",
+                "p" to "${Period.forInterval(interval).id}",
                 "em" to "${instrId.id}",
                 "market" to "${instrId.market}",
                 "df" to "${start.dayOfMonth}",
@@ -135,10 +141,6 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
         )
 
         val url = "http://export.finam.ru/table.csv?" + params.map { "${it.first}=${it.second}" }.joinToString(separator = "&")
-
-//        request.UserAgent = ;
-//        request.Accept = ;
-//        request.Headers.Add(HttpRequestHeader.AcceptLanguage, "en-us,en;q=0.5");
 
         val ret = SettableFuture.create<List<String>>()
         log.info(url)
@@ -220,6 +222,15 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
         val tickerMapper1 = tickerMapper(security)
         require(tickerMapper1 != null, {"cant find symbol for ${security}"})
         return tickerMapper1
+    }
+}
+
+
+fun main() {
+    val storage = MdStorageImpl()
+
+    FinamDownloader().symbols().filter { it.code == "SBER" }.forEach {
+        println(it)
     }
 }
 

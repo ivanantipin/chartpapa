@@ -20,46 +20,43 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
     init {
         val back = props["period"]!!.toInt()
 
-        enableSeries(Interval.Min10, interpolated = false)[0].preRollSubscribe {
-            if (daytss[0].count() > 40 && currentTime().atMoscow().hour == 18) {
-                val num = props["number"]!!.toInt()
-                val idxToRet = daytss.mapIndexed { idx, ts ->
-                    var ret = (nonInterpolated[idx][0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close
-                    if(position(idx) > 0){
-                        ret += 0.005
+        enableSeries(Interval.Min1)[0].preRollSubscribe {
+            if (daytss[0].count() > 40 && currentTime().atMoscow().hour == 18 && !daytss[0][0].interpolated) {
+
+                if(currentTime().atMoscow().minute == 41){
+
+                    val num = props["number"]!!.toInt()
+                    val idxToRet = daytss.mapIndexed { idx, ts ->
+                        var ret = (daytss[idx][0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close
+                        if(position(idx) > 0){
+                            ret += 0.005
+                        }
+                        Pair(idx, ret)
                     }
-                    Pair(idx, ret)
-                }
 
-                val indexed = idxToRet.filter { it.second.isFinite() && it.second > 0 }
+                    val indexed = idxToRet.filter { it.second.isFinite() && it.second > 0 }
 
-                val sortedBy = indexed.sortedBy { -it.second }
+                    val sortedBy = indexed.sortedBy { -it.second }
 
-                val sorted = sortedBy.subList(0, Math.min(num, indexed.size)).map { it.first }
+                    val sorted = sortedBy.subList(0, Math.min(num, indexed.size)).map { it.first }
 
-                idxToRet.forEach {
-                    logRealtime { "return for ticker ${instruments()[it.first]} is ${it.second}"}
-                }
+                    idxToRet.forEach {
+                        logRealtime { "return for ticker ${instruments()[it.first]} is ${it.second}"}
+                    }
 
-                logRealtime{"====="}
+                    logRealtime{"====="}
 
-                logRealtime { ("top is ${sorted.map{instruments()[it]}}")}
+                    logRealtime { ("top is ${sorted.map{instruments()[it]}}")}
 
 
-                oms.forEachIndexed { idx, om ->
-                    if(currentTime().atMoscow().minute == 10){
-                        if (!sorted.contains(idx)) {
-                            om.flattenAll()
-                        }
-                    }else{
-                        if (sorted.contains(idx)) {
-                            longForMoneyIfFlat(idx, tradeSize())
-                        } else {
-                            om.flattenAll()
-                        }
+                    instruments().mapIndexed{idx, _->idx}.filter { !sorted.contains(it) }.forEach {
+                        flattenAll(it)
+                    }
+
+                    sorted.forEach {
+                        longForMoneyIfFlat(it, tradeSize())
                     }
                 }
-
             }
         }
     }
@@ -67,7 +64,9 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
         fun modelConfig(tradeSize : Int = 10_000): ModelConfig {
             return ModelConfig(TrendModel::class, ModelBacktestConfig().apply {
                 instruments = tickers
-                startDate(LocalDate.now().minusDays(500))
+                interval = Interval.Min1
+                histSourceName = SourceName.FINAM
+                startDate(LocalDate.now().minusDays(3000))
             }).apply {
                 setTradeSize(tradeSize)
                 param("period", 33)

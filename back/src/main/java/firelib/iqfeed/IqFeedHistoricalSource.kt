@@ -15,7 +15,7 @@ import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class IqFeedHistoricalSource(val csvPath: Path) : HistoricalSource {
+class IqFeedHistoricalSource(val csvPath: Path = Paths.get("/ddisk/globaldatabase/1MIN/STK")) : HistoricalSource {
 
     val log = LoggerFactory.getLogger(javaClass)
 

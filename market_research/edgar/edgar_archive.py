@@ -5,7 +5,7 @@ import sqlite3
 import sys
 import urllib
 
-import filingsExtractor as fe
+import edgar.filingsExtractor as fe
 
 startYear = 2010
 endYear = 2018

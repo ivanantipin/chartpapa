@@ -49,8 +49,7 @@ fun Model.currentTime() : Instant {
     return context.timeService.currentTime()
 }
 
-fun Model.enableSeries(interval: Interval,
-                                                       historyLen: Int = 100, interpolated: Boolean = true): List<TimeSeries<Ohlc>> {
+fun Model.enableSeries(interval: Interval,historyLen: Int = 100, interpolated: Boolean = true): List<TimeSeries<Ohlc>> {
     val context = this.modelContext()
     val ret = instruments().mapIndexed { idx, _ ->
         context.mdDistributor.getOrCreateTs(idx, interval, historyLen)

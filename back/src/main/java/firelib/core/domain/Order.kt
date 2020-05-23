@@ -23,6 +23,10 @@ data class Order(val orderType: OrderType,
     val tradeSubscription: DurableChannel<Trade> = DurableChannel()
     val orderSubscription: DurableChannel<OrderState> = DurableChannel()
 
+    fun status() = orderSubscription.msgs.last.status
+
+    fun remainingQty(): Int = qtyLots - tradeSubscription.msgs.sumBy { it.qty }
+
     init {
         require(qtyLots > 0) { "order qty <= 0!!" }
         require(price > 0 || orderType == OrderType.Market) { "price : $price <=  0!!" }

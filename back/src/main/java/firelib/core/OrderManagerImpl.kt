@@ -38,7 +38,7 @@ class OrderManagerImpl(
         return security
     }
 
-    private val id2Order = mutableMapOf<String, OrderWithState>()
+    private val id2Order = mutableMapOf<String, Order>()
 
     private val orderStateChannel = NonDurableChannel<OrderState>()
 
@@ -56,11 +56,11 @@ class OrderManagerImpl(
     var idCounter = AtomicLong(System.currentTimeMillis())
 
     override fun liveOrders(): List<Order> {
-        return id2Order.values.map { it.order }
+        return id2Order.values.toList()
     }
 
     override fun hasPendingState(): Boolean {
-        return id2Order.values.any { (it.status().isPending() || (it.order.orderType == OrderType.Market)) }
+        return id2Order.values.any { (it.status().isPending() || (it.orderType == OrderType.Market)) }
     }
 
     override fun tradesTopic(): SubChannel<Trade> {
@@ -74,9 +74,8 @@ class OrderManagerImpl(
     override fun cancelOrders(order: Order) {
         val ord = id2Order.get(order.id)
         if (ord != null) {
+            order.orderSubscription.publish(OrderState(order, OrderStatus.PendingCancel, timeService.currentTime()))
             tradeGate.cancelOrder(order)
-            ord.statuses += OrderStatus.PendingCancel
-            orderStateChannel.publish(OrderState(ord.order, OrderStatus.PendingCancel, timeService.currentTime()))
         } else {
             log.error("cancelling non existing order {}", order)
         }
@@ -99,7 +98,7 @@ class OrderManagerImpl(
                 )
             )
         } else {
-            val orderWithState = OrderWithState(order)
+            val orderWithState = order
             this.id2Order[order.id] = orderWithState
             orderStateChannel.publish(OrderState(order, OrderStatus.New, timeService.currentTime()))
             log.info("submitting order {}", order)
@@ -117,9 +116,8 @@ class OrderManagerImpl(
         }
         log.info("order state received {} ", state)
 
-        val sOrder: OrderWithState = id2Order[state.order.id]!!
+        val sOrder = id2Order[state.order.id]!!
 
-        sOrder.statuses += state.status
 
         if (state.status.isFinal()) {
             if (state.status == OrderStatus.Done && sOrder.remainingQty() > 0) {
@@ -138,9 +136,8 @@ class OrderManagerImpl(
 
     val processedTrades = mutableSetOf<String>()
 
-    fun onTrade(trd: Trade, order: OrderWithState) {
+    fun onTrade(trd: Trade, order: Order) {
         log.info("on trade ${trd}")
-        order.trades += trd
 
         if (trd.tradeNo != "na") {
             if (!processedTrades.add(trd.tradeNo)) {
@@ -155,7 +152,7 @@ class OrderManagerImpl(
         }
         if (order.remainingQty() == 0) {
             log.info("removing filled order as remaining qty is zero")
-            id2Order.remove(order.order.id)
+            id2Order.remove(order.id)
         }
         val prevPos = position
         position = trd.adjustPositionByThisTrade(position)

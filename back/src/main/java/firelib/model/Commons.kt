@@ -34,4 +34,12 @@ val tickers = listOf(
     "poly",
     "mrkp",
     "rtkm",
-    "afks")
+    "afks",
+    "tcsg",
+    "ogkb",
+    "tgka",
+    "rasp",
+    "phor",
+    "dsky",
+    "lnta"
+)

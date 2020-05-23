@@ -65,6 +65,8 @@ fun commonRunConfig() : ModelBacktestConfig{
     val divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1300)).groupBy { it.ticker.toLowerCase() }
     return ModelBacktestConfig("RussianStocks").apply {
         instruments = tickers
+        interval = Interval.Min1
+        histSourceName = SourceName.FINAM
         startDate(LocalDate.now().minusDays(1300))
         enableDivs(divMap)
     }

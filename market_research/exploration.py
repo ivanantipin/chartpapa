@@ -3,9 +3,9 @@ import sqlite3
 import matplotlib.pyplot as plt
 import pandas as pd
 
-cnx = sqlite3.connect("/home/ivan/projects/chartpapa/market_research/report_out/NoName/report.db")
+cnx = sqlite3.connect("/home/ivan/projects/chartpapa/market_research/report_out/report.db")
 
-df=pd.read_sql_query(con=cnx, sql="select * from Ziggi where name = 'sberp_2019-07-30T15:10:00Z'")
+df=pd.read_sql_query(con=cnx, sql="select * from EdgarStat where name = 'sberp_2019-07-30T15:10:00Z'")
 
 
 ret = plt.figure()

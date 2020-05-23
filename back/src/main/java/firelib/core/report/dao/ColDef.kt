@@ -9,5 +9,4 @@ class ColDef<I,T>(val name : String, val extract : (I)->T, val typeOverride : KT
             typeOverride ?: extract.reflect()!!.returnType
         )
     }
-
 }
