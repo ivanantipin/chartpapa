@@ -17,6 +17,8 @@ interface OrderManager {
 
     fun positionTime() : Instant
 
+    fun positionPrice() : Double
+
     /**
      * any market order on market or not accepted limit order
      */

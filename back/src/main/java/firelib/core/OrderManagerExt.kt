@@ -29,6 +29,8 @@ fun OrderManager.makePositionEqualsTo(pos: Int, price : Double? = null) : Order?
 
 
 
+
+
 fun OrderManager.buyAtLimit(price: Double, vol: Int = 1) {
     this.submitOrders(Order(OrderType.Limit, price, vol, Side.Buy, security(), nextOrderId(),currentTime(), instrument(), modelName()))
 }

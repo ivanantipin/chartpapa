@@ -1,16 +1,6 @@
 support resistance
 vwap as measure of momentum
-move money to finam
 restart daily transaq in service
 benchmark in strategy backtest
 
-
-select ticker, sum(posAfter) from (
-
-select st.ModelName, st.Ticker, st.PosAfter, st.epochTimeMs
-from trades st,
-     (select ModelName, Ticker, max(t.epochTimeMs) as epochTimeMs
-      from trades t
-      group by t.Ticker, t.ModelName) le
-where st.epochTimeMs = le.epochTimeMs
-  and st.Ticker = le.Ticker and st.ModelName = le.ModelName) agg group by ticker
+filtering

@@ -4,24 +4,18 @@ import firelib.core.domain.Ohlc
 import firelib.core.mddistributor.forceMerge
 import firelib.core.mddistributor.mergeOhlc
 import firelib.core.misc.atNy
+import java.time.Instant
 import java.time.LocalTime
 
 interface TimeSeries<T> {
-
     fun count (): Int
-
     operator fun get(idx: Int): T
     operator fun set(idx: Int, value : T)
-
     fun capacity() : Int
-
+    fun preRollSubscribe(listener : (TimeSeries<T>)->Unit)
     fun last() : T {
         return this[0]
     }
-
-    fun preRollSubscribe(listener : (TimeSeries<T>)->Unit)
-
-
 }
 
 fun TimeSeries<Ohlc>.ret(last : Int) : Double{
@@ -78,7 +72,16 @@ class ConditionalTimeSeries(val condition : (Ohlc)->Boolean,
     override fun preRollSubscribe(listener: (TimeSeries<Ohlc>) -> Unit) {
         series.preRollSubscribe(listener)
     }
+}
 
+fun TimeSeries<Ohlc>.indexOfTime(time : Instant ) : Int {
+    val cnt = this.count()
+    for(i in 0 until cnt){
+        if(this[i].endTime == time){
+            return i
+        }
+    }
+    return -1
 }
 
 fun makeUsTimeseries(it: TimeSeries<Ohlc>): ConditionalTimeSeries {

@@ -46,6 +46,9 @@ class OrderManagerImpl(
 
     private var position = 0
 
+    private var positionPrice = 0.0
+
+
     private var positionTime = Instant.EPOCH
 
     override fun position(): Int = position
@@ -160,6 +163,8 @@ class OrderManagerImpl(
         if(prevPos.sign != position.sign){
             positionTime = trd.dtGmt
         }
+
+        positionPrice = trd.price
 
         log.info("position adjusted for security $security :  $prevPos -> ${position()}")
         tradesChannel.publish(trd.copy(positionAfter = position))

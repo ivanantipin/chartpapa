@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 
 val prodModels = mapOf(
-    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(250_000) },
+    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(200_000) },
     TrendModel::class.simpleName!! to { TrendModel.modelConfig(250_000) },
     RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(250_000) },
     ReversModel::class.simpleName!! to { ReversModel.modelConfig(30_000) },

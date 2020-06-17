@@ -11,11 +11,12 @@ class IntervalServiceImpl : IntervalService {
 
     override fun addListener(interval: Interval, action: IServiceAction) {
         if(!interval2listeners.any { it.first == interval }){
-            interval2listeners += Pair(interval, emptyList())
+            interval2listeners += Pair(interval, emptyList<IServiceAction>())
         }
         interval2listeners = interval2listeners.map {
             if (it.first == interval) {
-                Pair(it.first, it.second + action)
+                val lst : List<IServiceAction> = it.second + action
+                Pair(it.first, lst)
             } else {
                 it
             }

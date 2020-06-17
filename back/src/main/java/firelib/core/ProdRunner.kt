@@ -71,6 +71,10 @@ object ProdRunner {
 
         val curentPoses = readCurrentPositions(cfg.getProdDbFile())
 
+        curentPoses.forEach {
+            context.riskTradeGate.incPos(it.key.ticker, it.value.position)
+        }
+
         executorService.submit {
             models.forEach {model->
                 model.orderManagers().forEach {

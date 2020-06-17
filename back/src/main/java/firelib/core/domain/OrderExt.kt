@@ -23,3 +23,4 @@ fun Order.done() {
 fun Order.accepted() {
     this.orderSubscription.publish(OrderState(this, OrderStatus.Accepted, Instant.now(), ""))
 }
+

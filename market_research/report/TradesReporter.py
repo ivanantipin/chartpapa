@@ -279,11 +279,13 @@ def plotFactors(trades: pd.DataFrame):
 def loadWithFactors(filename : str, modelName : str ) -> pd.DataFrame:
     cnx = sqlite3.connect(filename)
     try:
-        trades = pd.read_sql_query(sql=f"SELECT t.Pnl, f.* FROM trades t, {modelName}_factors f where t.TradeId = f.TradeId and t.ModelName = '{modelName}'",
+        trades = pd.read_sql_query(sql=f"SELECT t.*, f.* FROM trades t, {modelName}_factors f where t.TradeId = f.TradeId and t.ModelName = '{modelName}'",
                                    con=cnx,
                                    # 2013-04-08T10:00:00Z
                                    parse_dates={'EntryDate': '%Y-%m-%dT%H:%M:%SZ',
                                                 'ExitDate': '%Y-%m-%dT%H:%M:%SZ'})
+
+        trades.sort_values(by='EntryDate', inplace=True)
 
         return trades
     except:

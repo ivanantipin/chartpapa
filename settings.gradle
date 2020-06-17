@@ -1,5 +1,7 @@
 include 'back'
 include 'grpc-back'
 include 'transaqgate'
+include 'kotlinback'
+include 'stockvizclient'
 include 'production'
 includeBuild("../transaqgrpc/client/java")

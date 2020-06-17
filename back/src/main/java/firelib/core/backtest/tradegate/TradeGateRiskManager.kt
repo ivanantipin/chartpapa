@@ -4,6 +4,7 @@ import firelib.common.Order
 import firelib.core.TradeGate
 import firelib.core.domain.*
 import firelib.core.timeservice.TimeServiceManaged
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.absoluteValue
@@ -15,6 +16,8 @@ class TradeGateRiskManager(
     val maxMoneyPerSerurity: Long
 ) :
     TradeGate {
+
+    val log = LoggerFactory.getLogger(javaClass)
 
     val prices = DoubleArray(instruments.size, { 0.0 })
 
@@ -64,12 +67,22 @@ class TradeGateRiskManager(
                 if(it.order.remainingQty() == 0){
                     pendingOrders[idx].remove(it.order)
                 }
+                if(it.status.isFinal()){
+                    pendingOrders[idx].remove(it.order)
+                }
             }
 
             delegate.sendOrder(order)
         }
     }
 
+    fun incPos(ticker : String, pos : Int){
+        if(pos != 0){
+            val idx = tickerToIndex[ticker]!!
+            positions[idx] += pos
+            println("current pos ${ticker} = ${positions[idx]}")
+        }
+    }
 
     fun updateBidAsks(i: Int, time: Instant, price: Double) {
         prices[i] = price

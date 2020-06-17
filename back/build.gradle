@@ -22,6 +22,10 @@ dependencies {
 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 
+    // https://mvnrepository.com/artifact/com.github.wendykierp/JTransforms
+    compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
+
+
     // https://mvnrepository.com/artifact/org.zeromq/jeromq
     compile group: 'org.zeromq', name: 'jeromq', version: '0.5.2'
 
@@ -29,6 +33,8 @@ dependencies {
 // https://mvnrepository.com/artifact/io.ktor/ktor-client-apache
     compile group: 'io.ktor', name: 'ktor-client-apache', version: '1.3.1'
     compile "io.ktor:ktor-client-jackson:1.3.0"
+
+    compile project (":stockvizclient")
 
 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
