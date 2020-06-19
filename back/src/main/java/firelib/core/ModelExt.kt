@@ -77,10 +77,12 @@ fun Model.quantiles(window: Int): List<Quantiles<Double>> {
 }
 
 fun Model.position(idx: Int): Int {
+
     return orderManagers()[idx].position()
 }
 
 fun Model.flattenAll(idx: Int, reason: String = "NA") {
+    logRealtime { "flattening all for ${instruments()[idx]}" }
     orderManagers()[idx].flattenAll(reason)
 }
 
@@ -92,9 +94,11 @@ fun Model.tradeSize(): Long {
 fun Model.longForMoneyIfFlat(idx: Int, money: Long): Boolean {
     return idxContext(idx).run {
         if (position <= 0 && !hasPendingState) {
+            logRealtime { "making position equals to ${moneyToLots(money)} price ${price} instrument ${instruments()[idx]}" }
             om.makePositionEqualsTo(moneyToLots(money), price)
             true
         } else {
+            logRealtime { "has pending state ${instruments()[idx]} not trading, position= ${position} hasPendingState=${hasPendingState}" }
             false
         }
     }

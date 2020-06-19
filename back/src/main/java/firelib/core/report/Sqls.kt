@@ -22,7 +22,7 @@ from trades st,
       from trades t
       group by t.Ticker, t.ModelName) le
 where st.epochTimeMs = le.epochTimeMs
-  and st.Ticker = le.Ticker and st.ModelName = le.ModelName
+  and st.Ticker = le.Ticker and st.ModelName = le.ModelName and st.PosAfter <> 0
   """.trimIndent()
 
     fun readCurrentPositions(path: Path): Map<ModelNameTicker, OmPosition> {

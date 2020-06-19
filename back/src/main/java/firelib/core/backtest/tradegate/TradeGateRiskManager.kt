@@ -1,19 +1,21 @@
 package firelib.core.backtest.tradegate
 
 import firelib.common.Order
+import firelib.core.InstrumentMapper
 import firelib.core.TradeGate
 import firelib.core.domain.*
 import firelib.core.timeservice.TimeServiceManaged
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.absoluteValue
 
 class TradeGateRiskManager(
     val maxMoneyTotal: Long,
     val delegate: TradeGate,
     val instruments: List<String>,
-    val maxMoneyPerSerurity: Long
+    val maxMoneyPerSerurity: Long,
+    val gateMapper: InstrumentMapper
+
 ) :
     TradeGate {
 
@@ -22,6 +24,8 @@ class TradeGateRiskManager(
     val prices = DoubleArray(instruments.size, { 0.0 })
 
     val tickerToIndex = instruments.mapIndexed({ idx, tick -> tick to idx }).toMap()
+
+    val instrMeta = instruments.map(gateMapper)
 
     val positions = IntArray(instruments.size, {0})
 
@@ -79,7 +83,7 @@ class TradeGateRiskManager(
     fun incPos(ticker : String, pos : Int){
         if(pos != 0){
             val idx = tickerToIndex[ticker]!!
-            positions[idx] += pos
+            positions[idx] += pos * instrMeta[idx]!!.lot
             println("current pos ${ticker} = ${positions[idx]}")
         }
     }
@@ -161,6 +165,11 @@ private fun setPrices(
 private fun makeRiskManager(): Pair<TradeGateStub, TradeGateRiskManager> {
     val instruments = listOf("sec0", "sec1")
     val stub = TradeGateStub(instruments, TimeServiceManaged())
-    val rm = TradeGateRiskManager(100L, stub, instruments, 50)
+    val rm = TradeGateRiskManager(100L, stub, instruments, 50, object :InstrumentMapper{
+        override fun invoke(p1: String): InstrId? {
+            return InstrId(p1,p1,
+                market = "na", code = p1, source = "dummy", lot = 1)
+        }
+    })
     return Pair(stub, rm)
 }
