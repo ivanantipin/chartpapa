@@ -66,7 +66,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
                 instruments = tickers
                 interval = Interval.Min1
                 histSourceName = SourceName.FINAM
-                startDate(LocalDate.now().minusDays(3000))
+                startDate(LocalDate.now().minusDays(300))
             }).apply {
                 setTradeSize(tradeSize)
                 param("period", 33)

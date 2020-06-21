@@ -7,6 +7,7 @@ import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
 import firelib.core.store.GlobalConstants
+import firelib.misc.StockVizTradeWriter
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.nio.file.*
@@ -47,7 +48,11 @@ object ReportWriter{
         if (model.trades.size == 0) {
             log.info("no trades generated")
         }else{
+
             model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.forEach {
+
+                StockVizTradeWriter.writePairs(it.toTradingCases(), model.model.name())
+
                 StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
             }
         }

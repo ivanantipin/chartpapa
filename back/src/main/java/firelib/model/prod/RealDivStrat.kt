@@ -46,8 +46,13 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
                 if (localTime.hour == 18 && localTime.minute == 30 && divs.containsKey(date)) {
                     logRealtime { "long for ${instrument} as it has a div ${divs[date]}" }
                     longForMoneyIfFlat(idx, tradeSize())
-                }else if (localTime.hour == 18 && localTime.minute == 20 && position(idx) != 0) {
-                    flattenAll(idx)
+                }
+
+                if (localTime.hour == 18 && localTime.minute == 20) {
+                    logRealtime { "checking if ${instrument} has position " }
+                    if(position(idx) != 0){
+                        flattenAll(idx)
+                    }
                 }
             }
         }
@@ -67,7 +72,7 @@ fun commonRunConfig() : ModelBacktestConfig{
         instruments = tickers
         interval = Interval.Min1
         histSourceName = SourceName.FINAM
-        startDate(LocalDate.now().minusDays(1300))
+        startDate(LocalDate.now().minusDays(300))
         enableDivs(divMap)
     }
 }

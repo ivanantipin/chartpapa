@@ -15,6 +15,7 @@ package org.openapitools.client.models
 import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * 
+ * @param identifier 
  * @param symbol 
  * @param exchange 
  * @param metaDiscrete 
@@ -22,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
  */
 
 data class NewInstrument (
+    @JsonProperty("identifier")
+    val identifier: kotlin.String,
     @JsonProperty("symbol")
     val symbol: kotlin.String,
     @JsonProperty("exchange")

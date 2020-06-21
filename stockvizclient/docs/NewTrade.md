@@ -5,7 +5,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **tradeId** | **kotlin.String** |  | 
-**side** | **kotlin.String** |  | 
+**portfolio** | **kotlin.String** |  | 
+**side** | [**inline**](#SideEnum) |  | 
 **qty** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  | 
 **openTime** | [**java.time.OffsetDateTime**](java.time.OffsetDateTime.md) |  | 
 **closeTime** | [**java.time.OffsetDateTime**](java.time.OffsetDateTime.md) |  | 
@@ -15,6 +16,13 @@ Name | Type | Description | Notes
 **symbol** | **kotlin.String** |  | 
 **discreteTags** | [**kotlin.Any**](.md) |  |  [optional]
 **continuousTags** | [**kotlin.Any**](.md) |  |  [optional]
+
+
+<a name="SideEnum"></a>
+## Enum: side
+Name | Value
+---- | -----
+side | long, short
 
 
 

@@ -56,6 +56,10 @@ class OrderManagerImpl(
         return positionTime
     }
 
+    override fun positionPrice(): Double {
+        return positionPrice
+    }
+
     var idCounter = AtomicLong(System.currentTimeMillis())
 
     override fun liveOrders(): List<Order> {

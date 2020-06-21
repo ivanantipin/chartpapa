@@ -4,10 +4,7 @@ import firelib.common.Order
 import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
-import firelib.core.domain.InstrId
-import firelib.core.domain.OrderState
-import firelib.core.domain.OrderType
-import firelib.core.domain.Side
+import firelib.core.domain.*
 import firelib.core.misc.TelegramMsg
 import firelib.core.misc.timeSequence
 import firelib.core.report.ModelNameTicker
@@ -80,13 +77,19 @@ object ProdRunner {
                 model.orderManagers().forEach {
                     val key = ModelNameTicker(it.modelName(), it.security().toLowerCase())
                     val pos = curentPoses.getOrDefault(key, OmPosition(0,0))
-                    log.info("restored position for model security ${key} to $pos")
+                    if(pos.position != 0){
+                        log.info("restored position for model security ${key} to $pos")
+                    }
                     it.updatePosition(pos.position, Instant.ofEpochMilli(pos.posTime))
                 }
             }
         }.get()
 
         context.tradeGate.setActiveReal(realGate)
+
+        context.marketDataDistributor.getOrCreateTs(0,Interval.Min240, 10).preRollSubscribe {
+            TelegramMsg.sendMsg("alive")
+        }
 
         val realReaders = cfg.instruments.map {
             realReaderFactory.makeReader(it)

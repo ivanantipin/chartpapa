@@ -39,7 +39,7 @@ data class Trade (
     @JsonProperty("portfolio")
     val portfolio: kotlin.String,
     @JsonProperty("side")
-    val side: kotlin.String,
+    val side: Trade.Side,
     @JsonProperty("qty")
     val qty: java.math.BigDecimal,
     @JsonProperty("open_time")
@@ -54,5 +54,16 @@ data class Trade (
     val pnl: java.math.BigDecimal,
     @JsonProperty("symbol")
     val symbol: kotlin.String
-)
+) {
+
+    /**
+    * 
+    * Values: long,short
+    */
+    
+    enum class Side(val value: kotlin.String){
+        @JsonProperty(value="long") long("long"),
+        @JsonProperty(value="short") short("short");
+    }
+}
 
