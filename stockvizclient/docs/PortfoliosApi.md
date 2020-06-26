@@ -18,7 +18,7 @@ Method | HTTP request | Description
 
 <a name="portfoliosAddOrdersCreate"></a>
 # **portfoliosAddOrdersCreate**
-> kotlin.Array&lt;NewOrder&gt; portfoliosAddOrdersCreate(portfolio, data)
+> AddResponse portfoliosAddOrdersCreate(portfolio, data)
 
 
 
@@ -32,7 +32,7 @@ val apiInstance = PortfoliosApi()
 val portfolio : kotlin.String = portfolio_example // kotlin.String | 
 val data : kotlin.Array<NewOrder> =  // kotlin.Array<NewOrder> | 
 try {
-    val result : kotlin.Array<NewOrder> = apiInstance.portfoliosAddOrdersCreate(portfolio, data)
+    val result : AddResponse = apiInstance.portfoliosAddOrdersCreate(portfolio, data)
     println(result)
 } catch (e: ClientException) {
     println("4xx response calling PortfoliosApi#portfoliosAddOrdersCreate")
@@ -52,7 +52,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**kotlin.Array&lt;NewOrder&gt;**](NewOrder.md)
+[**AddResponse**](AddResponse.md)
 
 ### Authorization
 
@@ -68,7 +68,7 @@ Configure Basic:
 
 <a name="portfoliosAddTradesCreate"></a>
 # **portfoliosAddTradesCreate**
-> kotlin.Array&lt;NewTrade&gt; portfoliosAddTradesCreate(portfolio, data)
+> AddResponse portfoliosAddTradesCreate(portfolio, data)
 
 
 
@@ -82,7 +82,7 @@ val apiInstance = PortfoliosApi()
 val portfolio : kotlin.String = portfolio_example // kotlin.String | 
 val data : kotlin.Array<NewTrade> =  // kotlin.Array<NewTrade> | 
 try {
-    val result : kotlin.Array<NewTrade> = apiInstance.portfoliosAddTradesCreate(portfolio, data)
+    val result : AddResponse = apiInstance.portfoliosAddTradesCreate(portfolio, data)
     println(result)
 } catch (e: ClientException) {
     println("4xx response calling PortfoliosApi#portfoliosAddTradesCreate")
@@ -102,7 +102,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**kotlin.Array&lt;NewTrade&gt;**](NewTrade.md)
+[**AddResponse**](AddResponse.md)
 
 ### Authorization
 

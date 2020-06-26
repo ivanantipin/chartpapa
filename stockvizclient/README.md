@@ -53,6 +53,7 @@ Class | Method | HTTP request | Description
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [org.openapitools.client.models.AddResponse](docs/AddResponse.md)
  - [org.openapitools.client.models.Candle](docs/Candle.md)
  - [org.openapitools.client.models.ContinuousMeta](docs/ContinuousMeta.md)
  - [org.openapitools.client.models.DiscreteMeta](docs/DiscreteMeta.md)

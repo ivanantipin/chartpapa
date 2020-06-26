@@ -11,6 +11,7 @@
 */
 package org.openapitools.client.apis
 
+import org.openapitools.client.models.AddResponse
 import org.openapitools.client.models.InlineResponse200
 import org.openapitools.client.models.NewOrder
 import org.openapitools.client.models.NewTrade
@@ -45,14 +46,14 @@ class PortfoliosApi(basePath: kotlin.String = defaultBasePath) : ApiClient(baseP
     * 
     * @param portfolio  
     * @param data  
-    * @return kotlin.Array<NewOrder>
+    * @return AddResponse
     * @throws UnsupportedOperationException If the API returns an informational or redirection response
     * @throws ClientException If the API returns a client error response
     * @throws ServerException If the API returns a server error response
     */
     @Suppress("UNCHECKED_CAST")
     @Throws(UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun portfoliosAddOrdersCreate(portfolio: kotlin.String, data: kotlin.Array<NewOrder>) : kotlin.Array<NewOrder> {
+    fun portfoliosAddOrdersCreate(portfolio: kotlin.String, data: kotlin.Array<NewOrder>) : AddResponse {
         val localVariableBody: kotlin.Any? = data
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -62,13 +63,13 @@ class PortfoliosApi(basePath: kotlin.String = defaultBasePath) : ApiClient(baseP
             query = localVariableQuery,
             headers = localVariableHeaders
         )
-        val localVarResponse = request<kotlin.Array<NewOrder>>(
+        val localVarResponse = request<AddResponse>(
             localVariableConfig,
             localVariableBody
         )
 
         return when (localVarResponse.responseType) {
-            ResponseType.Success -> (localVarResponse as Success<*>).data as kotlin.Array<NewOrder>
+            ResponseType.Success -> (localVarResponse as Success<*>).data as AddResponse
             ResponseType.Informational -> throw UnsupportedOperationException("Client does not support Informational responses.")
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {
@@ -87,14 +88,14 @@ class PortfoliosApi(basePath: kotlin.String = defaultBasePath) : ApiClient(baseP
     * 
     * @param portfolio  
     * @param data  
-    * @return kotlin.Array<NewTrade>
+    * @return AddResponse
     * @throws UnsupportedOperationException If the API returns an informational or redirection response
     * @throws ClientException If the API returns a client error response
     * @throws ServerException If the API returns a server error response
     */
     @Suppress("UNCHECKED_CAST")
     @Throws(UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun portfoliosAddTradesCreate(portfolio: kotlin.String, data: kotlin.Array<NewTrade>) : kotlin.Array<NewTrade> {
+    fun portfoliosAddTradesCreate(portfolio: kotlin.String, data: kotlin.Array<NewTrade>) : AddResponse {
         val localVariableBody: kotlin.Any? = data
         val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
@@ -104,13 +105,13 @@ class PortfoliosApi(basePath: kotlin.String = defaultBasePath) : ApiClient(baseP
             query = localVariableQuery,
             headers = localVariableHeaders
         )
-        val localVarResponse = request<kotlin.Array<NewTrade>>(
+        val localVarResponse = request<AddResponse>(
             localVariableConfig,
             localVariableBody
         )
 
         return when (localVarResponse.responseType) {
-            ResponseType.Success -> (localVarResponse as Success<*>).data as kotlin.Array<NewTrade>
+            ResponseType.Success -> (localVarResponse as Success<*>).data as AddResponse
             ResponseType.Informational -> throw UnsupportedOperationException("Client does not support Informational responses.")
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {

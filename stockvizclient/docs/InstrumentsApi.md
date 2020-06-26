@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 <a name="instrumentsAddCreate"></a>
 # **instrumentsAddCreate**
-> kotlin.Array&lt;NewInstrument&gt; instrumentsAddCreate(data)
+> AddResponse instrumentsAddCreate(data)
 
 
 
@@ -23,7 +23,7 @@ Method | HTTP request | Description
 val apiInstance = InstrumentsApi()
 val data : kotlin.Array<NewInstrument> =  // kotlin.Array<NewInstrument> | 
 try {
-    val result : kotlin.Array<NewInstrument> = apiInstance.instrumentsAddCreate(data)
+    val result : AddResponse = apiInstance.instrumentsAddCreate(data)
     println(result)
 } catch (e: ClientException) {
     println("4xx response calling InstrumentsApi#instrumentsAddCreate")
@@ -42,7 +42,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**kotlin.Array&lt;NewInstrument&gt;**](NewInstrument.md)
+[**AddResponse**](AddResponse.md)
 
 ### Authorization
 

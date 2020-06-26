@@ -35,8 +35,6 @@ data class NewTrade (
     val side: NewTrade.Side,
     @JsonProperty("qty")
     val qty: java.math.BigDecimal,
-    @JsonProperty("portfolio")
-    val portfolio: String,
     @JsonProperty("open_time")
     val openTime: kotlin.Int,
     @JsonProperty("close_time")

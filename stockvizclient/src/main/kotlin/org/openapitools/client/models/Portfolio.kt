@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * @param name 
  * @param description 
  * @param createdDate 
+ * @param benchmark 
  */
 
 data class Portfolio (
@@ -26,6 +27,8 @@ data class Portfolio (
     @JsonProperty("description")
     val description: kotlin.String? = null,
     @JsonProperty("created_date")
-    val createdDate: java.time.OffsetDateTime? = null
+    val createdDate: java.time.OffsetDateTime? = null,
+    @JsonProperty("benchmark")
+    val benchmark: kotlin.String? = null
 )
 

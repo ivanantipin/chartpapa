@@ -29,8 +29,6 @@ data class NewInstrument (
     @JsonProperty("meta_discrete")
     val metaDiscrete: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
     @JsonProperty("meta_continuous")
-    val metaContinuous: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null,
-    @JsonProperty("symbol_and_exchange")
-    val symbolAndExchange: kotlin.String
+    val metaContinuous: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null
 )
 
