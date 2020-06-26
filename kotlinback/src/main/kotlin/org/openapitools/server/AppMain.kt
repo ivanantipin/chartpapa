@@ -10,10 +10,7 @@ import io.ktor.auth.basic
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.config.HoconApplicationConfig
-import io.ktor.features.AutoHeadResponse
-import io.ktor.features.Compression
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.DefaultHeaders
+import io.ktor.features.*
 import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -41,8 +38,10 @@ fun Application.main() {
     }
     install(AutoHeadResponse) // see http://ktor.io/features/autoheadresponse.html
 //    install(HSTS, ApplicationHstsConfiguration()) // see http://ktor.io/features/hsts.html
-    install(Compression, ApplicationCompressionConfiguration()) // see http://ktor.io/features/compression.html
     install(Locations) // see http://ktor.io/features/locations.html
+    install(CORS){
+        anyHost()
+    }
     install(Authentication) {
         basic("Basic") {
             validate { credentials ->

@@ -22,7 +22,7 @@ package org.openapitools.server.models
  * @param volume 
  */
 data class Candle (
-    val datetime: java.time.LocalDateTime,
+    val datetime: String,
     val open: java.math.BigDecimal,
     val high: java.math.BigDecimal,
     val low: java.math.BigDecimal,

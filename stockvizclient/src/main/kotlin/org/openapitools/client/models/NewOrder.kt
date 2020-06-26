@@ -24,11 +24,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
  * @param updateTime 
  * @param symbol 
  * @param id 
+ * @param discreteTags 
+ * @param continuousTags 
  * @param tradeId 
  * @param price 
  * @param executionPrice 
- * @param discreteTags 
- * @param continuousTags 
  */
 
 data class NewOrder (
@@ -43,23 +43,23 @@ data class NewOrder (
     @JsonProperty("qty")
     val qty: java.math.BigDecimal,
     @JsonProperty("place_time")
-    val placeTime: java.time.OffsetDateTime,
+    val placeTime: kotlin.Int,
     @JsonProperty("update_time")
-    val updateTime: java.time.OffsetDateTime,
+    val updateTime: kotlin.Int,
     @JsonProperty("symbol")
     val symbol: kotlin.String,
     @JsonProperty("id")
     val id: kotlin.Int? = null,
+    @JsonProperty("discrete_tags")
+    val discreteTags: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
+    @JsonProperty("continuous_tags")
+    val continuousTags: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null,
     @JsonProperty("trade_id")
     val tradeId: kotlin.String? = null,
     @JsonProperty("price")
     val price: java.math.BigDecimal? = null,
     @JsonProperty("execution_price")
-    val executionPrice: java.math.BigDecimal? = null,
-    @JsonProperty("discrete_tags")
-    val discreteTags: kotlin.Any? = null,
-    @JsonProperty("continuous_tags")
-    val continuousTags: kotlin.Any? = null
+    val executionPrice: java.math.BigDecimal? = null
 ) {
 
     /**

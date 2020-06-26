@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * 
  * @param tradeId 
- * @param portfolio 
  * @param side 
  * @param qty 
  * @param openTime 
@@ -32,16 +31,16 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class NewTrade (
     @JsonProperty("trade_id")
     val tradeId: kotlin.String,
-    @JsonProperty("portfolio")
-    val portfolio: kotlin.String,
     @JsonProperty("side")
     val side: NewTrade.Side,
     @JsonProperty("qty")
     val qty: java.math.BigDecimal,
+    @JsonProperty("portfolio")
+    val portfolio: String,
     @JsonProperty("open_time")
-    val openTime: java.time.OffsetDateTime,
+    val openTime: kotlin.Int,
     @JsonProperty("close_time")
-    val closeTime: java.time.OffsetDateTime,
+    val closeTime: kotlin.Int,
     @JsonProperty("open_price")
     val openPrice: java.math.BigDecimal,
     @JsonProperty("close_price")
@@ -51,9 +50,9 @@ data class NewTrade (
     @JsonProperty("symbol")
     val symbol: kotlin.String,
     @JsonProperty("discrete_tags")
-    val discreteTags: kotlin.Any? = null,
+    val discreteTags: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
     @JsonProperty("continuous_tags")
-    val continuousTags: kotlin.Any? = null
+    val continuousTags: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null
 ) {
 
     /**

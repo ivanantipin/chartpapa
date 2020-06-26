@@ -50,41 +50,35 @@ All URIs are relative to *http://localhost:8000/api/v1*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *CandlesApi* | [**candlesRead**](docs/CandlesApi.md#candlesread) | **GET** /candles/{timeframe}/{symbol}/ | 
+*InstrumentsApi* | [**instrumentsAddCreate**](docs/InstrumentsApi.md#instrumentsaddcreate) | **POST** /instruments/add | 
+*InstrumentsApi* | [**instrumentsList**](docs/InstrumentsApi.md#instrumentslist) | **GET** /instruments/ | 
 *PortfoliosApi* | [**portfoliosAddOrdersCreate**](docs/PortfoliosApi.md#portfoliosaddorderscreate) | **POST** /portfolios/{portfolio}/add/orders/ | 
 *PortfoliosApi* | [**portfoliosAddTradesCreate**](docs/PortfoliosApi.md#portfoliosaddtradescreate) | **POST** /portfolios/{portfolio}/add/trades/ | 
 *PortfoliosApi* | [**portfoliosAvailableInstrumentsMetaList**](docs/PortfoliosApi.md#portfoliosavailableinstrumentsmetalist) | **GET** /portfolios/{portfolio}/available-instruments-meta/ | 
 *PortfoliosApi* | [**portfoliosAvailableTagsList**](docs/PortfoliosApi.md#portfoliosavailabletagslist) | **GET** /portfolios/{portfolio}/available-tags/ | 
 *PortfoliosApi* | [**portfoliosClearCreate**](docs/PortfoliosApi.md#portfoliosclearcreate) | **POST** /portfolios/{portfolio}/clear/ | 
 *PortfoliosApi* | [**portfoliosCreateCreate**](docs/PortfoliosApi.md#portfolioscreatecreate) | **POST** /portfolios/create/ | 
+*PortfoliosApi* | [**portfoliosDeleteDelete**](docs/PortfoliosApi.md#portfoliosdeletedelete) | **DELETE** /portfolios/{portfolio}/delete/ | 
 *PortfoliosApi* | [**portfoliosList**](docs/PortfoliosApi.md#portfolioslist) | **GET** /portfolios/ | 
-*PortfoliosApi* | [**portfoliosResultsByFilterList**](docs/PortfoliosApi.md#portfoliosresultsbyfilterlist) | **GET** /portfolios/{portfolio}/results/by-filter/ | 
-*PortfoliosApi* | [**portfoliosResultsList**](docs/PortfoliosApi.md#portfoliosresultslist) | **GET** /portfolios/{portfolio}/results/ | 
-*PortfoliosApi* | [**portfoliosResultsRead**](docs/PortfoliosApi.md#portfoliosresultsread) | **GET** /portfolios/{portfolio}/results/{aggregate}/ | 
+*PortfoliosApi* | [**portfoliosOrdersList**](docs/PortfoliosApi.md#portfoliosorderslist) | **GET** /portfolios/{portfolio}/orders/ | 
 *PortfoliosApi* | [**portfoliosTradesList**](docs/PortfoliosApi.md#portfoliostradeslist) | **GET** /portfolios/{portfolio}/trades/ | 
-*QuotesApi* | [**quotesDailyList**](docs/QuotesApi.md#quotesdailylist) | **GET** /quotes/daily/ | 
-*QuotesApi* | [**quotesDailyRead**](docs/QuotesApi.md#quotesdailyread) | **GET** /quotes/daily/{id}/ | 
 
 
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
- - [org.openapitools.server.models.Aggregates](docs/Aggregates.md)
- - [org.openapitools.server.models.BaseMetrics](docs/BaseMetrics.md)
  - [org.openapitools.server.models.Candle](docs/Candle.md)
- - [org.openapitools.server.models.CandlesDaily](docs/CandlesDaily.md)
  - [org.openapitools.server.models.ContinuousMeta](docs/ContinuousMeta.md)
- - [org.openapitools.server.models.DetailedMetrics](docs/DetailedMetrics.md)
  - [org.openapitools.server.models.DiscreteMeta](docs/DiscreteMeta.md)
- - [org.openapitools.server.models.EquityByTime](docs/EquityByTime.md)
- - [org.openapitools.server.models.EquityByTrade](docs/EquityByTrade.md)
- - [org.openapitools.server.models.EquitySet](docs/EquitySet.md)
  - [org.openapitools.server.models.InlineResponse200](docs/InlineResponse200.md)
+ - [org.openapitools.server.models.InlineResponse2001](docs/InlineResponse2001.md)
+ - [org.openapitools.server.models.NewInstrument](docs/NewInstrument.md)
  - [org.openapitools.server.models.NewOrder](docs/NewOrder.md)
  - [org.openapitools.server.models.NewTrade](docs/NewTrade.md)
  - [org.openapitools.server.models.Order](docs/Order.md)
  - [org.openapitools.server.models.Portfolio](docs/Portfolio.md)
  - [org.openapitools.server.models.PortfolioInstrumentsMeta](docs/PortfolioInstrumentsMeta.md)
- - [org.openapitools.server.models.Results](docs/Results.md)
+ - [org.openapitools.server.models.Symbol](docs/Symbol.md)
  - [org.openapitools.server.models.TagsMetaSummary](docs/TagsMetaSummary.md)
  - [org.openapitools.server.models.Trade](docs/Trade.md)
 

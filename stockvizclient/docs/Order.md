@@ -4,18 +4,18 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**discreteTags** | **kotlin.collections.Map&lt;kotlin.String, kotlin.String&gt;** |  | 
-**continuousTags** | [**kotlin.collections.Map&lt;kotlin.String, java.math.BigDecimal&gt;**](java.math.BigDecimal.md) |  | 
 **portfolio** | **kotlin.String** |  | 
 **orderId** | **kotlin.String** |  | 
 **side** | [**inline**](#SideEnum) |  | 
 **orderType** | [**inline**](#OrderTypeEnum) |  | 
 **status** | [**inline**](#StatusEnum) |  | 
 **qty** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  | 
-**placeTime** | [**java.time.OffsetDateTime**](java.time.OffsetDateTime.md) |  | 
-**updateTime** | [**java.time.OffsetDateTime**](java.time.OffsetDateTime.md) |  | 
+**placeTime** | **kotlin.Int** |  | 
+**updateTime** | **kotlin.Int** |  | 
 **symbol** | **kotlin.String** |  | 
 **id** | **kotlin.Int** |  |  [optional] [readonly]
+**discreteTags** | **kotlin.collections.Map&lt;kotlin.String, kotlin.String&gt;** |  |  [optional]
+**continuousTags** | [**kotlin.collections.Map&lt;kotlin.String, java.math.BigDecimal&gt;**](java.math.BigDecimal.md) |  |  [optional]
 **tradeId** | **kotlin.String** |  |  [optional]
 **price** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional]
 **executionPrice** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional]

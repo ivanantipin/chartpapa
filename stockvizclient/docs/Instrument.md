@@ -1,9 +1,10 @@
 
-# NewInstrument
+# Instrument
 
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**symbolAndExchange** | **kotlin.String** |  | 
 **symbol** | **kotlin.String** |  | 
 **exchange** | **kotlin.String** |  | 
 **metaDiscrete** | **kotlin.collections.Map&lt;kotlin.String, kotlin.String&gt;** |  |  [optional]

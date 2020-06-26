@@ -1,0 +1,1 @@
+java -jar openapi-generator-cli.jar generate -i http://localhost:8000/swagger.json -g kotlin-server -o ./kotlinback -c genconfig.json

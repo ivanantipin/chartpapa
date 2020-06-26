@@ -214,7 +214,7 @@ Configure Basic:
 
 <a name="portfoliosClearCreate"></a>
 # **portfoliosClearCreate**
-> InlineResponse2001 portfoliosClearCreate(portfolio)
+> InlineResponse200 portfoliosClearCreate(portfolio)
 
 
 
@@ -227,7 +227,7 @@ Configure Basic:
 val apiInstance = PortfoliosApi()
 val portfolio : kotlin.String = portfolio_example // kotlin.String | 
 try {
-    val result : InlineResponse2001 = apiInstance.portfoliosClearCreate(portfolio)
+    val result : InlineResponse200 = apiInstance.portfoliosClearCreate(portfolio)
     println(result)
 } catch (e: ClientException) {
     println("4xx response calling PortfoliosApi#portfoliosClearCreate")
@@ -246,7 +246,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**InlineResponse2001**](InlineResponse2001.md)
+[**InlineResponse200**](InlineResponse200.md)
 
 ### Authorization
 

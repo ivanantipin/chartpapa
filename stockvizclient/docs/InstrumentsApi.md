@@ -58,7 +58,7 @@ Configure Basic:
 
 <a name="instrumentsList"></a>
 # **instrumentsList**
-> InlineResponse200 instrumentsList(page, pageSize)
+> kotlin.Array&lt;Instrument&gt; instrumentsList()
 
 
 
@@ -69,10 +69,8 @@ Configure Basic:
 //import org.openapitools.client.models.*
 
 val apiInstance = InstrumentsApi()
-val page : kotlin.Int = 56 // kotlin.Int | A page number within the paginated result set.
-val pageSize : kotlin.Int = 56 // kotlin.Int | Number of results to return per page.
 try {
-    val result : InlineResponse200 = apiInstance.instrumentsList(page, pageSize)
+    val result : kotlin.Array<Instrument> = apiInstance.instrumentsList()
     println(result)
 } catch (e: ClientException) {
     println("4xx response calling InstrumentsApi#instrumentsList")
@@ -84,15 +82,11 @@ try {
 ```
 
 ### Parameters
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **page** | **kotlin.Int**| A page number within the paginated result set. | [optional]
- **pageSize** | **kotlin.Int**| Number of results to return per page. | [optional]
+This endpoint does not need any parameter.
 
 ### Return type
 
-[**InlineResponse200**](InlineResponse200.md)
+[**kotlin.Array&lt;Instrument&gt;**](Instrument.md)
 
 ### Authorization
 

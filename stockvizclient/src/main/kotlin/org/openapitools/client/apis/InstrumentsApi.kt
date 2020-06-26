@@ -11,7 +11,7 @@
 */
 package org.openapitools.client.apis
 
-import org.openapitools.client.models.InlineResponse200
+import org.openapitools.client.models.Instrument
 import org.openapitools.client.models.NewInstrument
 
 import org.openapitools.client.infrastructure.ApiClient
@@ -78,26 +78,16 @@ class InstrumentsApi(basePath: kotlin.String = defaultBasePath) : ApiClient(base
     /**
     * 
     * 
-    * @param page A page number within the paginated result set. (optional)
-    * @param pageSize Number of results to return per page. (optional)
-    * @return InlineResponse200
+    * @return kotlin.Array<Instrument>
     * @throws UnsupportedOperationException If the API returns an informational or redirection response
     * @throws ClientException If the API returns a client error response
     * @throws ServerException If the API returns a server error response
     */
     @Suppress("UNCHECKED_CAST")
     @Throws(UnsupportedOperationException::class, ClientException::class, ServerException::class)
-    fun instrumentsList(page: kotlin.Int?, pageSize: kotlin.Int?) : InlineResponse200 {
+    fun instrumentsList() : kotlin.Array<Instrument> {
         val localVariableBody: kotlin.Any? = null
-        val localVariableQuery: MultiValueMap = mutableMapOf<kotlin.String, List<kotlin.String>>()
-            .apply {
-                if (page != null) {
-                    put("page", listOf(page.toString()))
-                }
-                if (pageSize != null) {
-                    put("page_size", listOf(pageSize.toString()))
-                }
-            }
+        val localVariableQuery: MultiValueMap = mutableMapOf()
         val localVariableHeaders: MutableMap<String, String> = mutableMapOf()
         val localVariableConfig = RequestConfig(
             RequestMethod.GET,
@@ -105,13 +95,13 @@ class InstrumentsApi(basePath: kotlin.String = defaultBasePath) : ApiClient(base
             query = localVariableQuery,
             headers = localVariableHeaders
         )
-        val localVarResponse = request<InlineResponse200>(
+        val localVarResponse = request<kotlin.Array<Instrument>>(
             localVariableConfig,
             localVariableBody
         )
 
         return when (localVarResponse.responseType) {
-            ResponseType.Success -> (localVarResponse as Success<*>).data as InlineResponse200
+            ResponseType.Success -> (localVarResponse as Success<*>).data as kotlin.Array<Instrument>
             ResponseType.Informational -> throw UnsupportedOperationException("Client does not support Informational responses.")
             ResponseType.Redirection -> throw UnsupportedOperationException("Client does not support Redirection responses.")
             ResponseType.ClientError -> {

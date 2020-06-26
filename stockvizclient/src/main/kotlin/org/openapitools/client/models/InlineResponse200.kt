@@ -11,25 +11,20 @@
 */
 package org.openapitools.client.models
 
-import org.openapitools.client.models.Symbol
 
 import com.fasterxml.jackson.annotation.JsonProperty
 /**
  * 
- * @param count 
- * @param results 
- * @param next 
- * @param previous 
+ * @param success Request status
+ * @param message Results description
  */
 
 data class InlineResponse200 (
-    @JsonProperty("count")
-    val count: kotlin.Int,
-    @JsonProperty("results")
-    val results: kotlin.Array<Symbol>,
-    @JsonProperty("next")
-    val next: java.net.URI? = null,
-    @JsonProperty("previous")
-    val previous: java.net.URI? = null
+    /* Request status */
+    @JsonProperty("success")
+    val success: kotlin.Boolean? = null,
+    /* Results description */
+    @JsonProperty("message")
+    val message: kotlin.String? = null
 )
 

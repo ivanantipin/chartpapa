@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Candle (
     @JsonProperty("datetime")
-    val datetime: java.time.OffsetDateTime,
+    val datetime: kotlin.Int,
     @JsonProperty("open")
     val open: java.math.BigDecimal,
     @JsonProperty("high")

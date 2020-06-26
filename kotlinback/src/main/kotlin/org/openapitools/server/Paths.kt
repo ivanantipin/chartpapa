@@ -29,6 +29,15 @@ object Paths {
     /**
      * 
      * 
+     * @param page A page number within the paginated result set. (optional)
+     * @param pageSize Number of results to return per page. (optional)
+     */
+    @KtorExperimentalLocationsAPI
+    @Location("/instruments/") class instrumentsList(val page: kotlin.Int? = null, val pageSize: kotlin.Int? = null)
+
+    /**
+     * 
+     * 
      * @param portfolio  
      */
     @KtorExperimentalLocationsAPI
@@ -45,6 +54,14 @@ object Paths {
     /**
      * 
      * 
+     * @param portfolio  
+     */
+    @KtorExperimentalLocationsAPI
+    @Location("/portfolios/{portfolio}/delete/") class portfoliosDeleteDelete(val portfolio: kotlin.String)
+
+    /**
+     * 
+     * 
      */
     @KtorExperimentalLocationsAPI
     @Location("/portfolios/") class portfoliosList()
@@ -53,35 +70,9 @@ object Paths {
      * 
      * 
      * @param portfolio  
-     * @param symbol filter by symbol (optional)
-     * @param sector filter by sector (optional)
-     * @param industry filter by industry (optional)
-     * @param exchange filter by exchange (optional)
-     * @param country filter by country (optional)
-     * @param fromDate filter by date gte (optional)
-     * @param toDate filter by date lte (optional)
-     * @param fromTimeOfDay filter by time of a day gte (optional)
-     * @param toTimeOfDay filter by time of a day lte (optional)
      */
     @KtorExperimentalLocationsAPI
-    @Location("/portfolios/{portfolio}/results/by-filter/") class portfoliosResultsByFilterList(val portfolio: kotlin.String, val symbol: kotlin.String? = null, val sector: kotlin.String? = null, val industry: kotlin.String? = null, val exchange: kotlin.String? = null, val country: kotlin.String? = null, val fromDate: java.time.LocalDate? = null, val toDate: kotlin.String? = null, val fromTimeOfDay: kotlin.String? = null, val toTimeOfDay: kotlin.String? = null)
-
-    /**
-     * 
-     * 
-     * @param portfolio  
-     */
-    @KtorExperimentalLocationsAPI
-    @Location("/portfolios/{portfolio}/results/") class portfoliosResultsList(val portfolio: kotlin.String)
-
-    /**
-     * 
-     * 
-     * @param aggregate  
-     * @param portfolio  
-     */
-    @KtorExperimentalLocationsAPI
-    @Location("/portfolios/{portfolio}/results/{aggregate}/") class portfoliosResultsRead(val aggregate: kotlin.String, val portfolio: kotlin.String)
+    @Location("/portfolios/{portfolio}/orders/") class portfoliosOrdersList(val portfolio: kotlin.String)
 
     /**
      * 
@@ -90,20 +81,5 @@ object Paths {
      */
     @KtorExperimentalLocationsAPI
     @Location("/portfolios/{portfolio}/trades/") class portfoliosTradesList(val portfolio: kotlin.String)
-
-    /**
-     * 
-     * 
-     */
-    @KtorExperimentalLocationsAPI
-    @Location("/quotes/daily/") class quotesDailyList()
-
-    /**
-     * 
-     * 
-     * @param id A unique integer value identifying this candles daily. 
-     */
-    @KtorExperimentalLocationsAPI
-    @Location("/quotes/daily/{id}/") class quotesDailyRead(val id: kotlin.Int)
 
 }

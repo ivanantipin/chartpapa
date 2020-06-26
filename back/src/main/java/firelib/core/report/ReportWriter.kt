@@ -2,7 +2,6 @@ package firelib.core.report
 
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.ModelOutput
-import firelib.core.domain.OrderStatus
 import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
@@ -11,6 +10,7 @@ import firelib.misc.StockVizTradeWriter
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.nio.file.*
+import kotlin.system.measureTimeMillis
 
 
 object ReportWriter{
@@ -49,12 +49,23 @@ object ReportWriter{
             log.info("no trades generated")
         }else{
 
-            model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.forEach {
+            measureTimeMillis {
+                model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.forEach {
+                    StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
+                }
 
-                StockVizTradeWriter.writePairs(it.toTradingCases(), model.model.name())
+                val orders = model.orderStates.map { it.order }
 
-                StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
+                val trades = model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.flatMap {
+                    it.toTradingCases()
+                }
+                StockVizTradeWriter.writePairs(trades, orders, model.model.name())
+
+            }.apply {
+                println("took ${this/1000.0} s to write report")
             }
+
+
         }
 
         ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates)
