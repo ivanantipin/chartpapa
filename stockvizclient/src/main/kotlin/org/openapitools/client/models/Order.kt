@@ -46,9 +46,9 @@ data class Order (
     @JsonProperty("qty")
     val qty: java.math.BigDecimal,
     @JsonProperty("place_time")
-    val placeTime: kotlin.Int,
+    val placeTime: kotlin.Long,
     @JsonProperty("update_time")
-    val updateTime: kotlin.Int,
+    val updateTime: kotlin.Long,
     @JsonProperty("symbol")
     val symbol: kotlin.String,
     @JsonProperty("id")

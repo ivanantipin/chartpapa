@@ -1,9 +1,20 @@
 package firelib.core.report.dao
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.jvm.javaType
+
+
+val jsonMapper = ObjectMapper().apply {
+    this.registerModule(KotlinModule())
+}
+
 
 object SqlTypeMapper {
 
@@ -37,7 +48,7 @@ object SqlTypeMapper {
             return "TIMESTAMPTZ"
         }
 
-        throw RuntimeException("not supported type $retType")
+        return "VARCHAR"
     }
 
     fun fromDb(retType: KType): (Any) -> (Any) {
@@ -70,13 +81,16 @@ object SqlTypeMapper {
             return { it }
         }
 
-        throw RuntimeException("not supported type $retType")
+        return {
+            jsonMapper.readValue(it.toString(), (retType.classifier as KClass<*>).java)
+        }
     }
 
     fun toDb(retType: KType): (Any) -> (Any) {
         if (retType.classifier == String::class) {
             return { it }
         }
+
         if (retType.classifier == Double::class) {
             return { it }
         }
@@ -102,6 +116,7 @@ object SqlTypeMapper {
         if (retType.classifier == Instant::class) {
             return { (it as Instant).toEpochMilli() / 1000 }
         }
-        throw RuntimeException("not supported type $retType")
+
+        return { jsonMapper.writeValueAsString(it) }
     }
 }

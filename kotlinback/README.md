@@ -67,18 +67,18 @@ Class | Method | HTTP request | Description
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [org.openapitools.server.models.AddResponse](docs/AddResponse.md)
  - [org.openapitools.server.models.Candle](docs/Candle.md)
  - [org.openapitools.server.models.ContinuousMeta](docs/ContinuousMeta.md)
  - [org.openapitools.server.models.DiscreteMeta](docs/DiscreteMeta.md)
  - [org.openapitools.server.models.InlineResponse200](docs/InlineResponse200.md)
- - [org.openapitools.server.models.InlineResponse2001](docs/InlineResponse2001.md)
+ - [org.openapitools.server.models.Instrument](docs/Instrument.md)
  - [org.openapitools.server.models.NewInstrument](docs/NewInstrument.md)
  - [org.openapitools.server.models.NewOrder](docs/NewOrder.md)
  - [org.openapitools.server.models.NewTrade](docs/NewTrade.md)
  - [org.openapitools.server.models.Order](docs/Order.md)
  - [org.openapitools.server.models.Portfolio](docs/Portfolio.md)
  - [org.openapitools.server.models.PortfolioInstrumentsMeta](docs/PortfolioInstrumentsMeta.md)
- - [org.openapitools.server.models.Symbol](docs/Symbol.md)
  - [org.openapitools.server.models.TagsMetaSummary](docs/TagsMetaSummary.md)
  - [org.openapitools.server.models.Trade](docs/Trade.md)
 

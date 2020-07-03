@@ -11,19 +11,16 @@
 */
 package org.openapitools.server.models
 
-import org.openapitools.server.models.Symbol
 
 /**
  * 
- * @param count 
- * @param results 
- * @param next 
- * @param previous 
+ * @param success Request status
+ * @param message Results description
  */
 data class InlineResponse200 (
-    val count: kotlin.Int,
-    val results: kotlin.Array<Symbol>,
-    val next: java.net.URI? = null,
-    val previous: java.net.URI? = null
+    /* Request status */
+    val success: kotlin.Boolean? = null,
+    /* Results description */
+    val message: kotlin.String? = null
 ) 
 

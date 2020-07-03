@@ -29,11 +29,9 @@ object Paths {
     /**
      * 
      * 
-     * @param page A page number within the paginated result set. (optional)
-     * @param pageSize Number of results to return per page. (optional)
      */
     @KtorExperimentalLocationsAPI
-    @Location("/instruments/") class instrumentsList(val page: kotlin.Int? = null, val pageSize: kotlin.Int? = null)
+    @Location("/instruments/") class instrumentsList()
 
     /**
      * 

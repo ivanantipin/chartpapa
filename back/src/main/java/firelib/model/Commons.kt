@@ -41,5 +41,6 @@ val tickers = listOf(
     "rasp",
     "phor",
     "dsky",
-    "lnta"
+    "lnta",
+    "qiwi"
 )

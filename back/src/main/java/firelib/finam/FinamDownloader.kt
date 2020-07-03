@@ -24,7 +24,10 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class FinamDownloader : AutoCloseable, HistoricalSource {
+class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSource {
+
+
+
 
     private val client = DefaultAsyncHttpClient(
             DefaultAsyncHttpClientConfig.Builder()
@@ -90,7 +93,7 @@ class FinamDownloader : AutoCloseable, HistoricalSource {
         var mstart = start
         return sequence {
             while (mstart < LocalDateTime.now()) {
-                val finish = mstart.plusDays(100)
+                val finish = mstart.plusDays(batchDays.toLong())
                 yieldAll(loadSome(instrId, interval, mstart, finish))
                 mstart = finish.minusDays(2)
             }

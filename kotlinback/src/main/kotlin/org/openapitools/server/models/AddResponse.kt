@@ -14,15 +14,21 @@ package org.openapitools.server.models
 
 /**
  * 
- * @param name 
- * @param description 
- * @param createdDate 
- * @param benchmark 
+ * @param status 
+ * @param message 
  */
-data class Portfolio (
-    val name: kotlin.String,
-    val description: kotlin.String? = null,
-    val createdDate: java.time.LocalDateTime? = null,
-    val benchmark: kotlin.String? = null
+data class AddResponse (
+    val status: AddResponse.Status,
+    val message: kotlin.String
 ) 
+{
+    /**
+    * 
+    * Values: ok,error
+    */
+    enum class Status(val value: kotlin.String){
+        ok("ok"),
+        error("error");
+    }
+}
 

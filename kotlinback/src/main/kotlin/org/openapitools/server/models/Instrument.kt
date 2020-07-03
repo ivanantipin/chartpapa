@@ -14,12 +14,14 @@ package org.openapitools.server.models
 
 /**
  * 
+ * @param symbolAndExchange 
  * @param symbol 
  * @param exchange 
  * @param metaDiscrete 
  * @param metaContinuous 
  */
-data class NewInstrument (
+data class Instrument (
+    val symbolAndExchange: kotlin.String,
     val symbol: kotlin.String,
     val exchange: kotlin.String,
     val metaDiscrete: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,

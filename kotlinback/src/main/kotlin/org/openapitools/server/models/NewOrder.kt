@@ -23,11 +23,11 @@ package org.openapitools.server.models
  * @param updateTime 
  * @param symbol 
  * @param id 
+ * @param discreteTags 
+ * @param continuousTags 
  * @param tradeId 
  * @param price 
  * @param executionPrice 
- * @param discreteTags 
- * @param continuousTags 
  */
 data class NewOrder (
     val orderId: kotlin.String,
@@ -35,15 +35,15 @@ data class NewOrder (
     val orderType: NewOrder.OrderType,
     val status: NewOrder.Status,
     val qty: java.math.BigDecimal,
-    val placeTime: java.time.LocalDateTime,
-    val updateTime: java.time.LocalDateTime,
+    val placeTime: kotlin.Long,
+    val updateTime: kotlin.Long,
     val symbol: kotlin.String,
     val id: kotlin.Int? = null,
+    val discreteTags: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
+    val continuousTags: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null,
     val tradeId: kotlin.String? = null,
     val price: java.math.BigDecimal? = null,
-    val executionPrice: java.math.BigDecimal? = null,
-    val discreteTags: kotlin.Any? = null,
-    val continuousTags: kotlin.Any? = null
+    val executionPrice: java.math.BigDecimal? = null
 ) 
 {
     /**

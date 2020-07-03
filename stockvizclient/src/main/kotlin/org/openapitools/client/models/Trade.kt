@@ -39,9 +39,9 @@ data class Trade (
     @JsonProperty("qty")
     val qty: java.math.BigDecimal,
     @JsonProperty("open_time")
-    val openTime: kotlin.Int,
+    val openTime: kotlin.Long,
     @JsonProperty("close_time")
-    val closeTime: kotlin.Int,
+    val closeTime: kotlin.Long,
     @JsonProperty("open_price")
     val openPrice: java.math.BigDecimal,
     @JsonProperty("close_price")

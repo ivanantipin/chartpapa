@@ -7,8 +7,8 @@ class DurableChannel<T> : Channel<T> {
     val msgs = LinkedList<T>()
 
     override fun publish(t: T) {
-        listeners.forEach { it(t) }
         msgs += t
+        listeners.forEach { it(t) }
     }
 
     override fun subscribe(lsn: (T) -> Unit): ChannelSubscription {

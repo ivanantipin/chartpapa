@@ -14,8 +14,6 @@ package org.openapitools.server.models
 
 /**
  * 
- * @param discreteTags 
- * @param continuousTags 
  * @param portfolio 
  * @param orderId 
  * @param side 
@@ -26,23 +24,25 @@ package org.openapitools.server.models
  * @param updateTime 
  * @param symbol 
  * @param id 
+ * @param discreteTags 
+ * @param continuousTags 
  * @param tradeId 
  * @param price 
  * @param executionPrice 
  */
 data class Order (
-    val discreteTags: kotlin.collections.Map<kotlin.String, kotlin.String>,
-    val continuousTags: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>,
     val portfolio: kotlin.String,
     val orderId: kotlin.String,
     val side: Order.Side,
     val orderType: Order.OrderType,
     val status: Order.Status,
     val qty: java.math.BigDecimal,
-    val placeTime: java.time.LocalDateTime,
-    val updateTime: java.time.LocalDateTime,
+    val placeTime: kotlin.Long,
+    val updateTime: kotlin.Long,
     val symbol: kotlin.String,
     val id: kotlin.Int? = null,
+    val discreteTags: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
+    val continuousTags: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null,
     val tradeId: kotlin.String? = null,
     val price: java.math.BigDecimal? = null,
     val executionPrice: java.math.BigDecimal? = null

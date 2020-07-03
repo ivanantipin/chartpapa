@@ -23,6 +23,7 @@ enum class Interval(val durationMs: Long, val offset : Long = defaultOffset) {
     Min120(120 * 60 * 1000),
     Min240(240 * 60 * 1000),
     Day( 24* 60 * 60 * 1000),
+    Month( 24* 60 * 60 * 1000, 0L),
     AmericanDay( 24* 60 * 60 * 1000, defaultOffset + 4*3600*1000L ),
     Week(Day.durationMs*7);
 

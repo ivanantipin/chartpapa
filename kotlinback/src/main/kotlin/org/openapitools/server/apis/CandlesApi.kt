@@ -11,25 +11,19 @@
  */
 package org.openapitools.server.apis
 
+
 import com.google.gson.Gson
 import firelib.core.SourceName
 import firelib.core.domain.Interval
-import firelib.core.misc.atMoscow
-import firelib.core.misc.moscowZoneId
 import firelib.core.store.MdStorageImpl
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
 import io.ktor.locations.get
 import io.ktor.response.respondText
 import io.ktor.routing.Route
-
 import org.openapitools.server.Paths
-
-
 import org.openapitools.server.models.Candle
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @KtorExperimentalLocationsAPI
 fun Route.CandlesApi() {
@@ -43,7 +37,7 @@ fun Route.CandlesApi() {
 
         val candles = ohlcs.map {
             Candle(
-                it.endTime.atMoscow().atZone(moscowZoneId).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                it.endTime.toEpochMilli(),
                 it.open.toBigDecimal(),
                 it.high.toBigDecimal(),
                 it.low.toBigDecimal(),

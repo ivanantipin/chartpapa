@@ -15,7 +15,6 @@ package org.openapitools.server.models
 /**
  * 
  * @param tradeId 
- * @param portfolio 
  * @param side 
  * @param qty 
  * @param openTime 
@@ -29,17 +28,16 @@ package org.openapitools.server.models
  */
 data class NewTrade (
     val tradeId: kotlin.String,
-    val portfolio: kotlin.String,
     val side: NewTrade.Side,
     val qty: java.math.BigDecimal,
-    val openTime: java.time.LocalDateTime,
-    val closeTime: java.time.LocalDateTime,
+    val openTime: kotlin.Long,
+    val closeTime: kotlin.Long,
     val openPrice: java.math.BigDecimal,
     val closePrice: java.math.BigDecimal,
     val pnl: java.math.BigDecimal,
     val symbol: kotlin.String,
-    val discreteTags: kotlin.Any? = null,
-    val continuousTags: kotlin.Any? = null
+    val discreteTags: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
+    val continuousTags: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null
 ) 
 {
     /**
