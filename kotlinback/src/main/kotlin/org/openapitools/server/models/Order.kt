@@ -50,11 +50,11 @@ data class Order (
 {
     /**
     * 
-    * Values: buy,sell
+    * Values: long,short
     */
     enum class Side(val value: kotlin.String){
-        buy("buy"),
-        sell("sell");
+        long("long"),
+        short("short");
     }
     /**
     * 
@@ -72,13 +72,15 @@ data class Order (
     }
     /**
     * 
-    * Values: filled,canceled,placed,partialFilled
+    * Values: filled,canceled,placed,partialFilled,new,rejected
     */
     enum class Status(val value: kotlin.String){
         filled("filled"),
         canceled("canceled"),
         placed("placed"),
-        partialFilled("partial_filled");
+        partialFilled("partial_filled"),
+        new("new"),
+        rejected("rejected");
     }
 }
 

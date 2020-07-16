@@ -22,7 +22,6 @@ package org.openapitools.server.models
  * @param placeTime 
  * @param updateTime 
  * @param symbol 
- * @param id 
  * @param discreteTags 
  * @param continuousTags 
  * @param tradeId 
@@ -38,7 +37,6 @@ data class NewOrder (
     val placeTime: kotlin.Long,
     val updateTime: kotlin.Long,
     val symbol: kotlin.String,
-    val id: kotlin.Int? = null,
     val discreteTags: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
     val continuousTags: kotlin.collections.Map<kotlin.String, java.math.BigDecimal>? = null,
     val tradeId: kotlin.String? = null,
@@ -48,11 +46,11 @@ data class NewOrder (
 {
     /**
     * 
-    * Values: buy,sell
+    * Values: long,short
     */
     enum class Side(val value: kotlin.String){
-        buy("buy"),
-        sell("sell");
+        long("long"),
+        short("short");
     }
     /**
     * 
@@ -70,13 +68,15 @@ data class NewOrder (
     }
     /**
     * 
-    * Values: filled,canceled,placed,partialFilled
+    * Values: filled,canceled,placed,partialFilled,new,rejected
     */
     enum class Status(val value: kotlin.String){
         filled("filled"),
         canceled("canceled"),
         placed("placed"),
-        partialFilled("partial_filled");
+        partialFilled("partial_filled"),
+        new("new"),
+        rejected("rejected");
     }
 }
 

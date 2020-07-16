@@ -11,31 +11,22 @@
 */
 package org.openapitools.server.apis
 
+
 import com.google.gson.Gson
 import io.ktor.application.call
 import io.ktor.auth.UserIdPrincipal
-import io.ktor.auth.authentication
 import io.ktor.auth.authenticate
-import io.ktor.auth.OAuthAccessTokenResponse
-import io.ktor.auth.OAuthServerSettings
+import io.ktor.auth.authentication
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.locations.KtorExperimentalLocationsAPI
-import io.ktor.locations.delete
 import io.ktor.locations.get
 import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.routing.post
-import io.ktor.routing.put
 import io.ktor.routing.route
-
 import org.openapitools.server.Paths
-
-
-import org.openapitools.server.models.AddResponse
-import org.openapitools.server.models.Instrument
-import org.openapitools.server.models.NewInstrument
 
 @KtorExperimentalLocationsAPI
 fun Route.InstrumentsApi() {
@@ -64,6 +55,27 @@ fun Route.InstrumentsApi() {
             }
         }
             }
+    }
+
+
+    get<Paths.instrumentsLastUpdateList> {  _: Paths.instrumentsLastUpdateList ->
+        val principal = call.authentication.principal<UserIdPrincipal>()
+        
+        if (principal == null) {
+            call.respond(HttpStatusCode.Unauthorized)
+        } else {
+            val exampleContentType = "application/json"
+            val exampleContentString = """{
+              "update_time" : 0,
+              "success" : true
+            }"""
+            
+            when(exampleContentType) {
+                "application/json" -> call.respond(gson.fromJson(exampleContentString, empty::class.java))
+                "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
+                else -> call.respondText(exampleContentString)
+            }
+        }
     }
 
 

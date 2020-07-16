@@ -51,6 +51,7 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *CandlesApi* | [**candlesRead**](docs/CandlesApi.md#candlesread) | **GET** /candles/{timeframe}/{symbol}/ | 
 *InstrumentsApi* | [**instrumentsAddCreate**](docs/InstrumentsApi.md#instrumentsaddcreate) | **POST** /instruments/add | 
+*InstrumentsApi* | [**instrumentsLastUpdateList**](docs/InstrumentsApi.md#instrumentslastupdatelist) | **GET** /instruments/last-update/ | 
 *InstrumentsApi* | [**instrumentsList**](docs/InstrumentsApi.md#instrumentslist) | **GET** /instruments/ | 
 *PortfoliosApi* | [**portfoliosAddOrdersCreate**](docs/PortfoliosApi.md#portfoliosaddorderscreate) | **POST** /portfolios/{portfolio}/add/orders/ | 
 *PortfoliosApi* | [**portfoliosAddTradesCreate**](docs/PortfoliosApi.md#portfoliosaddtradescreate) | **POST** /portfolios/{portfolio}/add/trades/ | 
@@ -59,6 +60,7 @@ Class | Method | HTTP request | Description
 *PortfoliosApi* | [**portfoliosClearCreate**](docs/PortfoliosApi.md#portfoliosclearcreate) | **POST** /portfolios/{portfolio}/clear/ | 
 *PortfoliosApi* | [**portfoliosCreateCreate**](docs/PortfoliosApi.md#portfolioscreatecreate) | **POST** /portfolios/create/ | 
 *PortfoliosApi* | [**portfoliosDeleteDelete**](docs/PortfoliosApi.md#portfoliosdeletedelete) | **DELETE** /portfolios/{portfolio}/delete/ | 
+*PortfoliosApi* | [**portfoliosLastUpdatesList**](docs/PortfoliosApi.md#portfolioslastupdateslist) | **GET** /portfolios/{portfolio}/last-updates/ | 
 *PortfoliosApi* | [**portfoliosList**](docs/PortfoliosApi.md#portfolioslist) | **GET** /portfolios/ | 
 *PortfoliosApi* | [**portfoliosOrdersList**](docs/PortfoliosApi.md#portfoliosorderslist) | **GET** /portfolios/{portfolio}/orders/ | 
 *PortfoliosApi* | [**portfoliosTradesList**](docs/PortfoliosApi.md#portfoliostradeslist) | **GET** /portfolios/{portfolio}/trades/ | 
@@ -72,7 +74,9 @@ Class | Method | HTTP request | Description
  - [org.openapitools.server.models.ContinuousMeta](docs/ContinuousMeta.md)
  - [org.openapitools.server.models.DiscreteMeta](docs/DiscreteMeta.md)
  - [org.openapitools.server.models.InlineResponse200](docs/InlineResponse200.md)
+ - [org.openapitools.server.models.InlineResponse2001](docs/InlineResponse2001.md)
  - [org.openapitools.server.models.Instrument](docs/Instrument.md)
+ - [org.openapitools.server.models.LastUpdate](docs/LastUpdate.md)
  - [org.openapitools.server.models.NewInstrument](docs/NewInstrument.md)
  - [org.openapitools.server.models.NewOrder](docs/NewOrder.md)
  - [org.openapitools.server.models.NewTrade](docs/NewTrade.md)

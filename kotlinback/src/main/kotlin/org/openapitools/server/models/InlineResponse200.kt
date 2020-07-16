@@ -15,12 +15,12 @@ package org.openapitools.server.models
 /**
  * 
  * @param success Request status
- * @param message Results description
+ * @param updateTime Update time
  */
 data class InlineResponse200 (
     /* Request status */
     val success: kotlin.Boolean? = null,
-    /* Results description */
-    val message: kotlin.String? = null
+    /* Update time */
+    val updateTime: kotlin.Long? = null
 ) 
 

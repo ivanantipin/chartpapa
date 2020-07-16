@@ -20,11 +20,18 @@ object Paths {
      * 
      * @param symbol  
      * @param timeframe  
-     * @param fromDate filter by date gte (optional)
-     * @param toDate filter by date lte (optional)
+     * @param fromTs filter by timestamp gte (optional)
+     * @param toTs filter by timestamp lte (optional)
      */
     @KtorExperimentalLocationsAPI
-    @Location("/candles/{timeframe}/{symbol}/") class candlesRead(val symbol: kotlin.String, val timeframe: kotlin.String, val fromDate: java.time.LocalDate? = null, val toDate: kotlin.String? = null)
+    @Location("/candles/{timeframe}/{symbol}/") class candlesRead(val symbol: kotlin.String, val timeframe: kotlin.String, val fromTs: kotlin.Long? = null, val toTs: kotlin.Long? = null)
+
+    /**
+     * 
+     * 
+     */
+    @KtorExperimentalLocationsAPI
+    @Location("/instruments/last-update/") class instrumentsLastUpdateList()
 
     /**
      * 
@@ -56,6 +63,14 @@ object Paths {
      */
     @KtorExperimentalLocationsAPI
     @Location("/portfolios/{portfolio}/delete/") class portfoliosDeleteDelete(val portfolio: kotlin.String)
+
+    /**
+     * 
+     * 
+     * @param portfolio  
+     */
+    @KtorExperimentalLocationsAPI
+    @Location("/portfolios/{portfolio}/last-updates/") class portfoliosLastUpdatesList(val portfolio: kotlin.String)
 
     /**
      * 

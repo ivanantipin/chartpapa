@@ -15,6 +15,7 @@ package org.openapitools.server.apis
 import com.google.gson.Gson
 import firelib.core.SourceName
 import firelib.core.domain.Interval
+import firelib.core.misc.atMoscow
 import firelib.core.store.MdStorageImpl
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -23,7 +24,7 @@ import io.ktor.response.respondText
 import io.ktor.routing.Route
 import org.openapitools.server.Paths
 import org.openapitools.server.models.Candle
-import java.time.LocalDateTime
+import java.time.Instant
 
 @KtorExperimentalLocationsAPI
 fun Route.CandlesApi() {
@@ -31,9 +32,7 @@ fun Route.CandlesApi() {
     get<Paths.candlesRead> { cl: Paths.candlesRead ->
         val storage = MdStorageImpl()
         val dao = storage.md.getDao(SourceName.FINAM, Interval.Min10)
-        val ohlcs = dao.queryAll(cl.symbol.replace(".MICEX", ""), LocalDateTime.now().minusDays(300))
-
-        //"2000-01-23T04:56:07.000+00:00",
+        val ohlcs = dao.queryAll(cl.symbol.replace(".MICEX", ""), Instant.ofEpochMilli(cl.fromTs!!).atMoscow())
 
         val candles = ohlcs.map {
             Candle(
