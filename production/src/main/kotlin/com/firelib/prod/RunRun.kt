@@ -22,7 +22,7 @@ val prodModels = mapOf(
 )
 
 
-fun getTrqMicexMapper() : DbMapper{
+fun getTrqMicexMapper(): DbMapper {
     return DbMapper(trqMapperWriter(), { it.board == "TQBR" })
 }
 
@@ -37,8 +37,6 @@ fun main(args: Array<String>) {
 val runLogger = LoggerFactory.getLogger("runRun")
 
 private fun runReal(names: List<String>) {
-
-    System.setProperty("env", "prod")
 
     val modelConfigs = names.map { prodModels[it]!!() }
 

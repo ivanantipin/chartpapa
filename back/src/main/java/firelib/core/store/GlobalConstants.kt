@@ -1,34 +1,31 @@
 package firelib.core.store
 
+import firelib.core.report.Sqls
 import org.apache.commons.io.FileUtils
-import java.io.FileReader
 import java.nio.file.Paths
-import java.util.*
-
-object GlobalConstants{
-
-    val env = System.getProperty("env") ?:  System.getenv("env") ?: "test"
 
 
-    val props = Properties().apply {
-        println(" ENV set to  ${env}")
-        load(FileReader("${System.getProperty("user.home")}/keys/${env}.properties"))
-    }
+object GlobalConstants {
 
-    fun getProp(name : String ) : String{
-        require(props.containsKey(name), {"prop ${name} is absent"})
+    val env = System.getProperty("env") ?: System.getenv("env") ?: "test"
 
+    val rootFolder = Paths.get("/ddisk/globaldatabase")
 
-        return props[name]!! as String
-    }
-
-    val mdFolder = Paths.get("/ddisk/globaldatabase/md")
+    val mdFolder = rootFolder.resolve("md")
 
     val metaDb = mdFolder.resolve("meta.db")
 
+    val props = Sqls.readProps(metaDb, "envs", env)
+
+    fun getProp(name: String): String {
+        require(props.containsKey(name), { "prop ${name} is absent" })
+        return props[name]!! as String
+    }
+
+
     val rootReportPath = Paths.get("/home/ivan/projects/chartpapa/market_research/report_out")
 
-    fun ensureDirsExist(){
+    fun ensureDirsExist() {
         FileUtils.forceMkdir(mdFolder.toFile())
         FileUtils.forceMkdir(rootReportPath.toFile())
     }

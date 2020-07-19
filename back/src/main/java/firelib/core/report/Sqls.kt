@@ -36,6 +36,17 @@ where st.epochTimeMs = le.epochTimeMs
         }.toMap()
     }
 
+    fun readProps(path: Path, table : String, env : String): Map<String, String> {
+        val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
+        if(!checkTableExists(ds, table)){
+            println("empty table for path ${path} ")
+            return emptyMap()
+        }
+        return JdbcTemplate(ds).query("select name, value from ${table} where env = '${env}'") { rs, idx ->
+            rs.getString("name") to rs.getString("value")
+        }.toMap()
+    }
+
     fun checkTableExists(ds : DataSource, tableName : String) : Boolean{
         return JdbcTemplate(ds).queryForObject("SELECT count(*) FROM sqlite_master WHERE type='table' AND lower(name)='${tableName.toLowerCase()}'", Int::class.java) > 0
     }
