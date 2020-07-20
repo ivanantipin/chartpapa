@@ -11,7 +11,6 @@ import firelib.core.store.GlobalConstants
 import firelib.core.store.ReaderFactory
 import firelib.core.store.reader.ReaderSimpleDivAdjusted
 import firelib.core.store.reader.SimplifiedReader
-import firelib.finam.FinamDownloader
 import firelib.model.Div
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -24,7 +23,7 @@ import kotlin.reflect.full.primaryConstructor
 /**
  * configuration for model backtest
  */
-class ModelBacktestConfig(val name: String = "NoName") : Cloneable {
+class ModelBacktestConfig() : Cloneable {
     /**
      * instruments configuration
      */
@@ -106,11 +105,6 @@ class ModelBacktestConfig(val name: String = "NoName") : Cloneable {
     * report will be written into this directory
      */
     var reportTargetPath: String = GlobalConstants.rootReportPath.toString()
-
-    fun getProdDbFile(): Path {
-        return GlobalConstants.mdFolder.resolve("${name}.db").toAbsolutePath()
-    }
-
 
     fun getReportDbFile(): Path {
         return Paths.get(reportTargetPath).resolve("report.db").toAbsolutePath()

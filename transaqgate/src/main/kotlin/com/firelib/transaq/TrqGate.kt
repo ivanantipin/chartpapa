@@ -29,9 +29,6 @@ data class TrqClientDb(
     var type: String
 )
 
-
-
-
 class TrqGate(
     val dispatcherTrq: TrqMsgDispatcher,
     val executor: Executor

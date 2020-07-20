@@ -59,7 +59,11 @@ object ReportWriter{
                 val trades = model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.flatMap {
                     it.toTradingCases()
                 }
-                StockVizTradeWriter.writePairs(trades, orders, model.model.name())
+                try {
+                    StockVizTradeWriter.writePairs(trades, orders, model.model.name())
+                }catch (e : Exception){
+                    println("failed to write into stockviz due to ${e.message}")
+                }
 
             }.apply {
                 println("took ${this/1000.0} s to write report")

@@ -7,7 +7,6 @@ import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
-import firelib.core.report.dao.GeGeWriter
 import firelib.indicators.MarketProfile
 import firelib.indicators.defineLevels
 import firelib.model.tickers

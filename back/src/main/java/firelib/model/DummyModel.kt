@@ -6,9 +6,7 @@ import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.domain.ret
 import firelib.core.enableSeries
-import firelib.core.instruments
 import firelib.core.report.dao.GeGeWriter
 import java.time.LocalDate
 

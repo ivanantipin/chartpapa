@@ -5,21 +5,11 @@ import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
-import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
-import firelib.core.domain.Ohlc
-import firelib.core.misc.atMoscow
 import firelib.core.misc.atNy
 import firelib.core.store.MdDaoContainer
-import firelib.core.timeseries.ConditionalTimeSeries
-import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.makeUsTimeseries
-import firelib.iqfeed.IqFeedHistoricalSource
-import firelib.model.tickers
-import firelib.mt5.MT5Source
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import kotlin.random.Random
 
 

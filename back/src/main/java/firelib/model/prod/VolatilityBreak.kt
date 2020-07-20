@@ -14,19 +14,13 @@ import java.time.LocalDate
 
 
 class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : Model(context, properties) {
-
     val period = 20
-
     val daytss = enableSeries(interval = Interval.Day)
-
     val minSeries = enableSeries(interval = Interval.Min1)
-
     val donchians = daytss.map { Donchian { it.size <= period } }
-
 
     init {
         val tradeSize = properties["trade_size"]!!.toInt()
-
         minSeries.forEachIndexed { idx, it ->
             it.preRollSubscribe {
                 val dayTs = daytss[idx]
@@ -55,16 +49,13 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
             }
         }
     }
-
     private fun barQuantLowFun(it: Int) = daytss[it][0].downShadow() / daytss[it][0].range()
-
-
     companion object {
         fun modelConfig(tradeSize : Int): ModelConfig {
-            val runConfig = ModelBacktestConfig("Service").apply {
+            val runConfig = ModelBacktestConfig().apply {
                 interval = Interval.Min1
                 histSourceName = SourceName.FINAM
-                startDate(LocalDate.now().minusDays(600))
+                startDate(LocalDate.now().minusDays(1500))
                 instruments = tickers
             }
             return ModelConfig(VolatilityBreak::class, runConfig).apply {
@@ -78,9 +69,6 @@ class VolatilityBreak(context: ModelContext, properties: Map<String, String>) : 
 
 fun main() {
     val conf = modelConfig(250_000)
-    conf.runConfig.dumpInterval = Interval.Day
+    //conf.runConfig.dumpInterval = Interval.Day
     conf.runStrat()
 }
-
-
-

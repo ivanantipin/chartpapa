@@ -7,10 +7,6 @@ import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.report.dao.GeGeWriter
 import firelib.indicators.SRMaker
-import firelib.model.prod.factorBarQuantLow
-import firelib.model.prod.factorHour
-import firelib.model.prod.factorVolume
-import firelib.model.prod.factorWeekday
 import java.time.Instant
 import java.time.LocalDate
 

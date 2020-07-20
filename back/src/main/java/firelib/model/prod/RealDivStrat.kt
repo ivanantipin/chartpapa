@@ -68,7 +68,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 
 fun commonRunConfig() : ModelBacktestConfig{
     val divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1300)).groupBy { it.ticker.toLowerCase() }
-    return ModelBacktestConfig("RussianStocks").apply {
+    return ModelBacktestConfig().apply {
         instruments = tickers
         interval = Interval.Min1
         histSourceName = SourceName.FINAM

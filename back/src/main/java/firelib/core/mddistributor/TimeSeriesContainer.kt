@@ -20,7 +20,7 @@ class TimeSeriesContainer(val intervalService: IntervalService, val startTime : 
     }
 
 
-    var latestOhlc : Ohlc = Ohlc()
+    var latestOhlc : Ohlc = Ohlc(endTime = startTime)
 
     fun addOhlc(ohlc: Ohlc) {
         latestOhlc = ohlc
@@ -55,7 +55,7 @@ class TimeSeriesContainer(val intervalService: IntervalService, val startTime : 
 
     private fun createTimeSeries(interval: Interval, length: Int = 100): TimeSeriesImpl<Ohlc> {
         val timeSeries = TimeSeriesImpl(length) { Ohlc() }
-        timeSeries[0] = Ohlc(endTime = interval.ceilTime(startTime), interpolated = true)
+        timeSeries[0] = Ohlc(endTime = interval.ceilTime(latestOhlc.endTime), interpolated = true)
         map[interval] = timeSeries
         tss += timeSeries
 
@@ -79,7 +79,7 @@ fun mergeOhlc(currOhlc: Ohlc, ohlc: Ohlc): Ohlc {
     require(!ohlc.interpolated, { "should not be interpolated" })
 
     if (currOhlc.interpolated) {
-        require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
+        require(ohlc.endTime <= currOhlc.endTime, { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })
         return ohlc.copy(endTime = currOhlc.endTime, interpolated = false)
     } else {
         require(!ohlc.endTime.isAfter(currOhlc.endTime), { "curr ohlc ${currOhlc.endTime} < to be merged  ${ohlc.endTime}" })

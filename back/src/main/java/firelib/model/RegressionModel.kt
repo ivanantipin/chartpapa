@@ -8,7 +8,6 @@ import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.Quantiles
 import firelib.core.report.dao.GeGeWriter
-import firelib.core.store.DbReaderFactory
 import firelib.core.timeseries.TimeSeries
 import firelib.core.timeseries.ret
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression

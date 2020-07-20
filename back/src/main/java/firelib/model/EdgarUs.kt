@@ -8,15 +8,9 @@ import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.SqlUtils
-import firelib.core.misc.atNy
-import firelib.core.misc.toInstantMoscow
 import firelib.core.misc.toInstantNy
 import firelib.core.report.GenericMapWriter
-import firelib.core.report.dao.GeGeWriter
-import firelib.core.store.MdDaoContainer
 import firelib.core.timeseries.TimeSeries
-import firelib.core.timeseries.makeUsTimeseries
-import firelib.indicators.Ma
 import firelib.iqfeed.IqFeedHistoricalSource
 import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate

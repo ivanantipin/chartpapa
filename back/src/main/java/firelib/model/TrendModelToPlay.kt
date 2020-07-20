@@ -8,7 +8,6 @@ import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
 import firelib.indicators.VWAP
-import firelib.model.tickers
 import java.time.LocalDate
 
 

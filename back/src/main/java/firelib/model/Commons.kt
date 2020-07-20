@@ -29,7 +29,6 @@ val tickers = listOf(
     "yndx",
     "rual",
     "fees",
-    "tatn",
     "sibn",
     "poly",
     "mrkp",

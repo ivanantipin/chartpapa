@@ -6,7 +6,6 @@ import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
 import firelib.core.misc.Quantiles
-import firelib.core.store.DbReaderFactory
 import java.time.LocalDate
 
 class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model(context,props){

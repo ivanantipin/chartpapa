@@ -5,9 +5,6 @@ import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.core.store.DbReaderFactory
-import firelib.model.GapTrading
-import firelib.model.tickers
 import java.time.Instant
 import java.time.LocalDate
 

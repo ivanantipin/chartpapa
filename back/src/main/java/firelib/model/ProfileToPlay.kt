@@ -7,13 +7,8 @@ import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
-import firelib.core.store.DbReaderFactory
 import firelib.indicators.MarketProfile
 import firelib.indicators.defineLevels
-import firelib.model.prod.factorAvgBarQuantLow
-import firelib.model.prod.factorBarQuantLow
-import firelib.model.prod.factorPoc
-import firelib.model.prod.factorVolume
 import java.time.LocalDate
 
 

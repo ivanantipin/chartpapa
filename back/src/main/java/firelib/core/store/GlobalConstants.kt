@@ -13,7 +13,7 @@ object GlobalConstants {
 
     val mdFolder = rootFolder.resolve("md")
 
-    val metaDb = mdFolder.resolve("meta.db")
+    val metaDb = mdFolder.resolve("${env}.db")
 
     val props = Sqls.readProps(metaDb, "envs", env)
 

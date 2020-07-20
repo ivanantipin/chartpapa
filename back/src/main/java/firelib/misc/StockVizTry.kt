@@ -12,8 +12,15 @@ import org.openapitools.client.models.NewTrade
 import org.openapitools.client.models.Portfolio
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.util.*
 
+
+fun PortfoliosApi.createIfMissing(portfolio: String){
+    if(!this.portfoliosList().any { it.name == portfolio }){
+        this.portfoliosCreateCreate(Portfolio(portfolio, createdDate = OffsetDateTime.now()))
+    }
+}
 
 object StockVizTradeWriter {
 
@@ -25,9 +32,9 @@ object StockVizTradeWriter {
     ) {
         val api = PortfoliosApi()
 
-        api.portfoliosDeleteDelete(portfolio)
+        api.createIfMissing(portfolio)
 
-        api.portfoliosCreateCreate(Portfolio(name=portfolio))
+        api.portfoliosClearCreate(portfolio)
 
         val instrumentsApi = InstrumentsApi()
 
@@ -39,30 +46,29 @@ object StockVizTradeWriter {
         }.distinct().filter {
             !instrs.containsKey(it.symbol + "." + it.exchange)
         }
+
         if (distinct.isNotEmpty()) {
             instrumentsApi.instrumentsAddCreate(distinct.toTypedArray())
         }
         
-        api.portfoliosAddOrdersCreate(portfolio, orders.map {
-            NewOrder(
-                orderId = it.id,
-                side = if(it.side ==Side.Sell) NewOrder.Side.sell else NewOrder.Side.buy,
-                orderType = NewOrder.OrderType.market,
-                status = NewOrder.Status.filled,
-                qty = it.qtyLots.toBigDecimal(),
-                placeTime = it.placementTime.toEpochMilli(),
-                updateTime = it.placementTime.toEpochMilli(),
-                symbol = it.security.toUpperCase() + "." + "MICEX",
-                id = it.id.hashCode(),
-                discreteTags = null,
-                continuousTags = null,
-                tradeId = it.tradeSubscription.msgs.firstOrNull()?.tradeNo,
-                price = it.price.toBigDecimal(),
-                executionPrice = it.price.toBigDecimal()
-            )
-        }.filter { instrs.containsKey(it.symbol) }.toTypedArray())
-
-
+//        api.portfoliosAddOrdersCreate(portfolio, orders.map {
+//            NewOrder(
+//                orderId = it.id,
+//                side = if(it.side ==Side.Sell) NewOrder.Side.sell else NewOrder.Side.buy,
+//                orderType = NewOrder.OrderType.market,
+//                status = NewOrder.Status.filled,
+//                qty = it.qtyLots.toBigDecimal(),
+//                placeTime = it.placementTime.toEpochMilli(),
+//                updateTime = it.placementTime.toEpochMilli(),
+//                symbol = it.security.toUpperCase() + "." + "MICEX",
+//                id = it.id.hashCode(),
+//                discreteTags = emptyMap(),
+//                continuousTags = emptyMap(),
+//                tradeId = it.tradeSubscription.msgs.firstOrNull()?.tradeNo,
+//                price = it.price.toBigDecimal(),
+//                executionPrice = it.price.toBigDecimal()
+//            )
+//        }.filter { instrs.containsKey(it.symbol) }.toTypedArray())
 
         api.portfoliosAddTradesCreate(portfolio, list.map {
             val t0 = it.first

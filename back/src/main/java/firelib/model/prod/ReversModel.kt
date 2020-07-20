@@ -7,7 +7,6 @@ import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.domain.isUpBar
-import firelib.core.misc.atMoscow
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
 import firelib.model.*
