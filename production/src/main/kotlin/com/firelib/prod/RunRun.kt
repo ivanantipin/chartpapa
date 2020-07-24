@@ -11,14 +11,17 @@ import firelib.model.DummyModel
 import firelib.model.prod.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
+import kotlin.reflect.KClass
+
+
+fun getPosSize(model: KClass<*>): Int {
+    return GlobalConstants.getProp("${model.simpleName!!}.trade.size").toInt()
+}
 
 val prodModels = mapOf(
-    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(200_000) },
-    TrendModel::class.simpleName!! to { TrendModel.modelConfig(250_000) },
-    RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(250_000) },
-    ReversModel::class.simpleName!! to { ReversModel.modelConfig(30_000) },
-    ProfileModel::class.simpleName!! to { ProfileModel.modelConfig(30_000) },
-    "DummyModel" to { DummyModel.modelConfig() }
+    TrendModel::class.simpleName!! to { TrendModel.modelConfig(getPosSize(TrendModel::class)) },
+    RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(getPosSize(RealDivModel::class)) },
+    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(getPosSize(VolatilityBreak::class)) }
 )
 
 
@@ -42,10 +45,8 @@ private fun runReal(names: List<String>) {
 
     val runConfig = modelConfigs[0].runConfig
 
-    //fixme crap
-    runConfig.maxRiskMoney = 2_300_000
-    runConfig.maxRiskMoneyPerSec = 300_000
-
+    runConfig.maxRiskMoney = GlobalConstants.getProp("max.risk.money").toLong()
+    runConfig.maxRiskMoneyPerSec = GlobalConstants.getProp("max.risk.per.sec").toLong()
 
     GlobalConstants.ensureDirsExist()
 

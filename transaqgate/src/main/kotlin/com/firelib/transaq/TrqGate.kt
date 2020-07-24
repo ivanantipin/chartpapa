@@ -165,7 +165,7 @@ fun main() {
 
 
 fun makeDefaultStub(): TransaqConnectorGrpc.TransaqConnectorBlockingStub {
-    return TransaqClient("192.168.0.10", GlobalConstants.getProp("stub.port").toInt()).blockingStub
+    return TransaqClient(GlobalConstants.getProp("stub.ip"), GlobalConstants.getProp("stub.port").toInt()).blockingStub
 }
 
 fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str: String): TrqResponse {

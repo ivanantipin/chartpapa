@@ -36,11 +36,14 @@ fun npv(rate : Double, vararg cacheFlows : Double) : Double{
 
 val instr = finamMapperWriter().read()
 
-fun updateFf(){
+fun updateInstruments(){
     finamMapperWriter().write(FinamDownloader().symbols())
 }
 
+
+
 val source = FinamDownloader(6000)
+
 
 data class CacheEntry(val ticker : String,
                       val lastUpdated : Long,
