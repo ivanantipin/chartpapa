@@ -4,7 +4,7 @@ if [[ $# -eq 0 ]] ; then
 fi
 
 env=$1
-version=20200724-configurable
+version=20200725.1
 
 docker pull ivanantipin/chartpapa:${version}
 

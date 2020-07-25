@@ -32,7 +32,6 @@ fun getTrqMicexMapper(): DbMapper {
 }
 
 fun main(args: Array<String>) {
-    System.setProperty("env","prod")
     runReconnect()
     val models = GlobalConstants.getProp("models.to.run").split(",")
     runLogger.info("models to run : ${models}")
