@@ -4,10 +4,12 @@ if [[ $# -eq 0 ]] ; then
 fi
 
 env=$1
-version=20200719-dockerizing
+version=20200724-configurable
 
 docker pull ivanantipin/chartpapa:${version}
 
-docker run -e env=$env --name Reconnect-${env} --network host -d -v /ddisk/globaldatabase:/ddisk/globaldatabase ivanantipin/chartpapa:${version} reconnect
+containerName=AllModels-${env}
 
-docker run -e env=$env --name AllModels-${env} --network host -d -v /ddisk/globaldatabase:/ddisk/globaldatabase ivanantipin/chartpapa:${version} RealDivModel TrendModel
+docker rm -f ${containerName}
+
+docker run -e env=$env --name ${containerName} --network host -d -v /ddisk/globaldatabase:/ddisk/globaldatabase ivanantipin/chartpapa:${version}

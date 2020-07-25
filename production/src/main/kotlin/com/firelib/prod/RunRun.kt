@@ -7,12 +7,14 @@ import firelib.core.SimpleRunCtx
 import firelib.core.domain.Interval
 import firelib.core.store.GlobalConstants
 import firelib.core.store.trqMapperWriter
-import firelib.model.DummyModel
-import firelib.model.prod.*
+import firelib.model.prod.RealDivModel
+import firelib.model.prod.TrendModel
+import firelib.model.prod.VolatilityBreak
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import kotlin.reflect.KClass
 
+val runLogger = LoggerFactory.getLogger("runRun")
 
 fun getPosSize(model: KClass<*>): Int {
     return GlobalConstants.getProp("${model.simpleName!!}.trade.size").toInt()
@@ -30,16 +32,15 @@ fun getTrqMicexMapper(): DbMapper {
 }
 
 fun main(args: Array<String>) {
-    if (args[0] == "reconnect") {
-        runReconnect()
-    } else {
-        runReal(args.toList())
-    }
+    System.setProperty("env","prod")
+    runReconnect()
+    val models = GlobalConstants.getProp("models.to.run").split(",")
+    runLogger.info("models to run : ${models}")
+    runModels(models)
 }
 
-val runLogger = LoggerFactory.getLogger("runRun")
 
-private fun runReal(names: List<String>) {
+private fun runModels(names: List<String>) {
 
     val modelConfigs = names.map { prodModels[it]!!() }
 
