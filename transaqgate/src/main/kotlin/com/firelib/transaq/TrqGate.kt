@@ -62,7 +62,11 @@ class TrqGate(
             executor.execute({ processMsg(msg) })
         })
 
-        clientId = clientsDao.read().filter { it.market == "1" }[0].id
+        val clId = GlobalConstants.props.get("trq.client.id")
+
+        log.info("using client override ${clId}")
+
+        clientId = clId ?: clientsDao.read().filter { it.market == "1" }[0].id
 
         log.info("client id set to ${clientId}")
     }
