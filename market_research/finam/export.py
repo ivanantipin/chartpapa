@@ -46,6 +46,7 @@ class Market(IntEnum):
     FUTURES_ARCHIVE = 17  # expired futures
     FUTURES_USA = 7
     INDEXES = 6
+    RUSSIAN_INDEXES = 91
     SHARES = 1
     SPB = 517
     USA = 25

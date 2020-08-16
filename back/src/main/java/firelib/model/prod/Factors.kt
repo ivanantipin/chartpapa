@@ -1,15 +1,15 @@
 package firelib.model.prod
 
 import firelib.core.*
-import firelib.core.domain.Interval
-import firelib.core.domain.downShadow
-import firelib.core.domain.range
-import firelib.core.domain.upShadow
+import firelib.core.domain.*
 import firelib.core.misc.Quantiles
 import firelib.core.misc.atMoscow
 import firelib.indicators.MarketProfile
 import firelib.indicators.SimpleMovingAverage
+import org.apache.commons.math3.linear.RealMatrix
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation
 import java.lang.Exception
+import kotlin.math.min
 
 
 fun Model.factorWeekday() {
@@ -28,6 +28,44 @@ fun Model.factorBarQuant() {
     enableFactor("barQuant") {
         daytss[it][0].upShadow() / daytss[it][0].range()
     }
+}
+
+fun Model.enableCorrMatrix() : (i : Int, j : Int)->Double {
+    var corrMatrix : RealMatrix? = null
+
+    val weekTs = enableSeries(Interval.Week,300)
+
+    weekTs[0].preRollSubscribe {
+        if(it.count() > 20){
+            val cc = min(it.count() - 1, 70)
+            val corr = PearsonsCorrelation(Array(cc, { i->DoubleArray(weekTs.size, { j-> weekTs[j][i].ret()}) }))
+            corrMatrix = corr.correlationMatrix
+        }
+    }
+
+    return {i, j->
+        if(corrMatrix != null) corrMatrix!!.getEntry(i,j) else Double.NaN
+    }
+
+}
+
+fun Model.factorRank(daysBack : Int): (idx : Int)->Int {
+    val sers = enableSeries(Interval.Day, daysBack + 1)
+    val nonInterp = enableSeries(Interval.Day, daysBack + 1, false)
+
+    val ret = {tickerIdx : Int ->
+        val idxToRet = sers.mapIndexed { idx, ts ->
+            var ret = (sers[idx][0].close - nonInterp[idx][daysBack].close) / nonInterp[idx][daysBack].close
+            Pair(idx, ret)
+        }
+        val sortedBy = idxToRet.sortedBy { -it.second }
+        sortedBy.indexOfFirst { it.first == tickerIdx }
+    }
+
+    enableDiscreteFactor("rank${daysBack}", {tickerIdx->
+        ret(tickerIdx)
+    })
+    return ret
 }
 
 fun Model.factorBarQuantLow(): (idx: Int) -> Double {

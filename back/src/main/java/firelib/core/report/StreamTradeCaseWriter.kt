@@ -73,7 +73,7 @@ class StreamTradeCaseWriter(val path: Path, val tableName: String) {
             if(trade.tradeStat.factors.isEmpty()){
                 "NA"
             }else{
-                val header =  trade.tradeStat.factors.mapValues { "DOUBLE PRECISION" } + Pair("TradeId","VARCHAR")
+                val header =  trade.tradeStat.factors.associateBy({it.first}, {"DOUBLE PRECISION"})  + Pair("TradeId","VARCHAR")
                 JdbcTemplate(ds).execute(makeCreateSqlStmtFromHeader(getFactorsTable(trade), header))
                 makeSqlStatementFromHeader(getFactorsTable(trade), header)
             }
@@ -104,7 +104,7 @@ class StreamTradeCaseWriter(val path: Path, val tableName: String) {
             if(factorStmt != "NA"){
                 TransactionTemplate(tman).execute { status ->
                     val cases =
-                        trades.map { it.first.tradeStat.factors + Pair("TradeId", it.first.tradeNo) }.toTypedArray()
+                        trades.map { it.first.tradeStat.factors.associate { it } + Pair("TradeId", it.first.tradeNo) }.toTypedArray()
                     NamedParameterJdbcTemplate(ds).batchUpdate(factorStmt, cases)
                 }
             }

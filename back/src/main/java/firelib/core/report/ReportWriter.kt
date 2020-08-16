@@ -62,6 +62,7 @@ object ReportWriter{
                 try {
                     StockVizTradeWriter.writePairs(trades, orders, model.model.name())
                 }catch (e : Exception){
+                    e.printStackTrace()
                     println("failed to write into stockviz due to ${e.message}")
                 }
 

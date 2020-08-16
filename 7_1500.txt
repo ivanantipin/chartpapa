@@ -1,0 +1,11 @@
+sharpe 	0.125 	None
+mean 	0.895 	None
+pl 	598.776 	None
+pf 	1.667 	None
+cnt 	669.000 	None
+max 	70.316 	None
+min 	-20.146 	None
+median 	-0.245 	None
+HoldTimeMeanHours 	269.639 	None
+HoldTimeMedianHours 	120.000 	None
+AnnRet 	29.078 	None

@@ -4,7 +4,7 @@ if [[ $# -eq 0 ]] ; then
 fi
 
 env=$1
-version=20200725.1
+version=20200727-client-override
 
 docker pull ivanantipin/chartpapa:${version}
 

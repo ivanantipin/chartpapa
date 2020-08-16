@@ -3,9 +3,13 @@ import sqlite3
 import matplotlib.pyplot as plt
 import pandas as pd
 
+import numpy as np
+
 cnx = sqlite3.connect("/home/ivan/projects/chartpapa/market_research/report_out/report.db")
 
 df=pd.read_sql_query(con=cnx, sql="select * from EdgarStat where name = 'sberp_2019-07-30T15:10:00Z'")
+
+np.npv(0.07, )
 
 
 ret = plt.figure()

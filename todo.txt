@@ -1,6 +1,0 @@
-support resistance
-vwap as measure of momentum
-restart daily transaq in service
-benchmark in strategy backtest
-
-filtering

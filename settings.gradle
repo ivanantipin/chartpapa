@@ -1,5 +1,4 @@
 include 'back'
-include 'grpc-back'
 include 'transaqgate'
 include 'kotlinback'
 include 'stockvizclient'

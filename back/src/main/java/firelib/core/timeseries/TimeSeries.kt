@@ -1,6 +1,7 @@
 package firelib.core.timeseries
 
 import firelib.core.domain.Ohlc
+import firelib.core.domain.ret
 import firelib.core.mddistributor.forceMerge
 import firelib.core.mddistributor.mergeOhlc
 import firelib.core.misc.atNy
@@ -83,6 +84,12 @@ fun TimeSeries<Ohlc>.indexOfTime(time : Instant ) : Int {
     }
     return -1
 }
+
+fun TimeSeries<Ohlc>.returns(cnt : Int) : DoubleArray {
+    require(cnt < count())
+    return DoubleArray(cnt, {this[it].ret()})
+}
+
 
 fun makeUsTimeseries(it: TimeSeries<Ohlc>): ConditionalTimeSeries {
     val startTime = LocalTime.of(9, 30)

@@ -1,11 +1,15 @@
 package firelib.core.domain
 
+
+
+
 class TradeStat(val price: Double, val side: Side) {
 
     var maxHoldingPrice: Double = price
     var minHoldingPrice: Double = price
 
-    val factors = HashMap<String, Double>()
+    val factors = mutableListOf<Pair<String,Double>>()
+    val discreteFactors = mutableListOf<Pair<String, Int>>()
 
     fun MAE(): Double {
         return if (this.side == Side.Sell) price - maxHoldingPrice else minHoldingPrice - price
@@ -22,7 +26,12 @@ class TradeStat(val price: Double, val side: Side) {
     }
 
     fun addFactor(name: String, value: Double) {
-        factors[name] = value
+        factors += name to value
     }
+
+    fun addFactor(name: String, value: Int) {
+        discreteFactors += name to value
+    }
+
 
 }

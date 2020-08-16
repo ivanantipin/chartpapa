@@ -6,25 +6,20 @@ import firelib.core.domain.Side
 import firelib.core.misc.pnl
 import org.openapitools.client.apis.InstrumentsApi
 import org.openapitools.client.apis.PortfoliosApi
-import org.openapitools.client.models.NewInstrument
-import org.openapitools.client.models.NewOrder
-import org.openapitools.client.models.NewTrade
-import org.openapitools.client.models.Portfolio
+import org.openapitools.client.models.*
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.util.*
 
 
-fun PortfoliosApi.createIfMissing(portfolio: String){
-    if(!this.portfoliosList().any { it.name == portfolio }){
+fun PortfoliosApi.createIfMissing(portfolio: String) {
+    if (!this.portfoliosList().any { it.name == portfolio }) {
         this.portfoliosCreateCreate(Portfolio(portfolio, createdDate = OffsetDateTime.now()))
     }
 }
 
 object StockVizTradeWriter {
-
-
     fun writePairs(
         list: List<Pair<Trade, Trade>>,
         orders: List<Order>,
@@ -35,6 +30,8 @@ object StockVizTradeWriter {
         api.createIfMissing(portfolio)
 
         api.portfoliosClearCreate(portfolio)
+
+
 
         val instrumentsApi = InstrumentsApi()
 
@@ -50,31 +47,20 @@ object StockVizTradeWriter {
         if (distinct.isNotEmpty()) {
             instrumentsApi.instrumentsAddCreate(distinct.toTypedArray())
         }
-        
-//        api.portfoliosAddOrdersCreate(portfolio, orders.map {
-//            NewOrder(
-//                orderId = it.id,
-//                side = if(it.side ==Side.Sell) NewOrder.Side.sell else NewOrder.Side.buy,
-//                orderType = NewOrder.OrderType.market,
-//                status = NewOrder.Status.filled,
-//                qty = it.qtyLots.toBigDecimal(),
-//                placeTime = it.placementTime.toEpochMilli(),
-//                updateTime = it.placementTime.toEpochMilli(),
-//                symbol = it.security.toUpperCase() + "." + "MICEX",
-//                id = it.id.hashCode(),
-//                discreteTags = emptyMap(),
-//                continuousTags = emptyMap(),
-//                tradeId = it.tradeSubscription.msgs.firstOrNull()?.tradeNo,
-//                price = it.price.toBigDecimal(),
-//                executionPrice = it.price.toBigDecimal()
-//            )
-//        }.filter { instrs.containsKey(it.symbol) }.toTypedArray())
 
+        //addOrders(api, portfolio, orders, instrs)
+
+        addTrades(api, portfolio, list)
+    }
+
+    private fun addTrades(
+        api: PortfoliosApi,
+        portfolio: String,
+        list: List<Pair<Trade, Trade>>
+    ) {
         api.portfoliosAddTradesCreate(portfolio, list.map {
             val t0 = it.first
             val t1 = it.second
-
-            val descrete: Map<String, Double> = t0.tradeStat.factors.filter { it.key.endsWith("_int") }
 
             NewTrade(
                 tradeId = t0.tradeNo,
@@ -86,45 +72,35 @@ object StockVizTradeWriter {
                 pnl = it.pnl().toBigDecimal(),
                 closePrice = t1.price.toBigDecimal(),
                 closeTime = t1.dtGmt.toEpochMilli(),
-                continuousTags = t0.tradeStat.factors.mapValues { it.value.toBigDecimal() },
-                discreteTags = emptyMap<String, String>()
+                continuousTags = t0.tradeStat.factors.associateBy({ it.first }, { it.second.toBigDecimal() }),
+                discreteTags = t0.tradeStat.discreteFactors.associateBy({ it.first }, { it.second.toString() })
             )
         }.toTypedArray())
     }
+
+    private fun addOrders(
+        api: PortfoliosApi,
+        portfolio: String,
+        orders: List<Order>,
+        instrs: Map<String, List<Instrument>>
+    ) {
+        api.portfoliosAddOrdersCreate(portfolio, orders.map {
+            NewOrder(
+                orderId = it.id,
+                side = if (it.side == Side.Sell) NewOrder.Side.sell else NewOrder.Side.buy,
+                orderType = NewOrder.OrderType.market,
+                status = NewOrder.Status.filled,
+                qty = it.qtyLots.toBigDecimal(),
+                placeTime = it.placementTime.toEpochMilli(),
+                updateTime = it.placementTime.toEpochMilli(),
+                symbol = it.security.toUpperCase() + "." + "MICEX",
+                id = it.id.hashCode(),
+                discreteTags = emptyMap(),
+                continuousTags = emptyMap(),
+                tradeId = it.tradeSubscription.msgs.firstOrNull()?.tradeNo,
+                price = it.price.toBigDecimal(),
+                executionPrice = it.price.toBigDecimal()
+            )
+        }.filter { instrs.containsKey(it.symbol) }.toTypedArray())
+    }
 }
-
-fun mkTrd(portfolio: String): NewTrade {
-    return NewTrade(
-        tradeId = UUID.randomUUID().toString(),
-        side = NewTrade.Side.long,
-        qty = 1.toBigDecimal(),
-        openPrice = 1.toBigDecimal(),
-        openTime = Instant.now().toEpochMilli(),
-        symbol = "SBER.MICEX",
-        pnl = 2.toBigDecimal(),
-        closePrice = 1.toBigDecimal(),
-        closeTime = Instant.now().toEpochMilli(),
-        continuousTags = mapOf<String, BigDecimal>(
-            "Factor0" to 1.0.toBigDecimal()
-        ),
-        discreteTags = mapOf<String, String>(
-            "Factor0" to "A0"
-        )
-    )
-}
-
-fun main() {
-    val api = PortfoliosApi()
-    val portfolio = "Dummy0"
-
-    //api.portfoliosDeleteDelete(portfolio)
-
-    //api.portfoliosCreateCreate(Portfolio(name=portfolio))
-
-    println(api.portfoliosOrdersList("VolatilityBreak").toList())
-
-
-
-}
-
-

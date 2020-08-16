@@ -45,6 +45,15 @@ fun Model.enableFactor(name: String, fact: (Int) -> Double) {
     }
 }
 
+fun Model.enableDiscreteFactor(name: String, fact: (Int) -> Int) {
+    orderManagers().forEachIndexed { index, orderManager ->
+        orderManager.tradesTopic().subscribe {
+            it.tradeStat.addFactor(name, fact(index))
+        }
+    }
+}
+
+
 fun Model.currentTime(): Instant {
     return context.timeService.currentTime()
 }
