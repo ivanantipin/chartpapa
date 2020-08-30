@@ -20,6 +20,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.OffsetTime
+import java.util.concurrent.TimeUnit
 
 open class ApiClient(val baseUrl: String) {
     companion object {
@@ -39,7 +40,7 @@ open class ApiClient(val baseUrl: String) {
 
         @JvmStatic
         val client: OkHttpClient by lazy {
-            builder.build()
+            builder.writeTimeout(1,TimeUnit.MINUTES).readTimeout(1, TimeUnit.MINUTES).callTimeout(1,TimeUnit.MINUTES).build()
         }
 
         @JvmStatic

@@ -7,6 +7,7 @@ import firelib.core.SimpleRunCtx
 import firelib.core.domain.Interval
 import firelib.core.store.GlobalConstants
 import firelib.core.store.trqMapperWriter
+import firelib.model.prod.CandleMax
 import firelib.model.prod.RealDivModel
 import firelib.model.prod.TrendModel
 import firelib.model.prod.VolatilityBreak
@@ -23,7 +24,7 @@ fun getPosSize(model: KClass<*>): Int {
 val prodModels = mapOf(
     TrendModel::class.simpleName!! to { TrendModel.modelConfig(getPosSize(TrendModel::class)) },
     RealDivModel::class.simpleName!! to { RealDivModel.modelConfig(getPosSize(RealDivModel::class)) },
-    VolatilityBreak::class.simpleName!! to { VolatilityBreak.modelConfig(getPosSize(VolatilityBreak::class)) }
+    CandleMax::class.simpleName!! to { CandleMax.modelConfig(getPosSize(CandleMax::class)) }
 )
 
 

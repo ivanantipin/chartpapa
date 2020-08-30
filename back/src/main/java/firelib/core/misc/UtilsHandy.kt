@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
 //    MdStorageImpl().updateMarketData(InstrId(code = "ALLFUTSi", source = SourceName.MT5.name), interval = Interval.Min15);
     //UtilsHandy.updateTicker("sngsp")
 
-    UtilsHandy.updateRussianDivStocks(interval = Interval.Min1)
+    UtilsHandy.updateRussianDivStocks(interval = Interval.Min10)
 
     return
 
