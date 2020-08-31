@@ -40,10 +40,7 @@ class SiStratReal(context: ModelContext, val props: Map<String, String>) : Model
 
     companion object{
         fun modelConfig(): ModelConfig {
-            return ModelConfig(SiStratReal::class, ModelBacktestConfig().apply {
-                instruments = listOf("SPFB_Si")
-                startDate(LocalDate.now().minusDays(5000))
-            }).apply {
+            return ModelConfig(SiStratReal::class).apply {
                 param("hold_hours", 30)
             }
         }
@@ -53,5 +50,8 @@ class SiStratReal(context: ModelContext, val props: Map<String, String>) : Model
 
 
 fun main() {
-    SiStratReal.modelConfig().runStrat()
+    SiStratReal.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = listOf("SPFB_Si")
+        startDate(LocalDate.now().minusDays(5000))
+    })
 }

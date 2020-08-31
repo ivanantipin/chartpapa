@@ -21,7 +21,6 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         val diff = props["diff"]!!.toInt()
 
         val series = enableSeries(Interval.Min10, interpolated = false, historyLen = window + 200)
-        val minSeries = enableSeries(Interval.Min1, interpolated = false, historyLen = window + 200)
         val daySeries = enableSeries(Interval.Day, interpolated = true, historyLen = 5)
 
         val profiles = instruments().map { MarketProfile() }
@@ -29,7 +28,7 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
         val barQuantFactor = factorBarQuantLow()
 
 
-        instruments().forEachIndexed({ idx, ticker ->
+        instruments().forEachIndexed({ idx, _ ->
             val ts = series[idx]
             val minSer = series[idx]
             val dayts = daySeries[idx]
@@ -79,12 +78,7 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
 
     companion object {
         fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
-            return ModelConfig(ProfileModel::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                interval = Interval.Min1
-                histSourceName = SourceName.FINAM
-                startDate(LocalDate.now().minusDays(600))
-            }).apply {
+            return ModelConfig(ProfileModel::class).apply {
                 setTradeSize(tradeSize)
                 param("window", 13000)
                 param("diff", 18)
@@ -97,5 +91,5 @@ class ProfileModel(context: ModelContext, val props: Map<String, String>) : Mode
 }
 
 fun main() {
-    ProfileModel.modelConfig().runStrat()
+    ProfileModel.modelConfig().runStrat(runCfgWODivs())
 }

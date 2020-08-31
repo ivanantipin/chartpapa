@@ -51,18 +51,17 @@ class SpreadModel(context: ModelContext, val props: Map<String, String>) : Model
 }
 
 fun spreadModel(): ModelConfig {
-    val runConfig = ModelBacktestConfig().apply {
-        startDate(LocalDate.now().minusDays(1500))
-        interval = Interval.Min240
-        histSourceName = SourceName.MT5
-        instruments = listOf("BNO", "USO")
-
-    }
-    return ModelConfig(SpreadModel::class, runConfig).apply{
+    return ModelConfig(SpreadModel::class).apply{
         opt("period", 10,500, 5)
     }
 }
 
 fun main() {
-    spreadModel().runStrat()
+    spreadModel().runStrat(ModelBacktestConfig().apply {
+        startDate(LocalDate.now().minusDays(1500))
+        interval = Interval.Min240
+        histSourceName = SourceName.MT5
+        instruments = listOf("BNO", "USO")
+
+    })
 }

@@ -33,7 +33,7 @@ class DummyModel(context: ModelContext, val fac: Map<String, String>) : Model(co
     override fun onBacktestEnd() {
         super.onBacktestEnd()
         val writer = GeGeWriter<GapStat>(
-            context.config.runConfig.getReportDbFile(),
+            context.runConfig.getReportDbFile(),
             GapStat::class,
             name = "gaps"
         )
@@ -42,19 +42,16 @@ class DummyModel(context: ModelContext, val fac: Map<String, String>) : Model(co
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(DummyModel::class, ModelBacktestConfig().apply {
-                interval = Interval.Sec10
-                instruments = listOf("RIM0")
-                disableBacktest = true
-                startDate(LocalDate.now().minusDays(5000))
-            })
+            return ModelConfig(DummyModel::class)
         }
-
     }
-
-
 }
 
 fun main() {
-    MarketOpen.modelConfig().runStrat()
+    MarketOpen.modelConfig().runStrat(ModelBacktestConfig().apply {
+        interval = Interval.Sec10
+        instruments = listOf("RIM0")
+        disableBacktest = true
+        startDate(LocalDate.now().minusDays(5000))
+    })
 }

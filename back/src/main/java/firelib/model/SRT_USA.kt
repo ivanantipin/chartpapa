@@ -52,16 +52,16 @@ class SRT_USA(context: ModelContext, fac: Map<String, String>) : Model(context, 
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(SRT_USA::class, ModelBacktestConfig().apply {
-                instruments = sample(MdDaoContainer().getDao(SourceName.IQFEED, Interval.Min30).listAvailableInstruments(), 100)
-                interval= Interval.Min30
-                startDate(LocalDate.now().minusDays(600))
-                histSourceName = SourceName.IQFEED
-            })
+            return ModelConfig(SRT_USA::class)
         }
     }
 }
 
 fun main() {
-    SRT_USA.modelConfig().runStrat()
+    SRT_USA.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = sample(MdDaoContainer().getDao(SourceName.IQFEED, Interval.Min30).listAvailableInstruments(), 100)
+        interval= Interval.Min30
+        startDate(LocalDate.now().minusDays(600))
+        histSourceName = SourceName.IQFEED
+    })
 }

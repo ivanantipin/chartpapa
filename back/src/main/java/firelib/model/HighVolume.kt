@@ -72,10 +72,7 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(HighVolume::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                startDate(LocalDate.now().minusDays(3000))
-            })
+            return ModelConfig(HighVolume::class)
         }
 
     }
@@ -83,5 +80,8 @@ class HighVolume(context: ModelContext, val props: Map<String, String>) : Model(
 }
 
 fun main() {
-    HighVolume.modelConfig().runStrat()
+    HighVolume.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(3000))
+    })
 }

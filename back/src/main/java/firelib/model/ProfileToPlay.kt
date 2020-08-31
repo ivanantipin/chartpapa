@@ -77,12 +77,7 @@ class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Mod
     companion object {
         //MdStorageImpl().updateMarketData(InstrId(code = "ALLFUTSi", source = SourceName.MT5.name), interval = Interval.Min15);
         fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
-            return ModelConfig(ProfileToPlay::class, ModelBacktestConfig().apply {
-                instruments = listOf("ALLFUTRTSI")
-                interval= Interval.Min15
-                startDate(LocalDate.now().minusDays(5000))
-                histSourceName = SourceName.MT5
-            }).apply {
+            return ModelConfig(ProfileToPlay::class).apply {
                 setTradeSize(tradeSize)
                 param("window", 1300)
                 param("diff", 4)
@@ -95,5 +90,10 @@ class ProfileToPlay(context: ModelContext, val props: Map<String, String>) : Mod
 }
 
 fun main() {
-    ProfileToPlay.modelConfig().runStrat()
+    ProfileToPlay.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = listOf("ALLFUTRTSI")
+        interval= Interval.Min15
+        startDate(LocalDate.now().minusDays(5000))
+        histSourceName = SourceName.MT5
+    })
 }

@@ -32,10 +32,10 @@ object Backtester {
         }
     }
 
-    fun runOptimized(mc: ModelConfig) {
+    fun runOptimized(mc: ModelConfig, runConfig: ModelBacktestConfig) {
         log.info("Starting")
 
-        val cfg = mc.runConfig
+        val cfg = runConfig
 
         val startTime = System.currentTimeMillis()
 
@@ -114,16 +114,12 @@ object Backtester {
         return executor
     }
 
-    fun runSimple(mc: ModelConfig, runConfig : ModelBacktestConfig = mc.runConfig) {
+    fun runSimple(mc: ModelConfig, runConfig : ModelBacktestConfig) {
         runSimple(listOf(mc), runConfig)
     }
 
     //fixme - provide backtest config separatele
-    fun runSimple(mc: List<ModelConfig>, runConfig : ModelBacktestConfig = mc[0].runConfig) {
-
-        mc.forEach {
-            it.runConfig = runConfig
-        }
+    fun runSimple(mc: List<ModelConfig>, runConfig : ModelBacktestConfig) {
 
         clearReportDir(runConfig.reportTargetPath)
 

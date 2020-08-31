@@ -7,9 +7,7 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
-import firelib.core.misc.SqlUtils
 import firelib.core.misc.atUtc
-import firelib.core.report.dao.GeGeWriter
 import firelib.emulator.HistoricalSourceEmulator
 import firelib.finam.FinamDownloader
 import firelib.finam.MoexSource
@@ -24,20 +22,6 @@ import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
-
-
-class MdDaoContainer(val folder: String = GlobalConstants.mdFolder.toString()) {
-    val container = SingletonsContainer()
-
-    fun getDao(source: SourceName, interval: Interval): MdDao {
-        return container.get("$source/${interval}") {
-            val folder = this.folder + "/" + source + "/"
-            FileUtils.forceMkdir(File(folder))
-            MdDao(SqlUtils.getDsForFile("$folder$interval.db"))
-        }
-    }
-
-}
 
 
 class SourceFactory{
@@ -55,26 +39,12 @@ class SourceFactory{
     operator fun get(source: SourceName) : HistoricalSource{
         return concurrentHashMap.computeIfAbsent(source, {sources[source]!!()})
     }
-
 }
 
 
 class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toString()) : MdStorage {
 
     val log = LoggerFactory.getLogger(javaClass)
-
-    val requestedDao = GeGeWriter<InstrId>(
-        Paths.get("$folder/meta.db"),
-        InstrId::class,
-        listOf("code"),
-        "requested"
-    )
-    val symbolsDao = GeGeWriter<InstrId>(
-        Paths.get("$folder/meta.db"),
-        InstrId::class,
-        listOf("code"),
-        "symbols"
-    )
 
     val md = MdDaoContainer()
 
@@ -85,7 +55,6 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     }
 
     override fun read(instrId: InstrId, interval: Interval, targetInterval: Interval): List<Ohlc> {
-        requestedDao.write(listOf(instrId))
         val dao = md.getDao(instrId.sourceEnum(), interval)
         val startTime = LocalDateTime.now().minusSeconds(targetInterval.durationMs * 600 / 1000)
         var ret = dao.queryAll(instrId.code, startTime)
@@ -99,10 +68,6 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         } finally {
             log.info("transformed in " + (System.currentTimeMillis() - start) / 1000.0 + " s. " + ret.size + " min bars")
         }
-    }
-
-    override fun meta(): List<InstrId> {
-        return symbolsDao.read()
     }
 
     fun updateMarketData(instrId: InstrId, interval: Interval): Instant {

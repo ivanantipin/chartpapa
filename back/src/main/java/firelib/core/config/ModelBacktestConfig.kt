@@ -12,6 +12,7 @@ import firelib.core.store.ReaderFactory
 import firelib.core.store.reader.ReaderSimpleDivAdjusted
 import firelib.core.store.reader.SimplifiedReader
 import firelib.model.Div
+import firelib.model.prod.runCfgWODivs
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Instant
@@ -120,11 +121,11 @@ class ModelBacktestConfig() : Cloneable {
 }
 
 
-fun ModelConfig.runStrat() {
+fun ModelConfig.runStrat(runConfig: ModelBacktestConfig) {
     if (this.optConfig.params.isNotEmpty()) {
-        Backtester.runOptimized(this)
+        Backtester.runOptimized(this, runConfig)
     } else {
-        Backtester.runSimple(this)
+        Backtester.runSimple(this,runConfig)
     }
 }
 

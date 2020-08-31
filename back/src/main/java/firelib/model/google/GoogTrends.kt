@@ -49,12 +49,7 @@ class GoogTrends(context: ModelContext, val props: Map<String, String>) : Model(
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(GoogTrends::class, ModelBacktestConfig().apply {
-                instruments = listOf("XLY","XLP")
-                interval = Interval.Min30
-                histSourceName = SourceName.IQFEED
-                startDate(LocalDate.now().minusDays(2000))
-            })
+            return ModelConfig(GoogTrends::class)
         }
 
     }
@@ -62,5 +57,10 @@ class GoogTrends(context: ModelContext, val props: Map<String, String>) : Model(
 }
 
 fun main() {
-    GoogTrends.modelConfig().runStrat()
+    GoogTrends.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = listOf("XLY","XLP")
+        interval = Interval.Min30
+        histSourceName = SourceName.IQFEED
+        startDate(LocalDate.now().minusDays(2000))
+    })
 }

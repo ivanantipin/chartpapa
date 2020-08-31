@@ -74,10 +74,7 @@ class TrendModelToPlay(context: ModelContext, val props: Map<String, String>) : 
     }
     companion object{
         fun modelConfig(tradeSize : Int = 10_000): ModelConfig {
-            return ModelConfig(TrendModelToPlay::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                startDate(LocalDate.now().minusDays(3000))
-            }).apply {
+            return ModelConfig(TrendModelToPlay::class).apply {
                 setTradeSize(tradeSize)
                 param("period", 33)
                 param("number", 10)
@@ -88,5 +85,8 @@ class TrendModelToPlay(context: ModelContext, val props: Map<String, String>) : 
 
 
 fun main() {
-    TrendModelToPlay.modelConfig().runStrat()
+    TrendModelToPlay.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(3000))
+    })
 }

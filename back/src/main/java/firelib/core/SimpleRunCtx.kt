@@ -43,7 +43,7 @@ class SimpleRunCtx(val runConfig: ModelBacktestConfig) {
             marketDataDistributor,
             riskTradeGate,
             runConfig.gateMapper,
-            mc
+            mc, runConfig
         )
     }
 

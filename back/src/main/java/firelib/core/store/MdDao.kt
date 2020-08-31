@@ -1,8 +1,8 @@
 package firelib.core.store
 
 import firelib.core.domain.Ohlc
+import firelib.core.misc.SqlUtils
 import firelib.core.misc.toInstantDefault
-import firelib.core.report.Sqls
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.ResultSetExtractor
@@ -149,7 +149,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     val existingTables by lazy {
-        Sqls.listAllTables(ds).map { it.toLowerCase() }.toSet()
+        SqlUtils.listAllTables(ds).map { it.toLowerCase() }.toSet()
     }
 
     fun queryAll(codeIn: String, start: LocalDateTime, limit: Int = 10_000_000): List<Ohlc> {

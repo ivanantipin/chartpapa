@@ -85,13 +85,7 @@ class EdgarUs(context: ModelContext, val props: Map<String, String>) : Model(con
 
     companion object {
         fun modelConfig(tradeSize: Int = 10_000): ModelConfig {
-            return ModelConfig(EdgarUs::class, ModelBacktestConfig().apply {
-                //instruments = MdDaoContainer().getDao(SourceName.IQFEED, Interval.Min30).listAvailableInstruments()
-                instruments = getSymbolsForEdgar().keys.toList()
-                interval = Interval.Min30
-                histSourceName = SourceName.IQFEED
-                startDate(LocalDate.now().minusDays(2000))
-            }).apply {
+            return ModelConfig(EdgarUs::class).apply {
                 setTradeSize(tradeSize)
             }
         }
@@ -120,5 +114,11 @@ fun getSymbolsForEdgar(): Map<String, List<EdgarFiling>> {
 }
 
 fun main() {
-    EdgarUs.modelConfig().runStrat()
+    EdgarUs.modelConfig().runStrat(ModelBacktestConfig().apply {
+        //instruments = MdDaoContainer().getDao(SourceName.IQFEED, Interval.Min30).listAvailableInstruments()
+        instruments = getSymbolsForEdgar().keys.toList()
+        interval = Interval.Min30
+        histSourceName = SourceName.IQFEED
+        startDate(LocalDate.now().minusDays(2000))
+    })
 }

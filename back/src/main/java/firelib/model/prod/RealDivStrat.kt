@@ -59,7 +59,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
     }
     companion object{
         fun modelConfig(tradeSize : Int = 10_000) : ModelConfig{
-            return ModelConfig(RealDivModel::class, commonRunConfig()).apply {
+            return ModelConfig(RealDivModel::class).apply {
                 setTradeSize(tradeSize)
             }
         }
@@ -77,6 +77,17 @@ fun commonRunConfig() : ModelBacktestConfig{
     }
 }
 
+fun runCfgWODivs() : ModelBacktestConfig{
+
+    return ModelBacktestConfig().apply {
+        instruments = tickers
+        interval = Interval.Min1
+        histSourceName = SourceName.FINAM
+        startDate(LocalDate.now().minusDays(1500))
+    }
+}
+
+
 fun main() {
-    RealDivModel.modelConfig().runStrat()
+    RealDivModel.modelConfig().runStrat(commonRunConfig())
 }

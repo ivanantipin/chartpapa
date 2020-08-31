@@ -7,10 +7,10 @@ import firelib.core.config.ModelConfig
 import firelib.core.domain.*
 import firelib.core.misc.TelegramMsg
 import firelib.core.misc.timeSequence
-import firelib.core.report.ModelNameTicker
-import firelib.core.report.OmPosition
+import firelib.core.domain.ModelNameTicker
+import firelib.core.domain.OmPosition
 import firelib.core.report.ReportWriter
-import firelib.core.report.Sqls.readCurrentPositions
+import firelib.core.report.SqlQueries.readCurrentPositions
 import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
 import firelib.core.store.ReaderFactory

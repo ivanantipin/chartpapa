@@ -23,7 +23,7 @@ class CandleMax(context: ModelContext, properties: Map<String, String>) : Model(
             instruments().forEachIndexed { idx, _ ->
                 val moscomTime = currentTime().atMoscow()
                 if (moscomTime.hour == 18 && moscomTime.minute == 42
-                    && volRel(idx) > 0.8
+                    && volRel(idx) > 0.9
                     && moscomTime.dayOfWeek != DayOfWeek.THURSDAY
                     && rankFunk(idx) > 5
                     && !daytss[0][0].interpolated
@@ -49,20 +49,9 @@ class CandleMax(context: ModelContext, properties: Map<String, String>) : Model(
 
 
     companion object {
-        fun runConfig(): ModelBacktestConfig {
-            return ModelBacktestConfig().apply {
-                instruments = tickers.filter { it != "irao" }
-                interval = Interval.Min1
-                maxRiskMoney = 1000_000
-                histSourceName = SourceName.FINAM
-                startDate(LocalDate.now().minusDays(1700))
-            }
-        }
-
         fun modelConfig(tradeSize : Int): ModelConfig {
             return ModelConfig(
-                CandleMax::class,
-                runConfig()
+                CandleMax::class
                 //commonRunConfig()
             ).apply {
                 setTradeSize(tradeSize)
@@ -73,5 +62,5 @@ class CandleMax(context: ModelContext, properties: Map<String, String>) : Model(
 
 fun main() {
     val conf = CandleMax.modelConfig(100_000)
-    conf.runStrat()
+    conf.runStrat(runCfgWODivs())
 }

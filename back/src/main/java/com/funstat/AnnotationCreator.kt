@@ -99,7 +99,7 @@ labelOptions: {
                         }
                     }
                     SignalType.Flip -> {
-                        val clevel = if (s.reference.up) oh.high else oh.low
+                        if (s.reference.up) oh.high else oh.low
                         labels.add(baseLabel
                                 .withAttribute("text", "" + (ci - s.reference.start + 1))
                                 .withAttribute("backgroundColor", "white")

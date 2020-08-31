@@ -340,7 +340,7 @@ class Exporter(object):
     def lookup(self, *args, **kwargs):
         return self._meta.lookup(*args, **kwargs)
 
-    def getMeta(self):
+    def getMeta(self) -> pd.DataFrame:
         return self._meta.getMeta()
 
     def download(self,

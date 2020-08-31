@@ -51,15 +51,15 @@ class SiStrat(context: ModelContext, val props: Map<String, String>) : Model(con
 }
 
 fun siModel(): ModelConfig {
-    return ModelConfig(SiStrat::class, ModelBacktestConfig().apply {
-        instruments = listOf("SPFB_Si")
-        startDate(LocalDate.now().minusDays(5000))
-    }).apply {
+    return ModelConfig(SiStrat::class).apply {
         param("hold_hours", 30)
     }
 
 }
 
 fun main() {
-    siModel().runStrat()
+    siModel().runStrat(ModelBacktestConfig().apply {
+        instruments = listOf("SPFB_Si")
+        startDate(LocalDate.now().minusDays(5000))
+    })
 }

@@ -1,7 +1,9 @@
 package firelib.core.misc
 
+import org.springframework.jdbc.core.JdbcTemplate
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
+import javax.sql.DataSource
 
 object SqlUtils{
     fun makeSqlStatementFromHeader(table: String, header: Map<String, String>): String {
@@ -27,6 +29,16 @@ object SqlUtils{
         val ds = SQLiteDataSource(sqLiteConfig)
         ds.url = "jdbc:sqlite:$file"
         return ds
+    }
+    fun checkTableExists(ds: DataSource, tableName: String): Boolean {
+        return JdbcTemplate(ds).queryForObject(
+            "SELECT count(*) FROM sqlite_master WHERE type='table' AND lower(name)='${tableName.toLowerCase()}'",
+            Int::class.java
+        ) > 0
+    }
+
+    fun listAllTables(ds: DataSource): List<String> {
+        return JdbcTemplate(ds).queryForList("SELECT name FROM sqlite_master WHERE type='table' ", String::class.java)
     }
 
 

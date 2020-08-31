@@ -131,7 +131,7 @@ fun Model.closePositionByTimeout(
 fun Model.closePosByCondition(
     condition: (idx: Int) -> Boolean
 ) {
-    val interval = this.context.config.runConfig.interval
+    val interval = this.context.runConfig.interval
     context.mdDistributor.getOrCreateTs(0, interval, 1).preRollSubscribe {
         orderManagers().forEachIndexed { index, orderManager ->
             if (orderManager.position() != 0 && condition(index)) {
@@ -147,11 +147,11 @@ fun Model.prerollSubscribe(interval: Interval, listener: (Instant, MarketDataDis
 }
 
 fun Model.runConfig(): ModelBacktestConfig {
-    return context.config.runConfig
+    return context.runConfig
 }
 
 fun Model.instruments(): List<String> {
-    return context.config.runConfig.instruments
+    return context.runConfig.instruments
 }
 
 fun Model.positionDuration(idx: Int, unit: TimeUnit = TimeUnit.HOURS): Long {

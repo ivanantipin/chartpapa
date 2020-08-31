@@ -1,20 +1,12 @@
 package firelib.core.report
 
+import firelib.core.domain.ModelNameTicker
+import firelib.core.domain.OmPosition
 import firelib.core.misc.SqlUtils
 import org.springframework.jdbc.core.JdbcTemplate
 import java.nio.file.Path
-import java.nio.file.Paths
-import javax.sql.DataSource
 
-
-data class OmPosition(
-    val position : Int,
-    val posTime : Long
-)
-
-data class ModelNameTicker(val modelName : String, val ticker : String)
-
-object Sqls {
+object SqlQueries {
     val curPosSql = """
 select st.ModelName, st.Ticker, st.PosAfter, st.epochTimeMs
 from trades st,
@@ -27,18 +19,21 @@ where st.epochTimeMs = le.epochTimeMs
 
     fun readCurrentPositions(path: Path): Map<ModelNameTicker, OmPosition> {
         val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
-        if(!checkTableExists(ds, "trades")){
+        if (!SqlUtils.checkTableExists(ds, "trades")) {
             println("empty trades for path ${path} no positions to be restored")
             return emptyMap()
         }
         return JdbcTemplate(ds).query(curPosSql) { rs, idx ->
-            Pair(ModelNameTicker(rs.getString("ModelName"), rs.getString("ticker")), OmPosition(rs.getInt("posafter"), rs.getLong("epochTimeMs")))
+            Pair(
+                ModelNameTicker(rs.getString("ModelName"), rs.getString("ticker")),
+                OmPosition(rs.getInt("posafter"), rs.getLong("epochTimeMs"))
+            )
         }.toMap()
     }
 
-    fun readProps(path: Path, table : String, env : String): Map<String, String> {
+    fun readProps(path: Path, table: String, env: String): Map<String, String> {
         val ds = SqlUtils.getDsForFile(path.toAbsolutePath().toString())
-        if(!checkTableExists(ds, table)){
+        if (!SqlUtils.checkTableExists(ds, table)) {
             println("empty table for path ${path} ")
             return emptyMap()
         }
@@ -47,16 +42,5 @@ where st.epochTimeMs = le.epochTimeMs
         }.toMap()
     }
 
-    fun checkTableExists(ds : DataSource, tableName : String) : Boolean{
-        return JdbcTemplate(ds).queryForObject("SELECT count(*) FROM sqlite_master WHERE type='table' AND lower(name)='${tableName.toLowerCase()}'", Int::class.java) > 0
-    }
 
-    fun listAllTables(ds : DataSource) : List<String>{
-        return JdbcTemplate(ds).queryForList("SELECT name FROM sqlite_master WHERE type='table' ", String::class.java)
-    }
-}
-
-
-fun main() {
-    println(Sqls.readCurrentPositions(Paths.get("/home/ivan/tmp/VolatilityBreak.db")))
 }

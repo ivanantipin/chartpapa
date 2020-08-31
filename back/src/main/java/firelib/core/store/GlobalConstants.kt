@@ -1,6 +1,6 @@
 package firelib.core.store
 
-import firelib.core.report.Sqls
+import firelib.core.report.SqlQueries
 import org.apache.commons.io.FileUtils
 import java.nio.file.Paths
 
@@ -15,7 +15,7 @@ object GlobalConstants {
 
     val metaDb = mdFolder.resolve("${env}.db")
 
-    val props = Sqls.readProps(metaDb, "envs", env)
+    val props = SqlQueries.readProps(metaDb, "envs", env)
 
     fun getProp(name: String): String {
         require(props.containsKey(name), { "prop ${name} is absent" })

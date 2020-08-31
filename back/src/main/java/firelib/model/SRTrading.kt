@@ -79,16 +79,16 @@ class SRTrading(context: ModelContext, fac: Map<String, String>) : Model(context
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(SRTrading::class, ModelBacktestConfig().apply {
-                instruments = listOf("USDRUB.c")
-                interval= Interval.Min15
-                startDate(LocalDate.now().minusDays(5000))
-                histSourceName = SourceName.MT5
-            })
+            return ModelConfig(SRTrading::class)
         }
     }
 }
 
 fun main() {
-    SRTrading.modelConfig().runStrat()
+    SRTrading.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = listOf("USDRUB.c")
+        interval= Interval.Min15
+        startDate(LocalDate.now().minusDays(5000))
+        histSourceName = SourceName.MT5
+    })
 }

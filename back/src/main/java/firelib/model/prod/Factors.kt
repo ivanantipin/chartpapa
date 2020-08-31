@@ -58,7 +58,7 @@ fun Model.factorRank(daysBack: Int): (idx: Int) -> Int {
     val nonInterp = enableSeries(Interval.Day, daysBack + 1, false)
 
     val ret = { tickerIdx: Int ->
-        val idxToRet = sers.mapIndexed { idx, ts ->
+        val idxToRet = sers.mapIndexed { idx, _ ->
             var ret = (sers[idx][0].close - nonInterp[idx][daysBack].close) / nonInterp[idx][daysBack].close
             Pair(idx, ret)
         }

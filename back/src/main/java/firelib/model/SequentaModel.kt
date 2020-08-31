@@ -186,20 +186,20 @@ class SequentaModel(context: ModelContext, properties: Map<String, String>) : Mo
 
 fun seqModel(): ModelConfig {
 
-    return ModelConfig(SequentaModel::class, ModelBacktestConfig().apply {
-        instruments = GlobalConstants.mdFolder.resolve("/ddisk/globaldatabase/1MIN/STK").toFile().list().toList()
-            .map { it.replace("_1.csv", "") }.filter { it != "ON" && it != "ALL" }.subList(0, 200)
-        interval = Interval.Min30
-        startDate(LocalDate.now().minusDays(1000))
-        histSourceName = SourceName.IQFEED
-    }).apply {
+    return ModelConfig(SequentaModel::class).apply {
         param("hold_hours", 30)
     }
 }
 
 fun main() {
     val start = System.currentTimeMillis()
-    seqModel().runStrat()
+    seqModel().runStrat(ModelBacktestConfig().apply {
+        instruments = GlobalConstants.mdFolder.resolve("/ddisk/globaldatabase/1MIN/STK").toFile().list().toList()
+            .map { it.replace("_1.csv", "") }.filter { it != "ON" && it != "ALL" }.subList(0, 200)
+        interval = Interval.Min30
+        startDate(LocalDate.now().minusDays(1000))
+        histSourceName = SourceName.IQFEED
+    })
     println((System.currentTimeMillis() - start)/1000.0)
     //transform()
 

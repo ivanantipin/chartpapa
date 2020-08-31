@@ -8,8 +8,7 @@ import kotlin.reflect.KClass
 
 class ModelConfig(
     @get:JsonIgnore
-    val modelKClass: KClass<out Model>,
-    var runConfig : ModelBacktestConfig
+    val modelKClass: KClass<out Model>
 ) : Cloneable{
 
 

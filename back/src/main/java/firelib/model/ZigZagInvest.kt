@@ -52,21 +52,21 @@ class ZigZagInvest(context: ModelContext, val props: Map<String, String>) : Mode
     }
 
     override fun onBacktestEnd() {
-        val writer = GeGeWriter<ZiggiStat>(context.config.runConfig.getReportDbFile(), ZiggiStat::class)
+        val writer = GeGeWriter<ZiggiStat>(context.runConfig.getReportDbFile(), ZiggiStat::class)
         writer.write(lst)
     }
 
     companion object {
         //MdStorageImpl().updateMarketData(InstrId(code = "ALLFUTSi", source = SourceName.MT5.name), interval = Interval.Min15);
         fun modelConfig(tradeSize : Int = 100_000): ModelConfig {
-            return ModelConfig(ZigZagInvest::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                startDate(LocalDate.now().minusDays(3000))
-            })
+            return ModelConfig(ZigZagInvest::class)
         }
     }
 }
 
 fun main() {
-    ZigZagInvest.modelConfig().runStrat()
+    ZigZagInvest.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(3000))
+    })
 }

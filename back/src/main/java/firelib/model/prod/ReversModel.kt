@@ -77,10 +77,7 @@ class ReversModel(context: ModelContext, val props: Map<String, String>) : Model
 
     companion object {
         fun modelConfig(tradeSize: Int = 10_000): ModelConfig {
-            return ModelConfig(ReversModel::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                startDate(LocalDate.now().minusDays(5000))
-            }).apply {
+            return ModelConfig(ReversModel::class).apply {
                 setTradeSize(tradeSize)
             }
         }
@@ -89,5 +86,8 @@ class ReversModel(context: ModelContext, val props: Map<String, String>) : Model
 
 
 fun main() {
-    ReversModel.modelConfig().runStrat()
+    ReversModel.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(5000))
+    })
 }

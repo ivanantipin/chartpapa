@@ -63,10 +63,7 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(HighVolumeTrade::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                startDate(LocalDate.now().minusDays(3000))
-            }).apply {
+            return ModelConfig(HighVolumeTrade::class).apply {
                 opt("length", 1, 10, 1)
             }
         }
@@ -77,5 +74,8 @@ class HighVolumeTrade(context: ModelContext, val props: Map<String, String>) : M
 }
 
 fun main() {
-    HighVolumeTrade.modelConfig().runStrat()
+    HighVolumeTrade.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(3000))
+    })
 }

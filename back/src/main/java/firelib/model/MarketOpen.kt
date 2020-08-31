@@ -68,7 +68,7 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
     override fun onBacktestEnd() {
         super.onBacktestEnd()
         val writer = GeGeWriter<GapStat>(
-            context.config.runConfig.getReportDbFile(),
+            context.runConfig.getReportDbFile(),
             GapStat::class,
             name = "gaps"
         )
@@ -77,10 +77,7 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(MarketOpen::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                startDate(LocalDate.now().minusDays(5000))
-            })
+            return ModelConfig(MarketOpen::class)
         }
 
     }
@@ -89,5 +86,8 @@ class MarketOpen(context: ModelContext, val fac: Map<String, String>) : Model(co
 }
 
 fun main() {
-    MarketOpen.modelConfig().runStrat()
+    MarketOpen.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(5000))
+    })
 }

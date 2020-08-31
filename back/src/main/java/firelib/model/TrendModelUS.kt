@@ -40,13 +40,7 @@ class TrendModelUS(context: ModelContext, val props: Map<String, String>) : Mode
 
     companion object{
         fun modelConfig(tradeSize : Int = 10_000): ModelConfig {
-            return ModelConfig(TrendModelUS::class, ModelBacktestConfig().apply {
-                //instruments = MdDaoContainer().getDao(SourceName.IQFEED, Interval.Min30).listAvailableInstruments()
-                instruments =  sample(MdDaoContainer().getDao(SourceName.MT5, Interval.Min30).listAvailableInstruments(), 50)
-                interval= Interval.Min30
-                histSourceName = SourceName.MT5
-                startDate(LocalDate.now().minusDays(600))
-            }).apply {
+            return ModelConfig(TrendModelUS::class).apply {
                 setTradeSize(tradeSize)
             }
         }
@@ -61,5 +55,11 @@ fun sample(list : List<String>, n : Int) : List<String>{
 
 
 fun main() {
-    TrendModelUS.modelConfig().runStrat()
+    TrendModelUS.modelConfig().runStrat(ModelBacktestConfig().apply {
+        //instruments = MdDaoContainer().getDao(SourceName.IQFEED, Interval.Min30).listAvailableInstruments()
+        instruments =  sample(MdDaoContainer().getDao(SourceName.MT5, Interval.Min30).listAvailableInstruments(), 50)
+        interval= Interval.Min30
+        histSourceName = SourceName.MT5
+        startDate(LocalDate.now().minusDays(600))
+    })
 }

@@ -64,10 +64,7 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(GapTrading::class, ModelBacktestConfig().apply {
-                instruments = tickers
-                startDate(LocalDate.now().minusDays(5000))
-            }).apply {
+            return ModelConfig(GapTrading::class).apply {
                 opt("holdtime", 1, 3, 1)
             }
         }
@@ -78,5 +75,8 @@ class GapTrading(context: ModelContext, fac: Map<String, String>) : Model(contex
 }
 
 fun main() {
-    GapTrading.modelConfig().runStrat()
+    GapTrading.modelConfig().runStrat(ModelBacktestConfig().apply {
+        instruments = tickers
+        startDate(LocalDate.now().minusDays(5000))
+    })
 }

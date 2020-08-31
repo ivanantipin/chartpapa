@@ -110,12 +110,7 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(RegressionModel::class, ModelBacktestConfig().apply {
-                interval = Interval.Min240
-                histSourceName = SourceName.MT5
-                instruments = listOf("ALLFUTRTSI","ALLFUTBRENT","FUTSP500CONT")
-
-            }).apply {
+            return ModelConfig(RegressionModel::class).apply {
                 param("period", 10)
             }
         }
@@ -125,5 +120,10 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
 
 
 fun main() {
-    RegressionModel.modelConfig().runStrat()
+    RegressionModel.modelConfig().runStrat(ModelBacktestConfig().apply {
+        interval = Interval.Min240
+        histSourceName = SourceName.MT5
+        instruments = listOf("ALLFUTRTSI","ALLFUTBRENT","FUTSP500CONT")
+
+    })
 }

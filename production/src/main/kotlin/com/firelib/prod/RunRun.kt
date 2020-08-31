@@ -7,10 +7,7 @@ import firelib.core.SimpleRunCtx
 import firelib.core.domain.Interval
 import firelib.core.store.GlobalConstants
 import firelib.core.store.trqMapperWriter
-import firelib.model.prod.CandleMax
-import firelib.model.prod.RealDivModel
-import firelib.model.prod.TrendModel
-import firelib.model.prod.VolatilityBreak
+import firelib.model.prod.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import kotlin.reflect.KClass
@@ -44,7 +41,7 @@ private fun runModels(names: List<String>) {
 
     val modelConfigs = names.map { prodModels[it]!!() }
 
-    val runConfig = modelConfigs[0].runConfig
+    val runConfig = commonRunConfig()
 
     runConfig.maxRiskMoney = GlobalConstants.getProp("max.risk.money").toLong()
     runConfig.maxRiskMoneyPerSec = GlobalConstants.getProp("max.risk.per.sec").toLong()

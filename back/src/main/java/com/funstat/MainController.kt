@@ -33,7 +33,7 @@ class MainController {
 
     fun loadStaticPages(): List<String> {
         return noteBooksDir.toFile()
-                .list { f, name -> name.endsWith("html") }
+                .list { _, name -> name.endsWith("html") }
                 .map { it.replace(".html", "") }
     }
 
@@ -52,7 +52,7 @@ class MainController {
     }
 
     fun instruments(): Collection<InstrId> {
-        return storage.meta().filter { s -> s.sourceEnum() != VantageDownloader.SOURCE }
+        return emptyList()
     }
 
     fun timeframes(): List<String> {

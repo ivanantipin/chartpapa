@@ -8,6 +8,7 @@ import firelib.core.store.reader.SimplifiedReader
 import firelib.emulator.GateEmulator
 import firelib.emulator.RtReaderEmulator
 import firelib.model.DummyModel
+import firelib.model.prod.commonRunConfig
 import java.util.concurrent.Executors
 
 
@@ -32,7 +33,7 @@ fun main() {
     val gate = GateEmulator(executor)
 
     try {
-        val context = SimpleRunCtx(DummyModel.modelConfig().runConfig)
+        val context = SimpleRunCtx(commonRunConfig())
 
         ProdRunner.runStrat(
             executor,
