@@ -12,7 +12,7 @@ import java.time.LocalDate
 class RealDivModel(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
 
     init {
-        var divMap = runConfig().tickerToDiv!!
+        var divMap = runConfig().tickerToDiv ?: emptyMap()
 
         val tss = enableSeries(Interval.Min10, interpolated = false)
 
