@@ -4,11 +4,17 @@ package com.firelib.prod
 import com.firelib.transaq.*
 import firelib.core.ProdRunner
 import firelib.core.SimpleRunCtx
+import firelib.core.SourceName
+import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.Interval
 import firelib.core.store.GlobalConstants
 import firelib.core.store.trqMapperWriter
-import firelib.model.prod.*
+import firelib.model.prod.CandleMax
+import firelib.model.prod.RealDivModel
+import firelib.model.prod.TrendModel
+import firelib.model.tickers
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.concurrent.Executors
 import kotlin.reflect.KClass
 
@@ -36,12 +42,22 @@ fun main(args: Array<String>) {
     runModels(models)
 }
 
+fun commonRunWODivsConfig() : ModelBacktestConfig {
+
+    return ModelBacktestConfig().apply {
+        instruments = tickers
+        interval = Interval.Min1
+        histSourceName = SourceName.FINAM
+        startDate(LocalDate.now().minusDays(300))
+    }
+}
+
 
 private fun runModels(names: List<String>) {
 
     val modelConfigs = names.map { prodModels[it]!!() }
 
-    val runConfig = commonRunConfig()
+    val runConfig = commonRunWODivsConfig()
 
     runConfig.maxRiskMoney = GlobalConstants.getProp("max.risk.money").toLong()
     runConfig.maxRiskMoneyPerSec = GlobalConstants.getProp("max.risk.per.sec").toLong()
