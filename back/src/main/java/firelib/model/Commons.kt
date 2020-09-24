@@ -1,6 +1,9 @@
 package firelib.model
 
-val tickers = listOf(
+import firelib.core.report.dao.GeGeWriter
+import firelib.core.store.GlobalConstants
+
+val tickersToWrite = listOf(
     "sber",
     "lkoh",
     "gazp",
@@ -43,3 +46,22 @@ val tickers = listOf(
     "lnta",
     "qiwi"
 )
+
+data class TickerConfig(val ticker : String)
+
+val tickersReader = GeGeWriter<TickerConfig>(GlobalConstants.metaDb, TickerConfig::class, listOf("ticker"), "ticker_config")
+
+val tickers = tickersReader.read().map { it.ticker }
+
+fun main() {
+    //writer.write(tickers.map{TickerConfig(it)})
+    println(tickersReader.read())
+}
+
+
+
+
+
+
+
+

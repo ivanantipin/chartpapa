@@ -4,3 +4,5 @@ include 'kotlinback'
 include 'stockvizclient'
 include 'production'
 includeBuild("../transaqgrpc/client/java")
+include 'binance'
+

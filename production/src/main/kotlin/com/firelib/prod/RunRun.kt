@@ -55,14 +55,16 @@ fun commonRunWODivsConfig() : ModelBacktestConfig {
 
 private fun runModels(names: List<String>) {
 
+    GlobalConstants.ensureDirsExist()
+
     val modelConfigs = names.map { prodModels[it]!!() }
 
     val runConfig = commonRunWODivsConfig()
 
+    println("tickers to run : ${runConfig.instruments.joinToString("\n")}")
+
     runConfig.maxRiskMoney = GlobalConstants.getProp("max.risk.money").toLong()
     runConfig.maxRiskMoneyPerSec = GlobalConstants.getProp("max.risk.per.sec").toLong()
-
-    GlobalConstants.ensureDirsExist()
 
     val executor = Executors.newSingleThreadExecutor { Thread(it, "mainExecutor") }
 
