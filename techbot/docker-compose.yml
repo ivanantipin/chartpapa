@@ -1,0 +1,14 @@
+version: '3'
+services:
+  hiserver:
+    image: "ivanantipin/hiexport:1.0"
+    restart: on-failure
+    network_mode: host
+  bot:
+    image: "ivanantipin/techbot:20200924-tickers-in-db"
+    restart: on-failure
+    network_mode: host
+    volumes:
+      - /ddisk/globaldatabase:/ddisk/globaldatabase
+    depends_on:
+      - hiserver

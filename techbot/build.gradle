@@ -1,0 +1,41 @@
+buildscript {
+    ext.kotlin_version = '1.4.10'
+    repositories { jcenter() }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+    }
+}
+
+plugins {
+    id 'application'
+}
+
+
+application {
+    mainClassName = 'com.firelib.techbot.MainKt'
+    applicationDefaultJvmArgs = ['-Xms128m', '-Xmx1024m']
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+    maven { url "https://kotlin.bintray.com/kotlinx" }
+}
+
+apply plugin: 'kotlinx-serialization'
+
+
+dependencies {
+    implementation('info.picocli:picocli:4.5.2')
+    implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:5.0.0'
+    implementation("io.ktor:ktor-client-cio:1.4.1")
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0"
+    compile project(':back')
+
+    implementation "org.jetbrains.exposed:exposed-core:$exposed_version"
+    implementation "org.jetbrains.exposed:exposed-dao:$exposed_version"
+    implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
+}
+
+// https://mvnrepository.com/artifact/io.github.kotlin-telegram-bot.kotlin-telegram-bot/telegram
+
