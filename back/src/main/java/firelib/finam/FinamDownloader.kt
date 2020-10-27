@@ -26,9 +26,6 @@ import java.util.*
 
 class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSource {
 
-
-
-
     private val client = DefaultAsyncHttpClient(
             DefaultAsyncHttpClientConfig.Builder()
                     .setFollowRedirect(true)
@@ -129,16 +126,16 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
                 "sep2" to "1",
                 // "at" to "1", header
                 "p" to "${Period.forInterval(interval).id}",
-                "em" to "${instrId.id}",
-                "market" to "${instrId.market}",
+                "em" to instrId.id,
+                "market" to instrId.market,
                 "df" to "${start.dayOfMonth}",
                 "mf" to "${(start.monthValue - 1)}",
                 "yf" to "${start.year}",
                 "dt" to "${finish.dayOfMonth}",
                 "mt" to "${(finish.monthValue - 1)}",
                 "yt" to "${finish.year}",
-                "code" to "${instrId.code}",
-                "cn" to "${instrId.code}",
+                "code" to instrId.code,
+                "cn" to instrId.code,
                 "to" to "${finish.year}.${finish.monthValue}.${finish.dayOfMonth}",
                 "from" to "${start.year}.${start.monthValue}.${start.dayOfMonth}"
         )
@@ -174,6 +171,7 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         private val log = LoggerFactory.getLogger(FinamDownloader::class.java)
         val SOURCE = SourceName.FINAM
         val SHARES_MARKET = "1"
+        val FX = "5"
         val FX_MARKET = "45"
     }
 

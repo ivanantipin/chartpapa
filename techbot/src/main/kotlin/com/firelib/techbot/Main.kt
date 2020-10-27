@@ -3,6 +3,7 @@ package com.firelib.techbot
 import com.firelib.sub.BreachEvents
 import com.firelib.sub.Subscriptions
 import com.firelib.sub.Users
+import com.firelib.techbot.UpdateSensitivities.updateSensitivties
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
@@ -25,9 +26,11 @@ import java.nio.file.Paths
 import java.time.Instant
 
 
+const val debug_token = "1379427551:AAH-U5kTFhHHZBAJkPl4c2QuUNF8zsl17X0"
+
 fun makeBot(taBot: TABot): Bot {
     val bot = bot {
-        token = "1379427551:AAH-U5kTFhHHZBAJkPl4c2QuUNF8zsl17X0"
+        token = System.getenv("TELEGRAM_TOKEN") ?:  debug_token
         dispatch {
             text { bot, update ->
                 val text = update.message?.text ?: "Hello, World!"
@@ -61,21 +64,16 @@ fun main(args: Array<String>) {
 
     initDatabase()
 
+    transaction {
+        if(SensitivityConfig.selectAll().count() == 0L){
+            println("updating senses")
+            updateSensitivties()
+        }
+    }
 
     val taBot = TABot()
 
-
     val bot = makeBot(taBot)
-
-//    GlobalScope.launch {
-//        timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
-//            try {
-//                UtilsHandy.updateRussianDivStocks(interval = Interval.Min10)
-//            }catch (e : Exception){
-//                e.printStackTrace()
-//            }
-//        }
-//    }
 
     bot.startPolling()
 }

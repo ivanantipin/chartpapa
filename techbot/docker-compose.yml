@@ -5,9 +5,11 @@ services:
     restart: on-failure
     network_mode: host
   bot:
-    image: "ivanantipin/techbot:20200924-tickers-in-db"
+    image: "ivanantipin/techbot:20201026-techbot1.0"
     restart: on-failure
     network_mode: host
+    environment:
+      - TELEGRAM_TOKEN=1072760314:AAHEzPEfFsFRiI5t6aNWNJ20jhZzpnb7dlM
     volumes:
       - /ddisk/globaldatabase:/ddisk/globaldatabase
     depends_on:

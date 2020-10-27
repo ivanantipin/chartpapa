@@ -7,8 +7,6 @@ import com.github.kotlintelegrambot.echo.com.firelib.telbot.CmdLine
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
-import firelib.model.tickers
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import picocli.CommandLine
@@ -57,7 +55,7 @@ object BotHelper {
     }
 
     fun checkTicker(ticker : String, bot : Bot, update : Update): Boolean {
-        if (!tickers.contains(ticker)) {
+        if (SymbolsDao.available().find { it.code.equals(ticker, true) } == null) {
             bot.sendMessage(
                 chatId = update.message!!.chat.id,
                 text = "invalid ticker ${ticker}",

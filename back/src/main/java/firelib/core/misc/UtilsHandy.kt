@@ -25,13 +25,13 @@ object UtilsHandy {
     }
 
 
-    fun updateTicker(ticker: String, market: String = FinamDownloader.SHARES_MARKET) {
+    fun updateTicker(ticker: String, market: String = FinamDownloader.SHARES_MARKET, interval : Interval = Interval.Min1) {
         val downloader = FinamDownloader()
         val symbols = downloader.symbols()
         val instr = symbols.find { it.code.equals(ticker, true) && it.market == market }
         if (instr != null) {
             log.info("updating instrument ${instr}")
-            MdStorageImpl().updateMarketData(instr, Interval.Min1)
+            MdStorageImpl().updateMarketData(instr, interval)
         } else {
             log.info("instrument not found ${ticker}")
         }
@@ -42,30 +42,5 @@ object UtilsHandy {
 
 
 fun main(args: Array<String>) {
-//    MdStorageImpl().updateMarketData(InstrId(code = "ALLFUTSi", source = SourceName.MT5.name), interval = Interval.Min15);
-    //UtilsHandy.updateTicker("sngsp")
-
-    UtilsHandy.updateRussianDivStocks(interval = Interval.Min10)
-
-    return
-
-
-//    val impl = MdStorageImpl()
-//    tickers.forEach {
-//        impl.updateMarketData(InstrId(code = it.toUpperCase(), board = "TQBR", source = SourceName.MOEX.name), Interval.Min5)
-//    }
-
-    val downloader = FinamDownloader()
-    val symbols = downloader.symbols()
-
-    symbols.filter {
-        it.code.contains("ogkb", ignoreCase = true) || it.name.contains("гдр", ignoreCase = true)
-    }.forEach { println(it) }
-
-
-    UtilsHandy.updateTicker("lnta")
-//    UtilsHandy.updateRussianDivStocks(interval = Interval.Min1)
-
-
-    //UtilsHandy.updateTicker("irao")
+    UtilsHandy.updateTicker("AUDNZD", FinamDownloader.FX)
 }

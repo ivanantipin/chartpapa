@@ -124,28 +124,34 @@ object ImageService{
                     )
                 )
 
-                if (line.intersectPoint != null) {
-                    val data = listOf(
+                val data2nd = if (line.intersectPoint != null) {
+                    listOf(
                         arrayOf(hours[line.x1].endTime.toEpochMilli().toDouble(), line.y1),
                         arrayOf(
                             hours[line.intersectPoint!!.first].endTime.toEpochMilli().toDouble(),
                             line.intersectPoint!!.second
                         )
                     )
-                    yield(
-                        HSeries(
-                            "line",
-                            name = "${idx}_inters",
-                            HMarker(true),
-                            data,
-                            showInLegend = true,
-                            color = color,
-                            dashStyle = "dot"
+                }else{
+                    listOf(
+                        arrayOf(hours[line.x1].endTime.toEpochMilli().toDouble(), line.y1),
+                        arrayOf(
+                            hours.last().endTime.toEpochMilli().toDouble(),
+                            line.calcValue(hours.size - 1)
                         )
                     )
                 }
-
-
+                yield(
+                    HSeries(
+                        "line",
+                        name = "${idx}_inters",
+                        HMarker(true),
+                        data2nd,
+                        showInLegend = true,
+                        color = color,
+                        dashStyle = "dot"
+                    )
+                )
             }
         }
 

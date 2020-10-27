@@ -4,7 +4,7 @@ import com.firelib.sub.BreachEvents
 import com.firelib.sub.Subscriptions
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.echo.chart.ImageService
-import firelib.model.tickers
+import firelib.telbot.SymbolsDao
 import firelib.telbot.TimeFrame
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -20,7 +20,7 @@ object UsersNotifier {
         try {
             transaction {
                 val subscribed = Subscriptions.selectAll().withDistinct(true).map { it[Subscriptions.ticker] }
-                val breaches = tickers.filter { subscribed.contains(it) }.flatMap{ticker->
+                val breaches = SymbolsDao.available().map { it.code }.filter { subscribed.contains(it) }.flatMap{ ticker->
                     //fixme timeframes
                     ImageService.findBreaches(ticker, TimeFrame.H)
                 }

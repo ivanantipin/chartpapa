@@ -51,17 +51,17 @@ data class TickerConfig(val ticker : String)
 
 val tickersReader = GeGeWriter<TickerConfig>(GlobalConstants.metaDb, TickerConfig::class, listOf("ticker"), "ticker_config")
 
-val tickers = tickersReader.read().map { it.ticker }
-
-fun main() {
-    //writer.write(tickers.map{TickerConfig(it)})
-    println(tickersReader.read())
+fun populateTickersIfEmpty() : List<String>{
+    var rr = tickersReader.read().map { it.ticker }
+    if(rr.isEmpty()){
+        println("populating tickers")
+        tickersReader.write(tickersToWrite.map{TickerConfig(it)})
+        rr = tickersReader.read().map { it.ticker }
+    }
+    return rr
 }
 
-
-
-
-
+val tickers = populateTickersIfEmpty()
 
 
 

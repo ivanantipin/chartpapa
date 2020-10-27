@@ -5,7 +5,6 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.echo.com.firelib.telbot.*
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
-import firelib.model.tickers
 import firelib.telbot.BotHelper
 import firelib.telbot.BotHelper.checkTicker
 import firelib.telbot.BotHelper.displaySubscriptions
