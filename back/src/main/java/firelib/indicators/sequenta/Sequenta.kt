@@ -3,6 +3,7 @@ package firelib.indicators.sequenta
 import firelib.core.domain.Ohlc
 import firelib.core.domain.range
 import firelib.core.misc.atUtc
+import java.time.Instant
 import java.time.LocalDateTime
 
 
@@ -61,12 +62,12 @@ class Sequenta {
             calcRange()
         }
 
-        fun getStart(): LocalDateTime {
-            return data[start].endTime.atUtc()
+        fun getStart(): Instant {
+            return data[start].endTime
         }
 
-        fun getEnd(): LocalDateTime {
-            return data[end].endTime.atUtc()
+        fun getEnd(): Instant {
+            return data[end].endTime
         }
 
         fun setupSize(): Int {

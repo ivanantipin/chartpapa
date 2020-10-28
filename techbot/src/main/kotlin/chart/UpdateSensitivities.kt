@@ -1,12 +1,8 @@
 package com.firelib.techbot
 
-import com.firelib.trend.LineConfig
-import com.firelib.trend.TrendsCreator
-import com.github.kotlintelegrambot.echo.chart.ImageService
-import com.github.kotlintelegrambot.echo.chart.SensitivityConfig
-import firelib.telbot.TimeFrame
+import com.firelib.techbot.BotHelper.getOhlcsForTf
+import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.Ohlc
-import firelib.telbot.SymbolsDao
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.deleteWhere
@@ -29,7 +25,7 @@ object UpdateSensitivities{
             SymbolsDao.available().forEach { instr ->
                 val ticker = instr.code
                 TimeFrame.values().forEach { timeFrame ->
-                    val targetOhlcs = ImageService.getOhlcsForTf(ticker, timeFrame.interval)
+                    val targetOhlcs = getOhlcsForTf(ticker, timeFrame.interval)
 
                     var updated = false
                     for (i in 7 downTo 2) {
