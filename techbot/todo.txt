@@ -1,6 +1,6 @@
-1. caption to comands
-2. example to commands
-3. write description of bot on /start command
+7. active trend levels
 5. levels
 6. demark notifications
-7. active trend levels
+2. example to commands
+3. write description of bot on /start command
+8. demark check correctness

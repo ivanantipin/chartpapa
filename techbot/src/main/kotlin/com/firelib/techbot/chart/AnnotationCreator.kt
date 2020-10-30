@@ -20,19 +20,6 @@ object AnnotationCreator {
 
     internal val displayedCounts = arrayOf(11, 12, 20)
 
-    /*
-labelOptions: {
-    shape: 'connector',
-            align: 'right',
-            justify: false,
-            crop: true,
-            style: {
-        fontSize: '0.8em',
-                textOutline: '1px white'
-    }
-},
-*/
-
     fun formatDbl(dbl: Double): String {
         return DecimalFormat("#.##").format(dbl)
     }
@@ -85,27 +72,34 @@ labelOptions: {
                         val ratio = s.reference.recycleRatio()
                         val recycle = if (ratio != null) "/R=${formatDbl(ratio)}" else "";
 
-                        labels.add(base.copy(text = "${s.reference.completedSignal}" + recycle))
+                        if (!s.reference.isCancelled) {
+                            labels.add(base.copy(text = "${s.reference.completedSignal}" + recycle))
 
-                        if(s.reference.up){
-                            shapes.add(makeBuySellPoint("red", point.x!!, point.y!!, Side.Sell))
-                        }else{
-                            shapes.add(makeBuySellPoint("green", point.x!!, point.y!!, Side.Buy))
+                            if (s.reference.up) {
+                                shapes.add(makeBuySellPoint("red", point.x!!, point.y!!, Side.Sell))
+                            } else {
+                                shapes.add(makeBuySellPoint("green", point.x!!, point.y!!, Side.Buy))
+                            }
+                            val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]
+
+                            var hline = HLine(
+                                ohlcs[ci - 3].endTime.toEpochMilli(),
+                                endOh.endTime.toEpochMilli(),
+                                sequenta.calcStop(s.reference.up, s.reference.start, sequenta.data.size),
+                                dashStyle = "Solid",
+                                color = if (s.reference.up) "red" else "green"
+                            )
+                            lines0.add(hline)
                         }
-                        val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]
-
-                        var hline = HLine(
-                            ohlcs[ci - 3].endTime.toEpochMilli(),
-                            endOh.endTime.toEpochMilli(),
-                            sequenta.calcStop(s.reference.up, s.reference.start, sequenta.data.size),
-                            dashStyle = "Solid",
-                            color = if (s.reference.up) "red" else "green"
-                        )
-                        lines0.add(hline)
                     }
                     SignalType.SetupReach -> {
-                        val hhline = HLine(s.reference.getStart().toEpochMilli(), s.reference.getEnd().toEpochMilli(), s.reference.tdst,
-                            dashStyle = "ShortDash", color= if (s.reference.up) "green" else "red")
+                        val hhline = HLine(
+                            s.reference.getStart().toEpochMilli(),
+                            s.reference.getEnd().toEpochMilli(),
+                            s.reference.tdst,
+                            dashStyle = "ShortDash",
+                            color = if (s.reference.up) "green" else "red"
+                        )
                         lines.add(hhline)
                         while (curLine.get() < lines.size - 5) {
                             lines[curLine.get()] = lines[curLine.get()].copy(end = oh.endTime.toEpochMilli())

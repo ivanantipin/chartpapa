@@ -1,12 +1,10 @@
 package com.firelib.techbot.chart
 
-import com.firelib.techbot.BotHelper
 import com.firelib.techbot.TdLine
 import com.firelib.techbot.chart.ChartCreator.makeOptions
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.LineType.*
-import com.firelib.techbot.initDatabase
-import firelib.core.domain.Interval
+import com.funstat.domain.HLine
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import io.ktor.client.*
@@ -15,7 +13,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.sql.transactions.transaction
 
 object ChartService{
 
@@ -26,12 +23,29 @@ object ChartService{
 
     val urlString = "http://localhost:7801"
 
-    fun drawSequenta(ann : SequentaAnnnotations, hours: List<Ohlc>, ticker: String) : ByteArray{
+    fun drawSequenta(ann : SequentaAnnnotations, hours: List<Ohlc>, title: String) : ByteArray{
 
-        val series = ann.lines.flatMap {hline->
+        val series = renderHLines(ann.lines)
+
+        val options = makeOptions(hours, title)
+
+        options.annotations = listOf(HAnnotation(labels = ann.labels, shapes = ann.shapes))
+
+        options.series += series
+
+        val optJson = Json { prettyPrint=true }.encodeToString(HiRequest(async = true, infile = options, constr = "StockChart", 2))
+
+        println(optJson)
+
+
+        return postJson(optJson)
+    }
+
+    private fun renderHLines(lines: List<HLine>): List<HSeries> {
+        val series = lines.flatMap { hline ->
 
             sequence {
-                val data : List<Array<Double>> = listOf(
+                val data: List<Array<Double>> = listOf(
                     arrayOf(hline.start.toDouble(), hline.level),
                     arrayOf(hline.end.toDouble(), hline.level)
                 )
@@ -49,21 +63,7 @@ object ChartService{
                 )
             }
         }
-
-
-
-        val options = makeOptions(hours, ticker)
-
-        options.annotations = listOf(HAnnotation(labels = ann.labels, shapes = ann.shapes))
-
-        options.series += series
-
-        val optJson = Json { prettyPrint=true }.encodeToString(HiRequest(async = true, infile = options, constr = "StockChart", 2))
-
-        println(optJson)
-
-
-        return postJson(optJson)
+        return series
     }
 
     private fun postJson(optJson: String) : ByteArray{
@@ -94,6 +94,7 @@ object ChartService{
         }.values.flatMap { it.toList() }
 
         options.series += series
+        options.series += renderHLines(activeLevels(lines, hours))
 
         val optJson = Json { prettyPrint=true }.encodeToString(HiRequest(async = true, infile = options, constr = "StockChart", 2))
 
@@ -102,7 +103,7 @@ object ChartService{
 
     private fun annotations(lines : List<TdLine>, hours: List<Ohlc>): HAnnotation {
         val shapes = lines.filter { it.intersectPoint != null }.map {
-            val color = if (it.lineType == Support) "red" else "green"
+            val color = getLineColor(it)
             val x = hours[it.intersectPoint!!.first].endTime.toEpochMilli()
             val y = it.intersectPoint!!.second
             val side = if (it.lineType == Support) Side.Sell else Side.Buy
@@ -110,6 +111,20 @@ object ChartService{
         }
         return HAnnotation(emptyList(), shapes)
     }
+
+    private fun getLineColor(it: TdLine): String {
+        val color = if (it.lineType == Support) "red" else "green"
+        return color
+    }
+
+    private fun activeLevels(lines : List<TdLine>, hours: List<Ohlc>): List<HLine> {
+        return lines.filter { it.intersectPoint == null }.map {
+            val start = hours[0].endTime.toEpochMilli()
+            val end = hours[20].endTime.toEpochMilli()
+            HLine(start, end, it.calcValue(hours.size - 1), "solid", getLineColor(it))
+        }
+    }
+
 
     private fun renderLine(
         line: TdLine,

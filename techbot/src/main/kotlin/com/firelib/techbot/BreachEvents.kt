@@ -8,7 +8,7 @@ object BreachEvents : IntIdTable() {
     val timeframe = varchar("timeframe", 10)
     val photoFile = varchar("photo_file", 100)
     val eventTimeMs = long("event_time_ms")
-    val eventType = varchar("event_type", 10).default(BreachType.TREND_LINE.name)
+    val eventType = varchar("event_type", 30).default(BreachType.TREND_LINE.name)
 
     init {
         index(false, eventTimeMs)

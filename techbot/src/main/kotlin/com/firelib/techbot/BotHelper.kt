@@ -19,14 +19,14 @@ import java.time.LocalDateTime
 
 object BotHelper {
     fun displaySubscriptions(uid: Int): String {
+        val header = "*Your subscriptions*\n"
         val resp = Subscriptions.select {
             Subscriptions.user eq uid
         }.map {
             "${it[Subscriptions.ticker]} : ${it[Subscriptions.timeframe]}"
         }.sorted().joinToString(separator = "\n")
-        return resp
+        return header + resp
     }
-
 
     fun ensureExist(user : User){
         if (Users.select { Users.userId eq user.id }.count() == 0L) {

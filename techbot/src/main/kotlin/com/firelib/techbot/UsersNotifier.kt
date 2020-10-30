@@ -12,18 +12,18 @@ import java.io.File
 import java.time.Instant
 
 
-data class BreachEventKey(val ticker : String, val tf : TimeFrame, val eventTimeMs : Long, val type : BreachType)
-data class BreachEvent(val key : BreachEventKey, val photoFile : String)
+data class BreachEventKey(val ticker: String, val tf: TimeFrame, val eventTimeMs: Long, val type: BreachType)
+data class BreachEvent(val key: BreachEventKey, val photoFile: String)
 
 object UsersNotifier {
 
-    fun start(bot : Bot){
-        TimeFrame.values().forEach {tf->
+    fun start(bot: Bot) {
+        TimeFrame.values().forEach { tf ->
             Thread({
                 timeSequence(Instant.now(), Interval.Min10, 10000).forEach {
                     try {
                         check(bot, tf, 5)
-                    }catch (e : Exception){
+                    } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
@@ -33,7 +33,7 @@ object UsersNotifier {
         }
     }
 
-    fun check(bot : Bot, timeFrame: TimeFrame, breachWindow : Int){
+    fun check(bot: Bot, timeFrame: TimeFrame, breachWindow: Int) {
         try {
             transaction {
                 val subscribed = Subscriptions.select { Subscriptions.timeframe eq timeFrame.name }
@@ -41,28 +41,25 @@ object UsersNotifier {
 
                 println("subsc " + subscribed)
 
-                val breaches = SymbolsDao.available().map { it.code}.filter {subscribed.contains(it) }.flatMap{ ticker->
-                    //fixme timeframes
-                    BreachFinder.findBreaches(ticker, timeFrame, breachWindow)
-                }
-
-                println("breaches found ${breaches.joinToString (separator = "\n")}")
-
                 val existingEvents = loadExistingBreaches()
 
-                println("existing breaches ${existingEvents}")
+                val breaches =
+                    SymbolsDao.available().map { it.code }.filter { subscribed.contains(it) }.flatMap { ticker ->
+                        BreachFinder.findNewBreaches(
+                            ticker,
+                            timeFrame,
+                            breachWindow,
+                            existingEvents.map { it.key }.toSet()
+                        )
+                    }
 
-                val keys = existingEvents.map { it.key }.toSet()
+                println("new breaches found ${breaches.joinToString(separator = "\n")}")
 
-                val newBreaches = breaches.filter { !keys.contains(it.key) }
-
-                println("new breaches ${newBreaches}")
-
-                newBreaches.forEach {
-                    process(it, bot)
+                breaches.forEach {
+                    notify(it, bot)
                 }
 
-                BreachEvents.batchInsert(newBreaches){
+                BreachEvents.batchInsert(breaches) {
                     this[BreachEvents.ticker] = it.key.ticker
                     this[BreachEvents.timeframe] = it.key.tf.name
                     this[BreachEvents.eventTimeMs] = it.key.eventTimeMs
@@ -70,14 +67,14 @@ object UsersNotifier {
                     this[BreachEvents.eventType] = BreachType.TREND_LINE.name
                 }
             }
-        }catch (e : Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun loadExistingBreaches(): List<BreachEvent> {
-        val existingEvents =
-            BreachEvents.select { BreachEvents.eventTimeMs greater System.currentTimeMillis() - 200 * 24 * 3600_000L }.map {
+        return BreachEvents.select { BreachEvents.eventTimeMs greater System.currentTimeMillis() - 200 * 24 * 3600_000L }
+            .map {
                 val key = BreachEventKey(
                     ticker = it[BreachEvents.ticker],
                     TimeFrame.valueOf(it[BreachEvents.timeframe]),
@@ -86,16 +83,15 @@ object UsersNotifier {
                 )
                 BreachEvent(key, photoFile = it[BreachEvents.photoFile])
             }
-        return existingEvents
     }
 
-    fun process(be: BreachEvent, bot : Bot){
-        Subscriptions.select{
+    fun notify(be: BreachEvent, bot: Bot) {
+        Subscriptions.select {
             Subscriptions.ticker eq be.key.ticker and (Subscriptions.timeframe eq be.key.tf.name)
         }.forEach {
             println("notifiying user ${it}")
             val response = bot.sendPhoto(it[Subscriptions.user].toLong(), File(be.photoFile))
-            if(response.second != null){
+            if (response.second != null) {
                 response.second!!.printStackTrace()
             }
         }

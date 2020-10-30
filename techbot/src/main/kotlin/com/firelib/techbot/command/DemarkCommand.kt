@@ -20,7 +20,7 @@ class DemarkCommand : CommandHandler {
     }
 
 
-    @CommandLine.Command(name = command, description = ["display trends for commands"])
+    @CommandLine.Command(name = command, description = ["demark sequenta indicator"])
     class DemarkCmd : CmdLine{
         @CommandLine.Parameters(description = ["ticker"])
         var ticker: String = ""
@@ -50,11 +50,10 @@ class DemarkCommand : CommandHandler {
 
         val ann = AnnotationCreator.createAnnotations(targetOhlcs)
 
-
-        val bytes = ChartService.drawSequenta(ann, targetOhlcs, dcmd.ticker)
+        val bytes = ChartService.drawSequenta(ann, targetOhlcs, "Demark indicator for ${dcmd.ticker} (${dcmd.timeFrame})" )
 
         val fileName = BreachFinder.makeSnapFileName(
-            "_",
+            "demark",
             dcmd.ticker,
             dcmd.timeFrame,
             targetOhlcs.last().endTime.toEpochMilli()
