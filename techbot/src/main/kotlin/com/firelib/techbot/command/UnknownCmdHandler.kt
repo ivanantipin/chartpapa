@@ -23,6 +23,7 @@ class UnknownCmdHandler(val taBot: TABot) : CommandHandler {
 
             TrendsCommand().handle(Command("/tl", listOf(cmd.cmd, tf.name)), bot, update)
             DemarkCommand().handle(Command("/demark", listOf(cmd.cmd, tf.name)), bot, update)
+            LevelsCommand().handle(Command("/lvl", listOf(cmd.cmd)), bot, update)
         }else{
             bot.sendMessage(
                 chatId = update.message!!.chat.id,

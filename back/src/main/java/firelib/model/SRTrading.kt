@@ -20,7 +20,7 @@ class SRTrading(context: ModelContext, fac: Map<String, String>) : Model(context
     init {
         val series = enableSeries(Interval.Min60, 5)
         val srmakers = instruments().map {ticker->
-            val srMaker = SRMaker(0.002, numberOfExtremes = 20, numberOfHits = 2, zigZagMove = 0.03)
+            val srMaker = SRMaker(numberOfExtremes = 20, numberOfHits = 2, zigZagMove = 0.03)
             srMaker.setEvictedListener {evicted->
                 lst += evicted.map {sr-> support_resistance(ticker, sr.initial , sr.activeDate, currentTime(), sr.level) }
             }

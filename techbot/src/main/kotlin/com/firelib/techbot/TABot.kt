@@ -16,6 +16,7 @@ class TABot {
         register(SubHandler())
         register(RmHandler())
         register(DemarkCommand())
+        register(LevelsCommand())
         register(HelpListHandler(this))
     }
 

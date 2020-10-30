@@ -3,6 +3,8 @@ package chart
 import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
+import firelib.core.domain.Interval
+import firelib.indicators.SRMaker
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -11,7 +13,7 @@ import java.nio.file.Paths
 
 
 enum class BreachType {
-    TREND_LINE, DEMARK_SIGNAL, TREND_LINE_SNAPSHOT
+    TREND_LINE, DEMARK_SIGNAL, TREND_LINE_SNAPSHOT, LEVELS_SNAPSHOT
 }
 
 object BreachFinder {
@@ -24,6 +26,38 @@ object BreachFinder {
         val fileName = "${prefix}_${ticker}_${timeFrame}_$eventTimeMs"
         val tempDir = System.getProperty("java.io.tmpdir")
         return Paths.get(tempDir).resolve("${fileName}.png").toFile().absoluteFile.toString()
+    }
+
+    fun historicalLevels(ticker: String): HistoricalBreaches {
+        val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 4000)
+        val eventTimeMs = targetOhlcs.last().endTime.toEpochMilli()
+
+        val maker = SRMaker(100, 2, 0.01)
+
+        return transaction {
+            val be =
+                BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq TimeFrame.M30.name) and (BreachEvents.eventType eq  BreachType.LEVELS_SNAPSHOT.name)}
+                    .firstOrNull()
+
+            if (be == null || true) {
+                val fileName = makeSnapFileName(BreachType.LEVELS_SNAPSHOT.name, ticker, TimeFrame.M30, eventTimeMs)
+
+                targetOhlcs.forEach { maker.addOhlc(it) }
+
+                val bytes = ChartService.drawLevels(maker.currentLevels, targetOhlcs, "Levels for ${ticker} ")
+                saveFile(bytes, fileName)
+                BreachEvents.insert {
+                    it[BreachEvents.ticker] = ticker
+                    it[BreachEvents.timeframe] = TimeFrame.M30.name
+                    it[BreachEvents.eventTimeMs] = eventTimeMs
+                    it[BreachEvents.photoFile] = fileName
+                    it[BreachEvents.eventType] = BreachType.LEVELS_SNAPSHOT.name
+                }
+                return@transaction HistoricalBreaches(filePath = fileName)
+            }
+
+            return@transaction HistoricalBreaches(filePath = be[BreachEvents.photoFile])
+        }
     }
 
 

@@ -7,6 +7,7 @@ import com.firelib.techbot.domain.LineType.*
 import com.funstat.domain.HLine
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
+import firelib.indicators.SR
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
@@ -14,16 +15,16 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-object ChartService{
+object ChartService {
 
     val client = HttpClient()
 
     @Serializable
-    data class HiRequest(val async : Boolean, val infile : HOptions, val constr : String, val scale : Int)
+    data class HiRequest(val async: Boolean, val infile: HOptions, val constr: String, val scale: Int)
 
     val urlString = "http://localhost:7801"
 
-    fun drawSequenta(ann : SequentaAnnnotations, hours: List<Ohlc>, title: String) : ByteArray{
+    fun drawSequenta(ann: SequentaAnnnotations, hours: List<Ohlc>, title: String): ByteArray {
 
         val series = renderHLines(ann.lines)
 
@@ -33,7 +34,14 @@ object ChartService{
 
         options.series += series
 
-        val optJson = Json { prettyPrint=true }.encodeToString(HiRequest(async = true, infile = options, constr = "StockChart", 2))
+        val optJson = Json { prettyPrint = true }.encodeToString(
+            HiRequest(
+                async = true,
+                infile = options,
+                constr = "StockChart",
+                2
+            )
+        )
 
         println(optJson)
 
@@ -66,7 +74,7 @@ object ChartService{
         return series
     }
 
-    private fun postJson(optJson: String) : ByteArray{
+    private fun postJson(optJson: String): ByteArray {
         return runBlocking {
             val imagePath = client.post<String> {
                 url(urlString)
@@ -78,6 +86,36 @@ object ChartService{
             client.get<ByteArray>(url)
         }
     }
+
+    fun drawLevels(
+        lines: List<SR>,
+        hours: List<Ohlc>,
+        title: String
+    ): ByteArray {
+        val options = makeOptions(hours, title)
+
+        options.series += renderHLines(lines.flatMap {
+            val start = it.initial.toEpochMilli()
+            val end = it.activeDate.toEpochMilli()
+            listOf(
+                HLine(start, end, it.level, "solid", "green"),
+                HLine(end, hours.last().endTime.toEpochMilli(), it.level, "dash", "green")
+            )
+
+        })
+
+        val optJson = Json { prettyPrint = true }.encodeToString(
+            HiRequest(
+                async = true,
+                infile = options,
+                constr = "StockChart",
+                2
+            )
+        )
+
+        return postJson(optJson)
+    }
+
 
     fun drawLines(
         lines: List<TdLine>,
@@ -96,12 +134,19 @@ object ChartService{
         options.series += series
         options.series += renderHLines(activeLevels(lines, hours))
 
-        val optJson = Json { prettyPrint=true }.encodeToString(HiRequest(async = true, infile = options, constr = "StockChart", 2))
+        val optJson = Json { prettyPrint = true }.encodeToString(
+            HiRequest(
+                async = true,
+                infile = options,
+                constr = "StockChart",
+                2
+            )
+        )
 
         return postJson(optJson)
     }
 
-    private fun annotations(lines : List<TdLine>, hours: List<Ohlc>): HAnnotation {
+    private fun annotations(lines: List<TdLine>, hours: List<Ohlc>): HAnnotation {
         val shapes = lines.filter { it.intersectPoint != null }.map {
             val color = getLineColor(it)
             val x = hours[it.intersectPoint!!.first].endTime.toEpochMilli()
@@ -117,7 +162,7 @@ object ChartService{
         return color
     }
 
-    private fun activeLevels(lines : List<TdLine>, hours: List<Ohlc>): List<HLine> {
+    private fun activeLevels(lines: List<TdLine>, hours: List<Ohlc>): List<HLine> {
         return lines.filter { it.intersectPoint == null }.map {
             val start = hours[0].endTime.toEpochMilli()
             val end = hours[20].endTime.toEpochMilli()
@@ -142,7 +187,7 @@ object ChartService{
         }
 
         return sequence {
-            val data : List<Array<Double>> = listOf(
+            val data: List<Array<Double>> = listOf(
                 arrayOf(hours[line.x0].endTime.toEpochMilli().toDouble(), line.y0),
                 arrayOf(hours[line.x1].endTime.toEpochMilli().toDouble(), line.y1)
             )
@@ -159,7 +204,7 @@ object ChartService{
                 )
             )
 
-            val data2nd : List<Array<Double>> = if (line.intersectPoint != null) {
+            val data2nd: List<Array<Double>> = if (line.intersectPoint != null) {
                 listOf(
                     arrayOf(hours[line.x1].endTime.toEpochMilli().toDouble(), line.y1),
                     arrayOf(

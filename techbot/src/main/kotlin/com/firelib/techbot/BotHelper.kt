@@ -66,6 +66,13 @@ object BotHelper {
         return IntervalTransformer.transform(timeFrame, ohlcs)
     }
 
+    fun getOhlcsForTf(ticker : String, timeFrame: Interval, window : Int) : List<Ohlc>{
+        val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(window.toLong()))
+        val ohlcs = MdDaoContainer().getDao(SourceName.FINAM, Interval.Min10).queryAll(ticker, startTime)
+        return IntervalTransformer.transform(timeFrame, ohlcs)
+    }
+
+
 
     fun checkTicker(ticker : String, bot : Bot, update : Update): Boolean {
         if (SymbolsDao.available().find { it.code.equals(ticker, true) } == null) {

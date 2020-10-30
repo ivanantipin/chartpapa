@@ -1,13 +1,20 @@
 package firelib.indicators
 
 import firelib.core.domain.Ohlc
+import org.apache.commons.math3.ml.clustering.Clusterable
+import org.apache.commons.math3.ml.clustering.DBSCANClusterer
 import java.time.Instant
 import java.util.*
 
+inline class Cl(val point : Pair<Instant,Double>) : Clusterable {
+    override fun getPoint(): DoubleArray {
+        return doubleArrayOf(point.second)
+    }
+}
 
 data class SR(val initial : Instant, val activeDate : Instant, val level : Double)
 
-class SRMaker (val tolerance : Double, val numberOfExtremes : Int = 100, val numberOfHits : Int = 2, val zigZagMove : Double = 0.02){
+class SRMaker(val numberOfExtremes: Int = 100, val numberOfHits: Int = 2, val zigZagMove: Double = 0.02){
     val zigZag = ZigZag(zigZagMove)
 
     val extremes = LinkedList<Pair<Instant,Double>>()
@@ -38,30 +45,24 @@ class SRMaker (val tolerance : Double, val numberOfExtremes : Int = 100, val num
         }
     }
 
+
     fun mergeExtremes() : List<SR> {
         if(extremes.isEmpty()){
             return emptyList()
         }
-        val sorted = LinkedList(extremes.sortedBy { it.second })
-        val ret = mutableListOf<List<Pair<Instant,Double>>>()
 
+        val avg = extremes.map { it.second }.average()
 
-        var num = mutableListOf(sorted.poll()!!)
+        val data = extremes.map { Cl(it) }
 
-        while (sorted.isNotEmpty()){
-            val poll = sorted.poll()!!
-            val diff = (poll.second - num.last().second)*2/(poll.second + num.last().second)
-            if(diff > tolerance){
-                ret += num
-                num = mutableListOf(poll)
-            }else{
-                num.add(poll)
-            }
-        }
-        ret += num
+        val clasterer = DBSCANClusterer<Cl>(avg/300, numberOfHits)
 
-        return ret.filter { it.size >= numberOfHits}.map { it.sortedBy { it.first } }.map {
-            SR(it[0].first,it[numberOfHits - 1].first, it.map { it.second }.average())
+        val cluster = clasterer.cluster(data)
+
+        return cluster.map {
+            val first = it.points.minByOrNull { it.point.first }!!.point.first
+            val last = it.points.maxByOrNull { it.point.first }!!.point.first
+            SR(first,last, it.points.map { it.point.second }.average())
         }
     }
 
