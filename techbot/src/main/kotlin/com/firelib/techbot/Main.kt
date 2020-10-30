@@ -7,6 +7,7 @@ import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.text
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
+import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -62,7 +63,7 @@ fun makeBot(taBot: TABot): Bot {
 }
 
 fun initDatabase(){
-    Database.connect("jdbc:sqlite:/tmp/chatbot.db", driver = "org.sqlite.JDBC")
+    Database.connect("jdbc:sqlite:${GlobalConstants.metaDb.toAbsolutePath()}", driver = "org.sqlite.JDBC")
     transaction {
         addLogger(StdOutSqlLogger)
         SchemaUtils.create(Users)
