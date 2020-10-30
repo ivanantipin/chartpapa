@@ -1,27 +1,49 @@
 package com.firelib.techbot
 
 import chart.BreachFinder
+import chart.BreachType
 import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
+import firelib.core.domain.Interval
+import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+import java.time.Instant
 
 
-data class BreachEventKey(val ticker : String, val tf : TimeFrame, val eventTimeMs : Long)
+data class BreachEventKey(val ticker : String, val tf : TimeFrame, val eventTimeMs : Long, val type : BreachType)
 data class BreachEvent(val key : BreachEventKey, val photoFile : String)
 
 object UsersNotifier {
 
-    fun check(bot : Bot, timeFrame: TimeFrame){
+    fun start(bot : Bot){
+        TimeFrame.values().forEach {tf->
+            Thread({
+                timeSequence(Instant.now(), Interval.Min10, 10000).forEach {
+                    try {
+                        check(bot, tf, 5)
+                    }catch (e : Exception){
+                        e.printStackTrace()
+                    }
+
+                }
+            }, tf.name + "_breach_notifier").start()
+
+        }
+    }
+
+    fun check(bot : Bot, timeFrame: TimeFrame, breachWindow : Int){
         try {
             transaction {
                 val subscribed = Subscriptions.select { Subscriptions.timeframe eq timeFrame.name }
                     .map { it[Subscriptions.ticker] }.distinct()
 
-                val breaches = SymbolsDao.available().map { it.code }.filter { subscribed.contains(it) }.flatMap{ ticker->
+                println("subsc " + subscribed)
+
+                val breaches = SymbolsDao.available().map { it.code}.filter {subscribed.contains(it) }.flatMap{ ticker->
                     //fixme timeframes
-                    BreachFinder.findBreaches(ticker, timeFrame)
+                    BreachFinder.findBreaches(ticker, timeFrame, breachWindow)
                 }
 
                 println("breaches found ${breaches.joinToString (separator = "\n")}")
@@ -45,6 +67,7 @@ object UsersNotifier {
                     this[BreachEvents.timeframe] = it.key.tf.name
                     this[BreachEvents.eventTimeMs] = it.key.eventTimeMs
                     this[BreachEvents.photoFile] = it.photoFile
+                    this[BreachEvents.eventType] = BreachType.TREND_LINE.name
                 }
             }
         }catch (e : Exception){
@@ -58,7 +81,8 @@ object UsersNotifier {
                 val key = BreachEventKey(
                     ticker = it[BreachEvents.ticker],
                     TimeFrame.valueOf(it[BreachEvents.timeframe]),
-                    it[BreachEvents.eventTimeMs]
+                    it[BreachEvents.eventTimeMs],
+                    BreachType.valueOf(it[BreachEvents.eventType])
                 )
                 BreachEvent(key, photoFile = it[BreachEvents.photoFile])
             }
@@ -76,4 +100,12 @@ object UsersNotifier {
             }
         }
     }
+}
+
+fun main() {
+    initDatabase()
+    //UpdateSensitivities.updateSensitivties()
+
+    val bot = makeBot(TABot())
+    UsersNotifier.check(bot, TimeFrame.M30, 20)
 }

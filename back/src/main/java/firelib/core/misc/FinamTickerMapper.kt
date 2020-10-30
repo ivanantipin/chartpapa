@@ -16,11 +16,8 @@ class FinamTickerMapper(val finamDownloader: FinamDownloader, val market : Strin
     }
 
     override fun invoke(ticker: String): InstrId? {
-
-        val lticker = ticker.toLowerCase()
-        require(code2instr.containsKey(lticker), {"no ticker found ${lticker}"})
-
-        val lst = code2instr[lticker]!!
+        require(code2instr.containsKey(ticker), {"no ticker found ${ticker}"})
+        val lst = code2instr[ticker]!!
         return lst.filter { it.market == market }.firstOrNull()
     }
 }

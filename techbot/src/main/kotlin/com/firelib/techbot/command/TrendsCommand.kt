@@ -22,10 +22,10 @@ class TrendsCommand : CommandHandler {
         @CommandLine.Parameters(description = ["ticker"])
         var ticker: String = ""
 
-        @CommandLine.Parameters(description = ["timeframe , possible values: \${COMPLETION-CANDIDATES}"], defaultValue = "H")
+        @CommandLine.Parameters(description = ["timeframe , possible values: \${COMPLETION-CANDIDATES}"], defaultValue = "D")
         var tf: TimeFrame = TimeFrame.D;
         override fun postConstruct() {
-            ticker = ticker.toLowerCase()
+            ticker = ticker.toUpperCase()
         }
     }
 

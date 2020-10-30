@@ -8,6 +8,7 @@ import com.firelib.techbot.domain.LineType.*
 import com.firelib.techbot.initDatabase
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
+import firelib.core.domain.Side
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
@@ -43,7 +44,7 @@ object ChartService{
                         showInLegend = false,
                         color = hline.color,
                         dashStyle = hline.dashStyle,
-                        lineWidth = 1.0
+                        lineWidth = 0.5
                     )
                 )
             }
@@ -53,7 +54,7 @@ object ChartService{
 
         val options = makeOptions(hours, ticker)
 
-        options.annotations = listOf(HAnnotation(labels = ann.labels))
+        options.annotations = listOf(HAnnotation(labels = ann.labels, shapes = ann.shapes))
 
         options.series += series
 
@@ -81,8 +82,10 @@ object ChartService{
     fun drawLines(
         lines: List<TdLine>,
         hours: List<Ohlc>,
-        ticker: String
+        title: String
     ): ByteArray {
+        val options = makeOptions(hours, title)
+        options.annotations += annotations(lines, hours)
 
         val series = lines.groupBy { it.lineType }.mapValues { (key, value) ->
             value.asSequence().flatMapIndexed { idx, line ->
@@ -90,13 +93,22 @@ object ChartService{
             }
         }.values.flatMap { it.toList() }
 
-        val options = makeOptions(hours, ticker)
-
         options.series += series
 
         val optJson = Json { prettyPrint=true }.encodeToString(HiRequest(async = true, infile = options, constr = "StockChart", 2))
 
         return postJson(optJson)
+    }
+
+    private fun annotations(lines : List<TdLine>, hours: List<Ohlc>): HAnnotation {
+        val shapes = lines.filter { it.intersectPoint != null }.map {
+            val color = if (it.lineType == Support) "red" else "green"
+            val x = hours[it.intersectPoint!!.first].endTime.toEpochMilli()
+            val y = it.intersectPoint!!.second
+            val side = if (it.lineType == Support) Side.Sell else Side.Buy
+            ChartCreator.makeBuySellPoint(color, x, y, side)
+        }
+        return HAnnotation(emptyList(), shapes)
     }
 
     private fun renderLine(
@@ -140,6 +152,7 @@ object ChartService{
                         line.intersectPoint!!.second
                     )
                 )
+
             } else {
                 listOf(
                     arrayOf(hours[line.x1].endTime.toEpochMilli().toDouble(), line.y1),

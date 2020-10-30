@@ -28,7 +28,7 @@ class DemarkCommand : CommandHandler {
         @CommandLine.Parameters(description = ["timeframe , possible values: \${COMPLETION-CANDIDATES}"], defaultValue = "H")
         var timeFrame: TimeFrame = TimeFrame.D;
         override fun postConstruct() {
-            ticker = ticker.toLowerCase()
+            ticker = ticker.toUpperCase()
         }
     }
 
@@ -53,7 +53,12 @@ class DemarkCommand : CommandHandler {
 
         val bytes = ChartService.drawSequenta(ann, targetOhlcs, dcmd.ticker)
 
-        val fileName = BreachFinder.makeSnapFileName(dcmd.ticker, dcmd.timeFrame, targetOhlcs.last().endTime.toEpochMilli())
+        val fileName = BreachFinder.makeSnapFileName(
+            "_",
+            dcmd.ticker,
+            dcmd.timeFrame,
+            targetOhlcs.last().endTime.toEpochMilli()
+        )
         saveFile(bytes, fileName)
 
         bot.sendPhoto(chatId = update.message!!.chat.id, photo = File(fileName))

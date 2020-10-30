@@ -28,25 +28,9 @@ object SymbolsDao {
 
     val instruments = fetchInstruments()
     val fxInstruments = instruments.filter { fxSymbols.contains(it.code) && it.market == FinamDownloader.FX }
-    val stockInstruments = instruments.filter { tickers.contains(it.code.toLowerCase()) && it.market == FinamDownloader.SHARES_MARKET }
+    val stockInstruments = instruments.filter { tickers.contains(it.code) && it.market == FinamDownloader.SHARES_MARKET }
 
     val all = fxInstruments + stockInstruments
-
-    init {
-
-        Thread({
-            timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
-                try {
-                    val storage = MdStorageImpl()
-                    available().forEach {
-                        storage.updateMarketData(it, Interval.Min10)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }).start()
-    }
 
 
     fun available(): List<InstrId> {

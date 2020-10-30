@@ -9,8 +9,8 @@ class DbMapper(val readWrite: GeGeWriter<InstrId>, filter: (InstrId) -> Boolean 
     val symbols = readWrite.read().filter(filter).associateBy { it.code.toLowerCase() }
 
     override fun invoke(code: String): InstrId {
-        require(symbols.containsKey(code.toLowerCase()), {"no symbol in mapper ${code}"})
-        return symbols[code.toLowerCase()]!!
+        require(symbols.containsKey(code), {"no symbol in mapper ${code}"})
+        return symbols[code]!!
     }
 
 }

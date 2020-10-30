@@ -33,11 +33,33 @@ data class HLabel(
     var point : HPoint? = null,
     var drawOnTop : Boolean? = null,
     var backgroundColor : String? = null,
+    var borderColor : String? = null,
     var verticalAlign : String? = null,
     var distance : Int? = null,
     var text : String? = null,
     var shape : String? = null,
+    var style : HStyle? = null
 )
 
 @Serializable
-data class HAnnotation(val labels : List<HLabel>)
+data class HShape(
+    var fill : String? = null,
+    var stroke : String? = null,
+    var strokeWidth : Int? = null,
+    var dashStyle : String? = null,
+    var type : String? = null,
+    var markerEnd : String? = null,
+    var markerStart : String? = null,
+    var points : List<HPoint>? = null,
+    var height : Int? = null
+
+)
+
+@Serializable
+data class HStyle(
+    var fontFamily : String? = null,
+    var fontSize : String? = null
+)
+
+@Serializable
+data class HAnnotation(val labels : List<HLabel>, val shapes : List<HShape>)

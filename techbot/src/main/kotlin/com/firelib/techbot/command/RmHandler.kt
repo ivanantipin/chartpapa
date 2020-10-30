@@ -25,7 +25,7 @@ class RmHandler : CommandHandler {
             @CommandLine.Parameters(description = ["ticker"], )
             var ticker : String = ""
             override fun postConstruct() {
-                ticker = ticker.toLowerCase()
+                ticker = ticker.toUpperCase()
             }
         }
     }

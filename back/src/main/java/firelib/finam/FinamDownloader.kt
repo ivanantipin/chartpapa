@@ -143,11 +143,10 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         val url = "http://export.finam.ru/table.csv?" + params.map { "${it.first}=${it.second}" }.joinToString(separator = "&")
 
         val ret = SettableFuture.create<List<String>>()
-        log.info(url)
+        log.debug(url)
         client.prepareGet(url).execute()
                 .toCompletableFuture()
                 .thenAccept { response ->
-                    log.info("Status", response.statusCode)
                     try {
                         val lines = readLines(InputStreamReader(response.responseBodyAsStream, "cp1251"))
                         ret.set(lines)

@@ -16,7 +16,7 @@ class DbMapper(val readWrite: GeGeWriter<InstrId>, filter: (InstrId) -> Boolean 
     }
 
     override fun invoke(p1: String): InstrId {
-        return symbols[p1.toLowerCase()]!!
+        return symbols[p1]!!
     }
 }
 

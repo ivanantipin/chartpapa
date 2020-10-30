@@ -31,10 +31,10 @@ class SubHandler : CommandHandler {
         var ticker: String = ""
 
         @CommandLine.Parameters(description = ["timeframe , possible values: \${COMPLETION-CANDIDATES}"], index = "1")
-        var timeFrame: TimeFrame = TimeFrame.H
+        var timeFrame: TimeFrame = TimeFrame.D
 
         override fun postConstruct() {
-            ticker = ticker.toLowerCase()
+            ticker = ticker.toUpperCase()
         }
 
     }
@@ -44,7 +44,7 @@ class SubHandler : CommandHandler {
         val subCmd = SubCmd()
 
         if (!parseCommand(subCmd, cmd.opts, bot, update) ||
-            !checkTicker(subCmd.ticker.toLowerCase(), bot, update)
+            !checkTicker(subCmd.ticker.toUpperCase(), bot, update)
         ) {
             return
         }
