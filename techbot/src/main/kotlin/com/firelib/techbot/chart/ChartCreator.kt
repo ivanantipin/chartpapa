@@ -32,7 +32,7 @@ object ChartCreator {
         ).apply {
             yAxis += HAxis(height = "100%", lineWidth = 1, offset = 10, opposite = false)
             xAxis = HAxis(gapGridLineWidth = 1, lineWidth = 1)
-            series += HSeries("ohlc", title, data = data, marker = HMarker(true), showInLegend = true)
+            series += HSeries("ohlc", "price", data = data, marker = HMarker(true), showInLegend = true)
             navigator = HNavigator(false)
             scrollbar = HScrollbar(false)
         }

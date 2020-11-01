@@ -81,6 +81,9 @@ fun initDatabase(){
         SchemaUtils.create(LevelSensitivityConfig)
         SchemaUtils.createMissingTablesAndColumns(LevelSensitivityConfig)
 
+        SchemaUtils.create(CommandsLog)
+        SchemaUtils.createMissingTablesAndColumns(CommandsLog)
+
     }
 }
 
