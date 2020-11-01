@@ -11,3 +11,10 @@ object SensitivityConfig: Table() {
 
     override val primaryKey = PrimaryKey(ticker, timeframe, name = "sens_conf_pk")
 }
+
+object LevelSensitivityConfig: Table() {
+    val ticker = varchar("ticker", 10)
+    val hits = integer("hits")
+    val zigzag_pct = double("zigzag_pct")
+    override val primaryKey = PrimaryKey(ticker, name = "level_sens_conf_pk")
+}

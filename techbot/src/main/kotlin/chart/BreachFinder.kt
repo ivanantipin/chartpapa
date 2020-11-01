@@ -29,12 +29,19 @@ object BreachFinder {
     }
 
     fun historicalLevels(ticker: String): HistoricalBreaches {
-        val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 4000)
+        val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
         val eventTimeMs = targetOhlcs.last().endTime.toEpochMilli()
 
-        val maker = SRMaker(100, 2, 0.01)
 
         return transaction {
+
+            val rr = LevelSensitivityConfig.select { LevelSensitivityConfig.ticker eq ticker }.first()
+            val hits = rr[LevelSensitivityConfig.hits]
+            val ziggy = rr[LevelSensitivityConfig.zigzag_pct]
+
+            val maker = SRMaker(1000, hits, ziggy)
+
+
             val be =
                 BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq TimeFrame.M30.name) and (BreachEvents.eventType eq  BreachType.LEVELS_SNAPSHOT.name)}
                     .firstOrNull()

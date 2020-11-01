@@ -77,6 +77,10 @@ fun initDatabase(){
 
         SchemaUtils.create(BreachEvents)
         SchemaUtils.createMissingTablesAndColumns(BreachEvents)
+
+        SchemaUtils.create(LevelSensitivityConfig)
+        SchemaUtils.createMissingTablesAndColumns(LevelSensitivityConfig)
+
     }
 }
 

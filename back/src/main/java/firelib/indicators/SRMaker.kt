@@ -14,7 +14,7 @@ inline class Cl(val point : Pair<Instant,Double>) : Clusterable {
 
 data class SR(val initial : Instant, val activeDate : Instant, val level : Double)
 
-class SRMaker(val numberOfExtremes: Int = 100, val numberOfHits: Int = 2, val zigZagMove: Double = 0.02){
+class SRMaker(val numberOfExtremes: Int = 100, val numberOfHits: Int = 2, val zigZagMove: Double = 0.02, ){
     val zigZag = ZigZag(zigZagMove)
 
     val extremes = LinkedList<Pair<Instant,Double>>()
@@ -56,6 +56,7 @@ class SRMaker(val numberOfExtremes: Int = 100, val numberOfHits: Int = 2, val zi
         val data = extremes.map { Cl(it) }
 
         val clasterer = DBSCANClusterer<Cl>(avg/300, numberOfHits)
+
 
         val cluster = clasterer.cluster(data)
 

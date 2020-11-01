@@ -53,7 +53,6 @@ class LevelsCommand : CommandHandler {
 
 fun main() {
     initDatabase()
-    historicalLevels("gazp")
-
+    historicalLevels("AUDUSD")
 }
 
