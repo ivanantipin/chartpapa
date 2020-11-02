@@ -12,9 +12,7 @@ object UpdateLevelsSensitivities{
 
     fun updateLevelSenses() {
         transaction {
-
             LevelSensitivityConfig.deleteAll()
-
             SymbolsDao.available().forEach { instr ->
                 val ticker = instr.code
                 val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
@@ -45,10 +43,6 @@ object UpdateLevelsSensitivities{
             }
         }
     }
-
-
-
-
 }
 
 

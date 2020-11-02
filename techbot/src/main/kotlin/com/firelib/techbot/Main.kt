@@ -27,6 +27,11 @@ fun main(args: Array<String>) {
             println("updating senses")
             updateSensitivties()
         }
+        if(LevelSensitivityConfig.selectAll().count() == 0L){
+            println("updating level senses")
+            UpdateLevelsSensitivities.updateLevelSenses()
+        }
+
     }
     val taBot = TABot()
     val bot = makeBot(taBot)
