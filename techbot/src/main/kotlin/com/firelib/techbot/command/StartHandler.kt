@@ -15,28 +15,22 @@ class StartHandler : CommandHandler {
         return listOf("/start")
     }
 
-    override suspend fun handle(cmd: Command, bot: Bot, update: Update) {
+    override fun handle(cmd: Command, bot: Bot, update: Update) {
 
         val fromUser = update.message!!.from!!
 
-        transaction {
-            // print sql to std-out
-            addLogger(StdOutSqlLogger)
+        ensureExist(fromUser)
 
-            ensureExist(fromUser)
-
-            val mdText = """
+        val mdText = """
                     [Инструкция](https://teletype.in/@techbot/techBotInstruction1)
                 """.trimIndent()
 
-            bot.sendMessage(
-                chatId = update.message!!.chat.id,
-                text = mdText,
-                parseMode = ParseMode.MARKDOWN_V2
-            )
-        }
+        bot.sendMessage(
+            chatId = update.message!!.chat.id,
+            text = mdText,
+            parseMode = ParseMode.MARKDOWN
+        )
     }
-
 
     override fun description(): String {
         return "start comand"

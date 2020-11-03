@@ -11,7 +11,7 @@ class TickersListHandler : CommandHandler {
         return listOf("/list")
     }
 
-    override suspend fun handle(cmd: Command, bot: Bot, update: Update) {
+    override fun handle(cmd: Command, bot: Bot, update: Update) {
         val byMarket = SymbolsDao.available().groupBy { it.market }
 
         var str = ""

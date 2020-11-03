@@ -31,7 +31,7 @@ class LevelsCommand : CommandHandler {
         return listOf(command)
     }
 
-    override suspend fun handle(cmd: Command, bot: Bot, update: Update) {
+    override fun handle(cmd: Command, bot: Bot, update: Update) {
 
         val trendsCmd = LevelsCmd()
 

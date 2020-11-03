@@ -1,5 +1,6 @@
 package chart
 
+import chart.BreachFinder.makeSnapFileName
 import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
@@ -41,29 +42,31 @@ object BreachFinder {
 
             val maker = SRMaker(1000, hits, ziggy)
 
-
             val be =
-                BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq TimeFrame.M30.name) and (BreachEvents.eventType eq  BreachType.LEVELS_SNAPSHOT.name)}
+                BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq TimeFrame.M30.name) and (BreachEvents.eventType eq BreachType.LEVELS_SNAPSHOT.name) }
                     .firstOrNull()
 
-            if (be == null || true) {
+            if (be == null) {
                 val fileName = makeSnapFileName(BreachType.LEVELS_SNAPSHOT.name, ticker, TimeFrame.M30, eventTimeMs)
 
                 targetOhlcs.forEach { maker.addOhlc(it) }
 
                 val bytes = ChartService.drawLevels(maker.currentLevels, targetOhlcs, "Levels for ${ticker} ")
                 saveFile(bytes, fileName)
-                BreachEvents.insert {
-                    it[BreachEvents.ticker] = ticker
-                    it[BreachEvents.timeframe] = TimeFrame.M30.name
-                    it[BreachEvents.eventTimeMs] = eventTimeMs
-                    it[BreachEvents.photoFile] = fileName
-                    it[BreachEvents.eventType] = BreachType.LEVELS_SNAPSHOT.name
-                }
-                return@transaction HistoricalBreaches(filePath = fileName)
-            }
 
-            return@transaction HistoricalBreaches(filePath = be[BreachEvents.photoFile])
+                updateDatabase("update levels events", {
+                    BreachEvents.insert {
+                        it[BreachEvents.ticker] = ticker
+                        it[BreachEvents.timeframe] = TimeFrame.M30.name
+                        it[BreachEvents.eventTimeMs] = eventTimeMs
+                        it[BreachEvents.photoFile] = fileName
+                        it[BreachEvents.eventType] = BreachType.LEVELS_SNAPSHOT.name
+                    }
+                }).get()
+                HistoricalBreaches(filePath = fileName)
+            } else {
+                HistoricalBreaches(filePath = be[BreachEvents.photoFile])
+            }
         }
     }
 
@@ -72,17 +75,18 @@ object BreachFinder {
         val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
         val eventTimeMs = targetOhlcs.last().endTime.toEpochMilli()
 
-        return transaction {
-            val be =
-                BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq timeFrame.name) and (BreachEvents.eventType eq  BreachType.TREND_LINE_SNAPSHOT.name)}
-                    .firstOrNull()
+        val be = transaction {
+            BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq timeFrame.name) and (BreachEvents.eventType eq BreachType.TREND_LINE_SNAPSHOT.name) }
+                .firstOrNull()
+        }
 
-            if (be == null) {
-                val fileName = makeSnapFileName(BreachType.TREND_LINE.name, ticker, timeFrame, eventTimeMs)
-                val conf = BotConfig.getConf(ticker, timeFrame)
-                val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
-                val bytes = ChartService.drawLines(lines, targetOhlcs, "Trend lines for ${ticker} (${timeFrame})")
-                saveFile(bytes, fileName)
+        return if (be == null) {
+            val fileName = makeSnapFileName(BreachType.TREND_LINE.name, ticker, timeFrame, eventTimeMs)
+            val conf = BotConfig.getConf(ticker, timeFrame)
+            val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
+            val bytes = ChartService.drawLines(lines, targetOhlcs, "Trend lines for ${ticker} (${timeFrame})")
+            saveFile(bytes, fileName)
+            updateDatabase("update trend lines events") {
                 BreachEvents.insert {
                     it[BreachEvents.ticker] = ticker
                     it[BreachEvents.timeframe] = timeFrame.name
@@ -90,10 +94,10 @@ object BreachFinder {
                     it[BreachEvents.photoFile] = fileName
                     it[BreachEvents.eventType] = BreachType.TREND_LINE_SNAPSHOT.name
                 }
-                return@transaction HistoricalBreaches(filePath = fileName)
-            }
-
-            return@transaction HistoricalBreaches(filePath = be[BreachEvents.photoFile])
+            }.get()
+            HistoricalBreaches(filePath = fileName)
+        } else {
+            HistoricalBreaches(filePath = be[BreachEvents.photoFile])
         }
     }
 
@@ -128,5 +132,4 @@ object BreachFinder {
                 }
             }
     }
-
 }

@@ -3,7 +3,7 @@ package com.firelib.techbot.command
 import chart.BreachFinder
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.BotHelper.checkTicker
-import com.firelib.techbot.chart.AnnotationCreator
+import com.firelib.techbot.chart.SequentaAnnCreator
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.saveFile
@@ -36,7 +36,7 @@ class DemarkCommand : CommandHandler {
         return listOf(command)
     }
 
-    override suspend fun handle(cmd: Command, bot: Bot, update: Update) {
+    override fun handle(cmd: Command, bot: Bot, update: Update) {
 
         val dcmd = DemarkCmd()
 
@@ -46,17 +46,17 @@ class DemarkCommand : CommandHandler {
             return
         }
 
-        val targetOhlcs = BotHelper.getOhlcsForTf(dcmd.ticker, dcmd.timeFrame.interval)
+        val ohlcs = BotHelper.getOhlcsForTf(dcmd.ticker, dcmd.timeFrame.interval)
 
-        val ann = AnnotationCreator.createAnnotations(targetOhlcs)
+        val ann = SequentaAnnCreator.createAnnotations(ohlcs)
 
-        val bytes = ChartService.drawSequenta(ann, targetOhlcs, "Demark indicator for ${dcmd.ticker} (${dcmd.timeFrame})" )
+        val bytes = ChartService.drawSequenta(ann, ohlcs, "Demark indicator for ${dcmd.ticker} (${dcmd.timeFrame})" )
 
         val fileName = BreachFinder.makeSnapFileName(
             "demark",
             dcmd.ticker,
             dcmd.timeFrame,
-            targetOhlcs.last().endTime.toEpochMilli()
+            ohlcs.last().endTime.toEpochMilli()
         )
         saveFile(bytes, fileName)
 

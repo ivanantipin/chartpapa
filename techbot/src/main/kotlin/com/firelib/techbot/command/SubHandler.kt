@@ -6,6 +6,7 @@ import com.firelib.techbot.BotHelper.ensureExist
 import com.firelib.techbot.BotHelper.parseCommand
 import com.firelib.techbot.Subscriptions
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -40,7 +41,7 @@ class SubHandler : CommandHandler {
     }
 
 
-    override suspend fun handle(cmd: Command, bot: Bot, update: Update) {
+    override fun handle(cmd: Command, bot: Bot, update: Update) {
         val subCmd = SubCmd()
 
         if (!parseCommand(subCmd, cmd.opts, bot, update) ||
@@ -49,17 +50,13 @@ class SubHandler : CommandHandler {
             return
         }
 
-
         val fromUser = update.message!!.from
 
         val uid = fromUser!!.id.toInt()
 
-        transaction {
-            // print sql to std-out
-            addLogger(StdOutSqlLogger)
+        ensureExist(fromUser)
 
-            ensureExist(fromUser)
-
+        updateDatabase("update subscription") {
             if (Subscriptions.select { Subscriptions.user eq uid and (Subscriptions.ticker eq subCmd.ticker) and (Subscriptions.timeframe eq subCmd.timeFrame.name) }
                     .empty()) {
                 Subscriptions.insert {
@@ -68,14 +65,13 @@ class SubHandler : CommandHandler {
                     it[timeframe] = subCmd.timeFrame.name
                 }
             }
+        }.get()
 
-            bot.sendMessage(
-                chatId = update.message!!.chat.id,
-                text = displaySubscriptions(uid),
-                parseMode = ParseMode.MARKDOWN
-            )
-
-        }
+        bot.sendMessage(
+            chatId = update.message!!.chat.id,
+            text = displaySubscriptions(uid),
+            parseMode = ParseMode.MARKDOWN
+        )
     }
 
     override fun description(): String {

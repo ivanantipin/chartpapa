@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object UpdateLevelsSensitivities{
 
     fun updateLevelSenses() {
-        transaction {
+        updateDatabase("update levels senses") {
             LevelSensitivityConfig.deleteAll()
             SymbolsDao.available().forEach { instr ->
                 val ticker = instr.code
@@ -41,7 +41,7 @@ object UpdateLevelsSensitivities{
                     }
                 }
             }
-        }
+        }.get()
     }
 }
 

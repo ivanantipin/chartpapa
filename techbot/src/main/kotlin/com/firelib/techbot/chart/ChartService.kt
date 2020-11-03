@@ -3,7 +3,8 @@ package com.firelib.techbot.chart
 import com.firelib.techbot.TdLine
 import com.firelib.techbot.chart.ChartCreator.makeOptions
 import com.firelib.techbot.chart.domain.*
-import com.firelib.techbot.domain.LineType.*
+import com.firelib.techbot.domain.LineType.Resistance
+import com.firelib.techbot.domain.LineType.Support
 import com.funstat.domain.HLine
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
@@ -14,10 +15,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.sql.logTimeSpent
+
 
 object ChartService {
 
     val client = HttpClient()
+
 
     @Serializable
     data class HiRequest(val async: Boolean, val infile: HOptions, val constr: String, val scale: Int)
@@ -42,11 +46,9 @@ object ChartService {
                 2
             )
         )
-
-        println(optJson)
-
-
-        return postJson(optJson)
+        return logTimeSpent("draw sequenta hicharts server"){
+            postJson(optJson)
+        }
     }
 
     private fun renderHLines(lines: List<HLine>): List<HSeries> {
@@ -113,7 +115,9 @@ object ChartService {
             )
         )
 
-        return postJson(optJson)
+        return logTimeSpent("draw levels hicharts server"){
+            postJson(optJson)
+        }
     }
 
 
@@ -124,16 +128,13 @@ object ChartService {
     ): ByteArray {
         val options = makeOptions(hours, title)
         options.annotations += annotations(lines, hours)
-
         val series = lines.groupBy { it.lineType }.mapValues { (key, value) ->
             value.asSequence().flatMapIndexed { idx, line ->
                 renderLine(line, idx, hours)
             }
         }.values.flatMap { it.toList() }
-
         options.series += series
         options.series += renderHLines(activeLevels(lines, hours))
-
         val optJson = Json { prettyPrint = true }.encodeToString(
             HiRequest(
                 async = true,
@@ -142,8 +143,9 @@ object ChartService {
                 2
             )
         )
-
-        return postJson(optJson)
+        return logTimeSpent("draw lines hicharts server"){
+            postJson(optJson)
+        }
     }
 
     private fun annotations(lines: List<TdLine>, hours: List<Ohlc>): HAnnotation {

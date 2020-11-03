@@ -26,7 +26,7 @@ object ChartCreator {
         }
         return HOptions(
             title = HTitle(title),
-            chart = HChart(margin = listOf(0,20,50,50)),
+            chart = HChart(margin = listOf(0, 20, 50, 50)),
             rangeSelector = HRangeSelector(false),
             legend = defaultLegend
         ).apply {
@@ -38,20 +38,19 @@ object ChartCreator {
         }
     }
 
-    fun makeBuySellPoint(color : String, time : Long, y : Double, buySell : Side) : HShape{
+    fun makeBuySellPoint(color: String, time: Long, y: Double, buySell: Side): HShape {
         val point = HPoint(0, 0, time, y)
         val sign = buySell.sign
-        return HShape(fill = "none", stroke = color, strokeWidth = 1,
+        return HShape(
+            fill = "none", stroke = color, strokeWidth = 1,
             dashStyle = "solid",
             type = "path",
             points = listOf(
-                point.copy(y = (point.y!! - sign*point.y!!/200.0)),
+                point.copy(y = (point.y!! - sign * point.y!! / 200.0)),
                 point
             ),
             markerEnd = "arrow",
             height = 2
         )
     }
-
-
 }

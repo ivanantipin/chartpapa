@@ -18,7 +18,6 @@ object TrendsCreator {
 
         val cache = mutableMapOf<Pair<Int, Int>, Boolean>()
 
-
         fun checkRangeNonIntersected(x0: Int, x1: Int): Boolean {
             return cache.computeIfAbsent(Pair(x0, x1), { P ->
                 val line = TdLine(x0, x1, prices[x0], prices[x1], lineType, 0, 0.0)
@@ -27,8 +26,6 @@ object TrendsCreator {
         }
 
         val ret = mutableMapOf<Pair<Int, Int>, TdLine>()
-
-
 
         for (si in pivots.indices) {
             val s = pivots[si]
@@ -62,7 +59,6 @@ object TrendsCreator {
 
         return ret.values.toList()
     }
-
 
     fun findRegresLines(ohlcs: List<Ohlc>, conf: LineConfig): List<TdLine> {
         val highs = ohlcs.map { it.high }

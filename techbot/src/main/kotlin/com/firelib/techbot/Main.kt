@@ -4,11 +4,15 @@ import com.firelib.techbot.UpdateSensitivities.updateSensitivties
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
+import com.github.kotlintelegrambot.dispatcher.handlers.TextHandler
 import com.github.kotlintelegrambot.dispatcher.text
+import com.github.kotlintelegrambot.entities.Message
+import com.github.kotlintelegrambot.entities.Update
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
+import okhttp3.logging.HttpLoggingInterceptor
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.FileOutputStream
@@ -55,17 +59,19 @@ fun startMd(){
 }
 
 fun makeBot(taBot: TABot): Bot {
-    val bot = bot {
+    val bt = bot {
+        logLevel = HttpLoggingInterceptor.Level.BASIC
         token = System.getenv("TELEGRAM_TOKEN") ?:  debug_token
         dispatch {
-            text { bot, update ->
+            text { bot , update ->
                 val text = update.message?.text ?: "Hello, World!"
                 taBot.handle(text, bot, update)
             }
         }
     }
-    return bot
+    return bt
 }
+
 
 fun initDatabase(){
     Database.connect("jdbc:sqlite:${GlobalConstants.metaDb.toAbsolutePath()}", driver = "org.sqlite.JDBC")

@@ -39,8 +39,6 @@ object UsersNotifier {
                 val subscribed = Subscriptions.select { Subscriptions.timeframe eq timeFrame.name }
                     .map { it[Subscriptions.ticker] }.distinct()
 
-                println("subsc " + subscribed)
-
                 val existingEvents = loadExistingBreaches()
 
                 val breaches =
@@ -53,19 +51,19 @@ object UsersNotifier {
                         )
                     }
 
-                println("new breaches found ${breaches.joinToString(separator = "\n")}")
-
                 breaches.forEach {
                     notify(it, bot)
                 }
 
-                BreachEvents.batchInsert(breaches) {
-                    this[BreachEvents.ticker] = it.key.ticker
-                    this[BreachEvents.timeframe] = it.key.tf.name
-                    this[BreachEvents.eventTimeMs] = it.key.eventTimeMs
-                    this[BreachEvents.photoFile] = it.photoFile
-                    this[BreachEvents.eventType] = BreachType.TREND_LINE.name
-                }
+                updateDatabase("insert breaches"){
+                    BreachEvents.batchInsert(breaches) {
+                        this[BreachEvents.ticker] = it.key.ticker
+                        this[BreachEvents.timeframe] = it.key.tf.name
+                        this[BreachEvents.eventTimeMs] = it.key.eventTimeMs
+                        this[BreachEvents.photoFile] = it.photoFile
+                        this[BreachEvents.eventType] = BreachType.TREND_LINE.name
+                    }
+                }.get()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -89,7 +87,7 @@ object UsersNotifier {
         Subscriptions.select {
             Subscriptions.ticker eq be.key.ticker and (Subscriptions.timeframe eq be.key.tf.name)
         }.forEach {
-            println("notifiying user ${it}")
+            mainLogger.info("notifiying user ${it}")
             val response = bot.sendPhoto(it[Subscriptions.user].toLong(), File(be.photoFile))
             if (response.second != null) {
                 response.second!!.printStackTrace()

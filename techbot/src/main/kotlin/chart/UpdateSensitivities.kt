@@ -12,13 +12,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object UpdateSensitivities{
 
-    suspend fun main(args: Array<String>) {
+    fun main(args: Array<String>) {
         initDatabase()
         updateSensitivties()
     }
 
     fun updateSensitivties() {
-        transaction {
+        updateDatabase("update sensitivities") {
 
             SensitivityConfig.deleteAll()
 
@@ -40,7 +40,7 @@ object UpdateSensitivities{
 
                 }
             }
-        }
+        }.get()
     }
 
 
@@ -70,7 +70,6 @@ object UpdateSensitivities{
         }
         return false
     }
-
 }
 
 

@@ -16,7 +16,7 @@ import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
-object AnnotationCreator {
+object SequentaAnnCreator {
 
     internal val displayedCounts = arrayOf(11, 12, 20)
 
@@ -135,16 +135,7 @@ fun main() {
     transaction {
         val ohs = BotHelper.getOhlcsForTf("sber", Interval.Day)
         val targetOhlcs = ohs.subList(ohs.size - 100, ohs.size)
-
-        val ann = AnnotationCreator.createAnnotations(targetOhlcs)
-        println(ann)
-
+        val ann = SequentaAnnCreator.createAnnotations(targetOhlcs)
         ChartService.drawSequenta(ann, targetOhlcs, "rtkm")
-
-
-//        val line = TdLine(0, targetOhlcs.size - 1, targetOhlcs[0].high, targetOhlcs.last().high, Resistance, 0, 0.0)
-//        val line1 = TdLine(0, targetOhlcs.size/2, targetOhlcs[0].high, targetOhlcs[targetOhlcs.size/2].high, Resistance, 0, 0.0)
-//        val lineS = TdLine(0, targetOhlcs.size - 1, targetOhlcs[0].low, targetOhlcs.last().low, Support, 0, 0.0)
-//        ChartService.drawLines(listOf(line,line1,lineS), targetOhlcs, "sber")
     }
 }

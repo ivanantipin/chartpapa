@@ -11,7 +11,7 @@ class HelpListHandler(val taBot: TABot) : CommandHandler {
         return listOf("/help")
     }
 
-    override suspend fun handle(cmd: Command, bot: Bot, update: Update) {
+    override fun handle(cmd: Command, bot: Bot, update: Update) {
 
         val msg = taBot.map.values.map { "${it.commands().joinToString("|")} - ${it.description()}" }
             .joinToString(separator = "\n")

@@ -5,6 +5,6 @@ import com.github.kotlintelegrambot.entities.Update
 
 interface CommandHandler {
     fun commands() : List<String>
-    suspend fun handle(cmd: Command, bot: Bot, update: Update)
+    fun handle(cmd: Command, bot: Bot, update: Update)
     fun description() : String
 }

@@ -5,6 +5,7 @@ import com.firelib.techbot.BotHelper.checkTicker
 import com.firelib.techbot.BotHelper.displaySubscriptions
 import com.firelib.techbot.BotHelper.ensureExist
 import com.firelib.techbot.Subscriptions
+import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -34,8 +35,7 @@ class RmHandler : CommandHandler {
         return listOf(command)
     }
 
-    override suspend fun handle(cmd: Command, bot: Bot, update: Update) {
-
+    override fun handle(cmd: Command, bot: Bot, update: Update) {
         val subCmd = RmCmd()
 
         if(!BotHelper.parseCommand(subCmd, cmd.opts, bot,update) ||
@@ -47,23 +47,15 @@ class RmHandler : CommandHandler {
 
         val uid = fromUser!!.id.toInt()
 
-        transaction {
-            // print sql to std-out
-            addLogger(StdOutSqlLogger)
-
-            ensureExist(fromUser)
-
+        updateDatabase("delete user", {
             Subscriptions.deleteWhere { Subscriptions.user eq uid and (Subscriptions.ticker eq subCmd.ticker) }
+        }).get()
 
-            val resp = displaySubscriptions(uid)
-
-            bot.sendMessage(
-                chatId = update.message!!.chat.id,
-                text = resp,
-                parseMode = ParseMode.MARKDOWN
-            )
-
-        }
+        bot.sendMessage(
+            chatId = update.message!!.chat.id,
+            text = displaySubscriptions(uid),
+            parseMode = ParseMode.MARKDOWN
+        )
     }
 
 
