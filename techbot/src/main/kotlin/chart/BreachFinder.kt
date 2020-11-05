@@ -5,6 +5,7 @@ import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.Interval
+import firelib.core.store.GlobalConstants
 import firelib.indicators.SRMaker
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
@@ -25,8 +26,7 @@ object BreachFinder {
 
     fun makeSnapFileName(prefix: String, ticker: String, timeFrame: TimeFrame, eventTimeMs: Long): String {
         val fileName = "${prefix}_${ticker}_${timeFrame}_$eventTimeMs"
-        val tempDir = System.getProperty("java.io.tmpdir")
-        return Paths.get(tempDir).resolve("${fileName}.png").toFile().absoluteFile.toString()
+        return GlobalConstants.imgFolder.resolve("${fileName}.png").toFile().absoluteFile.toString()
     }
 
     fun historicalLevels(ticker: String): HistoricalBreaches {

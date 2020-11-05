@@ -13,6 +13,8 @@ object GlobalConstants {
 
     val mdFolder = rootFolder.resolve("md")
 
+    val imgFolder = mdFolder.resolve("img")
+
     val metaDb = mdFolder.resolve("${env}.db")
 
     val props = SqlQueries.readProps(metaDb, "envs", env)
@@ -27,6 +29,7 @@ object GlobalConstants {
 
     fun ensureDirsExist() {
         FileUtils.forceMkdir(mdFolder.toFile())
+        FileUtils.forceMkdir(imgFolder.toFile())
         FileUtils.forceMkdir(rootReportPath.toFile())
     }
 
