@@ -8,8 +8,8 @@ import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 
 class UnknownCmdHandler(val taBot: TABot) : CommandHandler {
-    override fun commands(): List<String> {
-        return listOf("")
+    override fun command(): String {
+        return ""
     }
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {

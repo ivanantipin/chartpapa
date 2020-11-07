@@ -5,7 +5,9 @@ import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.Interval
+import firelib.core.misc.atMoscow
 import firelib.core.store.GlobalConstants
+import firelib.finam.timeFormatter
 import firelib.indicators.SRMaker
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
@@ -75,29 +77,30 @@ object BreachFinder {
         val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
         val eventTimeMs = targetOhlcs.last().endTime.toEpochMilli()
 
-        val be = transaction {
-            BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq timeFrame.name) and (BreachEvents.eventType eq BreachType.TREND_LINE_SNAPSHOT.name) }
-                .firstOrNull()
-        }
+        return transaction {
+            val be =
+                BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq timeFrame.name) and (BreachEvents.eventType eq BreachType.TREND_LINE_SNAPSHOT.name) }
+                    .firstOrNull()
 
-        return if (be == null) {
-            val fileName = makeSnapFileName(BreachType.TREND_LINE.name, ticker, timeFrame, eventTimeMs)
-            val conf = BotConfig.getConf(ticker, timeFrame)
-            val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
-            val bytes = ChartService.drawLines(lines, targetOhlcs, "Trend lines for ${ticker} (${timeFrame})")
-            saveFile(bytes, fileName)
-            updateDatabase("update trend lines events") {
-                BreachEvents.insert {
-                    it[BreachEvents.ticker] = ticker
-                    it[BreachEvents.timeframe] = timeFrame.name
-                    it[BreachEvents.eventTimeMs] = eventTimeMs
-                    it[BreachEvents.photoFile] = fileName
-                    it[BreachEvents.eventType] = BreachType.TREND_LINE_SNAPSHOT.name
-                }
-            }.get()
-            HistoricalBreaches(filePath = fileName)
-        } else {
-            HistoricalBreaches(filePath = be[BreachEvents.photoFile])
+            if (be == null) {
+                val fileName = makeSnapFileName(BreachType.TREND_LINE.name, ticker, timeFrame, eventTimeMs)
+                val conf = BotConfig.getConf(ticker, timeFrame)
+                val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
+                val bytes = ChartService.drawLines(lines, targetOhlcs, "Trend lines for ${ticker} (${timeFrame})")
+                saveFile(bytes, fileName)
+                updateDatabase("update trend lines events") {
+                    BreachEvents.insert {
+                        it[BreachEvents.ticker] = ticker
+                        it[BreachEvents.timeframe] = timeFrame.name
+                        it[BreachEvents.eventTimeMs] = eventTimeMs
+                        it[BreachEvents.photoFile] = fileName
+                        it[BreachEvents.eventType] = BreachType.TREND_LINE_SNAPSHOT.name
+                    }
+                }.get()
+                HistoricalBreaches(filePath = fileName)
+            } else {
+                HistoricalBreaches(filePath = be[BreachEvents.photoFile])
+            }
         }
     }
 
@@ -123,7 +126,8 @@ object BreachFinder {
                         timeFrame,
                         targetOhlcs.last().endTime.toEpochMilli()
                     )
-                    val title = "Breakout for ${ticker} (${timeFrame})"
+                    val time = timeFormatter.format(endTime.atMoscow())
+                    val title = "Breakout for ${ticker} (${timeFrame}, time is ${time} msk)"
                     val img = ChartService.drawLines(listOf(it), targetOhlcs, title)
                     saveFile(img, fileName)
                     listOf(BreachEvent(key, fileName))

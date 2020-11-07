@@ -24,8 +24,8 @@ object BotHelper {
             val header = "*Your subscriptions*\n"
             val resp = Subscriptions.select {
                 Subscriptions.user eq uid
-            }.map {
-                "${it[Subscriptions.ticker]} : ${it[Subscriptions.timeframe]}"
+            }.groupBy({it[Subscriptions.ticker]}).map {
+                "${it.key} : ${it.value.joinToString (separator = ",", transform = { row->row[Subscriptions.timeframe] }) }"
             }.sorted().joinToString(separator = "\n")
             header + resp
         }
@@ -89,4 +89,6 @@ object BotHelper {
         }
         return true
     }
+
+
 }

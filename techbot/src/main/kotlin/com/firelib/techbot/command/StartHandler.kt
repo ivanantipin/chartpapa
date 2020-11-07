@@ -10,9 +10,14 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class StartHandler : CommandHandler {
 
+    override fun category() : CommandCategory{
+        return CommandCategory.Other
+    }
 
-    override fun commands(): List<String> {
-        return listOf("/start")
+
+
+    override fun command(): String {
+        return "/start"
     }
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {

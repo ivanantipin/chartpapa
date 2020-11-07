@@ -16,6 +16,11 @@ class LevelsCommand : CommandHandler {
         const val command = "/lvl"
     }
 
+    override fun category() : CommandCategory{
+        return CommandCategory.Analysis
+    }
+
+
 
     @CommandLine.Command(name = command, description = ["display levels"])
     class LevelsCmd : CmdLine {
@@ -27,8 +32,8 @@ class LevelsCommand : CommandHandler {
         }
     }
 
-    override fun commands(): List<String> {
-        return listOf(command)
+    override fun command(): String {
+        return command
     }
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {

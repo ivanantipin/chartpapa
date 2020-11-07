@@ -19,6 +19,11 @@ class DemarkCommand : CommandHandler {
         const val command = "/demark"
     }
 
+    override fun category() : CommandCategory{
+        return CommandCategory.Analysis
+    }
+
+
 
     @CommandLine.Command(name = command, description = ["demark sequenta indicator"])
     class DemarkCmd : CmdLine{
@@ -32,8 +37,8 @@ class DemarkCommand : CommandHandler {
         }
     }
 
-    override fun commands(): List<String> {
-        return listOf(command)
+    override fun command(): String {
+        return command
     }
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {

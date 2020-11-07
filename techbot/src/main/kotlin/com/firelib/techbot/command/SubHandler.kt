@@ -19,26 +19,39 @@ class SubHandler : CommandHandler {
 
     companion object {
         const val command = "/sub"
+        const val descr =  """subscribe for the ticker signals ( demark, levels and trend lines)
+            *examples:*
+            */sub sber d,w* : _subscribe for sber day and week timeframes_
+            */sub sber*  : _subscribe for all timeframes_
+        """
+
     }
 
-    override fun commands(): List<String> {
-        return listOf(command)
+    override fun category() : CommandCategory{
+        return CommandCategory.Subscriptions
     }
 
 
-    @CommandLine.Command(name = command, description = ["subscribe for the ticker"])
+    override fun command(): String {
+        return command
+    }
+
+
+
+    @CommandLine.Command(name = command, description = [SubHandler.descr])
     class SubCmd : CmdLine {
         @CommandLine.Parameters(description = ["ticker"], index = "0")
         var ticker: String = ""
 
-        @CommandLine.Parameters(description = ["timeframe , possible values: \${COMPLETION-CANDIDATES}"], index = "1")
-        var timeFrame: TimeFrame = TimeFrame.D
+        @CommandLine.Parameters(description = ["timeframe , possible values: \${COMPLETION-CANDIDATES}"],  split = ",")
+        var timeFrame: ArrayList<TimeFrame> = ArrayList()
 
         override fun postConstruct() {
             ticker = ticker.toUpperCase()
         }
 
     }
+
 
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {
@@ -57,14 +70,19 @@ class SubHandler : CommandHandler {
         ensureExist(fromUser)
 
         updateDatabase("update subscription") {
-            if (Subscriptions.select { Subscriptions.user eq uid and (Subscriptions.ticker eq subCmd.ticker) and (Subscriptions.timeframe eq subCmd.timeFrame.name) }
-                    .empty()) {
-                Subscriptions.insert {
-                    it[user] = uid
-                    it[ticker] = subCmd.ticker
-                    it[timeframe] = subCmd.timeFrame.name
+            val lst = if(subCmd.timeFrame.isEmpty()) TimeFrame.values().toList() else subCmd.timeFrame
+            lst.forEach {tf->
+                if (Subscriptions.select { Subscriptions.user eq uid and (Subscriptions.ticker eq subCmd.ticker) and (Subscriptions.timeframe eq tf.name) }
+                        .empty()) {
+                    Subscriptions.insert {
+                        it[user] = uid
+                        it[ticker] = subCmd.ticker
+                        it[timeframe] = tf.name
+                    }
                 }
+
             }
+
         }.get()
 
         bot.sendMessage(

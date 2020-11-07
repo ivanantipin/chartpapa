@@ -7,18 +7,34 @@ import com.github.kotlintelegrambot.entities.Update
 
 class HelpListHandler(val taBot: TABot) : CommandHandler {
 
-    override fun commands(): List<String> {
-        return listOf("/help")
+    override fun command(): String {
+        return "/help"
     }
+
+    override fun category() : CommandCategory{
+        return CommandCategory.Other
+    }
+
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {
 
-        val msg = taBot.map.values.map { "${it.commands().joinToString("|")} - ${it.description()}" }
-            .joinToString(separator = "\n")
+        val byCategory = taBot.map.values.groupBy { it.category() }
+
+        fun handlersToStr(lst : List<CommandHandler>) =  lst.joinToString(separator = "\n", transform = {ln-> "${ln.command()} - ${ln.description()}"})
+
+
+
+        val descr = CommandCategory.values().map {cat->
+
+            """*${cat} commands*
+${handlersToStr(byCategory[cat]!!)}
+
+""".trimIndent()
+        }.joinToString(separator = "\n")
 
         bot.sendMessage(
             chatId = update.message!!.chat.id,
-            text = msg,
+            text = descr,
             parseMode = ParseMode.MARKDOWN
         )
     }

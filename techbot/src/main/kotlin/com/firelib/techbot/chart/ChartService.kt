@@ -103,8 +103,12 @@ object ChartService {
                 HLine(start, end, it.level, "solid", "green"),
                 HLine(end, hours.last().endTime.toEpochMilli(), it.level, "dash", "green")
             )
-
         })
+
+        options.annotations += HAnnotation(lines.map {
+            ChartCreator.markLevel(it.initial.toEpochMilli(), it.level, false)
+        }, emptyList())
+
 
         val optJson = Json { prettyPrint = true }.encodeToString(
             HiRequest(

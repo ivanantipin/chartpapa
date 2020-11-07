@@ -18,6 +18,11 @@ import picocli.CommandLine
 
 class RmHandler : CommandHandler {
 
+    override fun category() : CommandCategory{
+        return CommandCategory.Subscriptions
+    }
+
+
     companion object{
         const val command = "/rm"
 
@@ -31,8 +36,8 @@ class RmHandler : CommandHandler {
         }
     }
 
-    override fun commands(): List<String> {
-        return listOf(command)
+    override fun command(): String {
+        return command
     }
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {

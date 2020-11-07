@@ -2,23 +2,27 @@ package com.firelib.techbot.chart
 
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.chart.ChartCreator.makeBuySellPoint
+import com.firelib.techbot.chart.ChartCreator.markLevel
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.initDatabase
 import com.funstat.domain.HLine
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
+import firelib.core.misc.toStrWithDecPlaces
 import firelib.indicators.sequenta.Sequenta
+import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.SignalType
 import firelib.indicators.sequenta.calcStop
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.log
 
 object SequentaAnnCreator {
 
-    internal val displayedCounts = arrayOf(11, 12, 20)
+    internal val displayedCounts = arrayOf(11, 12)
 
     fun formatDbl(dbl: Double): String {
         return DecimalFormat("#.##").format(dbl)
@@ -100,6 +104,7 @@ object SequentaAnnCreator {
                             dashStyle = "ShortDash",
                             color = if (s.reference.up) "green" else "red"
                         )
+                        labels.add(markLevel( s.reference.getStart().toEpochMilli(), s.reference.tdst, s.reference.up))
                         lines.add(hhline)
                         while (curLine.get() < lines.size - 5) {
                             lines[curLine.get()] = lines[curLine.get()].copy(end = oh.endTime.toEpochMilli())
@@ -127,13 +132,14 @@ object SequentaAnnCreator {
         lines.addAll(lines0)
         return SequentaAnnnotations(labels, shapes, lines)
     }
+
 }
 
 
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf("sber", Interval.Day)
+        val ohs = BotHelper.getOhlcsForTf("plzl", Interval.Day)
         val targetOhlcs = ohs.subList(ohs.size - 100, ohs.size)
         val ann = SequentaAnnCreator.createAnnotations(targetOhlcs)
         ChartService.drawSequenta(ann, targetOhlcs, "rtkm")

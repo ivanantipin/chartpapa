@@ -3,6 +3,8 @@ package com.firelib.techbot.chart
 import com.firelib.techbot.chart.domain.*
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
+import firelib.core.misc.toStrWithDecPlaces
+import kotlin.math.log
 
 
 val defaultLegend = HLegend(
@@ -37,6 +39,24 @@ object ChartCreator {
             scrollbar = HScrollbar(false)
         }
     }
+
+    fun markLevel(
+        timeMs : Long,
+        level : Double,
+        below : Boolean
+    ): HLabel {
+        val decPlaces =  log(100000/level, 10.0).toInt()
+        return HLabel(
+            verticalAlign = if (below) "bottom" else "top",
+            backgroundColor = "rgba(255,255,255,0)", //if (s.reference.up) "red" else "green",
+            borderColor = "rgba(255,255,255,0.5)",
+            text = level.toStrWithDecPlaces(decPlaces),
+            style = HStyle(fontSize = "6px"),
+            distance = if (below) -10 else 0,
+            point = HPoint(x = timeMs, y = level,xAxis = 0, yAxis = 0)
+        )
+    }
+
 
     fun makeBuySellPoint(color: String, time: Long, y: Double, buySell: Side): HShape {
         val point = HPoint(0, 0, time, y)

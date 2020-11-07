@@ -19,24 +19,23 @@ import kotlin.time.measureTimedValue
 val databaseExecutor = Executors.newSingleThreadExecutor()
 
 
-inline fun <R> measureTime(block: ()->R) : Pair<R,Long> {
+inline fun <R> measureTime(block: () -> R): Pair<R, Long> {
     val start = System.currentTimeMillis()
     val answer = block()
     return answer to System.currentTimeMillis() - start
 }
 
-inline fun <R> measureAndLogTime(msg : String, block: ()->R) : Pair<R,Long> {
+inline fun <R> measureAndLogTime(msg: String, block: () -> R): Pair<R, Long> {
     val (r, l) = measureTime(block)
-    mainLogger.info("time spent on ${msg} is ${l/1000.0} s.")
+    mainLogger.info("time spent on ${msg} is ${l / 1000.0} s.")
     return r to l
 }
-
 
 
 val mainLogger = LoggerFactory.getLogger("main")
 
 
-fun <T> updateDatabase(name: String, block: () -> T) : Future<T> {
+fun <T> updateDatabase(name: String, block: () -> T): Future<T> {
     return databaseExecutor.submit(
         Callable<T> {
             transaction {
@@ -69,9 +68,7 @@ class TABot {
     }
 
     fun register(handler: CommandHandler) {
-        handler.commands().forEach {
-            map[it] = handler
-        }
+        map[handler.command()] = handler
     }
 
     fun parseCmd(cmd: String): Command {
@@ -95,7 +92,7 @@ class TABot {
             val parsed = parseCmd(cmd)
             val handler = map.get(parsed.cmd)
             if (handler != null) {
-                measureAndLogTime("processing command ${handler::class}"){
+                measureAndLogTime("processing command ${handler::class}") {
                     handler.handle(parsed, bot, update)
                 }
             } else {

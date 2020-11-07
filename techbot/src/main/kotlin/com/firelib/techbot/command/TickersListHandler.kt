@@ -7,8 +7,8 @@ import com.github.kotlintelegrambot.entities.Update
 import firelib.finam.FinamDownloader
 
 class TickersListHandler : CommandHandler {
-    override fun commands(): List<String> {
-        return listOf("/list")
+    override fun command(): String {
+        return "/list"
     }
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {

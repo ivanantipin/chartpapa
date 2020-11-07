@@ -16,6 +16,11 @@ class TrendsCommand : CommandHandler {
         const val command = "/tl"
     }
 
+    override fun category() : CommandCategory{
+        return CommandCategory.Analysis
+    }
+
+
 
     @CommandLine.Command(name = command, description = ["display trends for commands"])
     class TrendsCmd : CmdLine{
@@ -29,8 +34,8 @@ class TrendsCommand : CommandHandler {
         }
     }
 
-    override fun commands(): List<String> {
-        return listOf(command)
+    override fun command(): String {
+        return command
     }
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {
