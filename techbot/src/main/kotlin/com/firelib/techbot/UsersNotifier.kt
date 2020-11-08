@@ -23,7 +23,7 @@ object UsersNotifier {
     fun start(bot: Bot) {
         TimeFrame.values().forEach { tf ->
             Thread({
-                timeSequence(Instant.now(), Interval.Min10, 10000).forEach {
+                timeSequence(Instant.now(), tf.interval, 10000).forEach {
                     try {
                         check(bot, tf, 5)
                     } catch (e: Exception) {
@@ -32,13 +32,13 @@ object UsersNotifier {
 
                 }
             }, tf.name + "_breach_notifier").start()
-
         }
     }
 
     fun check(bot: Bot, timeFrame: TimeFrame, breachWindow: Int) {
         try {
             transaction {
+
                 val subscribed = Subscriptions.select { Subscriptions.timeframe eq timeFrame.name }
                     .map { it[Subscriptions.ticker] }.distinct()
 
@@ -76,6 +76,7 @@ object UsersNotifier {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        println("transaction finished")
     }
 
 
@@ -110,5 +111,9 @@ fun main() {
     //UpdateSensitivities.updateSensitivties()
 
     val bot = makeBot(TABot())
-    UsersNotifier.check(bot, TimeFrame.M30, 20)
+
+    TimeFrame.values().forEach { tf ->
+        UsersNotifier.check(bot, tf, 5)
+    }
+
 }

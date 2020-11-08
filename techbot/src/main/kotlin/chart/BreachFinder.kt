@@ -16,6 +16,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
 import kotlin.math.sign
 
 
@@ -39,29 +40,33 @@ object BreachFinder {
         val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
         val conf = BotConfig.getConf(ticker, timeFrame)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
+
+
         return lines.filter { it.intersectPoint != null && it.intersectPoint!!.first >= targetOhlcs.size - breachWindow }
-            .flatMap {
+            .groupBy {
                 val endTime = targetOhlcs[it.intersectPoint!!.first].endTime
-                val key = BreachEventKey(ticker, timeFrame, endTime.toEpochMilli(), BreachType.TREND_LINE)
-                if (!existingBreaches.contains(key)) {
-                    val fileName = makeSnapFileName(
-                        BreachType.TREND_LINE.name,
-                        ticker,
-                        timeFrame,
-                        targetOhlcs.last().endTime.toEpochMilli()
-                    )
-                    val time = timeFormatter.format(endTime.atMoscow())
-                    val title = "Breakout for ${ticker} (${timeFrame}, time is ${time} msk)"
-                    val img = ChartService.drawLines(listOf(it), targetOhlcs, title)
-                    saveFile(img, fileName)
-                    listOf(BreachEvent(key, fileName))
-                } else {
-                    emptyList()
-                }
+                BreachEventKey(ticker, timeFrame, endTime.toEpochMilli(), BreachType.TREND_LINE)
+            }
+            .filter { !existingBreaches.contains(it.key) }
+            .map {
+                val key = it.key
+                println(key)
+                val fileName = makeSnapFileName(
+                    BreachType.TREND_LINE.name,
+                    ticker,
+                    timeFrame,
+                    it.key.eventTimeMs
+                )
+
+                val time = timeFormatter.format(Instant.ofEpochMilli(it.key.eventTimeMs).atMoscow())
+                val title = "Breakout for ${ticker} (${timeFrame}, time is ${time} msk)"
+                val img = ChartService.drawLines(it.value, targetOhlcs, title)
+                saveFile(img, fileName)
+                BreachEvent(key, fileName)
             }
     }
 
-    data class LevelSignal(val side : Side, val time : Long, val level : SR)
+    data class LevelSignal(val side: Side, val time: Long, val level: SR)
 
     fun findLevelBreaches(
         ticker: String,
@@ -72,8 +77,9 @@ object BreachFinder {
         val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
         val levels = makeLevels(ticker, targetOhlcs)
 
-        return levels.flatMap {sr->
-            val breachDetected = sign(targetOhlcs.at(-1).close - sr.level) == sign(sr.level - targetOhlcs.at(-breachWindow).close)
+        return levels.flatMap { sr ->
+            val breachDetected =
+                sign(targetOhlcs.at(-1).close - sr.level) == sign(sr.level - targetOhlcs.at(-breachWindow).close)
             val time = targetOhlcs.last().endTime.toEpochMilli()
             val key = BreachEventKey(ticker, timeFrame, time, BreachType.LEVELS_SIGNAL)
 
@@ -87,7 +93,11 @@ object BreachFinder {
                     time
                 )
 
-                val img = ChartService.drawLevelsBreaches(listOf(LevelSignal(side, time, sr)), targetOhlcs, "Levels breaches")
+                val timeStr = timeFormatter.format(targetOhlcs.at(-1).endTime.atMoscow())
+                val title = "Level breakout for ${ticker} (${timeFrame}, time is ${timeStr} msk)"
+
+                val img =
+                    ChartService.drawLevelsBreaches(listOf(LevelSignal(side, time, sr)), targetOhlcs, title)
 
                 saveFile(img, fileName)
 
@@ -104,7 +114,7 @@ object BreachFinder {
     ): List<SR> {
 
         val lst = LevelSensitivityConfig.select { LevelSensitivityConfig.ticker eq ticker }.toList()
-        if(lst.isEmpty()){
+        if (lst.isEmpty()) {
             println("no level senses for ticker ${ticker}")
             return emptyList()
         }
@@ -122,8 +132,8 @@ object BreachFinder {
 }
 
 
-fun List<Ohlc>.at(idx : Int) : Ohlc{
-    if(idx < 0) {
+fun List<Ohlc>.at(idx: Int): Ohlc {
+    if (idx < 0) {
         return this[this.size + idx]
     }
     return this[idx]
@@ -131,11 +141,7 @@ fun List<Ohlc>.at(idx : Int) : Ohlc{
 
 fun main() {
     initDatabase()
-    SymbolsDao.available().forEach { instr->
-        transaction {
-            BreachFinder.findLevelBreaches(instr.code, TimeFrame.M30, 100, emptySet())
-        }
-    }
+    BreachFinder.findNewBreaches("GAZP", TimeFrame.W, 5, emptySet())
     //UpdateLevelsSensitivities.updateLevelSenses()
 
 }

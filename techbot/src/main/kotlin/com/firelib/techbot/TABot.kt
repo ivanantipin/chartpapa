@@ -36,6 +36,7 @@ val mainLogger = LoggerFactory.getLogger("main")
 
 
 fun <T> updateDatabase(name: String, block: () -> T): Future<T> {
+
     return databaseExecutor.submit(
         Callable<T> {
             transaction {
