@@ -1,11 +1,16 @@
 package com.firelib.techbot.chart
 
+import chart.BreachFinder
+import chart.at
+import com.firelib.techbot.BotHelper
 import com.firelib.techbot.TdLine
 import com.firelib.techbot.chart.ChartCreator.makeOptions
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.LineType.Resistance
 import com.firelib.techbot.domain.LineType.Support
+import com.firelib.techbot.initDatabase
 import com.funstat.domain.HLine
+import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.SR
@@ -16,6 +21,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.logTimeSpent
+import org.jetbrains.exposed.sql.transactions.transaction
 
 
 object ChartService {
@@ -38,16 +44,8 @@ object ChartService {
 
         options.series += series
 
-        val optJson = Json { prettyPrint = true }.encodeToString(
-            HiRequest(
-                async = true,
-                infile = options,
-                constr = "StockChart",
-                2
-            )
-        )
         return logTimeSpent("draw sequenta hicharts server"){
-            postJson(optJson)
+            post(options)
         }
     }
 
@@ -96,7 +94,22 @@ object ChartService {
     ): ByteArray {
         val options = makeOptions(hours, title)
 
-        options.series += renderHLines(lines.flatMap {
+        options.series += level2series(lines, hours)
+
+        options.annotations += HAnnotation(lines.map {
+            ChartCreator.markLevel(it.initial.toEpochMilli(), it.level, false)
+        }, emptyList())
+
+        return logTimeSpent("draw levels hicharts server"){
+            post(options)
+        }
+    }
+
+    private fun level2series(
+        lines: List<SR>,
+        hours: List<Ohlc>
+    ): List<HSeries> {
+        return renderHLines(lines.flatMap {
             val start = it.initial.toEpochMilli()
             val end = it.activeDate.toEpochMilli()
             listOf(
@@ -104,23 +117,30 @@ object ChartService {
                 HLine(end, hours.last().endTime.toEpochMilli(), it.level, "dash", "green")
             )
         })
+    }
 
-        options.annotations += HAnnotation(lines.map {
-            ChartCreator.markLevel(it.initial.toEpochMilli(), it.level, false)
-        }, emptyList())
+    fun drawLevelsBreaches(
+        signals: List<BreachFinder.LevelSignal>,
+        hours: List<Ohlc>,
+        title: String
+    ): ByteArray {
+        val options = makeOptions(hours, title)
+
+        options.series += level2series(signals.map { it.level }, hours)
+
+        val shapes = signals.map {
+            val color = getLineColor(it.side)
+            ChartCreator.makeBuySellPoint(color, it.time, it.level.level, it.side)
+        }
 
 
-        val optJson = Json { prettyPrint = true }.encodeToString(
-            HiRequest(
-                async = true,
-                infile = options,
-                constr = "StockChart",
-                2
-            )
-        )
+        val labels = signals.map { sr ->
+            ChartCreator.markLevel(sr.level.initial.toEpochMilli(), sr.level.level, false)
+        }
+        options.annotations += HAnnotation(labels, shapes)
 
         return logTimeSpent("draw levels hicharts server"){
-            postJson(optJson)
+            post(options)
         }
     }
 
@@ -139,40 +159,45 @@ object ChartService {
         }.values.flatMap { it.toList() }
         options.series += series
         options.series += renderHLines(activeLevels(lines, hours))
-        val optJson = Json { prettyPrint = true }.encodeToString(
-            HiRequest(
-                async = true,
-                infile = options,
-                constr = "StockChart",
-                2
-            )
-        )
+
         return logTimeSpent("draw lines hicharts server"){
-            postJson(optJson)
+            post(options)
         }
+    }
+
+    private fun post(options: HOptions): ByteArray {
+        val optJson = Json { prettyPrint = true }.encodeToString(
+                HiRequest(
+                    async = true,
+                    infile = options,
+                    constr = "StockChart",
+                    2
+                )
+            )
+        return postJson(optJson)
     }
 
     private fun annotations(lines: List<TdLine>, hours: List<Ohlc>): HAnnotation {
         val shapes = lines.filter { it.intersectPoint != null }.map {
-            val color = getLineColor(it)
+            val side = if (it.lineType == Support) Side.Sell else Side.Buy
+            val color = getLineColor(side)
             val x = hours[it.intersectPoint!!.first].endTime.toEpochMilli()
             val y = it.intersectPoint!!.second
-            val side = if (it.lineType == Support) Side.Sell else Side.Buy
             ChartCreator.makeBuySellPoint(color, x, y, side)
         }
         return HAnnotation(emptyList(), shapes)
     }
 
-    private fun getLineColor(it: TdLine): String {
-        val color = if (it.lineType == Support) "red" else "green"
-        return color
+    private fun getLineColor(side : Side): String {
+        return if (side == Side.Buy) "green" else "red"
     }
 
     private fun activeLevels(lines: List<TdLine>, hours: List<Ohlc>): List<HLine> {
         return lines.filter { it.intersectPoint == null }.map {
             val start = hours[0].endTime.toEpochMilli()
             val end = hours[20].endTime.toEpochMilli()
-            HLine(start, end, it.calcValue(hours.size - 1), "solid", getLineColor(it))
+            val side = if(it.lineType ==Support) Side.Sell else Side.Buy
+            HLine(start, end, it.calcValue(hours.size - 1), "solid", getLineColor(side))
         }
     }
 
@@ -240,5 +265,16 @@ object ChartService {
                 )
             )
         }
+    }
+}
+
+fun main() {
+    initDatabase()
+    transaction {
+        val ohs = BotHelper.getOhlcsForTf("plzl", Interval.Day)
+        val sr = SR(ohs[0].endTime, ohs[20].endTime, ohs[20].high)
+        val time = ohs.at(-5).endTime.toEpochMilli()
+        val sigi = BreachFinder.LevelSignal(Side.Sell, time, sr)
+        ChartService.drawLevelsBreaches(listOf(sigi), ohs, "some")
     }
 }

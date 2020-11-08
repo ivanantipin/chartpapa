@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import chart.BreachFinder.historicalLevels
+import chart.HistoricalLevels
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.BotHelper.checkTicker
 import com.firelib.techbot.initDatabase
@@ -46,7 +46,7 @@ class LevelsCommand : CommandHandler {
             return
         }
 
-        val image = historicalLevels(trendsCmd.ticker)
+        val image = HistoricalLevels.historicalLevels(trendsCmd.ticker)
         bot.sendPhoto(chatId = update.message!!.chat.id, photo = File(image.filePath))
     }
 
@@ -58,6 +58,6 @@ class LevelsCommand : CommandHandler {
 
 fun main() {
     initDatabase()
-    historicalLevels("AUDUSD")
+    HistoricalLevels.historicalLevels("AUDUSD")
 }
 

@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import chart.BreachFinder.historicalBreaches
+import chart.HistoricalTrendLines.historicalTrendLines
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.BotHelper.checkTicker
 import com.firelib.techbot.domain.TimeFrame
@@ -48,7 +48,7 @@ class TrendsCommand : CommandHandler {
             return
         }
 
-        val image = historicalBreaches(trendsCmd.ticker, trendsCmd.tf)
+        val image = historicalTrendLines(trendsCmd.ticker, trendsCmd.tf)
         bot.sendPhoto(chatId = update.message!!.chat.id, photo = File(image.filePath))
     }
 

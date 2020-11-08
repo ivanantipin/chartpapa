@@ -2,6 +2,9 @@ package com.firelib.techbot
 
 import chart.BreachFinder
 import chart.BreachType
+import chart.HistoricalBreaches
+import chart.SequentaSignals
+import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
 import firelib.core.domain.Interval
@@ -39,7 +42,7 @@ object UsersNotifier {
                 val subscribed = Subscriptions.select { Subscriptions.timeframe eq timeFrame.name }
                     .map { it[Subscriptions.ticker] }.distinct()
 
-                val existingEvents = loadExistingBreaches()
+                val existingEvents = loadExistingBreaches().map { it.key }.toSet()
 
                 val breaches =
                     SymbolsDao.available().map { it.code }.filter { subscribed.contains(it) }.flatMap { ticker ->
@@ -47,21 +50,26 @@ object UsersNotifier {
                             ticker,
                             timeFrame,
                             breachWindow,
-                            existingEvents.map { it.key }.toSet()
-                        )
+                            existingEvents
+                        ) + BreachFinder.findLevelBreaches(
+                            ticker,
+                            timeFrame,
+                            breachWindow,
+                            existingEvents
+                        ) + SequentaSignals.checkSignals(ticker, timeFrame, breachWindow, existingEvents)
                     }
 
                 breaches.forEach {
                     notify(it, bot)
                 }
 
-                updateDatabase("insert breaches"){
+                updateDatabase("insert breaches") {
                     BreachEvents.batchInsert(breaches) {
                         this[BreachEvents.ticker] = it.key.ticker
                         this[BreachEvents.timeframe] = it.key.tf.name
                         this[BreachEvents.eventTimeMs] = it.key.eventTimeMs
                         this[BreachEvents.photoFile] = it.photoFile
-                        this[BreachEvents.eventType] = BreachType.TREND_LINE.name
+                        this[BreachEvents.eventType] = it.key.type.name
                     }
                 }.get()
             }
@@ -70,8 +78,9 @@ object UsersNotifier {
         }
     }
 
+
     fun loadExistingBreaches(): List<BreachEvent> {
-        return BreachEvents.select { BreachEvents.eventTimeMs greater System.currentTimeMillis() - 200 * 24 * 3600_000L }
+        return BreachEvents.select { BreachEvents.eventTimeMs greater System.currentTimeMillis() - 10 * 24 * 3600_000L }
             .map {
                 val key = BreachEventKey(
                     ticker = it[BreachEvents.ticker],
