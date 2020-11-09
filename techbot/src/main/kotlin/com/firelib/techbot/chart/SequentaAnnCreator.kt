@@ -39,7 +39,6 @@ object SequentaAnnCreator {
 
 
     fun createAnnotations(ohlcs: List<Ohlc>): SequentaAnnnotations {
-        val sequenta = Sequenta()
 
         val labels = ArrayList<HLabel>()
         val shapes = ArrayList<HShape>()
@@ -94,7 +93,7 @@ object SequentaAnnCreator {
                         var hline = HLine(
                             ohlcs[ci - 3].endTime.toEpochMilli(),
                             endOh.endTime.toEpochMilli(),
-                            sequenta.calcStop(s.reference.up, s.reference.start, sequenta.data.size),
+                            s.reference.sequenta().calcStop(s.reference.up, s.reference.start, s.idx),
                             dashStyle = "Solid",
                             color = if (s.reference.up) "red" else "green"
                         )
@@ -143,9 +142,8 @@ object SequentaAnnCreator {
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf("plzl", Interval.Day)
-        val targetOhlcs = ohs.subList(ohs.size - 100, ohs.size)
-        val ann = SequentaAnnCreator.createAnnotations(targetOhlcs)
-        ChartService.drawSequenta(ann, targetOhlcs, "rtkm")
+        val ohs = BotHelper.getOhlcsForTf("sber", Interval.Day)
+        val ann = SequentaAnnCreator.createAnnotations(ohs)
+        ChartService.drawSequenta(ann, ohs, "rtkm")
     }
 }

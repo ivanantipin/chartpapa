@@ -57,6 +57,11 @@ class Sequenta {
                 -1
             } else counts[pendingSignal - 1]
 
+
+        fun data() : List<Ohlc>{
+            return data
+        }
+
         fun updateEnd(idx: Int) {
             end = idx
             calcRange()
@@ -104,6 +109,10 @@ class Sequenta {
 
         fun invalidated(): Boolean {
             return closesBeyondTdst > 5
+        }
+
+        fun sequenta() : Sequenta{
+            return this@Sequenta
         }
 
         fun checkCountDown(): List<Signal> {
