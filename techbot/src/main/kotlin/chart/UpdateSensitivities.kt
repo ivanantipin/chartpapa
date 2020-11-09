@@ -12,11 +12,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object UpdateSensitivities{
 
-    fun main(args: Array<String>) {
-        initDatabase()
-        updateSensitivties()
-    }
-
     fun updateSensitivties() {
         updateDatabase("update sensitivities") {
 
@@ -72,5 +67,7 @@ object UpdateSensitivities{
     }
 }
 
-
-
+fun main(args: Array<String>) {
+    initDatabase()
+    UpdateSensitivities.updateSensitivties()
+}

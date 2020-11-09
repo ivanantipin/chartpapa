@@ -2,7 +2,9 @@ package chart
 
 import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
+import com.firelib.techbot.chart.SequentaAnnCreator
 import com.firelib.techbot.domain.TimeFrame
+import firelib.core.domain.Interval
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -15,10 +17,13 @@ object HistoricalTrendLines{
 
         return transaction {
             val be =
-                BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq timeFrame.name) and (BreachEvents.eventType eq BreachType.TREND_LINE_SNAPSHOT.name) }
+                BreachEvents.select { BreachEvents.ticker eq ticker and
+                        (BreachEvents.timeframe eq timeFrame.name) and
+                        (BreachEvents.eventType eq BreachType.TREND_LINE_SNAPSHOT.name) and
+                        (BreachEvents.eventTimeMs eq eventTimeMs)}
                     .firstOrNull()
 
-            if (be == null) {
+            if (be == null || true) {
                 val fileName = BreachFinder.makeSnapFileName(BreachType.TREND_LINE.name, ticker, timeFrame, eventTimeMs)
                 val conf = BotConfig.getConf(ticker, timeFrame)
                 val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
@@ -39,5 +44,9 @@ object HistoricalTrendLines{
             }
         }
     }
+}
 
+fun main() {
+    initDatabase()
+    val lines = HistoricalTrendLines.historicalTrendLines("RASP", TimeFrame.H)
 }

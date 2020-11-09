@@ -141,7 +141,7 @@ fun List<Ohlc>.at(idx: Int): Ohlc {
 
 fun main() {
     initDatabase()
-    BreachFinder.findNewBreaches("GAZP", TimeFrame.W, 5, emptySet())
+    BreachFinder.findNewBreaches("RASP", TimeFrame.H, 5, emptySet())
     //UpdateLevelsSensitivities.updateLevelSenses()
 
 }

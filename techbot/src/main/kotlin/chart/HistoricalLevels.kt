@@ -16,7 +16,6 @@ object HistoricalLevels{
         val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
         val eventTimeMs = targetOhlcs.last().endTime.toEpochMilli()
 
-
         return transaction {
 
             val rr = LevelSensitivityConfig.select { LevelSensitivityConfig.ticker eq ticker }.first()
@@ -26,7 +25,11 @@ object HistoricalLevels{
             val maker = SRMaker(1000, hits, ziggy)
 
             val be =
-                BreachEvents.select { BreachEvents.ticker eq ticker and (BreachEvents.timeframe eq TimeFrame.M30.name) and (BreachEvents.eventType eq BreachType.LEVELS_SNAPSHOT.name) }
+                BreachEvents.select { BreachEvents.ticker eq ticker and
+                        (BreachEvents.timeframe eq TimeFrame.M30.name) and
+                        (BreachEvents.eventType eq BreachType.LEVELS_SNAPSHOT.name) and
+                        (BreachEvents.eventTimeMs eq eventTimeMs)
+                }
                     .firstOrNull()
 
             if (be == null) {
