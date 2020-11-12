@@ -25,7 +25,7 @@ object UsersNotifier {
             Thread({
                 timeSequence(Instant.now(), tf.interval, 10000).forEach {
                     try {
-                        check(bot, tf, 5)
+                        check(bot, tf, 2)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }

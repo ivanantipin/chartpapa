@@ -7,8 +7,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 
 
-class Sequenta {
-    var counts = arrayOf(13, 21)
+class Sequenta(val counts : Array<Int> = arrayOf(13, 21)) {
 
     var data: MutableList<Ohlc> = ArrayList()
 

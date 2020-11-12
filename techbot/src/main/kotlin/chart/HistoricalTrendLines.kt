@@ -12,8 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object HistoricalTrendLines{
     fun historicalTrendLines(ticker: String, timeFrame: TimeFrame): HistoricalBreaches {
-        val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
-        val eventTimeMs = targetOhlcs.last().endTime.toEpochMilli()
+        val eventTimeMs = Interval.Min10.truncTime(System.currentTimeMillis())
 
         return transaction {
             val be =
@@ -24,6 +23,7 @@ object HistoricalTrendLines{
                     .firstOrNull()
 
             if (be == null || true) {
+                val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
                 val fileName = BreachFinder.makeSnapFileName(BreachType.TREND_LINE.name, ticker, timeFrame, eventTimeMs)
                 val conf = BotConfig.getConf(ticker, timeFrame)
                 val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)

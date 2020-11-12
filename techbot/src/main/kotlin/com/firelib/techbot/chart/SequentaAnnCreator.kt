@@ -47,7 +47,7 @@ object SequentaAnnCreator {
 
         val curLine = AtomicInteger(0)
 
-        val sequenta = Sequenta()
+        val sequenta = Sequenta(arrayOf(13))
 
         ohlcs.forEachIndexed { ci, oh ->
             sequenta.onOhlc(oh).forEach { s ->
@@ -82,7 +82,7 @@ object SequentaAnnCreator {
                         val ratio = s.reference.recycleRatio()
                         val recycle = if (ratio != null) "/R=${formatDbl(ratio)}" else "";
 
-                        if (!s.reference.isCancelled) {
+                        if (!s.reference.isCancelled && (ratio == null || ratio < 1)) {
                             labels.add(base.copy(text = "${s.reference.completedSignal}" + recycle))
 
                             if (s.reference.up) {

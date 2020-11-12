@@ -14,7 +14,8 @@ object HistoricalLevels{
 
     fun historicalLevels(ticker: String): HistoricalBreaches {
         val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
-        val eventTimeMs = targetOhlcs.last().endTime.toEpochMilli()
+        val eventTimeMs = Interval.Min10.truncTime(System.currentTimeMillis())
+
 
         return transaction {
 
