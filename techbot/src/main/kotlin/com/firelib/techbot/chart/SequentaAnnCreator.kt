@@ -144,7 +144,7 @@ object SequentaAnnCreator {
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf("rasp", Interval.Min60)
+        val ohs = BotHelper.getOhlcsForTf("sber", Interval.Min60)
         val ann = SequentaAnnCreator.createAnnotations(ohs)
         ChartService.drawSequenta(ann, ohs, "rtkm")
     }

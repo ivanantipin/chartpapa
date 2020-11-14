@@ -22,7 +22,7 @@ object HistoricalTrendLines{
                         (BreachEvents.eventTimeMs eq eventTimeMs)}
                     .firstOrNull()
 
-            if (be == null || true) {
+            if (be == null) {
                 val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
                 val fileName = BreachFinder.makeSnapFileName(BreachType.TREND_LINE.name, ticker, timeFrame, eventTimeMs)
                 val conf = BotConfig.getConf(ticker, timeFrame)

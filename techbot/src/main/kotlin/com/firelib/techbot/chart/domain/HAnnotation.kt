@@ -38,7 +38,8 @@ data class HLabel(
     var distance : Int? = null,
     var text : String? = null,
     var shape : String? = null,
-    var style : HStyle? = null
+    var style : HStyle? = null,
+    val allowOverlap : Boolean? = null
 )
 
 @Serializable

@@ -18,6 +18,7 @@ class HelpListHandler(val taBot: TABot) : CommandHandler {
 
     override fun handle(cmd: Command, bot: Bot, update: Update) {
 
+
         val byCategory = taBot.map.values.groupBy { it.category() }
 
         fun handlersToStr(lst : List<CommandHandler>) =  lst.joinToString(separator = "\n", transform = {ln-> "${ln.command()} - ${ln.description()}"})
@@ -30,7 +31,8 @@ class HelpListHandler(val taBot: TABot) : CommandHandler {
 ${handlersToStr(byCategory[cat]!!)}
 
 """.trimIndent()
-        }.joinToString(separator = "\n")
+        }.joinToString(separator = "\n") + "\n [Поддержка](https://t.me/techBotSupport)"
+
 
         bot.sendMessage(
             chatId = update.message!!.chat.id,

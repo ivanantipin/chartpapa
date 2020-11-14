@@ -53,7 +53,8 @@ object ChartCreator {
             text = level.toStrWithDecPlaces(decPlaces),
             style = HStyle(fontSize = "6px"),
             distance = if (below) -10 else 0,
-            point = HPoint(x = timeMs, y = level,xAxis = 0, yAxis = 0)
+            point = HPoint(x = timeMs, y = level,xAxis = 0, yAxis = 0),
+            allowOverlap = true
         )
     }
 
