@@ -27,7 +27,7 @@ class StartHandler : CommandHandler {
         ensureExist(fromUser)
 
         val mdText = """
-                    [Инструкция](https://teletype.in/@techbot/techBotInstruction1)
+                    [Инструкция](https://teletype.in/@techbot/techBotInstruction3)
                 """.trimIndent()
 
         bot.sendMessage(

@@ -24,14 +24,35 @@ class HelpListHandler(val taBot: TABot) : CommandHandler {
         fun handlersToStr(lst : List<CommandHandler>) =  lst.joinToString(separator = "\n", transform = {ln-> "${ln.command()} - ${ln.description()}"})
 
 
+        val shortcut = """
+            
+         * Simple usage *
+            *sber d*
+                - so you just need to type  *<ticker> <timeframe>* and it displays all charts for ticker for timeframe,
+            
+            */sub sber* 
+                - subscribe to sber signals
+            
+            */rm sber* 
+                - unsubscribe from sber signals
+            
+            */list*
+                - tickers available
+                
+             
+         """.trimIndent()
 
-        val descr = CommandCategory.values().map {cat->
+        val descr = shortcut + CommandCategory.values().map {cat->
 
             """*${cat} commands*
 ${handlersToStr(byCategory[cat]!!)}
 
 """.trimIndent()
         }.joinToString(separator = "\n") + "\n [Поддержка](https://t.me/techBotSupport)"
+
+
+
+
 
 
         bot.sendMessage(
