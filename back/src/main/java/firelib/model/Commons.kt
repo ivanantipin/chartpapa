@@ -61,4 +61,4 @@ fun populateTickersIfEmpty() : List<String>{
     return rr
 }
 
-val tickers = populateTickersIfEmpty()
+val tickers = populateTickersIfEmpty().sorted()

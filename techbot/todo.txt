@@ -1,6 +1,6 @@
-7. active trend levels
-5. levels
-6. demark notifications
-2. example to commands
-3. write description of bot on /start command
-8. demark check correctness
+demark check correctness
+Надо уровни по таймфреймам делать
+Надписи на уровнях не всегда работают
+Отступ справа нужен
+Сигнал демарка тек цена и стоп как описание текстовое
+релизный апдейт

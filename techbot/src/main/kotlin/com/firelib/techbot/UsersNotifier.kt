@@ -2,15 +2,13 @@ package com.firelib.techbot
 
 import chart.BreachFinder
 import chart.BreachType
-import chart.HistoricalBreaches
 import chart.SequentaSignals
-import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
-import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Instant
 
@@ -20,6 +18,8 @@ data class BreachEvent(val key: BreachEventKey, val photoFile: String)
 
 object UsersNotifier {
 
+    val log = LoggerFactory.getLogger(UsersNotifier::class.java)
+
     fun start(bot: Bot) {
         TimeFrame.values().forEach { tf ->
             Thread({
@@ -27,7 +27,7 @@ object UsersNotifier {
                     try {
                         check(bot, tf, 2)
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        log.error("error in user notifier", e)
                     }
 
                 }
@@ -39,8 +39,7 @@ object UsersNotifier {
         try {
             transaction {
 
-                val subscribed = Subscriptions.select { Subscriptions.timeframe eq timeFrame.name }
-                    .map { it[Subscriptions.ticker] }.distinct()
+                val subscribed = Subscriptions.selectAll().map { it[Subscriptions.ticker] }.distinct()
 
                 val existingEvents = loadExistingBreaches().map { it.key }.toSet()
 
@@ -74,7 +73,7 @@ object UsersNotifier {
                 }.get()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            log.error("errer in user notifier checking timeframe ${timeFrame}", e)
         }
         println("transaction finished")
     }
@@ -94,15 +93,16 @@ object UsersNotifier {
     }
 
     fun notify(be: BreachEvent, bot: Bot) {
-        Subscriptions.select {
-            Subscriptions.ticker eq be.key.ticker and (Subscriptions.timeframe eq be.key.tf.name)
-        }.forEach {
-            mainLogger.info("notifiying user ${it}")
-            val response = bot.sendPhoto(it[Subscriptions.user].toLong(), File(be.photoFile))
-            if (response.second != null) {
-                response.second!!.printStackTrace()
+        Subscriptions
+            .join(TimeFrames, joinType = JoinType.INNER, Subscriptions.user, TimeFrames.user,
+                { Subscriptions.ticker eq be.key.ticker and (TimeFrames.tf eq be.key.tf.name) })
+            .selectAll().forEach {
+                mainLogger.info("notifiying user ${it}")
+                val response = bot.sendPhoto(it[Subscriptions.user].toLong(), File(be.photoFile))
+                if (response.second != null) {
+                    response.second!!.printStackTrace()
+                }
             }
-        }
     }
 }
 

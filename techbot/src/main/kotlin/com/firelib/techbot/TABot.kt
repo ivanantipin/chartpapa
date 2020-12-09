@@ -1,19 +1,17 @@
 package com.firelib.techbot
 
-import com.firelib.techbot.command.*
+import com.firelib.techbot.command.CommandHandler
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.logTimeSpent
+import org.jetbrains.exposed.sql.StdOutSqlLogger
+import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import kotlin.system.measureTimeMillis
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTimedValue
 
 
 val databaseExecutor = Executors.newSingleThreadExecutor()
@@ -57,29 +55,8 @@ class TABot {
 
     val executors = Executors.newFixedThreadPool(20)
 
-    init {
-        register(TrendsCommand())
-        register(TickersListHandler())
-        register(SubHandler())
-        register(RmHandler())
-        register(DemarkCommand())
-        register(LevelsCommand())
-        register(StartHandler())
-        register(HelpListHandler(this))
-    }
-
-    fun register(handler: CommandHandler) {
-        map[handler.command()] = handler
-    }
-
-    fun parseCmd(cmd: String): Command {
-        val arr = cmd.split("\\s".toRegex())
-        return Command(arr[0], arr.subList(1, arr.size))
-    }
-
     fun handle(cmd: String, bot: Bot, update: Update) {
         executors.execute {
-
             updateDatabase("save command") {
                 val user = update.message!!.from!!
                 BotHelper.ensureExist(user)
@@ -88,16 +65,6 @@ class TABot {
                     it[CommandsLog.cmd] = cmd
                     it[timestamp] = System.currentTimeMillis()
                 }
-            }
-
-            val parsed = parseCmd(cmd)
-            val handler = map.get(parsed.cmd)
-            if (handler != null) {
-                measureAndLogTime("processing command ${handler::class}") {
-                    handler.handle(parsed, bot, update)
-                }
-            } else {
-                UnknownCmdHandler(this@TABot).handle(parsed, bot, update)
             }
         }
     }

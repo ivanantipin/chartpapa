@@ -1,6 +1,5 @@
 package com.firelib.techbot
 
-import com.firelib.techbot.command.CmdLine
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -13,23 +12,47 @@ import firelib.iqfeed.IntervalTransformer
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import picocli.CommandLine
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 import java.time.LocalDateTime
 
 object BotHelper {
     fun displaySubscriptions(uid: Int): String {
         return transaction {
-            val header = "*Your subscriptions*\n"
+            val header = "*Ваши подписки на сигналы*\n"
             val resp = Subscriptions.select {
                 Subscriptions.user eq uid
-            }.groupBy({it[Subscriptions.ticker]}).map {
-                "${it.key} : ${it.value.joinToString (separator = ",", transform = { row->row[Subscriptions.timeframe] }) }"
-            }.sorted().joinToString(separator = "\n")
+            }.map { it[Subscriptions.ticker] }.sorted().joinToString(separator = "\n")
             header + resp
         }
     }
+
+    fun displayTimeFrames(uid: Int): String {
+        return transaction {
+            val header = "*Ваши таймфреймы*\n"
+            val resp = TimeFrames.select {
+                TimeFrames.user eq uid
+            }.map { it[TimeFrames.tf] }.sorted().joinToString(separator = "\n")
+            header + resp
+        }
+    }
+
+
+    fun getSubscriptions(uid: Int): List<String> {
+        return transaction {
+            Subscriptions.select {
+                Subscriptions.user eq uid
+            }.withDistinct().map { it[Subscriptions.ticker] }
+
+        }
+    }
+
+    fun getTimeFrames(uid: Int): List<String> {
+        return transaction {
+            TimeFrames.select {
+                TimeFrames.user eq uid
+            }.withDistinct().map { it[TimeFrames.tf] }
+        }
+    }
+
 
     fun ensureExist(user: User) {
         updateDatabase("user update") {
@@ -41,28 +64,6 @@ object BotHelper {
                 }
             }
         }
-    }
-
-    fun getUsage(cmd: Any): String {
-        val outStr = ByteArrayOutputStream()
-        CommandLine.usage(cmd, PrintStream(outStr))
-        return String(outStr.toByteArray())
-    }
-
-    fun parseCommand(subCmd: CmdLine, args: List<String>, bot: Bot, update: Update): Boolean {
-        try {
-            CommandLine(subCmd).setCaseInsensitiveEnumValuesAllowed(true).parseArgs(*args.toTypedArray())
-            subCmd.postConstruct()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            bot.sendMessage(
-                chatId = update.message!!.chat.id,
-                text = getUsage(subCmd),
-                parseMode = ParseMode.MARKDOWN
-            )
-            return false
-        }
-        return true
     }
 
     fun getOhlcsForTf(ticker: String, timeFrame: Interval): List<Ohlc> {

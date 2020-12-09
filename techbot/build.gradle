@@ -27,7 +27,7 @@ apply plugin: 'kotlinx-serialization'
 
 dependencies {
     implementation('info.picocli:picocli:4.5.2')
-    implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:5.0.0'
+    implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.0'
     implementation("io.ktor:ktor-client-cio:1.4.1")
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.0"
     compile project(':back')

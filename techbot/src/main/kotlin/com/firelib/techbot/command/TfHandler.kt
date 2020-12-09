@@ -1,8 +1,7 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.BotHelper.displaySubscriptions
-import com.firelib.techbot.BotHelper.ensureExist
-import com.firelib.techbot.Subscriptions
+import com.firelib.techbot.BotHelper
+import com.firelib.techbot.TimeFrames
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.dispatcher.Cmd
@@ -13,38 +12,33 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 
-
-class SubHandler : CommandHandler {
+class TfHandler : CommandHandler {
     override fun command(): String {
-        return "sub"
+        return "add_tf"
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
-        val tkr = cmd.opts["ticker"]!!
+        val timeFrame = cmd.opts["tf"]!!
         val fromUser = update.fromUser()
 
         val uid = fromUser.id.toInt()
 
-        ensureExist(fromUser)
+        BotHelper.ensureExist(fromUser)
 
-        updateDatabase("update subscription") {
-            if (Subscriptions.select { Subscriptions.user eq uid and (Subscriptions.ticker eq tkr) }
+        updateDatabase("update timeframes") {
+            if (TimeFrames.select { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }
                     .empty()) {
-                Subscriptions.insert {
-                    it[user] = uid
-                    it[ticker] = tkr
+                TimeFrames.insert {
+                    it[TimeFrames.user] = uid
+                    it[TimeFrames.tf] = timeFrame
                 }
             }
         }.get()
 
         bot.sendMessage(
             chatId = fromUser.id,
-            text = displaySubscriptions(uid),
+            text = BotHelper.displayTimeFrames(uid),
             parseMode = ParseMode.MARKDOWN
         )
     }
 }
-
-
-
-
