@@ -63,8 +63,8 @@ fun main(args: Array<String>) {
         logLevel = LogLevel.Network.Body
         dispatch {
             text(null) {
-                var cmd = if (text == MenuReg.mainMenu) "HOME" else text
-                menuReg.map.getOrDefault(cmd, { a, b -> })(this.bot, this.message.chat.id)
+                var cmd = if (menuReg.map.containsKey(text) && text != MenuReg.mainMenu) text else "HOME"
+                menuReg.map[cmd]!!(this.bot, this.message.chat.id)
             }
             callbackQuery(null) {
                 menuReg.processData(this.callbackQuery.data, bot, update)

@@ -1,5 +1,6 @@
 package com.firelib.techbot
 
+import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -61,6 +62,12 @@ object BotHelper {
                     it[userId] = user.id
                     it[name] = user.firstName
                     it[familyName] = user.lastName ?: "NA"
+                }
+                TimeFrame.values().forEach { tff ->
+                    TimeFrames.insert {
+                        it[this.user] = user.id.toInt()
+                        it[tf] = tff.name
+                    }
                 }
             }
         }
