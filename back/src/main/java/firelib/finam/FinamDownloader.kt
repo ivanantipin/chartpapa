@@ -166,10 +166,26 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         return SourceName.FINAM
     }
 
-    companion object{
+    enum class FinamMarket(val id: String) {
+        SHARES_MARKET("1"),
+        FUTURES_MARKET("14"),
+        FX("5"),
+        BATS("25");
+
+        companion object {
+            fun decode(id: String): FinamMarket? {
+                return values().find { it.id == id }
+            }
+        }
+
+    }
+
+    companion object {
         private val log = LoggerFactory.getLogger(FinamDownloader::class.java)
         val SOURCE = SourceName.FINAM
         val SHARES_MARKET = "1"
+        val FUTURES_MARKET = "14"
+        val BATS_MARKET = "25"
         val FX = "5"
         val FX_MARKET = "45"
     }

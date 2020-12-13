@@ -23,11 +23,7 @@ const val debug_token = "1379427551:AAH-U5kTFhHHZBAJkPl4c2QuUNF8zsl17X0"
 
 fun main(args: Array<String>) {
     initDatabase()
-
-
-    if (System.getenv("TELEGRAM_TOKEN") != null) {
-        startMd()
-    }
+    startMd()
     transaction {
         if (SensitivityConfig.selectAll().count() == 0L) {
             println("updating senses")

@@ -1,6 +1,7 @@
 package com.github.kotlintelegrambot.dispatcher
 
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.SymbolsDao
 import com.firelib.techbot.command.CommandHandler
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.measureAndLogTime
@@ -9,7 +10,7 @@ import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import firelib.core.misc.JsonHelper
-import firelib.model.tickers
+import firelib.finam.FinamDownloader
 
 
 class MenuReg {
@@ -58,7 +59,7 @@ class MenuReg {
             commandData[inlineButton.data.name] = inlineButton.action!!
         } else if (inlineButton.buttons.isNotEmpty()) {
             commandData[inlineButton.data.name] = { bot, update ->
-                list(inlineButton.buttons.chunked(inlineButton.rowSize), bot, update.chatId(), inlineButton.title)
+                listUncat(inlineButton.buttons, bot, update.chatId(), inlineButton.rowSize)
             }
         }
         inlineButton.buttons.forEach { reg(it) }
@@ -91,6 +92,13 @@ class MenuReg {
         )
     }
 
+    fun listUncat(buttons: List<InlineButton>, bot: Bot, chatId: Long, rowSize: Int) {
+        buttons.groupBy { it.title }.forEach {
+            list(it.value.chunked(rowSize), bot, chatId, it.key)
+        }
+    }
+
+
     fun makeMenu() {
         val root = MenuItem("HOME").apply {
             menuItem("Технический анализ") {
@@ -100,8 +108,15 @@ class MenuReg {
                     TimeFrame.values().forEach { tf ->
                         inlButton(tf.name, Cmd("dema_tf_${tf.name}"), "выберите тикер") {
                             rowSize = 4
-                            tickers.forEach { ticker ->
-                                subInlButton(ticker, Cmd("dema", mapOf("ticker" to ticker, "tf" to tf.name))) {}
+                            SymbolsDao.all.forEach { instr ->
+
+                                val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
+
+                                subInlButton(
+                                    instr.code,
+                                    Cmd("dema", mapOf("ticker" to instr.code, "tf" to tf.name)),
+                                    mkt
+                                ) {}
                             }
                         }
                     }
@@ -112,8 +127,13 @@ class MenuReg {
                     TimeFrame.values().forEach { tf ->
                         inlButton(tf.name, Cmd("tl_tf_${tf.name}"), "выберите тикер") {
                             rowSize = 4
-                            tickers.forEach { ticker ->
-                                subInlButton(ticker, Cmd("tl", mapOf("ticker" to ticker, "tf" to tf.name))) {}
+                            SymbolsDao.all.forEach { instr ->
+                                val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
+                                subInlButton(
+                                    instr.code,
+                                    Cmd("tl", mapOf("ticker" to instr.code, "tf" to tf.name)),
+                                    mkt
+                                ) {}
                             }
                         }
                     }
@@ -124,8 +144,13 @@ class MenuReg {
                     TimeFrame.values().forEach { tf ->
                         inlButton(tf.name, Cmd("lvl_tf_${tf.name}"), "выберите тикер") {
                             rowSize = 4
-                            tickers.forEach { ticker ->
-                                subInlButton(ticker, Cmd("lvl", mapOf("ticker" to ticker, "tf" to tf.name))) {}
+                            SymbolsDao.all.forEach { instr ->
+                                val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
+                                subInlButton(
+                                    instr.code,
+                                    Cmd("lvl", mapOf("ticker" to instr.code, "tf" to tf.name)),
+                                    mkt
+                                ) {}
                             }
                         }
                     }
@@ -156,8 +181,9 @@ class MenuReg {
                         "выберите тикер чтобы подписаться на сигналы:"
                     ) {
                         rowSize = 4
-                        tickers.forEach { ticker ->
-                            subInlButton(ticker, Cmd("sub", mapOf("ticker" to ticker))) {}
+                        SymbolsDao.all.forEach { instr ->
+                            val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
+                            subInlButton(instr.code, Cmd("sub", mapOf("ticker" to instr.code)), mkt) {}
                         }
                     }
 
@@ -186,7 +212,7 @@ class MenuReg {
                     inlButton("Добавить таймфрейм", Cmd("add_tf_menu"), "Добавьте таймфрейм") {
                         rowSize = 1
                         TimeFrame.values().forEach { tf ->
-                            subInlButton(tf.name, Cmd("add_tf", mapOf("tf" to tf.name))) {}
+                            subInlButton(tf.name, Cmd("add_tf", mapOf("tf" to tf.name)), "") {}
                         }
                     }
                 }
@@ -226,8 +252,8 @@ data class Cmd(val name: String, val opts: Map<String, String> = mutableMapOf())
 class InlineButton(val name: String, val data: Cmd, val title: String, var rowSize: Int = 3) {
     val buttons: MutableList<InlineButton> = mutableListOf()
     var action: ((bot: Bot, update: Update) -> Unit)? = null
-    fun subInlButton(chName: String, data: Cmd, aa: InlineButton.() -> Unit): InlineButton {
-        val ret = InlineButton(chName, data, title)
+    fun subInlButton(chName: String, data: Cmd, ttl: String, aa: InlineButton.() -> Unit): InlineButton {
+        val ret = InlineButton(chName, data, ttl)
         aa(ret)
         buttons += ret
         return ret
