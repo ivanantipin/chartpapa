@@ -1,7 +1,6 @@
 package firelib.finam
 
 import com.google.common.io.CharStreams.readLines
-import com.google.common.util.concurrent.SettableFuture
 import com.opencsv.CSVParserBuilder
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
@@ -142,24 +141,13 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
 
         val url = "http://export.finam.ru/table.csv?" + params.map { "${it.first}=${it.second}" }.joinToString(separator = "&")
 
-        val ret = SettableFuture.create<List<String>>()
         log.debug(url)
-        client.prepareGet(url).execute()
-                .toCompletableFuture()
-                .thenAccept { response ->
-                    try {
-                        val lines = readLines(InputStreamReader(response.responseBodyAsStream, "cp1251"))
-                        ret.set(lines)
-                    } catch (e: IOException) {
-                        log.error("Can't read data", e)
-                    }
-                }
-
-        try {
-            return ret.get().map { parseOhlc(it) }.filter { it != null }.map { it!! }
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+        return client.prepareGet(url).execute()
+            .toCompletableFuture()
+            .thenApply { response ->
+                val lines = readLines(InputStreamReader(response.responseBodyAsStream, "cp1251"))
+                lines.map { parseOhlc(it) }.filter { it != null }.map { it!! }
+            }.get()
     }
 
     override fun getName(): SourceName {
