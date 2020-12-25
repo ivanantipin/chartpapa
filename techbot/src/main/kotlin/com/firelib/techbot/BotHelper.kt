@@ -87,7 +87,7 @@ object BotHelper {
 
 
     fun checkTicker(ticker: String, bot: Bot, update: Update): Boolean {
-        if (SymbolsDao.available().find { it.code.equals(ticker, true) } == null) {
+        if (MdService.liveSymbols.find { it.code.equals(ticker, true) } == null) {
             bot.sendMessage(
                 chatId = update.message!!.chat.id,
                 text = "invalid ticker ${ticker}",

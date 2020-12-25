@@ -44,7 +44,7 @@ object UsersNotifier {
                 val existingEvents = loadExistingBreaches().map { it.key }.toSet()
 
                 val breaches =
-                    SymbolsDao.available().map { it.code }.filter { subscribed.contains(it) }.flatMap { ticker ->
+                    MdService.liveSymbols.map { it.code }.filter { subscribed.contains(it) }.flatMap { ticker ->
                         BreachFinder.findNewBreaches(
                             ticker,
                             timeFrame,

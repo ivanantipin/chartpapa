@@ -7,10 +7,13 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import firelib.core.report.dao.ColDef
 import firelib.core.report.dao.ColDefDao
 import firelib.core.report.dao.GeGeWriter
-import org.apache.commons.io.IOUtils
+import firelib.core.store.GlobalConstants
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVRecord
 import org.springframework.web.client.RestTemplate
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.URL
-import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.reflect.KType
@@ -36,7 +39,7 @@ fun getType(colName: String): KType {
     return String::class.createType()
 }
 
-val outDb = Paths.get("/home/ivan/projects/chartpapa/market_research/edgar/data/edgar.db")
+val outDb = GlobalConstants.rootFolder.resolve("edgar.db")
 
 fun updateTickerCik(): JsonNode {
     val template = RestTemplate()
@@ -45,41 +48,47 @@ fun updateTickerCik(): JsonNode {
     return mapper.readTree(str)
 }
 
-fun importFile(linesIn: List<String>, tableIn: String) {
 
-    val table = tableIn.replace('.','_')
+val map = mutableMapOf<String, ColDefDao<Map<String, String>>>()
 
-    val lines = linesIn.map { it.split('\t') }
+fun importFile(linesIn: List<CSVRecord>, tableIn: String) {
 
-    val header = lines.first()
-    val linesWithoutHeader = lines.subList(1, lines.size)
+    val table = tableIn.replace('.', '_')
 
+    val maps = linesIn.map { it.toMap() }
 
-
-    val maps = linesWithoutHeader.map { lst ->
-        header.mapIndexed { idx, it ->
-            it to lst[idx]
-        }.toMap()
-    }
-
-    val colDefs = header.map { hh ->
-        ColDef<Map<String, String>, Any>(hh, { row -> row[hh]!! }, getType(hh))
-    }.toTypedArray() as Array<ColDef<Map<String, String>, out Any>>
-
-    val dao = ColDefDao(outDb, colDefs, table, getPk(table))
+    val dao = map.computeIfAbsent(tableIn, {
+        val colDefs = maps.first().keys.map { hh ->
+            ColDef<Map<String, String>, Any>(hh, { row -> row[hh]!! }, getType(hh))
+        }.toTypedArray() as Array<ColDef<Map<String, String>, out Any>>
+        ColDefDao(outDb, colDefs, table, getPk(table))
+    })
 
     dao.upsert(maps)
 }
 
-fun unzip(url : String) {
+fun unzip(url: String) {
     URL(url).openConnection().getInputStream().use { istream ->
         ZipInputStream(istream).use { zstream ->
             var localFileHeader: ZipEntry? = zstream.getNextEntry()
+
             while (localFileHeader != null) {
-                val lines = IOUtils.readLines(zstream)
-                if(localFileHeader.name.endsWith("txt") && localFileHeader.name.startsWith("sub")){
-                    importFile(lines as List<String>, localFileHeader.name)
-                    println("lines imported ${lines.size} from ${localFileHeader.name}")
+                if (localFileHeader.name.endsWith("txt")) {
+
+                    val reader = BufferedReader(InputStreamReader(zstream))
+
+                    val records: Iterable<CSVRecord> = CSVFormat.DEFAULT
+                        .withFirstRecordAsHeader()
+                        .withDelimiter('\t')
+                        .withQuote(null)
+                        .parse(reader)
+
+                    records.chunked(10000).forEach { recs ->
+                        importFile(recs, localFileHeader!!.name)
+                        println("lines imported ${recs.size} from ${localFileHeader!!.name}")
+                    }
+
+
                 }
                 localFileHeader = zstream.getNextEntry()
             }
@@ -87,7 +96,8 @@ fun unzip(url : String) {
     }
 }
 
-data class EdgarCik(val cik : String, val ticker : String, val name : String)
+
+data class EdgarCik(val cik: String, val ticker: String, val name: String)
 
 fun main() {
 
@@ -96,13 +106,13 @@ fun main() {
     val writer = GeGeWriter(outDb, EdgarCik::class, listOf("cik"), "cik_ticker")
 
 
-    val ciks = updateTickerCik()
-
-    writer.write(ciks.elements().asSequence().map {
-        println(it)
-        println(it["cik_str"])
-        EdgarCik(it["cik_str"].asText()!!, it["ticker"].textValue(), it["title"].textValue())
-    }.toList())
+//    val ciks = updateTickerCik()
+//
+//    writer.write(ciks.elements().asSequence().map {
+//        println(it)
+//        println(it["cik_str"])
+//        EdgarCik(it["cik_str"].asText()!!, it["ticker"].textValue(), it["title"].textValue())
+//    }.toList())
 
 
 //    for(i in 0 until 10_000_000){
@@ -115,13 +125,11 @@ fun main() {
 //    }
 
 
-
-//    for(year in 2015 until 2021){
-//        for(q in 1 .. 4){
-//            unzip("https://www.sec.gov/files/dera/data/financial-statement-data-sets/${year}q${q}.zip")
-//        }
-//    }
-
+    for (year in 2020 until 2021) {
+        for (q in 1..4) {
+            unzip("https://www.sec.gov/files/dera/data/financial-statement-data-sets/${year}q${q}.zip")
+        }
+    }
 
 
 //        val dsForFile = SqlUtils.getDsForFile("/home/ivan/projects/chartpapa/market_research/edgar/data/edgar.db")

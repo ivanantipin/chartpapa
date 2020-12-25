@@ -119,7 +119,7 @@ Status	"A"
 
 fun main() {
 
-    val allDivs = fetchDivs(LocalDate.now())
+    val allDivs = fetchDivs(LocalDate.now().minusDays(50))
 
     allDivs.forEach {
         println(it)

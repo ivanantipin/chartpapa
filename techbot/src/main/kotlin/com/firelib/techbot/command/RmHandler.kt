@@ -1,6 +1,5 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.BotHelper.displaySubscriptions
 import com.firelib.techbot.Subscriptions
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
@@ -20,13 +19,16 @@ class RmHandler : CommandHandler {
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val tkr = cmd.opts["ticker"]!!
         val uid = update.chatId().toInt()
+        var cnt = 0;
         updateDatabase("delete user", {
-            Subscriptions.deleteWhere { Subscriptions.user eq uid and (Subscriptions.ticker eq tkr) }
+            cnt = Subscriptions.deleteWhere { Subscriptions.user eq uid and (Subscriptions.ticker eq tkr) }
         }).get()
-        bot.sendMessage(
-            chatId = uid.toLong(),
-            text = displaySubscriptions(uid),
-            parseMode = ParseMode.MARKDOWN
-        )
+        if (cnt > 0) {
+            bot.sendMessage(
+                chatId = uid.toLong(),
+                text = "Символ удален ${tkr}",
+                parseMode = ParseMode.MARKDOWN
+            )
+        }
     }
 }

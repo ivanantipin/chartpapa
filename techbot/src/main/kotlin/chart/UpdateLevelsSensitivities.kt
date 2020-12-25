@@ -5,7 +5,7 @@ import firelib.core.domain.Interval
 import firelib.indicators.SRMaker
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.selectAll
 
 
 object UpdateLevelsSensitivities{
@@ -13,18 +13,22 @@ object UpdateLevelsSensitivities{
     fun updateLevelSenses() {
         updateDatabase("update levels senses") {
             LevelSensitivityConfig.deleteAll()
-            SymbolsDao.available().forEach { instr ->
-                val ticker = instr.code
-                val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
 
-                val maxPct = 0.05
-                val minPct = 0.015
+            Subscriptions.selectAll()
+                .map { Pair(it[Subscriptions.ticker], it[Subscriptions.market]) }
+                .distinct()
+                .forEach { instr ->
+                    val ticker = instr.first
+                    val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
 
-                var zigzag = 0.0
-                var hits = 0
+                    val maxPct = 0.05
+                    val minPct = 0.015
 
-                for( i in 100 downTo 0){
-                    zigzag = minPct + i*(maxPct - minPct)/100.0
+                    var zigzag = 0.0
+                    var hits = 0
+
+                    for (i in 100 downTo 0) {
+                        zigzag = minPct + i * (maxPct - minPct) / 100.0
                     hits = (i + 40)/20
 
                     val maker = SRMaker(1000, hits , zigzag)

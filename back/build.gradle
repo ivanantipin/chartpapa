@@ -18,7 +18,11 @@ dependencies {
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.10'
 
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
-    compile group: 'com.opencsv', name: 'opencsv', version: '4.2'
+    compile group: 'com.opencsv', name: 'opencsv', version: '5.3'
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-csv
+    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
+
 
     // https://mvnrepository.com/artifact/com.github.wendykierp/JTransforms
     compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'

@@ -9,21 +9,17 @@ import com.github.kotlintelegrambot.dispatcher.MenuReg
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.logging.LogLevel
-import firelib.core.domain.Interval
-import firelib.core.misc.timeSequence
 import firelib.core.store.GlobalConstants
-import firelib.core.store.MdStorageImpl
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.FileOutputStream
-import java.time.Instant
 
 
-const val debug_token = "1379427551:AAH-U5kTFhHHZBAJkPl4c2QuUNF8zsl17X0"
+const val debug_token = "1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM"
 
 fun main(args: Array<String>) {
     initDatabase()
-    startMd()
+    //startMd()
     transaction {
         if (SensitivityConfig.selectAll().count() == 0L) {
             println("updating senses")
@@ -59,8 +55,8 @@ fun main(args: Array<String>) {
         logLevel = LogLevel.Network.Body
         dispatch {
             text(null) {
-                var cmd = if (menuReg.map.containsKey(text) && text != MenuReg.mainMenu) text else "HOME"
-                menuReg.map[cmd]!!(this.bot, this.message.chat.id)
+                var cmd = if (menuReg.menuActions.containsKey(text) && text != MenuReg.mainMenu) text else "HOME"
+                menuReg.menuActions[cmd]!!(this.bot, this.message.chat.id)
             }
             callbackQuery(null) {
                 menuReg.processData(this.callbackQuery.data, bot, update)
@@ -73,22 +69,6 @@ fun main(args: Array<String>) {
     bot.startPolling()
 }
 
-fun startMd() {
-    Thread({
-        val storage = MdStorageImpl()
-        timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
-            try {
-                SymbolsDao.available().forEach {
-                    measureAndLogTime("update market data for instrument ${it.code}") {
-                        storage.updateMarketData(it, Interval.Min10)
-                    }
-                }
-            } catch (e: Exception) {
-                mainLogger.error("failed to update market data", e)
-            }
-        }
-    }).start()
-}
 
 fun makeBot(taBot: TABot): Bot {
     val bt = bot {

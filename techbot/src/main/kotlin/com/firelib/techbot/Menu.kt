@@ -1,7 +1,7 @@
 package com.github.kotlintelegrambot.dispatcher
 
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.SymbolsDao
+import com.firelib.techbot.MdService
 import com.firelib.techbot.command.CommandHandler
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.measureAndLogTime
@@ -10,11 +10,11 @@ import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import firelib.core.misc.JsonHelper
-import firelib.finam.FinamDownloader
+import java.util.concurrent.atomic.AtomicLong
 
 
 class MenuReg {
-    val map = mutableMapOf<String, (Bot, Long) -> Unit>()
+    val menuActions = mutableMapOf<String, (Bot, Long) -> Unit>()
 
     val commandData = mutableMapOf<String, (Bot, Update) -> Unit>()
 
@@ -30,9 +30,10 @@ class MenuReg {
 
     private fun reg(ret: MenuItem) {
         if (ret.action != null) {
-            map[ret.name] = ret.action!!
+            menuActions[ret.name] = ret.action!!
         } else if (ret.children.isNotEmpty()) {
-            map[ret.name] = { bot, chatId ->
+
+            menuActions[ret.name] = { bot, chatId ->
                 val sm = ret.children.map { KeyboardButton(it.name) }.chunked(ret.rowSize)
                 val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
                 bot.sendMessage(
@@ -42,7 +43,7 @@ class MenuReg {
                 )
             }
         } else {
-            map[ret.name] = { bot, chatId ->
+            menuActions[ret.name] = { bot, chatId ->
                 list(ret.buttons.chunked(ret.rowSize), bot, chatId, ret.title)
             }
         }
@@ -93,30 +94,36 @@ class MenuReg {
     }
 
     fun listUncat(buttons: List<InlineButton>, bot: Bot, chatId: Long, rowSize: Int) {
-        buttons.groupBy { it.title }.forEach {
-            list(it.value.chunked(rowSize), bot, chatId, it.key)
+        buttons.chunked(40).forEach { chunk ->
+            chunk.groupBy { it.title }.forEach {
+                val ttl = if (it.key.isBlank()) "NA" else it.key;
+                list(it.value.chunked(rowSize), bot, chatId, ttl)
+            }
         }
     }
 
 
     fun makeMenu() {
         val root = MenuItem("HOME").apply {
+            rowSize = 2
             menuItem("Технический анализ") {
                 rowSize = 2
                 menuItem("Демарк секвента") {
                     title = "Выберите таймфрейм для демарк секвенты"
                     TimeFrame.values().forEach { tf ->
-                        inlButton(tf.name, Cmd("dema_tf_${tf.name}"), "выберите тикер") {
-                            rowSize = 4
-                            SymbolsDao.all.forEach { instr ->
-
-                                val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
-
-                                subInlButton(
-                                    instr.code,
-                                    Cmd("dema", mapOf("ticker" to instr.code, "tf" to tf.name)),
-                                    mkt
-                                ) {}
+                        parentInlButton(tf.name) {
+                            action = { bot, update ->
+                                val bts = makeButtons(
+                                    "dema",
+                                    update.chatId().toInt(),
+                                    tf,
+                                    "Выберите тикер для демарк секвенты"
+                                )
+                                if (bts.isEmpty()) {
+                                    emtyListMsg(bot, update)
+                                } else {
+                                    list(bts.chunked(4), bot, update.chatId(), "Компании")
+                                }
                             }
                         }
                     }
@@ -125,15 +132,15 @@ class MenuReg {
                 menuItem("Тренд линии") {
                     title = "Выберите таймфрейм для тренд линий"
                     TimeFrame.values().forEach { tf ->
-                        inlButton(tf.name, Cmd("tl_tf_${tf.name}"), "выберите тикер") {
-                            rowSize = 4
-                            SymbolsDao.all.forEach { instr ->
-                                val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
-                                subInlButton(
-                                    instr.code,
-                                    Cmd("tl", mapOf("ticker" to instr.code, "tf" to tf.name)),
-                                    mkt
-                                ) {}
+                        parentInlButton(tf.name) {
+                            action = { bot, update ->
+                                val bts =
+                                    makeButtons("tl", update.chatId().toInt(), tf, "Выберите тикер для тренд линии")
+                                if (bts.isEmpty()) {
+                                    emtyListMsg(bot, update)
+                                } else {
+                                    list(bts.chunked(4), bot, update.chatId(), "Компании")
+                                }
                             }
                         }
                     }
@@ -142,82 +149,69 @@ class MenuReg {
                 menuItem("Горизонтальные уровни") {
                     title = "Выберите таймфрейм для горизонтальных уровней"
                     TimeFrame.values().forEach { tf ->
-                        inlButton(tf.name, Cmd("lvl_tf_${tf.name}"), "выберите тикер") {
-                            rowSize = 4
-                            SymbolsDao.all.forEach { instr ->
-                                val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
+                        parentInlButton(tf.name) {
+                            action = { bot, update ->
+                                val bts = makeButtons(
+                                    "lvl",
+                                    update.chatId().toInt(),
+                                    tf,
+                                    "Выберите тикер для горизонтальных линий"
+                                )
+                                if (bts.isEmpty()) {
+                                    emtyListMsg(bot, update)
+                                } else {
+                                    list(bts.chunked(4), bot, update.chatId(), "Компании")
+                                }
+                            }
+                        }
+                    }
+                }
+                menuItem("Главное меню") {}
+            }
+
+            menuItem("Настройки") {
+                rowSize = 2
+                parentInlButton("Ваши символы / Редактировать") {
+                    action = { bot, update ->
+                        val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
+                            .map { InlineButton(it, Cmd("unsub", mapOf("ticker" to it)), "") }.chunked(4)
+                        list(buttons, bot, update.chatId(), "Ваши символы, нажмите на символ чтобы отписаться")
+                    }
+                }
+
+                parentInlButton("Добавить символ") {
+                    rowSize = 4
+
+                    MdService.instrByStart.keys.forEach { start ->
+                        subInlButton(start, "Выберите начальную букву тикера:") {
+                            rowSize = 2
+                            MdService.instrByStart.getOrDefault(start, emptyList()).forEach { code ->
                                 subInlButton(
-                                    instr.code,
-                                    Cmd("lvl", mapOf("ticker" to instr.code, "tf" to tf.name)),
-                                    mkt
+                                    "(${code.code}) ${code.name}",
+                                    Cmd("sub", mapOf("ticker" to code.code, "market" to code.market)),
+                                    "Выберите компанию для добавления:"
                                 ) {}
                             }
                         }
                     }
                 }
 
-                menuItem("Подписки на сигналы") {
-                    title = "Выберите действие"
-                    rowSize = 1
-                    inlButton("Ваши подписки на сигналы", Cmd("my_sub"), "My subscriptions") {
-                        action = { bot, update ->
-                            bot.sendMessage(
-                                chatId = update.chatId(),
-                                text = BotHelper.displaySubscriptions(update.chatId().toInt()),
-                                parseMode = ParseMode.MARKDOWN
-                            )
-                        }
-                    }
-                    inlButton("Отписаться от сигналов", Cmd("unsub_menu"), "") {
-                        action = { bot, update ->
-                            val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
-                                .map { InlineButton(it, Cmd("unsub", mapOf("ticker" to it)), "") }.chunked(4)
-                            list(buttons, bot, update.chatId(), "Нажмите на тикер чтобы отписаться")
-                        }
-                    }
-                    inlButton(
-                        "Подписаться на сигналы",
-                        Cmd("sub_menu"),
-                        "выберите тикер чтобы подписаться на сигналы:"
-                    ) {
-                        rowSize = 4
-                        SymbolsDao.all.forEach { instr ->
-                            val mkt = "${FinamDownloader.FinamMarket.decode(instr.market)}"
-                            subInlButton(instr.code, Cmd("sub", mapOf("ticker" to instr.code)), mkt) {}
-                        }
-                    }
-
-                    inlButton("Ваши таймфреймы", Cmd("display_tf_menu"), "Ваши таймфреймы:") {
-                        action = { bot, update ->
-                            bot.sendMessage(
-                                update.chatId(),
-                                BotHelper.displayTimeFrames(update.chatId().toInt()),
-                                parseMode = ParseMode.MARKDOWN
-                            )
-                        }
-                    }
-
-                    inlButton(
-                        "Удалить таймфрейм для сигналов",
-                        Cmd("rm_tf_menu"),
-                        "Ваши таймфреймы, удалите ненужный нажатием"
-                    ) {
-                        action = { bot, update ->
-                            val buttons = BotHelper.getTimeFrames(update.chatId().toInt())
-                                .map { InlineButton(it, Cmd("rm_tf", mapOf("tf" to it)), "") }.chunked(1)
-                            list(buttons, bot, update.chatId(), "Нажмите на таймфрейм чтобы отписаться")
-                        }
-                    }
-
-                    inlButton("Добавить таймфрейм", Cmd("add_tf_menu"), "Добавьте таймфрейм") {
-                        rowSize = 1
-                        TimeFrame.values().forEach { tf ->
-                            subInlButton(tf.name, Cmd("add_tf", mapOf("tf" to tf.name)), "") {}
-                        }
+                parentInlButton("Ваши таймфреймы / Редактировать") {
+                    action = { bot, update ->
+                        val buttons = BotHelper.getTimeFrames(update.chatId().toInt())
+                            .map { InlineButton(it, Cmd("rm_tf", mapOf("tf" to it)), "") }.chunked(1)
+                        list(buttons, bot, update.chatId(), "Нажмите на таймфрейм чтобы отписаться")
                     }
                 }
-                menuItem("Главное меню") {}
+
+                inlButton("Добавить таймфрейм", Cmd("add_tf_menu"), "Добавьте таймфрейм") {
+                    rowSize = 1
+                    TimeFrame.values().forEach { tf ->
+                        subInlButton(tf.name, Cmd("add_tf", mapOf("tf" to tf.name)), "tf") {}
+                    }
+                }
             }
+
             menuItem("Помощь") {
                 action = { bot, chatIt ->
                     bot.sendMessage(
@@ -229,6 +223,32 @@ class MenuReg {
             }
         }
         reg(root)
+    }
+
+    private fun emtyListMsg(bot: Bot, update: Update) {
+        bot.sendMessage(
+            chatId = update.chatId(),
+            text = "Ваш список символов пуст, используйте *Добавить символ* меню",
+            parseMode = ParseMode.MARKDOWN
+        )
+
+        menuActions["Настройки"]!!(bot, update.chatId())
+    }
+
+    private fun makeButtons(
+        cmd: String,
+        chatId: Int,
+        tf: TimeFrame,
+        title: String
+    ): List<InlineButton> {
+        val bts = BotHelper.getSubscriptions(chatId).map { code ->
+            InlineButton(
+                code,
+                Cmd(cmd, mapOf("ticker" to code, "tf" to tf.name)),
+                title
+            )
+        }
+        return bts
     }
 
 }
@@ -258,7 +278,23 @@ class InlineButton(val name: String, val data: Cmd, val title: String, var rowSi
         buttons += ret
         return ret
     }
+
+    fun subInlButton(chName: String, ttl: String, aa: InlineButton.() -> Unit): InlineButton {
+        val ret = InlineButton(chName, Cmd(getCmdName()), ttl)
+        aa(ret)
+        buttons += ret
+        return ret
+    }
+
+
 }
+
+val cnt = AtomicLong();
+
+fun getCmdName(): String {
+    return "cmd${cnt.incrementAndGet()}";
+}
+
 
 class MenuItem(
     val name: String,
@@ -272,6 +308,7 @@ class MenuItem(
     var action: ((bot: Bot, chatId: Long) -> Unit)? = null
 
     fun menuItem(chName: String, aa: MenuItem.() -> Unit): MenuItem {
+        require(buttons.isEmpty(), { "to add menu item, buttons items must be empty" })
         val ret = MenuItem(chName)
         aa(ret)
         children += ret
@@ -279,9 +316,24 @@ class MenuItem(
     }
 
     fun inlButton(chName: String, data: Cmd, title: String = "", aa: InlineButton.() -> Unit): InlineButton {
+
+        require(children.isEmpty(), { "to add inline button, menu items must be empty" })
+
         val ret = InlineButton(chName, data, title)
         aa(ret)
         buttons += ret
         return ret
     }
+
+
+    fun parentInlButton(chName: String, aa: InlineButton.() -> Unit): InlineButton {
+
+        require(children.isEmpty(), { "to add inline button, menu items must be empty" })
+
+        val ret = InlineButton(chName, Cmd(getCmdName()), title)
+        aa(ret)
+        buttons += ret
+        return ret
+    }
+
 }
