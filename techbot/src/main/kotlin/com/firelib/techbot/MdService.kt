@@ -36,7 +36,9 @@ object MdService {
         val toSet = FinamDownloader.FinamMarket.values().map { it.id }.toSet()
         return instruments.filter {
             toSet.contains(it.market) && it.code.length >= 2
-        }.groupBy { it.code.substring(0, 1) }.toSortedMap()
+        }.groupBy { it.code.substring(0, 1) }
+            .mapValues { it.value.sortedBy { it.code } }
+            .toSortedMap()
     }
 
     init {
@@ -76,6 +78,8 @@ object MdService {
             measureAndLogTime("update md for ${instrId.code}") {
                 storage.updateMarketData(instrId, Interval.Min10)
             }
+            UpdateLevelsSensitivities.updateTicker(instrId.code)
+            UpdateSensitivities.updateSens(instrId.code)
         })
     }
 

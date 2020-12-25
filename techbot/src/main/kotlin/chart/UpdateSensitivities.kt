@@ -4,7 +4,6 @@ import com.firelib.techbot.BotHelper.getOhlcsForTf
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.Ohlc
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 
@@ -12,29 +11,32 @@ import org.jetbrains.exposed.sql.insert
 object UpdateSensitivities{
 
     fun updateSensitivties() {
-        updateDatabase("update sensitivities") {
+        MdService.liveSymbols.forEach { instr ->
+            val ticker = instr.code
+            updateSens(ticker)
+        }
+    }
 
-            SensitivityConfig.deleteAll()
+    fun updateSens(ticker: String) {
 
-            MdService.liveSymbols.forEach { instr ->
-                val ticker = instr.code
-                TimeFrame.values().forEach { timeFrame ->
-                    val targetOhlcs = getOhlcsForTf(ticker, timeFrame.interval)
+        updateDatabase("senses update ${ticker}") {
+            SensitivityConfig.deleteWhere { SensitivityConfig.ticker eq ticker }
+            TimeFrame.values().forEach { timeFrame ->
+                val targetOhlcs = getOhlcsForTf(ticker, timeFrame.interval)
 
-                    var updated = false
-                    for (i in 7 downTo 2) {
-                        if (updateForOrder(targetOhlcs, ticker, timeFrame, i)) {
-                            updated = true
-                            break
-                        }
+                var updated = false
+                for (i in 7 downTo 2) {
+                    if (updateForOrder(targetOhlcs, ticker, timeFrame, i)) {
+                        updated = true
+                        break
                     }
-                    if (!updated) {
-                        println("not found ${ticker}, ${timeFrame}")
-                    }
-
+                }
+                if (!updated) {
+                    println("not found ${ticker}, ${timeFrame}")
                 }
             }
         }.get()
+
     }
 
 
