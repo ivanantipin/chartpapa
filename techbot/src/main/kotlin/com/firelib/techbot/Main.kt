@@ -56,7 +56,7 @@ fun main(args: Array<String>) {
         dispatch {
             text(null) {
                 var cmd = if (menuReg.menuActions.containsKey(text) && text != MenuReg.mainMenu) text else "HOME"
-                menuReg.menuActions[cmd]!!(this.bot, this.message.chat.id)
+                menuReg.menuActions[cmd]!!(this.bot, this.update)
             }
             callbackQuery(null) {
                 menuReg.processData(this.callbackQuery.data, bot, update)

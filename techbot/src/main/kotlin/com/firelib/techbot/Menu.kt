@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 
 class MenuReg {
-    val menuActions = mutableMapOf<String, (Bot, Long) -> Unit>()
+    val menuActions = mutableMapOf<String, (Bot, Update) -> Unit>()
 
     val commandData = mutableMapOf<String, (Bot, Update) -> Unit>()
 
@@ -33,18 +33,18 @@ class MenuReg {
             menuActions[ret.name] = ret.action!!
         } else if (ret.children.isNotEmpty()) {
 
-            menuActions[ret.name] = { bot, chatId ->
+            menuActions[ret.name] = { bot, update ->
                 val sm = ret.children.map { KeyboardButton(it.name) }.chunked(ret.rowSize)
                 val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
                 bot.sendMessage(
-                    chatId = chatId,
+                    chatId = update.chatId(),
                     text = ret.name,
                     replyMarkup = keyboardMarkup
                 )
             }
         } else {
-            menuActions[ret.name] = { bot, chatId ->
-                list(ret.buttons.chunked(ret.rowSize), bot, chatId, ret.title)
+            menuActions[ret.name] = { bot, update ->
+                list(ret.buttons.chunked(ret.rowSize), bot, update.chatId(), ret.title)
             }
         }
 
@@ -139,7 +139,7 @@ class MenuReg {
                                 if (bts.isEmpty()) {
                                     emtyListMsg(bot, update)
                                 } else {
-                                    list(bts.chunked(4), bot, update.chatId(), "Компании")
+                                    list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для тренд линий")
                                 }
                             }
                         }
@@ -148,21 +148,17 @@ class MenuReg {
 
                 menuItem("Горизонтальные уровни") {
                     title = "Выберите таймфрейм для горизонтальных уровней"
-                    TimeFrame.values().forEach { tf ->
-                        parentInlButton(tf.name) {
-                            action = { bot, update ->
-                                val bts = makeButtons(
-                                    "lvl",
-                                    update.chatId().toInt(),
-                                    tf,
-                                    "Выберите тикер для горизонтальных линий"
-                                )
-                                if (bts.isEmpty()) {
-                                    emtyListMsg(bot, update)
-                                } else {
-                                    list(bts.chunked(4), bot, update.chatId(), "Компании")
-                                }
-                            }
+                    action = { bot, update ->
+                        val bts = makeButtons(
+                            "lvl",
+                            update.chatId().toInt(),
+                            TimeFrame.M30,
+                            "Выберите тикер для горизонтальных линий"
+                        )
+                        if (bts.isEmpty()) {
+                            emtyListMsg(bot, update)
+                        } else {
+                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для горизонтальных уровней")
                         }
                     }
                 }
@@ -213,9 +209,9 @@ class MenuReg {
             }
 
             menuItem("Помощь") {
-                action = { bot, chatIt ->
+                action = { bot, update ->
                     bot.sendMessage(
-                        chatId = chatIt,
+                        chatId = update.chatId(),
                         text = "[Поддержка](https://t.me/techBotSupport)",
                         parseMode = ParseMode.MARKDOWN
                     )
@@ -232,7 +228,7 @@ class MenuReg {
             parseMode = ParseMode.MARKDOWN
         )
 
-        menuActions["Настройки"]!!(bot, update.chatId())
+        menuActions["Настройки"]!!(bot, update)
     }
 
     private fun makeButtons(
@@ -305,7 +301,7 @@ class MenuItem(
 
 ) {
 
-    var action: ((bot: Bot, chatId: Long) -> Unit)? = null
+    var action: ((bot: Bot, update: Update) -> Unit)? = null
 
     fun menuItem(chName: String, aa: MenuItem.() -> Unit): MenuItem {
         require(buttons.isEmpty(), { "to add menu item, buttons items must be empty" })
