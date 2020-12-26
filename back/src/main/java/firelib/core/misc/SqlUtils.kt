@@ -27,7 +27,7 @@ object SqlUtils{
         //sqLiteConfig.setPragma(Pragma.DATE_STRING_FORMAT, "yyyy-MM-dd HH:mm:ss")
 
         val ds = SQLiteDataSource(sqLiteConfig)
-        ds.url = "jdbc:sqlite:$file"
+        ds.url = "jdbc:sqlite:$file?journal_mode=WAL"
         return ds
     }
     fun checkTableExists(ds: DataSource, tableName: String): Boolean {

@@ -10,7 +10,10 @@ import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.logging.LogLevel
 import firelib.core.store.GlobalConstants
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.StdOutSqlLogger
+import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.FileOutputStream
 
@@ -19,18 +22,15 @@ const val debug_token = "1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM"
 
 fun main(args: Array<String>) {
     initDatabase()
-    MdService.startMd()
-    transaction {
-        if (SensitivityConfig.selectAll().count() == 0L) {
-            println("updating senses")
-            updateSensitivties()
-        }
-        if (LevelSensitivityConfig.selectAll().count() == 0L) {
-            println("updating level senses")
-            UpdateLevelsSensitivities.updateLevelSenses()
-        }
 
+    MdService.updateAll()
+
+    transaction {
+        updateSensitivties()
+        UpdateLevelsSensitivities.updateLevelSenses()
     }
+
+    MdService.startMd()
 
     val menuReg = MenuReg()
     menuReg.makeMenu()

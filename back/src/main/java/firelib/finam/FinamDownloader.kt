@@ -91,7 +91,7 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
             while (mstart < LocalDateTime.now()) {
                 val finish = mstart.plusDays(batchDays.toLong())
                 yieldAll(loadSome(instrId, interval, mstart, finish))
-                mstart = finish.minusDays(2)
+                mstart = finish.minus(interval.duration)
             }
         }
     }

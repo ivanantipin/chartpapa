@@ -102,18 +102,22 @@ object MdService {
             //Subscriptions.selectAll().distinctBy { Subscriptions.ticker }.
             timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
                 try {
-                    pool.submit({
-                        liveSymbols.forEach {
-                            measureAndLogTime("update market data for instrument ${it.code}") {
-                                storage.updateMarketData(it, Interval.Min10)
-                            }
-                        }
-                    }).get()
+                    updateAll()
                 } catch (e: Exception) {
                     mainLogger.error("failed to update market data", e)
                 }
             }
         }).start()
+    }
+
+    fun updateAll() {
+        pool.submit({
+            liveSymbols.forEach {
+                measureAndLogTime("update market data for instrument ${it.code}") {
+                    storage.updateMarketData(it, Interval.Min10)
+                }
+            }
+        }).get()
     }
 
 }

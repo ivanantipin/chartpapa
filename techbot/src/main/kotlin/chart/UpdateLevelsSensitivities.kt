@@ -5,11 +5,11 @@ import firelib.core.domain.Interval
 import firelib.indicators.SRMaker
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
 import java.util.concurrent.Future
 
 
 object UpdateLevelsSensitivities {
+
 
     fun updateTicker(ticker: String): Future<Unit> {
         return updateDatabase("levels sens update ${ticker}") {
@@ -44,12 +44,9 @@ object UpdateLevelsSensitivities {
     }
 
     fun updateLevelSenses() {
-        Subscriptions.selectAll()
-            .map { Pair(it[Subscriptions.ticker], it[Subscriptions.market]) }
-            .distinct()
-            .forEach { instr ->
-                updateTicker(instr.first).get()
-            }
+        MdService.liveSymbols.forEach { instr ->
+            updateTicker(instr.code).get()
+        }
     }
 }
 
