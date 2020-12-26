@@ -19,7 +19,7 @@ const val debug_token = "1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM"
 
 fun main(args: Array<String>) {
     initDatabase()
-    //startMd()
+    MdService.startMd()
     transaction {
         if (SensitivityConfig.selectAll().count() == 0L) {
             println("updating senses")
