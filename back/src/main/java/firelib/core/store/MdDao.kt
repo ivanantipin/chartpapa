@@ -148,13 +148,10 @@ class MdDao(internal val ds: SQLiteDataSource) {
         return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC))
     }
 
-    val existingTables by lazy {
-        SqlUtils.listAllTables(ds).map { it.toLowerCase() }.toSet()
-    }
-
     fun queryAll(codeIn: String, start: LocalDateTime, limit: Int = 10_000_000): List<Ohlc> {
         val code = normName(codeIn)
-        if (!existingTables.contains(code.toLowerCase())) {
+
+        if (!SqlUtils.checkTableExists(ds, code)) {
             println("table does not exists!!!!! ${code}")
             return emptyList()
         }

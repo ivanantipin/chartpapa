@@ -9,8 +9,10 @@ import firelib.finam.FinamDownloader
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.ForkJoinTask
 
 object MdService {
 
@@ -72,27 +74,24 @@ object MdService {
 
     }
 
-    fun updateStock(ticker: String, market: String): Boolean {
+    fun updateStock(ticker: String, market: String): CompletableFuture<Unit>? {
         if (liveSymbols.find { it.code == ticker && it.market == market } != null) {
-            return false
+            return null
         } else {
             val instr = instrByCodeAndMarket.get(Pair(ticker, market))
             if (instr != null) {
                 liveSymbols.add(instr)
-                updateStock(instr)
-                return true
+                return CompletableFuture.supplyAsync<Unit>({ updateStock(instr).get() })
             }
         }
-        return false
+        return null
     }
 
-    fun updateStock(instrId: InstrId) {
-        pool.submit({
+    fun updateStock(instrId: InstrId): ForkJoinTask<*> {
+        return pool.submit({
             measureAndLogTime("update md for ${instrId.code}") {
                 storage.updateMarketData(instrId, Interval.Min10)
             }
-            UpdateLevelsSensitivities.updateTicker(instrId.code)
-            UpdateSensitivities.updateSens(instrId.code)
         })
     }
 

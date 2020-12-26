@@ -6,6 +6,7 @@ import firelib.core.domain.Ohlc
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
+import java.util.concurrent.Future
 
 
 object UpdateSensitivities{
@@ -13,13 +14,13 @@ object UpdateSensitivities{
     fun updateSensitivties() {
         MdService.liveSymbols.forEach { instr ->
             val ticker = instr.code
-            updateSens(ticker)
+            updateSens(ticker).get()
         }
     }
 
-    fun updateSens(ticker: String) {
+    fun updateSens(ticker: String): Future<Unit> {
 
-        updateDatabase("senses update ${ticker}") {
+        return updateDatabase("senses update ${ticker}") {
             SensitivityConfig.deleteWhere { SensitivityConfig.ticker eq ticker }
             TimeFrame.values().forEach { timeFrame ->
                 val targetOhlcs = getOhlcsForTf(ticker, timeFrame.interval)
@@ -35,7 +36,7 @@ object UpdateSensitivities{
                     println("not found ${ticker}, ${timeFrame}")
                 }
             }
-        }.get()
+        }
 
     }
 

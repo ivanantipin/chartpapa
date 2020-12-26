@@ -1,9 +1,7 @@
 package com.firelib.techbot.command
 
+import com.firelib.techbot.*
 import com.firelib.techbot.BotHelper.ensureExist
-import com.firelib.techbot.MdService
-import com.firelib.techbot.Subscriptions
-import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.dispatcher.Cmd
 import com.github.kotlintelegrambot.dispatcher.fromUser
@@ -35,6 +33,7 @@ class SubHandler : CommandHandler {
                 Subscriptions.insert {
                     it[user] = uid
                     it[ticker] = tkr
+                    it[Subscriptions.market] = market
                 }
                 added = true;
             }
@@ -42,7 +41,12 @@ class SubHandler : CommandHandler {
 
         var mdAvailable = true
 
-        if (MdService.updateStock(tkr, market)) {
+        val fut = MdService.updateStock(tkr, market)
+        if (fut != null) {
+            fut.thenAccept {
+                UpdateSensitivities.updateSens(tkr).get()
+                UpdateLevelsSensitivities.updateTicker(tkr).get()
+            }
             mdAvailable = false
         }
 
@@ -51,7 +55,6 @@ class SubHandler : CommandHandler {
 
 
         if (added) {
-
             bot.sendMessage(
                 chatId = fromUser.id,
                 text = "Добавлен символ ${tkr}, ${msg}",
