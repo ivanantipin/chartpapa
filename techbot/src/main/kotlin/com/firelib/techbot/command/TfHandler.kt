@@ -25,6 +25,8 @@ class TfHandler : CommandHandler {
 
         BotHelper.ensureExist(fromUser)
 
+        var flag = false
+
         updateDatabase("update timeframes") {
             if (TimeFrames.select { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }
                     .empty()) {
@@ -32,13 +34,16 @@ class TfHandler : CommandHandler {
                     it[TimeFrames.user] = uid
                     it[TimeFrames.tf] = timeFrame
                 }
+                flag = true
             }
         }.get()
 
-        bot.sendMessage(
-            chatId = fromUser.id,
-            text = BotHelper.displayTimeFrames(uid),
-            parseMode = ParseMode.MARKDOWN
-        )
+        if (flag) {
+            bot.sendMessage(
+                chatId = fromUser.id,
+                text = "Таймфрейм добавлен ${timeFrame}",
+                parseMode = ParseMode.MARKDOWN
+            )
+        }
     }
 }

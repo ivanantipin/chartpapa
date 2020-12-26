@@ -156,7 +156,7 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
 
     enum class FinamMarket(val id: String) {
         SHARES_MARKET("1"),
-//        FUTURES_MARKET("14"),
+        FUTURES_MARKET("14"),
         FX("5"),
         BATS("25");
 

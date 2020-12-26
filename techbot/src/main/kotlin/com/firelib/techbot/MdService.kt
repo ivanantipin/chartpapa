@@ -33,9 +33,22 @@ object MdService {
     val instrByStart = group(fetchInstruments())
 
     fun group(instruments: List<InstrId>): Map<String, List<InstrId>> {
-        val toSet = FinamDownloader.FinamMarket.values().map { it.id }.toSet()
+
+        val futureSymbols = listOf(
+            "BR",
+            "RTS",
+            "GOLD",
+            "MIX",
+            "Si",
+        )
+
+        val toSet = FinamDownloader.FinamMarket.values()
+            .map { it.id }.toSet()
+
         return instruments.filter {
             toSet.contains(it.market) && it.code.length >= 2
+                    && (it.market != FinamDownloader.FinamMarket.FUTURES_MARKET.id || futureSymbols.contains(it.code))
+
         }.groupBy { it.code.substring(0, 1) }
             .mapValues { it.value.sortedBy { it.code } }
             .toSortedMap()

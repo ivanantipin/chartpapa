@@ -170,8 +170,8 @@ class MenuReg {
             }
 
             menuItem("Настройки") {
-                rowSize = 2
-                parentInlButton("Ваши символы / Редактировать") {
+                rowSize = 1
+                parentInlButton("Ваши символы / Удаление") {
                     action = { bot, update ->
                         val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
                             .map { InlineButton(it, Cmd("unsub", mapOf("ticker" to it)), "") }.chunked(4)
@@ -196,7 +196,7 @@ class MenuReg {
                     }
                 }
 
-                parentInlButton("Ваши таймфреймы / Редактировать") {
+                parentInlButton("Ваши таймфреймы / Удаление") {
                     action = { bot, update ->
                         val buttons = BotHelper.getTimeFrames(update.chatId().toInt())
                             .map { InlineButton(it, Cmd("rm_tf", mapOf("tf" to it)), "") }.chunked(1)

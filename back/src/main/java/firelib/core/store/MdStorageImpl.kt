@@ -78,8 +78,9 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
         var instant = Instant.now()
         try {
+
             val dao = md.getDao(instrId.sourceEnum(), interval)
-            val startTime = dao.queryLast(instrId.code).map { oh -> oh.endTime.atUtc().minusDays(2) }
+            val startTime = dao.queryLast(instrId.code).map { oh -> oh.endTime.atUtc().minus(interval.duration) }
                 .orElse(LocalDateTime.now().minusDays(5000))
             source.load(instrId, startTime, interval).chunked(5000).forEach {
                 instant = it.last().endTime
