@@ -9,7 +9,6 @@ import com.funstat.domain.HLine
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
-import firelib.core.misc.toStrWithDecPlaces
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.SignalType
@@ -18,7 +17,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.log
 
 object SequentaAnnCreator {
 
@@ -144,7 +142,7 @@ object SequentaAnnCreator {
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf("sber", Interval.Min60)
+        val ohs = BotHelper.getOhlcsForTf("VEON", Interval.Day).subList(0, 100)
         val ann = SequentaAnnCreator.createAnnotations(ohs)
         ChartService.drawSequenta(ann, ohs, "rtkm")
     }

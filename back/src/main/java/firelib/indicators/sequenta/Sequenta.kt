@@ -2,9 +2,7 @@ package firelib.indicators.sequenta
 
 import firelib.core.domain.Ohlc
 import firelib.core.domain.range
-import firelib.core.misc.atUtc
 import java.time.Instant
-import java.time.LocalDateTime
 
 
 class Sequenta(val counts : Array<Int> = arrayOf(13, 21)) {
@@ -124,7 +122,7 @@ class Sequenta(val counts : Array<Int> = arrayOf(13, 21)) {
                 countDowns.add(idx)
                 ret.add(Signal(SignalType.Cdn, this))
                 if (countDowns.size >= counts[pendingSignal]) {
-                    if (up && data[idx].high > data[countDowns[8]].close || !up && data[idx].low < data[countDowns[8]].close) {
+                    if (up && data[idx].high > data[countDowns[7]].close || !up && data[idx].low < data[countDowns[7]].close) {
                         pendingSignal++
                         ret.add(Signal(SignalType.Signal, this))
                     } else {
