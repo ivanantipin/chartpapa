@@ -20,7 +20,7 @@ object UtilsHandy {
         val storageImpl = MdStorageImpl()
         val finamDownloader = FinamDownloader()
         val symbols =
-            finamDownloader.symbols().filter { tickers.contains(it.code.toLowerCase()) && it.market == market }
+            finamDownloader.symbols().filter { tickers.contains(it.code.toUpperCase()) && it.market == market }
         return symbols.map { Pair(it.code, storageImpl.updateMarketData(it, interval)) }
     }
 
@@ -42,5 +42,5 @@ object UtilsHandy {
 
 
 fun main(args: Array<String>) {
-    UtilsHandy.updateTicker("AUDNZD", FinamDownloader.FX)
+    UtilsHandy.updateRussianDivStocks(interval = Interval.Min1)
 }
