@@ -7,7 +7,7 @@ import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
-import firelib.indicators.Ema
+import firelib.indicators.Ma
 import java.time.LocalDate
 
 
@@ -17,8 +17,8 @@ class TrendModelMacd(context: ModelContext, val props: Map<String, String>) : Mo
 
 
     init {
-        val shortEmas = daytss.map { Ema(props["short"]!!.toInt(), it) }
-        val longEmas = daytss.map { Ema(props["long"]!!.toInt(), it) }
+        val shortEmas = daytss.map { Ma(props["short"]!!.toInt(), it) }
+        val longEmas = daytss.map { Ma(props["long"]!!.toInt(), it) }
 
         enableSeries(Interval.Min10)[0].preRollSubscribe {
             if (daytss[0].count() > 40 && currentTime().atMoscow().hour > 14 && !daytss[0][0].interpolated) {

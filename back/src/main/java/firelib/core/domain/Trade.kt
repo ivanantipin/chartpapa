@@ -2,6 +2,9 @@ package firelib.common
 
 import firelib.core.domain.TradeStat
 import firelib.core.misc.dbl2Str
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.nio.file.Paths
 import java.time.Instant
 import kotlin.math.absoluteValue
 
@@ -12,10 +15,7 @@ data class Trade(
     val order: Order,
     val dtGmt: Instant,
     val priceTime: Instant,
-    val tradeStat: TradeStat = TradeStat(
-        price,
-        order.side
-    ),
+    val tradeStat: TradeStat = TradeStat(),
     val positionAfter: Int = 0,
     val tradeNo : String = order.id
 ) {
@@ -53,3 +53,52 @@ data class Trade(
     }
 
 }
+
+object Trades : Table("trades") {
+    val ticker = varchar("Ticker", 10)
+    val tradeId = varchar("TradeId", 10)
+    val ModelName = varchar("ModelName", 20)
+    val orderId0 = varchar("OrderId0", 20)
+    val orderId1 = varchar("OrderId1", 20)
+    val epochTimeMs = long("epochTimeMs")
+    val closeTimeMs = long("closeTimeMs")
+    val entryPriceTime = long("EntryPriceTime")
+    val exitPriceTime = long("ExitPriceTime")
+    val buySell = integer("BuySell")
+    val entryTime = long("EntryDate")
+    val entryPrice = double("EntryPrice")
+    val exitTime = long("ExitDate")
+    val exitPrice = double("ExitPrice")
+    val pnl = double("Pnl")
+    val qty = integer("Qty")
+    val factors = blob("Factors").nullable()
+}
+
+
+
+fun initDatabase() {
+    val path = Paths.get("/home/ivan/projects/chartpapa/market_research/report_out/report.db")
+
+    Database.connect(
+        "jdbc:sqlite:${path.toAbsolutePath()}?journal_mode=WAL",
+        driver = "org.sqlite.JDBC"
+    )
+}
+
+fun main() {
+
+    initDatabase()
+
+    transaction {
+
+        SchemaUtils.createMissingTablesAndColumns(Trades)
+
+        Trades.selectAll().forEach {
+            println(it)
+        }
+    }
+
+
+}
+
+

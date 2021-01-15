@@ -6,7 +6,6 @@ import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
 import firelib.core.store.GlobalConstants
-import firelib.misc.StockVizTradeWriter
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.nio.file.*
@@ -48,29 +47,13 @@ object ReportWriter{
         if (model.trades.size == 0) {
             log.info("no trades generated")
         }else{
-
             measureTimeMillis {
                 model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.forEach {
                     StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
                 }
-
-                val orders = model.orderStates.map { it.order }
-
-                val trades = model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.flatMap {
-                    it.toTradingCases()
-                }
-                try {
-                    StockVizTradeWriter.writePairs(trades, orders, model.model.name())
-                }catch (e : Exception){
-                    e.printStackTrace()
-                    println("failed to write into stockviz due to ${e.message}")
-                }
-
             }.apply {
                 println("took ${this/1000.0} s to write report")
             }
-
-
         }
 
         ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates)

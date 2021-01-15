@@ -1,8 +1,8 @@
 include 'back'
 include 'transaqgate'
-include 'kotlinback'
 include 'stockvizclient'
 include 'production'
 includeBuild("../transaqgrpc/client/java")
 include 'binance'
 include 'techbot'
+include 'demo'

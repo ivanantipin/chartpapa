@@ -1,28 +1,40 @@
 package firelib.indicators
 
-import firelib.core.domain.Ohlc
-import firelib.core.timeseries.TimeSeries
 
-class Ema(
+class EmaSimple(
     val period: Int,
-    val ts: TimeSeries<Ohlc>,
-    val func: (Ohlc) -> Double = { it.close }
-) : (TimeSeries<Ohlc>) -> Unit {
-
+    var ema : Double
+) {
     val koeffFunc = 2.0 / (period + 1)
 
-    init {
-        ts.preRollSubscribe(this)
+    fun value() = ema
+
+    fun value(value : Double): Double = ema * (1 - koeffFunc) + value * koeffFunc
+
+    fun onRoll(value : Double) {
+        ema = ema * (1 - koeffFunc) + value * koeffFunc
     }
+}
 
 
-    private var ema: Double = 0.0
+val testData = arrayOf(
+22.19 to Double.NaN,
+22.08 to Double.NaN,
+22.17 to Double.NaN,
+22.18 to Double.NaN,
+22.13 to Double.NaN,
+22.23 to Double.NaN,
+22.43 to Double.NaN,
+22.24 to Double.NaN,
+22.29 to 22.22,
+22.15 to 22.21)
 
-    fun value(): Double = ema * (1 - koeffFunc) + func(ts[0]) * koeffFunc
-
-    override fun invoke(ts: TimeSeries<Ohlc>) {
-        if (!ts[0].interpolated) {
-            ema = ema * (1 - koeffFunc) + func(ts[0]) * koeffFunc
+fun main() {
+    val emaSimple = EmaSimple(10, 22.27)
+    testData.forEach {
+        emaSimple.onRoll(it.first)
+        if(!it.second.isNaN()){
+            println("diff is " + (emaSimple.ema - it.second) )
         }
     }
 }

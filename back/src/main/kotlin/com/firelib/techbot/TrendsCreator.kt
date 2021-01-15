@@ -1,5 +1,6 @@
 package com.firelib.techbot
 
+import com.firelib.techbot.domain.LineType
 import firelib.core.domain.Ohlc
 import org.apache.commons.math3.stat.regression.SimpleRegression
 import kotlin.math.min
@@ -10,7 +11,7 @@ object TrendsCreator {
         pivots: List<Int>,
         prices: List<Double>,
         intersectPrices: List<Double>,
-        lineType: com.firelib.techbot.domain.LineType,
+        lineType: LineType,
         rSquare: Double
     ): List<TdLine> {
 
@@ -61,30 +62,30 @@ object TrendsCreator {
         return ret.values.toList()
     }
 
-    fun findRegresLines(ohlcs: List<Ohlc>, conf: com.firelib.techbot.LineConfig): List<TdLine> {
+    fun findRegresLines(ohlcs: List<Ohlc>, conf: LineConfig): List<TdLine> {
         val highs = ohlcs.map { it.high }
         val lows = ohlcs.map { it.low }
         val closes = ohlcs.map { it.close }
-        val resistancePivots = findSimplePivots(highs, conf.pivotOrder, com.firelib.techbot.domain.LineType.Resistance)
-        val supportPivots = findSimplePivots(lows, conf.pivotOrder, com.firelib.techbot.domain.LineType.Support)
+        val resistancePivots = findSimplePivots(highs, conf.pivotOrder, LineType.Resistance)
+        val supportPivots = findSimplePivots(lows, conf.pivotOrder, LineType.Support)
         return makeLines(
             resistancePivots,
             highs,
             closes,
-            com.firelib.techbot.domain.LineType.Resistance,
+            LineType.Resistance,
             conf.rSquare
         ) + makeLines(
             supportPivots,
             lows,
             closes,
-            com.firelib.techbot.domain.LineType.Support, conf.rSquare
+            LineType.Support, conf.rSquare
         )
     }
 
     fun findSimplePivots(
         prices: List<Double>,
         pivotOrder: Int,
-        lineType: com.firelib.techbot.domain.LineType
+        lineType: LineType
     ): List<Int> {
         var extremeIndex = 0
         val ret = mutableListOf<Int>()

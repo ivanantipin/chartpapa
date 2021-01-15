@@ -19,3 +19,5 @@
 /kotlinback/out
 /stockvizclient/out/*
 /techbot/out/*
+/front/node_modules/
+/front/built

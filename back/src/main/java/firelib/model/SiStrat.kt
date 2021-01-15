@@ -5,7 +5,8 @@ import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.indicators.Ema
+import firelib.indicators.Ma
+
 import firelib.model.prod.factorHour
 import java.time.LocalDate
 
@@ -15,8 +16,8 @@ class SiStrat(context: ModelContext, val props: Map<String, String>) : Model(con
         val intraTs = enableSeries(Interval.Min30, 100, false)[0]
         val dayTs = enableSeries(Interval.Day, interpolated = true)[0]
 
-        val shortEma = Ema(12, dayTs)
-        val longEma = Ema(26, dayTs)
+        val shortEma = Ma(12, dayTs)
+        val longEma = Ma(26, dayTs)
 
         factorHour()
 

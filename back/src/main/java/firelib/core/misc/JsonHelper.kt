@@ -24,7 +24,4 @@ object JsonHelper {
         mapper.writeValue(writer, value)
         Files.write(fileName, listOf(writer.toString()), StandardOpenOption.CREATE)
     }
-
-    fun <T> deserialize(fileName: Path, clazz: Class<T>): T =
-        mapper.readValue(fileName.toFile(), clazz)
 }

@@ -1,0 +1,13 @@
+.clickRowStyl {
+    background-color: rgba(0, 0, 0, 1);
+    color: white;
+}
+
+.clickRowStyl:hover > td {
+    background-color: rgba(4, 75, 75, 0.78)
+}
+
+.site-page-header-ghost-wrapper {
+  background-color: rgba(123, 116, 127, 0.72);
+  padding: 24px;
+}
