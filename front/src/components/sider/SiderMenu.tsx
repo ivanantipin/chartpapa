@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom";
 import {Layout, Menu} from 'antd';
 import 'antd/dist/antd.css';
 import {AreaChartOutlined, DeploymentUnitOutlined} from '@ant-design/icons';
-import {SelectInfo} from "rc-menu/lib/interface";
+import {MenuInfo, SelectInfo} from "rc-menu/lib/interface";
 
 
 const {Sider} = Layout;
@@ -12,6 +12,7 @@ const {Sider} = Layout;
 export const SiderMenu = (props: any) => {
 
     const [collapsed, setCollapsed] = useState(false)
+    const [selectedKey, setSelectedKey] = useState("/total")
 
     const history = useHistory();
 
@@ -19,10 +20,11 @@ export const SiderMenu = (props: any) => {
         <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}>
             <Menu theme="dark" mode="inline"
                   defaultSelectedKeys={['/total']}
-                  // selectedKeys={[history.location.pathname]}
-                  // onSelect={(info: SelectInfo) => {
-                  //     history.push(info.key.toString)
-                  // }}
+                  selectedKeys={[selectedKey]}
+                  onClick={(info: MenuInfo) => {
+                      history.push(info.key as string)
+                      setSelectedKey(info.key as string)
+                  }}
             >
                 <Menu.Item key="/my-portfolios" icon={<AreaChartOutlined/>}>
                     Portfolios

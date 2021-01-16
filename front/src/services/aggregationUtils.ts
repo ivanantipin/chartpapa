@@ -92,7 +92,7 @@ export const aggregateTradesByParams = (params: AggParams, trades: Array<Trade>,
 
 export const filterTradesByAggregationResult = (trades: Array<Trade>, aggregation: AggregationResult, instrumentsMap?: InstrumentMap): Array<Trade> => {
     const filteredTrades: Array<Trade> = []
-    trades.map(t => {
+    trades.forEach(t => {
         let allOK = true
         aggregation.conditions.tradeCond?.forEach(cond => {
             // @ts-ignore

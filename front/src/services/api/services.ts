@@ -1,6 +1,8 @@
-import {DefaultApi} from "../../api/apis";
+import {DefaultApi} from "../../api";
 import {Configuration} from "../../api";
 
-export const portfoliosApi = new DefaultApi(new Configuration({basePath: process.env.REACT_APP_BACKEND_API_URL}));
-export const instrumentsApi = new DefaultApi(new Configuration({basePath: process.env.REACT_APP_BACKEND_API_URL}));
-export const candlesApi = new DefaultApi(new Configuration({basePath: process.env.REACT_APP_CANDLES_API_URL}))
+const url = "http://localhost:8080"
+
+export const portfoliosApi = new DefaultApi(new Configuration({basePath: url}));
+export const instrumentsApi = new DefaultApi(new Configuration({basePath: url}));
+export const candlesApi = new DefaultApi(new Configuration({basePath: url}))

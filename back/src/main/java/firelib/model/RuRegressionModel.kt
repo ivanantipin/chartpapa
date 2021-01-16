@@ -14,10 +14,7 @@ import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression
 import java.util.*
 
 
-data class StatDd(val ri : Double, val sp500 : Double, val brent : Double, val regres : Double)
-data class RegParam(val a : Double, val b : Double)
-
-class RegressionModel(context: ModelContext, val props: Map<String, String>) : Model(context,props){
+class RuRegressionModel(context: ModelContext, val props: Map<String, String>) : Model(context,props){
 
     val period = props["period"]!!.toInt()
 
@@ -31,7 +28,7 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
         val tss = enableSeries(Interval.Min240,1000, true)
         val reg = OLSMultipleLinearRegression()
         reg.isNoIntercept = true
-
+        
         val qq = Quantiles<Double>(100)
 
         tss[0].preRollSubscribe {
@@ -78,9 +75,9 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
 
                         val mm = qq.getQuantile(res)
                         if(mm > 0.95){
-                            shortForMoneyIfFlat(0, 1000_000)
-                        } else if(mm < 0.05){
                             longForMoneyIfFlat(0, 1000_000)
+                        } else if(mm < 0.05){
+                            shortForMoneyIfFlat(0, 1000_000)
                         } else if(mm > 0.1 && mm < 0.9){
                             flattenAll(0)
                         }
@@ -93,22 +90,13 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
         }
     }
 
-    override fun onBacktestEnd() {
-        val writer = GeGeWriter(runConfig().getReportDbFile(), StatDd::class)
-        writer.write(lst)
-
-        val ppw = GeGeWriter(runConfig().getReportDbFile(), RegParam::class)
-        ppw.write(lst1)
-
-
-    }
 
     private fun notInterpolatedLast(tss: List<TimeSeries<Ohlc>>, idx : Int) =
         !tss[0][idx].interpolated && !tss[1][idx].interpolated && !tss[2][idx].interpolated
 
     companion object {
         fun modelConfig(): ModelConfig {
-            return ModelConfig(RegressionModel::class).apply {
+            return ModelConfig(RuRegressionModel::class).apply {
                 param("period", 10)
             }
         }
@@ -118,10 +106,10 @@ class RegressionModel(context: ModelContext, val props: Map<String, String>) : M
 
 
 fun main() {
-    RegressionModel.modelConfig().runStrat(ModelBacktestConfig().apply {
-        interval = Interval.Min240
-        histSourceName = SourceName.MT5
-        instruments = listOf("ALLFUTRTSI","ALLFUTBRENT","FUTSP500CONT")
-
+    RuRegressionModel.modelConfig().runStrat(ModelBacktestConfig().apply {
+        interval = Interval.Min10
+        histSourceName = SourceName.FINAM
+        instruments = listOf("RTS", "SI", "BR")
+        maxRiskMoneyPerSec = 1000_0000
     })
 }

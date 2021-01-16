@@ -1,4 +1,4 @@
-import React, {useReducer, useState} from "react";
+import React, {useEffect, useReducer} from "react";
 import {Collapse, Tabs} from "antd";
 import {useMappedState} from "redux-react-hook";
 import {IMainState} from "../../reducers/reducers";
@@ -18,8 +18,8 @@ let _ = require('lodash');
 
 
 interface FilteredTrades {
-    filter : {[key : string] : Filter}
-    trades : Array<Trade>
+    filter: { [key: string]: Filter }
+    trades: Array<Trade>
 }
 
 export const TotalPage = (props: any) => {
@@ -28,24 +28,32 @@ export const TotalPage = (props: any) => {
         return state.trades
     })
 
-    const [filter, dispatch]= useReducer((state : FilteredTrades, action : Filter)=>{
+    const [filter, dispatch] = useReducer((state: FilteredTrades, action: Filter) => {
         const ff = {...state}
         ff.filter[action.name] = action
         let filters = Object.values(ff.filter);
-        ff.trades = origTrades.filter(it=>{
-            return filters.every(f=>f.filter(it))
+        ff.trades = origTrades.filter(it => {
+            return filters.length === 0 || filters.every(f => f.filter(it))
         })
         return ff
-    },{
-        filter : {},
-        trades : origTrades
+    }, {
+        filter: {},
+        trades: origTrades
     }, undefined)
+
+    useEffect(()=>{
+        dispatch({name : "dummy", filter : (t)=>true})
+        return
+    },[origTrades])
 
     return (
         <>
             <Collapse defaultActiveKey={['1']}>
                 <Panel header={'Filter'} key="1">
-                    <FilterComp onFilter={dispatch}/>
+                    <FilterComp onFilter={(f)=>{
+                        console.log("filter", f)
+                        dispatch(f)
+                    }}/>
                 </Panel>
             </Collapse>
             <Tabs defaultActiveKey="equity" animated={false}>

@@ -5,33 +5,46 @@ import firelib.core.config.ModelBacktestConfig
 import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.domain.Interval
-import firelib.indicators.Ma
-
-import firelib.model.prod.factorHour
+import firelib.indicators.EmaSimple
+import firelib.model.prod.*
 import java.time.LocalDate
-
 
 class SiStrat(context: ModelContext, val props: Map<String, String>) : Model(context, props) {
     init {
-        val intraTs = enableSeries(Interval.Min30, 100, false)[0]
-        val dayTs = enableSeries(Interval.Day, interpolated = true)[0]
 
-        val shortEma = Ma(12, dayTs)
-        val longEma = Ma(26, dayTs)
+        val series = enableSeries(Interval.Min240, 100, false)
+
+        val longEmas = series.map {
+            EmaSimple(26, 0.0)
+        }
+
+        series.forEachIndexed { index, timeSeries ->
+            timeSeries.preRollSubscribe {
+                longEmas[index].onRoll(timeSeries[0].close)
+            }
+        }
 
         factorHour()
+        factorWeekday()
+        factorBarQuantLow()
+        factorReturn(5)
+        factorReturn(10)
+        factorReturn(15)
+        factorRank(5)
 
-        intraTs.preRollSubscribe {
-            if (longEma.value() < shortEma.value()) {
-                if (position(0) <= 0) {
-                    flattenAll(0)
-                    longForMoneyIfFlat(0, 1000_000)
-                }
 
-            } else {
-                if (position(0) >= 0) {
-                    flattenAll(0)
-                    shortForMoneyIfFlat(0, 1000_000)
+        series[0].preRollSubscribe {
+            longEmas.forEachIndexed { idx, longEma ->
+                if (series[idx][0].close > longEma.value()) {
+                    if (position(idx) <= 0) {
+                        flattenAll(idx)
+                        longForMoneyIfFlat(idx, 1000_000)
+                    }
+                } else {
+                    if (position(idx) >= 0) {
+                        flattenAll(idx)
+                        shortForMoneyIfFlat(idx, 1000_000)
+                    }
                 }
             }
         }
@@ -40,8 +53,7 @@ class SiStrat(context: ModelContext, val props: Map<String, String>) : Model(con
 
 fun siModel(): ModelConfig {
     return ModelConfig(SiStrat::class).apply {
-        param("hold_hours", 30)
-
+        opt("ema.length", 12, 40, 2)
     }
 
 }
@@ -53,8 +65,9 @@ fun main() {
     siModel().runStrat(ModelBacktestConfig().apply {
         interval = Interval.Min10
         histSourceName = SourceName.FINAM
-        instruments = listOf("SI")
+        instruments = listOf("Si")
         maxRiskMoneyPerSec = 1000_0000
-        startDate(LocalDate.now().minusDays(5000))
+        startDate(LocalDate.now().minusDays(1200))
+        endDate(LocalDate.now().minusDays(300))
     })
 }

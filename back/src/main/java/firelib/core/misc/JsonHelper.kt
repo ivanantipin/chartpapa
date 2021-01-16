@@ -15,6 +15,11 @@ object JsonHelper {
         return mapper.writeValueAsString(obj)
     }
 
+    fun toJsonBytes(obj: Any): ByteArray {
+        return mapper.writeValueAsBytes(obj)
+    }
+
+
     inline fun <reified T> fromJson(str: String): T {
         return mapper.readValue(str, T::class.java)
     }

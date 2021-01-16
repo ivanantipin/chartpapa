@@ -56,7 +56,7 @@ data class Trade(
 
 object Trades : Table("trades") {
     val ticker = varchar("Ticker", 10)
-    val tradeId = varchar("TradeId", 10)
+    val tradeId = varchar("TradeId", 20)
     val ModelName = varchar("ModelName", 20)
     val orderId0 = varchar("OrderId0", 20)
     val orderId1 = varchar("OrderId1", 20)

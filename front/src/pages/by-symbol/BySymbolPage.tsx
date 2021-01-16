@@ -1,7 +1,7 @@
 import React from "react";
 import {AggregateAndFilterTemplate} from "../../templates/aggregate-and-filter/AggregateAndFilterTemplate";
 import {AggregationConditions, AggregationResult, calcStats, groupBy} from "../../services/tradeUtils";
-import {Trade} from "../../api/models";
+import {Trade} from "../../api";
 
 export const BySymbolPage = () => {
     const bySymbolAggFunction = (trades: Array<Trade>): Array<AggregationResult> => {

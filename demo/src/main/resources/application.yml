@@ -1,6 +1,11 @@
 micronaut:
   application:
     name: demo
+  server:
+    cors:
+      enabled: true
+  jackson:
+    serializationInclusion: ALWAYS
   router:
     static-resources:
       swagger:

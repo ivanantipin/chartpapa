@@ -26,13 +26,13 @@ export const FilterComp = (props: { onFilter: (filter: Filter) => void }) => {
     }, [portfolioID])
 
     const discr = metaSummary.discreteMetas.map(dm => {
-        return <DiscreteSlider meta={dm} onFilter={_.throttle((mmm: Filter) => {
+        return <DiscreteSlider key={dm.name} meta={dm} onFilter={_.throttle((mmm: Filter) => {
             props.onFilter(mmm)
         }, 500)}/>
     })
 
     const cont = metaSummary.continuousMetas.map(dm => {
-        return <ContinuosSlider meta={dm} onFilter={_.throttle((mmm: Filter) => {
+        return <ContinuosSlider key={dm.name} meta={dm} onFilter={_.throttle((mmm: Filter) => {
             props.onFilter(mmm)
         }, 500)}/>
     })
@@ -86,23 +86,24 @@ const DiscreteSlider = (props: { meta: DiscreteMeta, onFilter: (f: Filter) => vo
 
     const marks: { [key: number]: string } = {}
 
-    mapped.forEach((str, idx) => {
+    for (let idx = 0; idx < mapped.length; idx++){
+        let str = mapped[idx];
         marks[idx] = str
         mappedIndex[str] = idx
-    })
+    }
 
     return (
         <div>
             <h4>{meta.name} {marks[range[0]]} - {marks[range[1]]}</h4>
             <Slider marks={marks} step={null} range min={0} max={meta.values.length - 1}
                     value={[range[0], range[1]]} onChange={(val: [number, number]) => {
-                const rr = val as [number, number]
-                setRange(rr)
+                const range = val as [number, number]
+                setRange(range)
                 onFilter({
                     name: meta.name,
                     filter: (t: Trade) => {
                         const idx = mappedIndex[t.discreteTags!![meta.name]]
-                        return rr[0] <= idx && rr[1] >= idx;
+                        return range[0] <= idx && range[1] >= idx;
                     }
                 })
 
@@ -117,16 +118,14 @@ const DiscreteSlider = (props: { meta: DiscreteMeta, onFilter: (f: Filter) => vo
 export const TabledFilter = (props: { children: Array<any>, wrapNo: number }) => {
     const {children, wrapNo} = props;
 
-    console.log('children', children.length)
-
     return (
         <Fragment>
             {
                 chunk(children, wrapNo).map((ch: Array<any>, idx: number) => {
-                    return (<Row key={idx} gutter={8}>
+                    return (<Row key={`${idx}`} gutter={8}>
                         {
-                            ch.map(m => {
-                                return (<Col key={m[0]} span={12}>
+                            ch.map((m,colIdx) => {
+                                return (<Col key={ `${colIdx}`}  span={12}>
                                         {m}
                                     </Col>
                                 )

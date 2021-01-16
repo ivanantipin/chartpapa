@@ -1,5 +1,6 @@
 package firelib.stockviz.api
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import firelib.core.domain.Side
 import java.math.BigDecimal
 import javax.validation.constraints.NotNull
@@ -28,8 +29,10 @@ data class Trade(
 
     val symbol: String,
 
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     val discreteTags: Map<String, String> = emptyMap(),
 
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     val continuousTags: Map<String, BigDecimal> = emptyMap()
 )
 

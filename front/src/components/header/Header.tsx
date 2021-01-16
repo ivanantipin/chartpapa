@@ -28,12 +28,12 @@ export const portfolioStorage = window.localStorage;
 const StatusComp = (props: { status: LoadStatus }) => {
     let values = Object.values(props.status);
     if (values.some(it => it === LoadStatusEnum.Error)) {
-        return <div>Error load</div>
+        return <div key="error">Error load</div>
     }
     if (values.some(it => it === LoadStatusEnum.Loading)) {
-        return <Spin/>
+        return <Spin key="wait"/>
     }
-    return <div>Loaded</div>
+    return <div key="loaded">Loaded</div>
 };
 
 
@@ -71,20 +71,18 @@ export const Header = (props: any) => {
                 dispatch(setLoadStatus({orders: LoadStatusEnum.Loaded}))
             });
 
-            console.log('Loading meta and tags from API')
+            const portfolio = portfolioID as string
             portfoliosApi.portfoliosAvailableInstrumentsMetaList(
-                {portfolio: portfolioID}).then(meta => {
-                setStoredPortfolioInstrumentsMeta(portfolioID, meta)
+                {portfolio}).then(meta => {
+                setStoredPortfolioInstrumentsMeta(portfolio, meta)
                 dispatch(setAvailableInstrumentsMeta(meta))
                 dispatch(setLoadStatus({instruments: LoadStatusEnum.Loaded}))
             });
-            portfoliosApi.portfoliosAvailableTagsList({portfolio: portfolioID}).then(tags => {
-                setStoredPortfolioAvailableTags(portfolioID, tags)
+            portfoliosApi.portfoliosAvailableTagsList({portfolio}).then(tags => {
+                setStoredPortfolioAvailableTags(portfolio, tags)
                 dispatch(setAvailableTags(tags))
                 dispatch(setLoadStatus({tags: LoadStatusEnum.Loaded}))
             });
-
-
         }
     }, [portfolioID])
 
@@ -116,7 +114,7 @@ export const Header = (props: any) => {
             onBack={() => window.history.back()}
             title={title}
             extra={[
-                <StatusComp status={loadStatus}/>,
+                <StatusComp  key={"0"} status={loadStatus}/>,
                 <Button key="1">Manage Portfolios</Button>,
                 <Select key="2" style={{width: 200}} defaultValue="" value={portfolioID} onSelect={onPortfolioSelected}>
                     <Option value="">Please select portfolio...</Option>

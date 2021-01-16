@@ -1,5 +1,6 @@
 package firelib.core.report
 
+import firelib.common.Trades.nullable
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.ModelOutput
 import firelib.core.misc.JsonHelper
@@ -7,6 +8,11 @@ import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
 import firelib.core.store.GlobalConstants
 import org.apache.commons.io.FileUtils
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.batchInsert
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.statements.api.ExposedBlob
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.nio.file.*
 import kotlin.system.measureTimeMillis
@@ -74,12 +80,15 @@ object ReportWriter{
     }
 
     fun writeOpt(path : Path, estimates: List<ExecutionEstimates>) {
-        GenericMapWriter.write(path,estimates.map {
-            it.metricToValue.mapKeys { it.key.name } + it.optParams.mapKeys { "opt_${it.key.replace('.','_')}" }
-        }, "opts")
+        transaction {
+            Opts.insert {
+                it[Opts.blob] = ExposedBlob(JsonHelper.toJsonBytes(estimates))
+            }
+        }
     }
+}
 
-
-
+object Opts : Table("opts") {
+    val blob = blob("blob")
 }
 
