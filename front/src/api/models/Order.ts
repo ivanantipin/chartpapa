@@ -18,14 +18,14 @@ import {
     OrderOrderTypeFromJSON,
     OrderOrderTypeFromJSONTyped,
     OrderOrderTypeToJSON,
-    OrderSide,
-    OrderSideFromJSON,
-    OrderSideFromJSONTyped,
-    OrderSideToJSON,
     OrderStatus,
     OrderStatusFromJSON,
     OrderStatusFromJSONTyped,
     OrderStatusToJSON,
+    Side,
+    SideFromJSON,
+    SideFromJSONTyped,
+    SideToJSON,
 } from './';
 
 /**
@@ -48,10 +48,10 @@ export interface Order {
     orderId: string;
     /**
      * 
-     * @type {OrderSide}
+     * @type {Side}
      * @memberof Order
      */
-    side: OrderSide;
+    side: Side;
     /**
      * 
      * @type {OrderOrderType}
@@ -99,31 +99,31 @@ export interface Order {
      * @type {{ [key: string]: string; }}
      * @memberof Order
      */
-    discreteTags?: { [key: string]: string; } | null;
+    discreteTags: { [key: string]: string; };
     /**
      * 
      * @type {{ [key: string]: number; }}
      * @memberof Order
      */
-    continuousTags?: { [key: string]: number; } | null;
+    continuousTags: { [key: string]: number; };
     /**
      * 
      * @type {string}
      * @memberof Order
      */
-    tradeId?: string | null;
+    tradeId: string;
     /**
      * 
      * @type {number}
      * @memberof Order
      */
-    price?: number | null;
+    price: number;
     /**
      * 
      * @type {number}
      * @memberof Order
      */
-    executionPrice?: number | null;
+    executionPrice: number;
 }
 
 export function OrderFromJSON(json: any): Order {
@@ -138,19 +138,19 @@ export function OrderFromJSONTyped(json: any, ignoreDiscriminator: boolean): Ord
         
         'portfolio': json['portfolio'],
         'orderId': json['orderId'],
-        'side': OrderSideFromJSON(json['side']),
+        'side': SideFromJSON(json['side']),
         'orderType': OrderOrderTypeFromJSON(json['orderType']),
         'status': OrderStatusFromJSON(json['status']),
         'qty': json['qty'],
-        'placeTime': !exists(json, 'placeTime') ? undefined : json['placeTime'],
-        'updateTime': !exists(json, 'updateTime') ? undefined : json['updateTime'],
+        'placeTime': json['placeTime'],
+        'updateTime': json['updateTime'],
         'symbol': json['symbol'],
         'id': !exists(json, 'id') ? undefined : json['id'],
-        'discreteTags': !exists(json, 'discreteTags') ? undefined : json['discreteTags'],
-        'continuousTags': !exists(json, 'continuousTags') ? undefined : json['continuousTags'],
-        'tradeId': !exists(json, 'tradeId') ? undefined : json['tradeId'],
-        'price': !exists(json, 'price') ? undefined : json['price'],
-        'executionPrice': !exists(json, 'executionPrice') ? undefined : json['executionPrice'],
+        'discreteTags': json['discreteTags'],
+        'continuousTags': json['continuousTags'],
+        'tradeId': json['tradeId'],
+        'price': json['price'],
+        'executionPrice': json['executionPrice'],
     };
 }
 
@@ -165,7 +165,7 @@ export function OrderToJSON(value?: Order | null): any {
         
         'portfolio': value.portfolio,
         'orderId': value.orderId,
-        'side': OrderSideToJSON(value.side),
+        'side': SideToJSON(value.side),
         'orderType': OrderOrderTypeToJSON(value.orderType),
         'status': OrderStatusToJSON(value.status),
         'qty': value.qty,

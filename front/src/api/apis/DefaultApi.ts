@@ -18,9 +18,6 @@ import {
     Candle,
     CandleFromJSON,
     CandleToJSON,
-    HOptions,
-    HOptionsFromJSON,
-    HOptionsToJSON,
     Instrument,
     InstrumentFromJSON,
     InstrumentToJSON,
@@ -123,7 +120,7 @@ export class DefaultApi extends runtime.BaseAPI {
 
     /**
      */
-    async displayTradeRaw(requestParameters: DisplayTradeRequest): Promise<runtime.ApiResponse<HOptions>> {
+    async displayTradeRaw(requestParameters: DisplayTradeRequest): Promise<runtime.ApiResponse<string>> {
         if (requestParameters.tradeId === null || requestParameters.tradeId === undefined) {
             throw new runtime.RequiredError('tradeId','Required parameter requestParameters.tradeId was null or undefined when calling displayTrade.');
         }
@@ -139,12 +136,12 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         });
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => HOptionsFromJSON(jsonValue));
+        return new runtime.TextApiResponse(response) as any;
     }
 
     /**
      */
-    async displayTrade(requestParameters: DisplayTradeRequest): Promise<HOptions> {
+    async displayTrade(requestParameters: DisplayTradeRequest): Promise<string> {
         const response = await this.displayTradeRaw(requestParameters);
         return await response.value();
     }
