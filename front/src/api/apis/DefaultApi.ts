@@ -18,6 +18,9 @@ import {
     Candle,
     CandleFromJSON,
     CandleToJSON,
+    HOptions,
+    HOptionsFromJSON,
+    HOptionsToJSON,
     Instrument,
     InstrumentFromJSON,
     InstrumentToJSON,
@@ -43,6 +46,10 @@ export interface CandlesReadRequest {
     timeframe: string;
     fromTs: number;
     toTs: number;
+}
+
+export interface DisplayTradeRequest {
+    tradeId: string;
 }
 
 export interface PortfoliosAvailableInstrumentsMetaListRequest {
@@ -111,6 +118,34 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async candlesRead(requestParameters: CandlesReadRequest): Promise<Array<Candle>> {
         const response = await this.candlesReadRaw(requestParameters);
+        return await response.value();
+    }
+
+    /**
+     */
+    async displayTradeRaw(requestParameters: DisplayTradeRequest): Promise<runtime.ApiResponse<HOptions>> {
+        if (requestParameters.tradeId === null || requestParameters.tradeId === undefined) {
+            throw new runtime.RequiredError('tradeId','Required parameter requestParameters.tradeId was null or undefined when calling displayTrade.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/v1/portfolios/describe/{tradeId}`.replace(`{${"tradeId"}}`, encodeURIComponent(String(requestParameters.tradeId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => HOptionsFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async displayTrade(requestParameters: DisplayTradeRequest): Promise<HOptions> {
+        const response = await this.displayTradeRaw(requestParameters);
         return await response.value();
     }
 

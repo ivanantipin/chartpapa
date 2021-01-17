@@ -54,7 +54,7 @@ export interface Candle {
      * @type {number}
      * @memberof Candle
      */
-    volume?: number;
+    volume: number;
 }
 
 export function CandleFromJSON(json: any): Candle {
@@ -72,7 +72,7 @@ export function CandleFromJSONTyped(json: any, ignoreDiscriminator: boolean): Ca
         'high': json['high'],
         'low': json['low'],
         'close': json['close'],
-        'volume': !exists(json, 'volume') ? undefined : json['volume'],
+        'volume': json['volume'],
     };
 }
 

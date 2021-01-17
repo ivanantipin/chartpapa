@@ -7,7 +7,5 @@ dependencies{
 
 
     compile project (':back')
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.10.1'
 }

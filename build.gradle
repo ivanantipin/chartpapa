@@ -1,25 +1,17 @@
+buildscript {
+    repositories { jcenter() }
+}
 
 plugins {
     id 'org.jetbrains.kotlin.jvm' version'1.4.21'
-    id("org.jetbrains.kotlin.kapt") version "1.4.21-2"
+    id("org.jetbrains.kotlin.kapt") version "1.4.21"
     id 'idea'
 }
 
-ext{
-    kotlin_version=plugins.findPlugin("org.jetbrains.kotlin.jvm").kotlinPluginVersion
-}
-
 subprojects {
-
     apply plugin: "idea"
     apply plugin: "org.jetbrains.kotlin.jvm"
     apply plugin: "org.jetbrains.kotlin.kapt"
-
-//    compileKotlin {
-//        kotlinOptions {
-//            jvmTarget = "13"
-//        }
-//    }
 
     tasks {
         compileKotlin {
@@ -44,6 +36,6 @@ subprojects {
         google()
         jcenter()
         mavenLocal()
-
+        maven { url "https://jitpack.io" }
     }
 }

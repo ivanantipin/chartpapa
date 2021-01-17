@@ -9,6 +9,7 @@ import {DateStatTable} from "../../components/tables/ByDateResults";
 import {StatsPanel} from "../../components/equity/StatsPanel";
 import {Trade} from "../../api/models";
 import {Filter, FilterComp} from "../../components/factors/FilterComp";
+import {DisplayTrade} from "../../components/candlestick/DisplayTrade";
 
 const {TabPane} = Tabs;
 
@@ -71,6 +72,9 @@ export const TotalPage = (props: any) => {
                 </TabPane>
                 <TabPane tab="By Date" key="by_date">
                     <DateStatTable trades={filter.trades} orders={[]}/>
+                </TabPane>
+                <TabPane tab="Dummy" key="dummy">
+                    <DisplayTrade tradeId={"some"}/>
                 </TabPane>
             </Tabs>
         </>

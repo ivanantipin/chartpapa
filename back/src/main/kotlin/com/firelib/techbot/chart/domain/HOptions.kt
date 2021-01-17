@@ -1,8 +1,10 @@
 package com.firelib.techbot.chart.domain
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import kotlinx.serialization.Serializable
 
 @Serializable
+@JsonInclude(JsonInclude.Include.ALWAYS)
 data class HOptions(
     val title: HTitle? = null,
     val rangeSelector: HRangeSelector? = null,

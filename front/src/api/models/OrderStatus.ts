@@ -22,6 +22,7 @@ export enum OrderStatus {
     Canceled = 'canceled',
     Placed = 'placed',
     PartialFilled = 'partialFilled',
+    New = 'new',
     Rejected = 'rejected'
 }
 

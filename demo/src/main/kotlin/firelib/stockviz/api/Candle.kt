@@ -16,6 +16,7 @@ data class Candle(
 
     val close: BigDecimal,
 
+    @get:NotNull
     val volume: Int
 )
 

@@ -1,6 +1,8 @@
 package com.firelib.techbot.chart
 
 import com.firelib.techbot.TdLine
+import com.firelib.techbot.chart.domain.HAnnotation
+import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.chart.domain.HSeries
 import com.firelib.techbot.domain.LineType
 import com.funstat.domain.HLine
@@ -39,7 +41,7 @@ object HiChartCreator {
         hours: List<Ohlc>,
         title: String,
         lines: List<SR>
-    ): com.firelib.techbot.chart.domain.HOptions {
+    ): HOptions {
         val options = ChartCreator.makeOptions(hours, title)
 
         options.series += level2series(lines, hours)
@@ -68,7 +70,7 @@ object HiChartCreator {
         hours: List<Ohlc>,
         title: String,
         signals: List<LevelSignal>
-    ): com.firelib.techbot.chart.domain.HOptions {
+    ): HOptions {
         val options = ChartCreator.makeOptions(hours, title)
 
         options.series += level2series(signals.map { it.level }, hours)
@@ -81,7 +83,7 @@ object HiChartCreator {
         val labels = signals.map { sr ->
             ChartCreator.markLevel(sr.level.initial.toEpochMilli(), sr.level.level, false)
         }
-        options.annotations += com.firelib.techbot.chart.domain.HAnnotation(labels, shapes)
+        options.annotations += HAnnotation(labels, shapes)
         return options
     }
 
@@ -89,7 +91,7 @@ object HiChartCreator {
         hours: List<Ohlc>,
         title: String,
         lines: List<TdLine>
-    ): com.firelib.techbot.chart.domain.HOptions {
+    ): HOptions {
         val options = ChartCreator.makeOptions(hours, title)
         options.annotations += annotations(lines, hours)
         val series = lines.groupBy { it.lineType }.mapValues { (key, value) ->
