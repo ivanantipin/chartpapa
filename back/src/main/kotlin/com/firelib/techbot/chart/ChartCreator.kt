@@ -6,7 +6,6 @@ import firelib.core.domain.Side
 import firelib.core.misc.toStrWithDecPlaces
 import kotlin.math.log
 
-
 val defaultLegend = HLegend(
     floating = false,
     borderWidth = 1,
@@ -45,7 +44,7 @@ object ChartCreator {
         level : Double,
         below : Boolean
     ): HLabel {
-        val decPlaces =  log(100000/level, 10.0).toInt()
+        val decPlaces =  log(100000 / level, 10.0).toInt()
         return HLabel(
             verticalAlign = if (below) "bottom" else "top",
             backgroundColor = "rgba(255,255,255,0)", //if (s.reference.up) "red" else "green",
@@ -53,7 +52,7 @@ object ChartCreator {
             text = level.toStrWithDecPlaces(decPlaces),
             style = HStyle(fontSize = "6px"),
             distance = if (below) -10 else 0,
-            point = HPoint(x = timeMs, y = level,xAxis = 0, yAxis = 0),
+            point = HPoint(x = timeMs, y = level, xAxis = 0, yAxis = 0),
             allowOverlap = true
         )
     }
@@ -74,4 +73,20 @@ object ChartCreator {
             height = 2
         )
     }
+
+    fun makeSequentaOpts(
+        ann: SequentaAnnnotations,
+        hours: List<Ohlc>,
+        title: String
+    ): HOptions {
+        val series = HiChartCreator.renderHLines(ann.lines)
+
+        val options = makeOptions(hours, title)
+
+        options.annotations = listOf(HAnnotation(labels = ann.labels, shapes = ann.shapes))
+
+        options.series += series
+        return options
+    }
+
 }

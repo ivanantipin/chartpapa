@@ -1,7 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.4.10'
     repositories { jcenter() }
-
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
@@ -17,10 +15,6 @@ application {
     applicationDefaultJvmArgs = ['-Xms128m', '-Xmx1024m']
 }
 
-repositories {
-    maven { url "https://jitpack.io" }
-    maven { url "https://kotlin.bintray.com/kotlinx" }
-}
 
 apply plugin: 'kotlinx-serialization'
 

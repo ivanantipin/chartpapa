@@ -4,6 +4,7 @@ import firelib.core.misc.atNy
 import firelib.core.misc.dateFormat
 import firelib.core.misc.toStandardString
 import firelib.core.misc.toStringAtMoscow
+import firelib.indicators.SR
 import java.time.Instant
 
 data class Ohlc(
@@ -35,3 +36,5 @@ data class Ohlc(
     }
 
 }
+
+data class LevelSignal(val side: Side, val time: Long, val level: SR)

@@ -5,6 +5,7 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.SequentaAnnCreator
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.Interval
+import firelib.core.domain.LevelSignal
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.core.misc.atMoscow
@@ -65,8 +66,6 @@ object BreachFinder {
                 BreachEvent(key, fileName)
             }
     }
-
-    data class LevelSignal(val side: Side, val time: Long, val level: SR)
 
     fun findLevelBreaches(
         ticker: String,
