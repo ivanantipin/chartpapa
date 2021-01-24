@@ -83,6 +83,7 @@ class StreamTradeCaseWriter(val path: Path, val tableName: String) {
                 this[Trades.pnl] = it.pnl()
                 this[Trades.qty] = it.first.qty
                 this[Trades.factors] = ExposedBlob(JsonHelper.toJsonBytes(it.first.tradeStat))
+                this[Trades.context] = ExposedBlob(it.first.contextSupplier(it.first, it.second))
             }
         }
     }

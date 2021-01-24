@@ -8,19 +8,13 @@ import {CandlesApi} from "../../api/apis";
 
 require('highcharts/modules/annotations')(Highcharts)
 
-
-export const fetchTicker = (tradeId: string): Promise<string> => {
-    return portfoliosApi.displayTrade({tradeId})
-}
-
-
 export const DisplayTrade = (props: { tradeId: string }) => {
 
     const [opts, setOpts] = useState<any>({})
 
     useEffect(() => {
 
-        fetchTicker(props.tradeId).then(dt => {
+        portfoliosApi.displayTrade({tradeId: props.tradeId}).then(dt => {
 
             setOpts(JSON.parse(dt))
         })
@@ -28,9 +22,11 @@ export const DisplayTrade = (props: { tradeId: string }) => {
 
 
     return (
+        <div style={{height : '700px'}}>
         <HighchartsReact
             highcharts={Highcharts}
             constructorType={"stockChart"}
             options={opts}/>
+        </div>
     );
 }

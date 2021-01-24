@@ -6,6 +6,7 @@ import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.chart.domain.HSeries
 import com.firelib.techbot.domain.LineType
 import com.funstat.domain.HLine
+import firelib.common.Trade
 import firelib.core.domain.LevelSignal
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
@@ -46,7 +47,7 @@ object HiChartCreator {
 
         options.series += level2series(lines, hours)
 
-        options.annotations += com.firelib.techbot.chart.domain.HAnnotation(lines.map {
+        options.annotations += HAnnotation(lines.map {
             ChartCreator.markLevel(it.initial.toEpochMilli(), it.level, false)
         }, emptyList())
         return options
@@ -92,19 +93,27 @@ object HiChartCreator {
         title: String,
         lines: List<TdLine>
     ): HOptions {
-        val options = ChartCreator.makeOptions(hours, title)
+        val options = trendLinesWithoutBySell(hours, title, lines)
         options.annotations += annotations(lines, hours)
-        val series = lines.groupBy { it.lineType }.mapValues { (key, value) ->
+        return options
+    }
+
+    fun trendLinesWithoutBySell(
+        hours: List<Ohlc>,
+        title: String,
+        lines: List<TdLine>
+    ): HOptions {
+        val options = ChartCreator.makeOptions(hours, title)
+        val series = lines.groupBy { it.lineType }.mapValues { (_, value) ->
             value.asSequence().flatMapIndexed { idx, line ->
                 renderLine(line, idx, hours)
             }
         }.values.flatMap { it.toList() }
         options.series += series
-        options.series += renderHLines(activeLevels(lines, hours))
         return options
     }
 
-    private fun annotations(lines: List<TdLine>, hours: List<Ohlc>): com.firelib.techbot.chart.domain.HAnnotation {
+    private fun annotations(lines: List<TdLine>, hours: List<Ohlc>): HAnnotation {
         val shapes = lines.filter { it.intersectPoint != null }.map {
             val side = if (it.lineType == LineType.Support) Side.Sell else Side.Buy
             val color = getLineColor(side)
@@ -112,8 +121,20 @@ object HiChartCreator {
             val y = it.intersectPoint!!.second
             ChartCreator.makeBuySellPoint(color, x, y, side)
         }
-        return com.firelib.techbot.chart.domain.HAnnotation(emptyList(), shapes)
+        return HAnnotation(emptyList(), shapes)
     }
+
+    fun buySells(trades : List<Trade>): HAnnotation {
+        val shapes = trades.map {
+            val side = it.side()
+            val color = getLineColor(side)
+            val x =  it.dtGmt.toEpochMilli()
+            val y = it.price
+            ChartCreator.makeBuySellPoint(color, x, y, side)
+        }
+        return HAnnotation(emptyList(), shapes)
+    }
+
 
     private fun getLineColor(side: Side): String {
         return if (side == Side.Buy) "green" else "red"

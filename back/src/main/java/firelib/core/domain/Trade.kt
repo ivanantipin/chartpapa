@@ -17,7 +17,9 @@ data class Trade(
     val priceTime: Instant,
     val tradeStat: TradeStat = TradeStat(),
     val positionAfter: Int = 0,
-    val tradeNo : String = order.id
+    val tradeNo : String = order.id,
+    var tradeCtxValue : Any = "",
+    var contextSupplier : ((openTrade : Trade, closingTrade : Trade)->ByteArray) = {t0,t1-> ByteArray(0) }
 ) {
 
     init {
@@ -72,6 +74,7 @@ object Trades : Table("trades") {
     val pnl = double("Pnl")
     val qty = integer("Qty")
     val factors = blob("Factors").nullable()
+    val context = blob("Context").nullable()
 }
 
 

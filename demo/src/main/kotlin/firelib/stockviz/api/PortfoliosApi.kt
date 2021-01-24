@@ -1,32 +1,15 @@
 package firelib.stockviz.api
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.firelib.techbot.LineConfig
-import com.firelib.techbot.TrendsCreator
-import com.firelib.techbot.chart.ChartCreator
-import com.firelib.techbot.chart.HiChartCreator
-import com.firelib.techbot.chart.domain.HOptions
 import firelib.common.Trades
-import firelib.core.SourceName
-import firelib.core.domain.Interval
 import firelib.core.domain.Side
 import firelib.core.domain.TradeStat
 import firelib.core.misc.JsonHelper
-import firelib.core.misc.atMoscow
-import firelib.core.store.MdDao
-import firelib.core.store.MdStorageImpl
-import io.ktor.http.ContentType.Application.Json
-import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
-import kotlinx.serialization.SerializationStrategy
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.math.BigDecimal
-import java.time.Instant
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 @Controller("/api/v1")
 class PortfoliosApiController {
@@ -81,12 +64,10 @@ class PortfoliosApiController {
 
     @Get(value = "/portfolios/describe/{tradeId}", produces = ["application/json"])
     fun displayTrade(tradeId: String): String {
-        val storage = MdStorageImpl()
-        val dao = storage.md.getDao(SourceName.FINAM, Interval.Min10)
-        val ohlcs = dao.queryAll("SBER", Instant.ofEpochMilli(System.currentTimeMillis() - 10*24*3600_000L).atMoscow())
-        val lines = TrendsCreator.findRegresLines(ohlcs, LineConfig(2, 0.95))
-        val opts = HiChartCreator.makeTrendLines(ohlcs, "some", lines)
-        return Json { prettyPrint = true }.encodeToString( opts)
+        return transaction {
+            val row = Trades.select { Trades.tradeId eq tradeId }.firstOrNull()
+            String(row!![Trades.context]!!.bytes)
+        }
     }
 
 
@@ -94,7 +75,6 @@ class PortfoliosApiController {
     fun portfoliosTradesList(
         portfolio: String
     ): List<Trade> {
-
         return transaction {
             mapTrades(portfolio)
         }

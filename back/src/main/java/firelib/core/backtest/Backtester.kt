@@ -102,7 +102,7 @@ object Backtester {
 
         writeReport(reportProcessor.bestModels().last(), cfg)
 
-        ReportWriter.writeOpt(cfg.getReportDbFile(), reportProcessor.estimates)
+        ReportWriter.writeOpt(reportProcessor.estimates)
 
         log.info("Finished")
     }

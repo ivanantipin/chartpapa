@@ -1,12 +1,10 @@
 package firelib.core.report
 
-import firelib.common.Trades.nullable
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.ModelOutput
 import firelib.core.misc.JsonHelper
 import firelib.core.misc.toTradingCases
 import firelib.core.report.dao.ColDefDao
-import firelib.core.store.GlobalConstants
 import org.apache.commons.io.FileUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.batchInsert
@@ -14,72 +12,39 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
-import java.nio.file.*
+import java.nio.file.Paths
 import kotlin.system.measureTimeMillis
 
-
-object ReportWriter{
-    fun writeRows(ff: String, rows: Iterable<String>) {
-        Files.write(Paths.get(ff), rows, StandardOpenOption.CREATE)
-    }
+object ReportWriter {
 
     val log = LoggerFactory.getLogger(javaClass)
 
     fun clearReportDir(targetDir: String) {
         try {
             FileUtils.deleteDirectory(Paths.get(targetDir).toFile())
-        }catch (e : Exception){
+        } catch (e: Exception) {
             error("failed to remove report dir " + e.message)
         }
         FileUtils.forceMkdir(Paths.get(targetDir).toFile())
     }
 
-
     fun writeReport(model: ModelOutput, cfg: ModelBacktestConfig) {
-
-        writeStaticConf(cfg, model)
-
-        if(GlobalConstants.env == "test"){
-            copyPythonFiles(cfg)
-        }
-
-        writeModelOutput(model, cfg)
-
-        log.info("report written to ${cfg.reportTargetPath} you can run it , command 'jupyter lab'")
-
-    }
-
-    fun writeModelOutput(model: ModelOutput, cfg: ModelBacktestConfig){
         if (model.trades.size == 0) {
             log.info("no trades generated")
-        }else{
+        } else {
             measureTimeMillis {
                 model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.forEach {
                     StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
                 }
             }.apply {
-                println("took ${this/1000.0} s to write report")
+                println("took ${this / 1000.0} s to write report")
             }
         }
-
         ColDefDao(cfg.getReportDbFile(), orderColsDefs, "orders").upsert(model.orderStates)
+        log.info("report written to ${cfg.reportTargetPath} you can run it , command 'jupyter lab'")
     }
 
-    fun copyPythonFiles(cfg: ModelBacktestConfig) {
-        //fixme
-        Files.copy(Paths.get("/home/ivan/projects/chartpapa/market_research/report/StdReport.ipynb"), Paths.get(Paths.get(cfg.reportTargetPath, "StdReport.ipynb").toAbsolutePath().toString()), StandardCopyOption.REPLACE_EXISTING)
-        Files.copy(Paths.get("/home/ivan/projects/chartpapa/market_research/report/TradesReporter.py"), Paths.get(Paths.get(cfg.reportTargetPath, "TradesReporter.py").toAbsolutePath().toString()), StandardCopyOption.REPLACE_EXISTING)
-        Files.copy(Paths.get("/home/ivan/projects/chartpapa/market_research/report/ShowTrade.ipynb"), Paths.get(Paths.get(cfg.reportTargetPath, "ShowTrade.ipynb").toAbsolutePath().toString()), StandardCopyOption.REPLACE_EXISTING)
-    }
-
-    fun writeStaticConf(cfg: ModelBacktestConfig, model: ModelOutput) {
-
-        JsonHelper.serialize(cfg, Paths.get(cfg.reportTargetPath, "cfg.json"))
-
-        writeRows(Paths.get(cfg.reportTargetPath, "modelProps.properties").toAbsolutePath().toString(), model.modelProps.map({ it.key + "=" + it.value }))
-    }
-
-    fun writeOpt(path : Path, estimates: List<ExecutionEstimates>) {
+    fun writeOpt(estimates: List<ExecutionEstimates>) {
         transaction {
             Opts.insert {
                 it[Opts.blob] = ExposedBlob(JsonHelper.toJsonBytes(estimates))

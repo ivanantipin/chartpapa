@@ -23,6 +23,7 @@ fun TimeSeries<Ohlc>.ret(last : Int) : Double{
     return (this[0].close - this[last].close)/this[last].close
 }
 
+
 fun TimeSeries<Ohlc>.nonInterpolatedView() : TimeSeries<Ohlc>{
     val ret = TimeSeriesImpl(this.capacity(), { Ohlc() })
     this.preRollSubscribe {
@@ -89,6 +90,14 @@ fun TimeSeries<Ohlc>.returns(cnt : Int) : DoubleArray {
     require(cnt < count())
     return DoubleArray(cnt, {this[it].ret()})
 }
+
+fun TimeSeries<Ohlc>.toSequence(start : Int) : Sequence<Ohlc> {
+    require(start < count())
+    return (0 .. start).asSequence().map {idx->
+        this[start  - idx]
+    }
+}
+
 
 
 fun makeUsTimeseries(it: TimeSeries<Ohlc>): ConditionalTimeSeries {

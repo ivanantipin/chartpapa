@@ -89,7 +89,8 @@ fun Model.factorReturn(): (idx: Int) -> Double {
     }
 
     enableFactor("returnCurrent", { tickerIdx ->
-        ret(tickerIdx)
+        val ret1 = ret(tickerIdx)
+        if(ret1.isNaN()) -1.0 else ret1
     })
     return ret
 }

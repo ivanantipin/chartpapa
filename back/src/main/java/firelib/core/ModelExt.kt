@@ -1,5 +1,6 @@
 package firelib.core
 
+import firelib.common.Trade
 import firelib.core.config.ModelBacktestConfig
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
@@ -44,6 +45,24 @@ fun Model.enableFactor(name: String, fact: (Int) -> Double) {
         }
     }
 }
+
+fun Model.enableTradeContextSupplier(fact: (Int)->(open : Trade, close : Trade) -> ByteArray) {
+    orderManagers().forEachIndexed { index, orderManager ->
+        orderManager.tradesTopic().subscribe {
+            it.contextSupplier = fact(index)
+        }
+    }
+}
+
+fun Model.enableTradeContext(fact: (Int)->Any) {
+    orderManagers().forEachIndexed { index, orderManager ->
+        orderManager.tradesTopic().subscribe {
+            it.tradeCtxValue = fact(index)
+        }
+    }
+}
+
+
 
 fun Model.enableDiscreteFactor(name: String, fact: (Int) -> Int) {
     orderManagers().forEachIndexed { index, orderManager ->

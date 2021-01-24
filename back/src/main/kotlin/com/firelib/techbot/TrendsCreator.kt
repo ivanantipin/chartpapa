@@ -152,4 +152,51 @@ object TrendsCreator {
         return Pair(lows, highs)
     }
 
+    fun make2Lines(
+        pivots: List<Int>,
+        prices: List<Double>,
+        intersectPrices: List<Double>,
+        lineType: LineType,
+    ): List<TdLine> {
+
+        val cache = mutableMapOf<Pair<Int, Int>, Boolean>()
+
+        fun checkRangeNonIntersected(x0: Int, x1: Int): Boolean {
+            return cache.computeIfAbsent(Pair(x0, x1), { P ->
+                val line = TdLine(x0, x1, prices[x0], prices[x1], lineType, 0, 0.0)
+                !line.rangeIntersected(x0, x1, intersectPrices)
+            })
+        }
+
+        val ret = mutableMapOf<Pair<Int, Int>, TdLine>()
+
+        for (si in pivots.indices) {
+            val s = pivots[si]
+            for (mi in si + 1 until pivots.size) {
+                val m = pivots[mi]
+                if (checkRangeNonIntersected(s, m)) {
+                    ret.put(s to m, TdLine(s,m, prices[s], prices[m], lineType, 0, Double.NaN))
+                }
+            }
+        }
+
+        for (l in ret.values) {
+            for (x in l.x1 + 1 until intersectPrices.size) {
+                if (lineType.priceCmp(intersectPrices[x], l.calcValue(x))) {
+                    l.intersectPoint = Pair(x, l.calcValue(x))
+                    break
+                }
+            }
+        }
+
+        return ret.values.toList()
+    }
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        println(findTdPivots(listOf(1.0, 2.0, 3.0,2.0, 3.0, 4.0,3.0,2.0 ), 2))
+
+    }
+
+
 }
