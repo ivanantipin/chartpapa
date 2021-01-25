@@ -167,14 +167,6 @@ class MenuReg {
 
             menuItem("Инструменты/Подписки") {
                 rowSize = 1
-                parentInlButton("Ваши символы / Удаление") {
-                    action = { bot, update ->
-                        val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
-                            .map { InlineButton(it.code, Cmd("unsub", mapOf("ticker" to it.code, "market" to it.market)), "") }.chunked(4)
-                        list(buttons, bot, update.chatId(), "Ваши символы, нажмите на символ чтобы отписаться")
-                    }
-                }
-
                 parentInlButton("Добавить символ") {
                     rowSize = 4
 
@@ -189,6 +181,14 @@ class MenuReg {
                                 ) {}
                             }
                         }
+                    }
+                }
+
+                parentInlButton("Ваши символы / Удаление") {
+                    action = { bot, update ->
+                        val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
+                            .map { InlineButton(it.code, Cmd("unsub", mapOf("ticker" to it.code, "market" to it.market)), "") }.chunked(4)
+                        list(buttons, bot, update.chatId(), "Ваши символы, нажмите на символ чтобы отписаться")
                     }
                 }
 
