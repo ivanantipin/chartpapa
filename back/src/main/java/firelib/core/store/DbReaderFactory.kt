@@ -1,21 +1,30 @@
 package firelib.core.store
 
 import firelib.core.SourceName
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.store.reader.SimplifiedReader
+import firelib.finam.FinamDownloader
 import java.time.Instant
 
-//fixme time in make reader
-class DbReaderFactory(source : SourceName, interval: Interval, val startTime : Instant) :
+
+class DbReaderFactory(val source : SourceName, val interval: Interval, val startTime : Instant) :
     ReaderFactory {
 
-    val dao = MdDaoContainer().getDao(source, interval)
+    val mdStorage = MdStorageImpl()
 
     override fun makeReader(security: String): SimplifiedReader {
+
+        require(source == SourceName.FINAM, {"not supported source ${source}"})
+
+        // fixme hack
+        val instrId = InstrId(code = security, market = FinamDownloader.SHARES_MARKET)
+
         return SimplifiedReaderImpl(
-            dao,
-            security,
-            startTime = startTime
+            mdStorage,
+            instrId,
+            startTime = startTime,
+            interval
         )
     }
 }

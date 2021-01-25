@@ -46,10 +46,6 @@ object TrqCommandHelper {
         """.trimIndent()
     }
 
-    fun unsubscibeCmd(instr: Array<InstrId>): String {
-        return ""
-    }
-
 
     /*
     Security(secid=26, active=true,

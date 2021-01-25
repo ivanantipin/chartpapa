@@ -12,6 +12,7 @@ import firelib.core.domain.OmPosition
 import firelib.core.report.ReportWriter
 import firelib.core.report.SqlQueries.readCurrentPositions
 import firelib.core.store.GlobalConstants
+import firelib.core.store.MdStorage
 import firelib.core.store.MdStorageImpl
 import firelib.core.store.ReaderFactory
 import org.slf4j.LoggerFactory
@@ -155,9 +156,9 @@ object ProdRunner {
         )
     }
 
+    val storageImpl = MdStorageImpl()
 
     fun updateMd(cfg: ModelBacktestConfig, useMin: Boolean): Instant {
-        val storageImpl = MdStorageImpl()
         val source = storageImpl.sources[cfg.histSourceName]
         val updated = cfg.instruments.map(source::mapSecurity).associateBy({},
             { storageImpl.updateMd(it, source, cfg.interval) })

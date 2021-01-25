@@ -7,39 +7,12 @@ import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
 import firelib.core.misc.atUtc
-import firelib.emulator.HistoricalSourceEmulator
-import firelib.finam.FinamDownloader
-import firelib.finam.MoexSource
 import firelib.iqfeed.IntervalTransformer
-import firelib.iqfeed.IqFeedHistoricalSource
-import firelib.mt5.MT5SourceSafe
-import firelib.vantage.VantageDownloader
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDateTime
-import java.util.concurrent.ConcurrentHashMap
-
-
-class SourceFactory{
-    val sources = mapOf<SourceName, ()->HistoricalSource>(
-        SourceName.FINAM to {FinamDownloader()},
-        SourceName.VANTAGE to {VantageDownloader()},
-        SourceName.DUMMY to { HistoricalSourceEmulator() },
-        SourceName.MOEX to { MoexSource() },
-        SourceName.IQFEED to {IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK"))},
-        SourceName.MT5 to { MT5SourceSafe() }
-    )
-
-    val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()
-
-    operator fun get(source: SourceName) : HistoricalSource{
-        return concurrentHashMap.computeIfAbsent(source, {sources[source]!!()})
-    }
-}
-
 
 class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toString()) : MdStorage {
 
@@ -56,7 +29,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     override fun read(instrId: InstrId, interval: Interval, targetInterval: Interval): List<Ohlc> {
         val dao = md.getDao(instrId.sourceEnum(), interval)
         val startTime = LocalDateTime.now().minusSeconds(targetInterval.durationMs * 600 / 1000)
-        var ret = dao.queryAll(instrId.code, startTime)
+        var ret = dao.queryAll(makeTable(instrId), startTime).toList()
         if (ret.isEmpty()) {
             updateMarketData(instrId, interval)
             ret = dao.queryAll(instrId.code, startTime).toList()
@@ -67,6 +40,20 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         } finally {
             log.info("transformed in " + (System.currentTimeMillis() - start) / 1000.0 + " s. " + ret.size + " min bars")
         }
+    }
+
+    override fun read(instrId: InstrId, interval: Interval, start: LocalDateTime): List<Ohlc> {
+        val dao = md.getDao(instrId.sourceEnum(), interval)
+        return dao.queryAll(makeTable(instrId), start).toList()
+    }
+
+    fun makeTable(instrId: InstrId): String {
+        return "${instrId.code}_${instrId.market}"
+    }
+
+    override fun insert(instrId: InstrId, interval: Interval, ohlcs: List<Ohlc>) {
+        val dao = md.getDao(instrId.sourceEnum(), interval)
+        dao.insertOhlc(ohlcs, makeTable(instrId))
     }
 
     fun updateMarketData(instrId: InstrId, interval: Interval): Instant {
@@ -84,7 +71,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             source.load(instrId, startTime, interval).chunked(5000).forEach {
                 println("inserted")
                 instant = it.last().endTime
-                dao.insertOhlc(it, instrId.code)
+                dao.insertOhlc(it, makeTable(instrId))
             }
         } catch (e: Exception) {
             log.info("failed to update " + instrId + " " + e.message)

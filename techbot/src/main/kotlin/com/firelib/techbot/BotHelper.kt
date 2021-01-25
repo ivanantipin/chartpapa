@@ -71,17 +71,15 @@ object BotHelper {
         }
     }
 
-    val mdDaoContainer = MdDaoContainer()
+    val mdStorageImpl = MdStorageImpl()
 
-    fun getOhlcsForTf(ticker: String, timeFrame: Interval): List<Ohlc> {
-        val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(BotConfig.window))
-        val ohlcs = mdDaoContainer.getDao(SourceName.FINAM, Interval.Min10).queryAll(ticker, startTime)
-        return IntervalTransformer.transform(timeFrame, ohlcs)
+    fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
+        return getOhlcsForTf(ticker, timeFrame, BotConfig.window.toInt())
     }
 
-    fun getOhlcsForTf(ticker: String, timeFrame: Interval, window: Int): List<Ohlc> {
+    fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval, window: Int): List<Ohlc> {
         val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(window.toLong()))
-        val ohlcs = mdDaoContainer.getDao(SourceName.FINAM, Interval.Min10).queryAll(ticker, startTime)
+        val ohlcs = mdStorageImpl.read(ticker, Interval.Min10, startTime)
         return IntervalTransformer.transform(timeFrame, ohlcs)
     }
 

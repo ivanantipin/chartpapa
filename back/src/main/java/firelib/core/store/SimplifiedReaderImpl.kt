@@ -1,5 +1,7 @@
 package firelib.core.store
 
+import firelib.core.domain.InstrId
+import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.atUtc
 import firelib.core.store.reader.SimplifiedReader
@@ -7,7 +9,7 @@ import java.time.Instant
 import java.util.*
 
 
-class SimplifiedReaderImpl(val mdDao: MdDao, val code : String, val startTime : Instant) :
+class SimplifiedReaderImpl(val mdDao: MdStorageImpl, val instrId: InstrId, val startTime: Instant, val interval: Interval) :
     SimplifiedReader {
 
     var lastRead : Instant = startTime
@@ -17,7 +19,7 @@ class SimplifiedReaderImpl(val mdDao: MdDao, val code : String, val startTime : 
     var done = false
 
     fun read(){
-        val list = mdDao.queryAll(code, lastRead.atUtc(), 10_000)
+        val list = mdDao.read(instrId, interval,  lastRead.atUtc())
         if(list.isNotEmpty()){
             buffer.addAll(list)
             lastRead = list.last().endTime

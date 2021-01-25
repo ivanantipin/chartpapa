@@ -19,6 +19,15 @@ data class InstrId(val id: String = "N/A",
         fun dummyInstrument(ticker : String) : InstrId {
             return InstrId(ticker, ticker, "", ticker, "dummy")
         }
+        fun fromCodeAndExch(code : String, market : String) : InstrId{
+            return InstrId(code = code, market = market, source = SourceName.FINAM.name)
+        }
+
+    }
+
+
+    fun codeAndExch() : String{
+        return "${code}_${market}"
     }
 }
 
