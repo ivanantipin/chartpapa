@@ -7,6 +7,7 @@ import com.github.kotlintelegrambot.dispatcher.Cmd
 import com.github.kotlintelegrambot.dispatcher.fromUser
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
+import firelib.core.domain.InstrId
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -44,8 +45,9 @@ class SubHandler : CommandHandler {
         val fut = MdService.updateStock(tkr, market)
         if (fut != null) {
             fut.thenAccept {
-                UpdateSensitivities.updateSens(tkr).get()
-                UpdateLevelsSensitivities.updateTicker(tkr).get()
+                val instrId = InstrId.fromCodeAndExch(tkr, market)
+                UpdateSensitivities.updateSens(instrId).get()
+                UpdateLevelsSensitivities.updateTicker(instrId).get()
             }
             mdAvailable = false
         }

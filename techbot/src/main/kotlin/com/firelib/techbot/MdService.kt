@@ -121,7 +121,7 @@ object MdService {
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     initDatabase()
 
     transaction {

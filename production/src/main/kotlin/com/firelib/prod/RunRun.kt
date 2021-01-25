@@ -35,7 +35,7 @@ fun getTrqMicexMapper(): DbMapper {
     return DbMapper(trqMapperWriter(), { it.board == "TQBR" })
 }
 
-fun main(args: Array<String>) {
+fun main() {
     runReconnect()
     val models = GlobalConstants.getProp("models.to.run").split(",")
     runLogger.info("models to run : ${models}")

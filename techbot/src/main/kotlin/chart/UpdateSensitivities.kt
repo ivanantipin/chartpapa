@@ -2,6 +2,7 @@ package com.firelib.techbot
 
 import com.firelib.techbot.BotHelper.getOhlcsForTf
 import com.firelib.techbot.domain.TimeFrame
+import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
@@ -13,15 +14,14 @@ object UpdateSensitivities{
 
     fun updateSensitivties() {
         MdService.liveSymbols.forEach { instr ->
-            val ticker = instr.code
-            updateSens(ticker).get()
+            updateSens(instr).get()
         }
     }
 
-    fun updateSens(ticker: String): Future<Unit> {
+    fun updateSens(ticker: InstrId): Future<Unit> {
 
         return updateDatabase("senses update ${ticker}") {
-            SensitivityConfig.deleteWhere { SensitivityConfig.ticker eq ticker }
+            SensitivityConfig.deleteWhere { SensitivityConfig.codeAndExch eq ticker.codeAndExch() }
             TimeFrame.values().forEach { timeFrame ->
                 val targetOhlcs = getOhlcsForTf(ticker, timeFrame.interval)
 
@@ -43,7 +43,7 @@ object UpdateSensitivities{
 
     private fun updateForOrder(
         targetOhlcs: List<Ohlc>,
-        ticker: String,
+        ticker: InstrId,
         tf: TimeFrame,
         pvtOrder: Int
     ): Boolean {
@@ -53,10 +53,10 @@ object UpdateSensitivities{
             if (lines.size >= 2) {
                 println("final for ${ticker} ${tf} rsquare is ${lineRSquare} line count is ${lines.size}")
                 SensitivityConfig.deleteWhere {
-                    SensitivityConfig.ticker eq ticker and (SensitivityConfig.timeframe eq tf.name)
+                    SensitivityConfig.codeAndExch eq ticker.codeAndExch() and (SensitivityConfig.timeframe eq tf.name)
                 }
                 SensitivityConfig.insert {
-                    it[SensitivityConfig.ticker] = ticker
+                    it[SensitivityConfig.codeAndExch] = ticker.codeAndExch()
                     it[SensitivityConfig.timeframe] = tf.name
                     it[rSquare] = lineRSquare
                     it[SensitivityConfig.pivotOrder] = pvtOrder
@@ -69,7 +69,7 @@ object UpdateSensitivities{
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     initDatabase()
     UpdateSensitivities.updateSensitivties()
 }

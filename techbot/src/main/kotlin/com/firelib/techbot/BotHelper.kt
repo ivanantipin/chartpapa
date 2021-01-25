@@ -5,10 +5,10 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
-import firelib.core.SourceName
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
-import firelib.core.store.MdDaoContainer
+import firelib.core.store.MdStorageImpl
 import firelib.iqfeed.IntervalTransformer
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -36,12 +36,11 @@ object BotHelper {
         }
     }
 
-
-    fun getSubscriptions(uid: Int): List<String> {
+    fun getSubscriptions(uid: Int): List<InstrId> {
         return transaction {
             Subscriptions.select {
                 Subscriptions.user eq uid
-            }.withDistinct().map { it[Subscriptions.ticker] }
+            }.withDistinct().map { InstrId(code = it[Subscriptions.ticker], market = it[Subscriptions.market]) }
 
         }
     }
@@ -53,7 +52,6 @@ object BotHelper {
             }.withDistinct().map { it[TimeFrames.tf] }
         }
     }
-
 
     fun ensureExist(user: User) {
         updateDatabase("user update") {
@@ -87,7 +85,6 @@ object BotHelper {
         return IntervalTransformer.transform(timeFrame, ohlcs)
     }
 
-
     fun checkTicker(ticker: String, bot: Bot, update: Update): Boolean {
         if (MdService.liveSymbols.find { it.code.equals(ticker, true) } == null) {
             bot.sendMessage(
@@ -99,6 +96,5 @@ object BotHelper {
         }
         return true
     }
-
 
 }

@@ -1,6 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.domain.TimeFrame
+import firelib.core.domain.InstrId
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -14,27 +15,27 @@ object BotConfig{
     init {
         transaction {
             rSquares = SensitivityConfig.selectAll()
-                .associateBy({ Pair(it[SensitivityConfig.ticker], it[SensitivityConfig.timeframe]) },
+                .associateBy({ Pair(it[SensitivityConfig.codeAndExch], it[SensitivityConfig.timeframe]) },
                     { it[SensitivityConfig.rSquare] })
 
             pivotOrders = SensitivityConfig.selectAll()
-                .associateBy({ Pair(it[SensitivityConfig.ticker], it[SensitivityConfig.timeframe]) },
+                .associateBy({ Pair(it[SensitivityConfig.codeAndExch], it[SensitivityConfig.timeframe]) },
                     { it[SensitivityConfig.pivotOrder] })
         }
     }
 
-    fun getConf(ticker: String, timeFrame: TimeFrame) : LineConfig {
+    fun getConf(ticker: InstrId, timeFrame: TimeFrame) : LineConfig {
         val ret = LineConfig(getPivot(ticker, timeFrame), getRSquare(ticker, timeFrame))
         println("returning config for ${ticker} frame ${timeFrame} : ${ret}")
         return ret
     }
 
-    fun getRSquare(ticker : String, timeFrame : TimeFrame) : Double{
-        return rSquares.getOrDefault(Pair(ticker, timeFrame.name), lineRSquare)
+    fun getRSquare(ticker : InstrId, timeFrame : TimeFrame) : Double{
+        return rSquares.getOrDefault(Pair(ticker.codeAndExch(), timeFrame.name), lineRSquare)
     }
 
-    fun getPivot(ticker : String, timeFrame : TimeFrame) : Int{
-        return pivotOrders.getOrDefault(Pair(ticker, timeFrame.name), pivotOrder)
+    fun getPivot(ticker : InstrId, timeFrame : TimeFrame) : Int{
+        return pivotOrders.getOrDefault(Pair(ticker.codeAndExch(), timeFrame.name), pivotOrder)
     }
 
 

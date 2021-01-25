@@ -9,6 +9,7 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.dispatcher.Cmd
 import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.Update
+import firelib.core.domain.InstrId
 import java.io.File
 
 
@@ -20,9 +21,9 @@ class DemarkCommand : CommandHandler {
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
 
-        val (tkr, tf) = cmd.tickerAndTf()
+        val (tkr, market, tf) = cmd.tickerAndTf()
 
-        val ohlcs = BotHelper.getOhlcsForTf(tkr, tf.interval)
+        val ohlcs = BotHelper.getOhlcsForTf(InstrId.fromCodeAndExch(tkr, market), tf.interval)
 
         val ann = SequentaAnnCreator.createAnnotations(ohlcs)
 

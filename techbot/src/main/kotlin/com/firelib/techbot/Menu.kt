@@ -165,12 +165,12 @@ class MenuReg {
                 menuItem("Главное меню") {}
             }
 
-            menuItem("Настройки") {
+            menuItem("Инструменты/Подписки") {
                 rowSize = 1
                 parentInlButton("Ваши символы / Удаление") {
                     action = { bot, update ->
                         val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
-                            .map { InlineButton(it, Cmd("unsub", mapOf("ticker" to it)), "") }.chunked(4)
+                            .map { InlineButton(it.code, Cmd("unsub", mapOf("ticker" to it.code, "market" to it.market)), "") }.chunked(4)
                         list(buttons, bot, update.chatId(), "Ваши символы, нажмите на символ чтобы отписаться")
                     }
                 }
@@ -237,10 +237,10 @@ class MenuReg {
         tf: TimeFrame,
         title: String
     ): List<InlineButton> {
-        val bts = BotHelper.getSubscriptions(chatId).map { code ->
+        val bts = BotHelper.getSubscriptions(chatId).map { instrId ->
             InlineButton(
-                code,
-                Cmd(cmd, mapOf("ticker" to code, "tf" to tf.name)),
+                instrId.code,
+                Cmd(cmd, mapOf("ticker" to instrId.code, "tf" to tf.name, "market" to instrId.market)),
                 title
             )
         }
@@ -259,9 +259,12 @@ fun Update.fromUser(): User {
     return this.message?.from ?: this.callbackQuery?.from!!
 }
 
+
+data class TickerMarketTf(val ticker : String, val market : String, val tf : TimeFrame)
+
 data class Cmd(val name: String, val opts: Map<String, String> = mutableMapOf()) {
-    fun tickerAndTf(): Pair<String, TimeFrame> {
-        return Pair(opts["ticker"]!!, TimeFrame.valueOf(opts["tf"]!!))
+    fun tickerAndTf(): TickerMarketTf {
+        return TickerMarketTf(opts["ticker"]!!,  opts["market"]!!,  TimeFrame.valueOf(opts["tf"]!!))
     }
 }
 

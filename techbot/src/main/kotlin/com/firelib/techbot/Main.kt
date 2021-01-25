@@ -20,7 +20,7 @@ import java.io.FileOutputStream
 
 const val debug_token = "1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM"
 
-fun main(args: Array<String>) {
+fun main() {
     initDatabase()
 
     MdService.updateAll()

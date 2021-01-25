@@ -7,19 +7,20 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.SequentaAnnCreator
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.saveFile
+import firelib.core.domain.InstrId
 import firelib.core.misc.atMoscow
 import firelib.finam.timeFormatter
 import firelib.indicators.sequenta.SignalType
 
 object SequentaSignals {
 
-    fun checkSignals(ticker: String, tf: TimeFrame, window: Int, existing: Set<BreachEventKey>): List<BreachEvent> {
+    fun checkSignals(ticker: InstrId, tf: TimeFrame, window: Int, existing: Set<BreachEventKey>): List<BreachEvent> {
         val ohlcs = BotHelper.getOhlcsForTf(ticker, tf.interval)
         val signals = SequentaAnnCreator.genSignals(ohlcs)
         return signals.flatMap {
             val time = ohlcs.last().endTime
             val key =
-                BreachEventKey(ticker, tf, time.toEpochMilli(), BreachType.DEMARK_SIGNAL)
+                BreachEventKey(ticker.codeAndExch(), tf, time.toEpochMilli(), BreachType.DEMARK_SIGNAL)
             val newSignal =
                 it.second.type == SignalType.Signal && it.first > ohlcs.size - window && !existing.contains(key)
 
@@ -30,7 +31,7 @@ object SequentaSignals {
                 )
                 val fileName = BreachFinder.makeSnapFileName(
                     BreachType.TREND_LINE.name,
-                    ticker,
+                    ticker.codeAndExch(),
                     tf,
                     time.toEpochMilli()
                 )

@@ -2,21 +2,14 @@ package chart
 
 import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
-import com.firelib.techbot.chart.SequentaAnnCreator
 import com.firelib.techbot.domain.TimeFrame
-import firelib.core.domain.Interval
-import firelib.core.domain.LevelSignal
-import firelib.core.domain.Ohlc
-import firelib.core.domain.Side
+import firelib.core.domain.*
 import firelib.core.misc.atMoscow
 import firelib.core.store.GlobalConstants
 import firelib.finam.timeFormatter
 import firelib.indicators.SR
 import firelib.indicators.SRMaker
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 import kotlin.math.sign
 
@@ -33,7 +26,7 @@ object BreachFinder {
     }
 
     fun findNewBreaches(
-        ticker: String,
+        ticker: InstrId,
         timeFrame: TimeFrame,
         breachWindow: Int,
         existingBreaches: Set<BreachEventKey>
@@ -46,7 +39,7 @@ object BreachFinder {
         return lines.filter { it.intersectPoint != null && it.intersectPoint!!.first >= targetOhlcs.size - breachWindow }
             .groupBy {
                 val endTime = targetOhlcs[it.intersectPoint!!.first].endTime
-                BreachEventKey(ticker, timeFrame, endTime.toEpochMilli(), BreachType.TREND_LINE)
+                BreachEventKey(ticker.codeAndExch(), timeFrame, endTime.toEpochMilli(), BreachType.TREND_LINE)
             }
             .filter { !existingBreaches.contains(it.key) }
             .map {
@@ -54,7 +47,7 @@ object BreachFinder {
                 println(key)
                 val fileName = makeSnapFileName(
                     BreachType.TREND_LINE.name,
-                    ticker,
+                    ticker.codeAndExch(),
                     timeFrame,
                     it.key.eventTimeMs
                 )
@@ -68,7 +61,7 @@ object BreachFinder {
     }
 
     fun findLevelBreaches(
-        ticker: String,
+        ticker: InstrId,
         timeFrame: TimeFrame,
         breachWindow: Int,
         existingBreaches: Set<BreachEventKey>
@@ -80,14 +73,14 @@ object BreachFinder {
             val breachDetected =
                 sign(targetOhlcs.at(-1).close - sr.level) == sign(sr.level - targetOhlcs.at(-breachWindow).close)
             val time = targetOhlcs.last().endTime.toEpochMilli()
-            val key = BreachEventKey(ticker, timeFrame, time, BreachType.LEVELS_SIGNAL)
+            val key = BreachEventKey(ticker.codeAndExch(), timeFrame, time, BreachType.LEVELS_SIGNAL)
 
             if (breachDetected && !existingBreaches.contains(key)) {
                 val side = if (targetOhlcs.at(-1).close - sr.level > 0) Side.Buy else Side.Sell
 
                 val fileName = makeSnapFileName(
                     BreachType.LEVELS_SIGNAL.name,
-                    ticker,
+                    ticker.codeAndExch(),
                     timeFrame,
                     time
                 )
@@ -108,11 +101,11 @@ object BreachFinder {
     }
 
     private fun makeLevels(
-        ticker: String,
+        ticker: InstrId,
         targetOhlcs: List<Ohlc>
     ): List<SR> {
 
-        val lst = LevelSensitivityConfig.select { LevelSensitivityConfig.ticker eq ticker }.toList()
+        val lst = LevelSensitivityConfig.select { LevelSensitivityConfig.codeAndExch eq ticker.codeAndExch() }.toList()
         if (lst.isEmpty()) {
             println("no level senses for ticker ${ticker}")
             return emptyList()
@@ -140,7 +133,7 @@ fun List<Ohlc>.at(idx: Int): Ohlc {
 
 fun main() {
     initDatabase()
-    BreachFinder.findNewBreaches("RASP", TimeFrame.H, 5, emptySet())
+    BreachFinder.findNewBreaches(InstrId(code ="RASP", market = "1"), TimeFrame.H, 5, emptySet())
     //UpdateLevelsSensitivities.updateLevelSenses()
 
 }

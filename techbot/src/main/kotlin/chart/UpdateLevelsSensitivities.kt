@@ -1,6 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.UpdateLevelsSensitivities.updateLevelSenses
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.indicators.SRMaker
 import org.jetbrains.exposed.sql.deleteWhere
@@ -11,17 +12,17 @@ import java.util.concurrent.Future
 object UpdateLevelsSensitivities {
 
 
-    fun updateTicker(ticker: String): Future<Unit> {
+    fun updateTicker(ticker: InstrId): Future<Unit> {
         return updateDatabase("levels sens update ${ticker}") {
-            LevelSensitivityConfig.deleteWhere { LevelSensitivityConfig.ticker eq ticker }
+            LevelSensitivityConfig.deleteWhere { LevelSensitivityConfig.codeAndExch eq ticker.codeAndExch() }
 
             val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
 
             val maxPct = 0.05
             val minPct = 0.015
 
-            var zigzag = 0.0
-            var hits = 0
+            var zigzag: Double
+            var hits: Int
 
             for (i in 100 downTo 0) {
                 zigzag = minPct + i * (maxPct - minPct) / 100.0
@@ -33,7 +34,7 @@ object UpdateLevelsSensitivities {
                 if (maker.currentLevels.size >= 4) {
                     println("found for ticker ${ticker} hits ${hits} zigzag ${zigzag}")
                     LevelSensitivityConfig.insert {
-                        it[LevelSensitivityConfig.ticker] = ticker
+                        it[LevelSensitivityConfig.codeAndExch] = ticker.codeAndExch()
                         it[LevelSensitivityConfig.hits] = hits
                         it[LevelSensitivityConfig.zigzag_pct] = zigzag
                     }
@@ -45,13 +46,13 @@ object UpdateLevelsSensitivities {
 
     fun updateLevelSenses() {
         MdService.liveSymbols.forEach { instr ->
-            updateTicker(instr.code).get()
+            updateTicker(instr).get()
         }
     }
 }
 
 
-suspend fun main(args: Array<String>) {
+fun main() {
     initDatabase()
     updateLevelSenses()
 }

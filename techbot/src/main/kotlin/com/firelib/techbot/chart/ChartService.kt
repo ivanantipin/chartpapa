@@ -10,10 +10,7 @@ import com.firelib.techbot.chart.HiChartCreator.makeTrendLines
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.chart.domain.SequentaAnnnotations
 import com.firelib.techbot.initDatabase
-import firelib.core.domain.Interval
-import firelib.core.domain.LevelSignal
-import firelib.core.domain.Ohlc
-import firelib.core.domain.Side
+import firelib.core.domain.*
 import firelib.indicators.SR
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -98,7 +95,7 @@ object ChartService {
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf("plzl", Interval.Day)
+        val ohs = BotHelper.getOhlcsForTf(InstrId("plzl", "1"), Interval.Day)
         val sr = SR(ohs[0].endTime, ohs[20].endTime, ohs[20].high)
         val time = ohs.at(-5).endTime.toEpochMilli()
         val sigi = LevelSignal(Side.Sell, time, sr)

@@ -5,20 +5,17 @@ import firelib.core.misc.SqlUtils
 import firelib.core.misc.toInstantDefault
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.jdbc.core.ResultSetExtractor
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.sqlite.SQLiteDataSource
 import org.sqlite.core.CoreStatement
+import org.sqlite.core.DB
 import org.sqlite.jdbc3.JDBC3ResultSet
-import java.sql.ResultSet
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.ArrayList
 
 class MdDao(internal val ds: SQLiteDataSource) {
 
@@ -41,15 +38,16 @@ class MdDao(internal val ds: SQLiteDataSource) {
         }
     }
 
-    fun listAvailableInstruments() : List<String>{
-        return JdbcTemplate(ds).queryForList("""SELECT    name
+    fun listAvailableInstruments(): List<String> {
+        return JdbcTemplate(ds).queryForList(
+            """SELECT    name
                 FROM
                 sqlite_master  
                 WHERE  
                     type ='table' AND  
-                    name NOT LIKE 'sqlite_%' """, String::class.java)!!
+                    name NOT LIKE 'sqlite_%' """, String::class.java
+        )!!
     }
-
 
     fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
         val table = normName(tableIn)
@@ -100,73 +98,74 @@ class MdDao(internal val ds: SQLiteDataSource) {
         }
     }
 
-    private fun mapOhlc(rs: ResultSet, expectedSize: Int = 1): List<Ohlc> {
-
-        val sqLiteRs = rs as JDBC3ResultSet
-
-        val stmt = sqLiteRs.statement as CoreStatement
-
-        val db = stmt.datbase
-
-        val ret = ArrayList<Ohlc>(expectedSize)
-
-        while (rs.next()) {
-            // highly optimized code
-            val oh = Ohlc(
-                Instant.ofEpochMilli(db.column_long(stmt.pointer, 0)),
-                db.column_double(stmt.pointer, 1),
-                db.column_double(stmt.pointer, 2),
-                db.column_double(stmt.pointer, 3),
-                db.column_double(stmt.pointer, 4),
-                volume = db.column_long(stmt.pointer, 5),
-                interpolated = false
-            )
-            ret.add(oh)
-        }
-        return ret;
-
-    }
-
     fun normName(name: String): String {
         return name.replace('-', '_').replace('.', '_');
     }
 
-    fun queryLast(codeIn: String): Optional<Ohlc> {
+    fun queryLast(codeIn: String): Ohlc? {
         val code = normName(codeIn)
         ensureExist(code)
-        val ret = NamedParameterJdbcTemplate(ds).query(
-            "select * from $code order by dt desc LIMIT 1 ",
-            object : ResultSetExtractor<List<Ohlc>> {
-                override fun extractData(rs: ResultSet): List<Ohlc>? {
-                    return mapOhlc(rs)
+        return sequence {ds.connection.use {
+            val stmt = it.prepareStatement("select * from $code order by dt desc LIMIT 1 ")
+            stmt.use {
+                val rs = it.executeQuery()
+                val sqLiteRs = rs as JDBC3ResultSet
+                val stmt1 = sqLiteRs.statement as CoreStatement
+                val db = stmt1.datbase
+                    rs.use {
+                        while (rs.next()) {
+                            // highly optimized code
+                            yield(
+                                mapOh(db, stmt1)
+                            )
+                        }
+                    }
                 }
-            })
-        return if (ret.size == 0) Optional.empty() else Optional.of(ret[0])
+            }
+        }.firstOrNull()
     }
 
     fun queryAll(codeIn: String): List<Ohlc> {
-        return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC))
+        return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC)).toList()
     }
 
-    fun queryAll(codeIn: String, start: LocalDateTime, limit: Int = 10_000_000): List<Ohlc> {
+    fun queryAll(codeIn: String, start: LocalDateTime): Sequence<Ohlc> {
         val code = normName(codeIn)
 
         if (!SqlUtils.checkTableExists(ds, code)) {
             println("table does not exists!!!!! ${code}")
-            return emptyList()
+            return emptySequence()
         }
 
-        val map = mapOf(
-            "DT" to start.toInstantDefault().toEpochMilli(),
-            "LIMIT" to limit
-        )
-        return NamedParameterJdbcTemplate(ds).query(
-            "select * from $code where dt > :DT order by dt asc LIMIT :LIMIT",
-            map, object : ResultSetExtractor<List<Ohlc>> {
-                override fun extractData(rs: ResultSet): List<Ohlc> {
-                    return mapOhlc(rs, limit)
+        return sequence {
+            ds.connection.use {
+                val stmt = it.prepareStatement("select * from $code where dt > ? order by dt asc")
+                stmt.use {
+                    stmt.setLong(1, start.toInstantDefault().toEpochMilli())
+                    val rs = stmt.executeQuery()
+                    val sqLiteRs = rs as JDBC3ResultSet
+                    val stmt1 = sqLiteRs.statement as CoreStatement
+                    val db = stmt1.datbase
+                    rs.use {
+                        while (rs.next()) {
+                            // highly optimized code
+                            yield(
+                                mapOh(db, stmt1)
+                            )
+                        }
+                    }
                 }
             }
-        )!!
+        }
     }
+
+    private fun mapOh(db: DB, stmt1: CoreStatement) = Ohlc(
+        Instant.ofEpochMilli(db.column_long(stmt1.pointer, 0)),
+        db.column_double(stmt1.pointer, 1),
+        db.column_double(stmt1.pointer, 2),
+        db.column_double(stmt1.pointer, 3),
+        db.column_double(stmt1.pointer, 4),
+        volume = db.column_long(stmt1.pointer, 5),
+        interpolated = false
+    )
 }

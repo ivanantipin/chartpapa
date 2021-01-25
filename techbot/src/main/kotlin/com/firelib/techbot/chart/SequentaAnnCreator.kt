@@ -6,6 +6,7 @@ import com.firelib.techbot.chart.ChartCreator.markLevel
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.initDatabase
 import com.funstat.domain.HLine
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
@@ -126,6 +127,7 @@ object SequentaAnnCreator {
                             )
                         )
                     }
+                    else -> {}
                 }
             }
         }
@@ -142,7 +144,7 @@ object SequentaAnnCreator {
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf("VEON", Interval.Day).subList(0, 100)
+        val ohs = BotHelper.getOhlcsForTf(InstrId("VEON", market = "1"), Interval.Day).subList(0, 100)
         val ann = SequentaAnnCreator.createAnnotations(ohs)
         ChartService.drawSequenta(ann, ohs, "rtkm")
     }

@@ -21,7 +21,7 @@ import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-
+import java.util.concurrent.ConcurrentHashMap
 
 class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSource {
 
@@ -46,7 +46,6 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-
     }
 
     override fun symbols(): List<InstrId> {
@@ -76,7 +75,20 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
+    }
 
+    val cache = ConcurrentHashMap<String, InstrId>()
+
+    fun fixInstr(instrId: InstrId): InstrId {
+        if(instrId.id == "N/A"){
+            if(cache.isEmpty()){
+                cache.putAll(symbols().associateBy { it.codeAndExch() })
+            }
+            require(cache.containsKey(instrId.codeAndExch()), {"non exisitng ${instrId.codeAndExch()}"})
+            return cache[instrId.codeAndExch()]!!
+        }else{
+            return instrId
+        }
     }
 
     override fun load(instrIdSpec: InstrId, interval: Interval): Sequence<Ohlc> {
@@ -84,12 +96,14 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
     }
 
     @Synchronized
-    override fun load(instrId: InstrId, start: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+    override fun load(instrIdIn: InstrId, start: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+        val instrId = fixInstr(instrIdIn)
 
         var mstart = start
         return sequence {
             while (mstart < LocalDateTime.now()) {
                 val finish = mstart.plusDays(batchDays.toLong())
+                println("query")
                 yieldAll(loadSome(instrId, interval, mstart, finish))
                 mstart = finish.minus(interval.duration)
             }

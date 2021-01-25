@@ -7,7 +7,6 @@ import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import java.io.File
 import java.io.FileReader
-import java.lang.Double
 import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -18,11 +17,12 @@ val mt5format = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")
 
 fun parseMt5(str: String): Ohlc? {
     try {
+
         val arr = str.split(",").toTypedArray()
         return Ohlc(
             LocalDateTime.parse(arr[0], mt5format).toInstant(ZoneOffset.UTC),
-            Double.parseDouble(arr[1]),
-            Double.parseDouble(arr[2]), Double.parseDouble(arr[3]), Double.parseDouble(arr[4]), 0, arr[6].toLong(), false)
+            arr[1].toDouble(),
+            arr[2].toDouble(), arr[3].toDouble(), arr[4].toDouble(), 0, arr[6].toLong(), false)
     } catch (e: Exception) {
         println("not valid entry " + str + " because " + e.message)
         return null

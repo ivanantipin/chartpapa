@@ -1,6 +1,5 @@
 package firelib.core.store
 
-
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -60,7 +59,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         var ret = dao.queryAll(instrId.code, startTime)
         if (ret.isEmpty()) {
             updateMarketData(instrId, interval)
-            ret = dao.queryAll(instrId.code, startTime)
+            ret = dao.queryAll(instrId.code, startTime).toList()
         }
         val start = System.currentTimeMillis()
         try {
@@ -78,11 +77,12 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
         var instant = Instant.now()
         try {
-
             val dao = md.getDao(instrId.sourceEnum(), interval)
-            val startTime = dao.queryLast(instrId.code).map { oh -> oh.endTime.atUtc().minus(interval.duration) }
-                .orElse(LocalDateTime.now().minusDays(5000))
+            val last = dao.queryLast(makeTable(instrId))
+            val startTime = if (last == null) LocalDateTime.now().minusDays(5000) else last.endTime.atUtc().minus(interval.duration)
+
             source.load(instrId, startTime, interval).chunked(5000).forEach {
+                println("inserted")
                 instant = it.last().endTime
                 dao.insertOhlc(it, instrId.code)
             }
@@ -93,7 +93,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         return instant
     }
 
-    fun transform(instrId: InstrId, from : Interval, to : Interval){
+    fun transform(instrId: InstrId, from: Interval, to: Interval) {
         val dao = md.getDao(instrId.sourceEnum(), from)
         val daoTo = md.getDao(instrId.sourceEnum(), to)
         val toOhlc = IntervalTransformer.transform(to, dao.queryAll(instrId.code))
@@ -101,3 +101,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     }
 }
 
+fun main() {
+    val impl = MdStorageImpl()
+    impl.updateMarketData(InstrId(code = "GOOG", market =  "25", source = SourceName.FINAM.name), Interval.Min10)
+}
