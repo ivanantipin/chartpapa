@@ -40,7 +40,7 @@ object HistoricalLevels{
 
                 targetOhlcs.forEach { maker.addOhlc(it) }
 
-                val bytes = ChartService.drawLevels(maker.currentLevels, targetOhlcs, "Levels for ${ticker} ")
+                val bytes = ChartService.drawLevels(maker.currentLevels, targetOhlcs, "Levels for ${ticker.code} ")
                 saveFile(bytes, fileName)
 
                 updateDatabase("update levels events", {

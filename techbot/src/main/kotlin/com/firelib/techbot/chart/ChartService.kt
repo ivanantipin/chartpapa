@@ -95,7 +95,7 @@ object ChartService {
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf(InstrId("plzl", "1"), Interval.Day)
+        val ohs = BotHelper.getOhlcsForTf(InstrId.fromCodeAndExch("plzl", "1"), Interval.Day)
         val sr = SR(ohs[0].endTime, ohs[20].endTime, ohs[20].high)
         val time = ohs.at(-5).endTime.toEpochMilli()
         val sigi = LevelSignal(Side.Sell, time, sr)

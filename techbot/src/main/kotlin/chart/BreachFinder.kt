@@ -53,7 +53,7 @@ object BreachFinder {
                 )
 
                 val time = timeFormatter.format(Instant.ofEpochMilli(it.key.eventTimeMs).atMoscow())
-                val title = "Breakout for ${ticker} (${timeFrame}, time is ${time} msk)"
+                val title = "Breakout for ${ticker.code} (${timeFrame}, time is ${time} msk)"
                 val img = ChartService.drawLines(it.value, targetOhlcs, title)
                 saveFile(img, fileName)
                 BreachEvent(key, fileName)
@@ -86,7 +86,7 @@ object BreachFinder {
                 )
 
                 val timeStr = timeFormatter.format(targetOhlcs.at(-1).endTime.atMoscow())
-                val title = "Level breakout for ${ticker} (${timeFrame}, time is ${timeStr} msk)"
+                val title = "Level breakout for ${ticker.code} (${timeFrame}, time is ${timeStr} msk)"
 
                 val img =
                     ChartService.drawLevelsBreaches(listOf(LevelSignal(side, time, sr)), targetOhlcs, title)

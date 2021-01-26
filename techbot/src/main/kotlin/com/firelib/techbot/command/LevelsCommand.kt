@@ -17,7 +17,7 @@ class LevelsCommand : CommandHandler {
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val (tkr, market, tf) = cmd.tickerAndTf()
-        val image = HistoricalLevels.historicalLevels(InstrId(tkr, market))
+        val image = HistoricalLevels.historicalLevels(InstrId.fromCodeAndExch(tkr, market))
         bot.sendPhoto(chatId = update.chatId(), photo = File(image.filePath))
     }
 }

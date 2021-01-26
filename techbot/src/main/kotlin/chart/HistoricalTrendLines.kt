@@ -28,7 +28,7 @@ object HistoricalTrendLines{
                 val fileName = BreachFinder.makeSnapFileName(BreachType.TREND_LINE.name, ticker.codeAndExch(), timeFrame, eventTimeMs)
                 val conf = BotConfig.getConf(ticker, timeFrame)
                 val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
-                val bytes = ChartService.drawLines(lines, targetOhlcs, "Trend lines for ${ticker} (${timeFrame})")
+                val bytes = ChartService.drawLines(lines, targetOhlcs, "Trend lines for ${ticker.code} (${timeFrame})")
                 saveFile(bytes, fileName)
                 updateDatabase("update trend lines events") {
                     BreachEvents.insert {
