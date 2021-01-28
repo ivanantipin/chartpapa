@@ -4,6 +4,7 @@ import firelib.core.*
 import firelib.core.domain.*
 import firelib.core.misc.Quantiles
 import firelib.core.misc.atMoscow
+import firelib.core.misc.atNy
 import firelib.core.timeseries.ret
 import firelib.indicators.MarketProfile
 import firelib.indicators.SimpleMovingAverage
@@ -26,6 +27,13 @@ fun Model.factorHour() {
         currentTime().atMoscow().hour.toDouble()
     }
 }
+
+fun Model.factorHourUs() {
+    enableFactor("hour_int") {
+        currentTime().atNy().hour.toDouble()
+    }
+}
+
 
 fun Model.factorBarQuant() {
     val daytss = enableSeries(Interval.Day)

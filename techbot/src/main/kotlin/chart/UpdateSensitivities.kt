@@ -20,8 +20,8 @@ object UpdateSensitivities{
 
     fun updateSens(ticker: InstrId): Future<Unit> {
 
-        return updateDatabase("senses update ${ticker}") {
-            SensitivityConfig.deleteWhere { SensitivityConfig.codeAndExch eq ticker.codeAndExch() }
+        return updateDatabase("senses update ${ticker.code}") {
+            SensitivityConfig.deleteWhere { SensitivityConfig.instrId eq ticker.id }
             TimeFrame.values().forEach { timeFrame ->
                 val targetOhlcs = getOhlcsForTf(ticker, timeFrame.interval)
 
@@ -43,7 +43,7 @@ object UpdateSensitivities{
 
     private fun updateForOrder(
         targetOhlcs: List<Ohlc>,
-        ticker: InstrId,
+        instr: InstrId,
         tf: TimeFrame,
         pvtOrder: Int
     ): Boolean {
@@ -51,12 +51,12 @@ object UpdateSensitivities{
         while (lineRSquare > 0.9) {
             val lines = TrendsCreator.findRegresLines(targetOhlcs, LineConfig(pvtOrder, lineRSquare))
             if (lines.size >= 2) {
-                println("final for ${ticker} ${tf} rsquare is ${lineRSquare} line count is ${lines.size}")
+                println("final for ${instr} ${tf} rsquare is ${lineRSquare} line count is ${lines.size}")
                 SensitivityConfig.deleteWhere {
-                    SensitivityConfig.codeAndExch eq ticker.codeAndExch() and (SensitivityConfig.timeframe eq tf.name)
+                    SensitivityConfig.instrId eq instr.id and (SensitivityConfig.timeframe eq tf.name)
                 }
                 SensitivityConfig.insert {
-                    it[SensitivityConfig.codeAndExch] = ticker.codeAndExch()
+                    it[SensitivityConfig.instrId] = instr.id
                     it[SensitivityConfig.timeframe] = tf.name
                     it[rSquare] = lineRSquare
                     it[SensitivityConfig.pivotOrder] = pvtOrder

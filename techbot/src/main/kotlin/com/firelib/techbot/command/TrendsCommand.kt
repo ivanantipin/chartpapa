@@ -17,8 +17,7 @@ class TrendsCommand : CommandHandler {
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
-        val (tkr, market, tf) = cmd.tickerAndTf()
-        val image = historicalTrendLines(InstrId.fromCodeAndExch(tkr, market), tf)
+        val image = historicalTrendLines(cmd.instr(), cmd.tf())
         bot.sendPhoto(chatId = update.chatId(), photo = File(image.filePath))
     }
 

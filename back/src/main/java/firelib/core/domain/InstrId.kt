@@ -6,7 +6,7 @@ import java.math.BigDecimal
 
 data class InstrId(val id: String = "N/A",
                    val name: String = "N/A",
-                   val market: String = "N/A",
+                   val market: String = "NA",
                    val code: String = "N/A",
                    val source: String = "N/A",
                    val minPriceIncr: BigDecimal = BigDecimal(0.1),
@@ -23,11 +23,6 @@ data class InstrId(val id: String = "N/A",
             return InstrId(code = code, market = market, source = SourceName.FINAM.name)
         }
 
-    }
-
-
-    fun codeAndExch() : String{
-        return "${code}_${market}"
     }
 }
 

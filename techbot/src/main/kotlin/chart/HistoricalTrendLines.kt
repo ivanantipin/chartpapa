@@ -2,7 +2,6 @@ package chart
 
 import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
-import com.firelib.techbot.chart.SequentaAnnCreator
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -17,7 +16,7 @@ object HistoricalTrendLines{
 
         return transaction {
             val be =
-                BreachEvents.select { BreachEvents.ticker eq ticker.codeAndExch() and
+                BreachEvents.select { BreachEvents.instrId eq ticker.id and
                         (BreachEvents.timeframe eq timeFrame.name) and
                         (BreachEvents.eventType eq BreachType.TREND_LINE_SNAPSHOT.name) and
                         (BreachEvents.eventTimeMs eq eventTimeMs)}
@@ -25,14 +24,14 @@ object HistoricalTrendLines{
 
             if (be == null) {
                 val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
-                val fileName = BreachFinder.makeSnapFileName(BreachType.TREND_LINE.name, ticker.codeAndExch(), timeFrame, eventTimeMs)
+                val fileName = BreachFinder.makeSnapFileName(BreachType.TREND_LINE.name, ticker.id, timeFrame, eventTimeMs)
                 val conf = BotConfig.getConf(ticker, timeFrame)
                 val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
                 val bytes = ChartService.drawLines(lines, targetOhlcs, "Trend lines for ${ticker.code} (${timeFrame})")
                 saveFile(bytes, fileName)
                 updateDatabase("update trend lines events") {
                     BreachEvents.insert {
-                        it[BreachEvents.ticker] = ticker.codeAndExch()
+                        it[BreachEvents.instrId] = ticker.id
                         it[BreachEvents.timeframe] = timeFrame.name
                         it[BreachEvents.eventTimeMs] = eventTimeMs
                         it[BreachEvents.photoFile] = fileName

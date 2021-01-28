@@ -9,10 +9,7 @@ import firelib.finam.FinamDownloader
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.ForkJoinPool
-import java.util.concurrent.ForkJoinTask
+import java.util.concurrent.*
 
 object MdService {
 
@@ -20,6 +17,7 @@ object MdService {
     val storage = MdStorageImpl()
 
     val liveSymbols = CopyOnWriteArrayList<InstrId>()
+
 
     fun fetchInstruments(): List<InstrId> {
         var ret = finamMapperWriter().read()
@@ -30,7 +28,12 @@ object MdService {
         return ret
     }
 
+    fun byId(id : String) : InstrId{
+        return id2inst[id]!!
+    }
+
     val instrByCodeAndMarket = fetchInstruments().associateBy { Pair(it.code, it.market) }
+    val id2inst = fetchInstruments().associateBy { it.id }
 
     val instrByStart = group(fetchInstruments())
 
@@ -74,15 +77,10 @@ object MdService {
 
     }
 
-    fun updateStock(ticker: String, market: String): CompletableFuture<Unit>? {
-        if (liveSymbols.find { it.code == ticker && it.market == market } != null) {
-            return null
-        } else {
-            val instr = instrByCodeAndMarket.get(Pair(ticker, market))
-            if (instr != null) {
-                liveSymbols.add(instr)
-                return CompletableFuture.supplyAsync<Unit>({ updateStock(instr).get() })
-            }
+    fun update(instr: InstrId): CompletableFuture<Unit>? {
+        if (!liveSymbols.any { it.code == instr.code && it.market == instr.market }) {
+            liveSymbols.add(instr)
+            return CompletableFuture.supplyAsync({ updateStock(instr).get() })
         }
         return null
     }

@@ -82,10 +82,10 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
     fun fixInstr(instrId: InstrId): InstrId {
         if(instrId.id == "N/A"){
             if(cache.isEmpty()){
-                cache.putAll(symbols().associateBy { it.codeAndExch() })
+                cache.putAll(symbols().associateBy { it.id })
             }
-            require(cache.containsKey(instrId.codeAndExch()), {"non exisitng ${instrId.codeAndExch()}"})
-            return cache[instrId.codeAndExch()]!!
+            require(cache.containsKey(instrId.id), {"non exisitng ${instrId.id}"})
+            return cache[instrId.id]!!
         }else{
             return instrId
         }
@@ -186,6 +186,7 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         private val log = LoggerFactory.getLogger(FinamDownloader::class.java)
         val SOURCE = SourceName.FINAM
         val SHARES_MARKET = "1"
+        val ETF_MARKET = "517"
         val FUTURES_MARKET = "14"
         val BATS_MARKET = "25"
         val FX = "5"

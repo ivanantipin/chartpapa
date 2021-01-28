@@ -9,6 +9,7 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
+import firelib.core.domain.InstrId
 import firelib.core.misc.JsonHelper
 import java.util.concurrent.atomic.AtomicLong
 
@@ -176,7 +177,7 @@ class MenuReg {
                             MdService.instrByStart.getOrDefault(start, emptyList()).forEach { code ->
                                 subInlButton(
                                     "(${code.code}) ${code.name}",
-                                    Cmd("sub", mapOf("ticker" to code.code, "market" to code.market)),
+                                    Cmd("sub", mapOf("id" to code.id)),
                                     "Выберите компанию для добавления:"
                                 ) {}
                             }
@@ -187,7 +188,7 @@ class MenuReg {
                 parentInlButton("Ваши символы / Удаление") {
                     action = { bot, update ->
                         val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
-                            .map { InlineButton(it.code, Cmd("unsub", mapOf("ticker" to it.code, "market" to it.market)), "") }.chunked(4)
+                            .map { InlineButton(it.code, Cmd("unsub", mapOf("id" to it.id)), "") }.chunked(4)
                         list(buttons, bot, update.chatId(), "Ваши символы, нажмите на символ чтобы отписаться")
                     }
                 }
@@ -240,7 +241,7 @@ class MenuReg {
         val bts = BotHelper.getSubscriptions(chatId).map { instrId ->
             InlineButton(
                 instrId.code,
-                Cmd(cmd, mapOf("ticker" to instrId.code, "tf" to tf.name, "market" to instrId.market)),
+                Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name)),
                 title
             )
         }
@@ -259,12 +260,14 @@ fun Update.fromUser(): User {
     return this.message?.from ?: this.callbackQuery?.from!!
 }
 
-
-data class TickerMarketTf(val ticker : String, val market : String, val tf : TimeFrame)
-
 data class Cmd(val name: String, val opts: Map<String, String> = mutableMapOf()) {
-    fun tickerAndTf(): TickerMarketTf {
-        return TickerMarketTf(opts["ticker"]!!,  opts["market"]!!,  TimeFrame.valueOf(opts["tf"]!!))
+
+    fun instr() : InstrId{
+        return MdService.byId(opts["id"]!!)
+    }
+
+    fun tf(): TimeFrame {
+        return TimeFrame.valueOf(opts["tf"]!!)
     }
 }
 

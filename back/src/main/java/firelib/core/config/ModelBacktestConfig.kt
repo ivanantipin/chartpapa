@@ -11,6 +11,7 @@ import firelib.core.store.GlobalConstants
 import firelib.core.store.ReaderFactory
 import firelib.core.store.reader.ReaderSimpleDivAdjusted
 import firelib.core.store.reader.SimplifiedReader
+import firelib.finam.FinamDownloader
 import firelib.model.Div
 import firelib.model.prod.runCfgWODivs
 import java.nio.file.Path
@@ -40,6 +41,8 @@ class ModelBacktestConfig() : Cloneable {
 
     var maxRiskMoney = 1_500_000L
 
+    var market : String = FinamDownloader.SHARES_MARKET
+
     var maxRiskMoneyPerSec = 250_000L
 
     fun roundedStartTime(): Instant {
@@ -61,7 +64,8 @@ class ModelBacktestConfig() : Cloneable {
             val delegate = DbReaderFactory(
                 histSourceName,
                 interval,
-                roundedStartTime()
+                roundedStartTime(),
+                market = market
             )
             object : ReaderFactory {
                 override fun makeReader(security: String): SimplifiedReader {
@@ -75,7 +79,8 @@ class ModelBacktestConfig() : Cloneable {
             DbReaderFactory(
                 histSourceName,
                 interval,
-                roundedStartTime()
+                roundedStartTime(),
+                market = market
             )
         }
     }

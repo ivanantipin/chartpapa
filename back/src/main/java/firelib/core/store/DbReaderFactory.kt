@@ -8,21 +8,18 @@ import firelib.finam.FinamDownloader
 import java.time.Instant
 
 
-class DbReaderFactory(val source : SourceName, val interval: Interval, val startTime : Instant) :
+class DbReaderFactory(val source : SourceName, val interval: Interval, val startTime : Instant, val market : String = FinamDownloader.SHARES_MARKET) :
     ReaderFactory {
 
     val mdStorage = MdStorageImpl()
 
     override fun makeReader(security: String): SimplifiedReader {
 
-        require(source == SourceName.FINAM, {"not supported source ${source}"})
-
-        // fixme hack
-        val instrId = InstrId(code = security, market = FinamDownloader.SHARES_MARKET)
+        //require(source == SourceName.FINAM, {"not supported source ${source}"})
 
         return SimplifiedReaderImpl(
             mdStorage,
-            instrId,
+            InstrId(code = security, market=market, source = source.name),
             startTime = startTime,
             interval
         )

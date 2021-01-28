@@ -40,7 +40,15 @@ object BotHelper {
         return transaction {
             Subscriptions.select {
                 Subscriptions.user eq uid
-            }.withDistinct().map { InstrId(code = it[Subscriptions.ticker], market = it[Subscriptions.market]) }
+            }.withDistinct().flatMap {
+                val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
+                if(ret == null){
+                    println("error failed to map ${it}")
+                    emptyList()
+                }else{
+                    listOf(ret)
+                }
+            }
 
         }
     }

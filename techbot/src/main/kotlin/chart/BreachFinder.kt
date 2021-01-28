@@ -39,7 +39,7 @@ object BreachFinder {
         return lines.filter { it.intersectPoint != null && it.intersectPoint!!.first >= targetOhlcs.size - breachWindow }
             .groupBy {
                 val endTime = targetOhlcs[it.intersectPoint!!.first].endTime
-                BreachEventKey(ticker.codeAndExch(), timeFrame, endTime.toEpochMilli(), BreachType.TREND_LINE)
+                BreachEventKey(ticker.id, timeFrame, endTime.toEpochMilli(), BreachType.TREND_LINE)
             }
             .filter { !existingBreaches.contains(it.key) }
             .map {
@@ -47,7 +47,7 @@ object BreachFinder {
                 println(key)
                 val fileName = makeSnapFileName(
                     BreachType.TREND_LINE.name,
-                    ticker.codeAndExch(),
+                    ticker.id,
                     timeFrame,
                     it.key.eventTimeMs
                 )
@@ -73,14 +73,14 @@ object BreachFinder {
             val breachDetected =
                 sign(targetOhlcs.at(-1).close - sr.level) == sign(sr.level - targetOhlcs.at(-breachWindow).close)
             val time = targetOhlcs.last().endTime.toEpochMilli()
-            val key = BreachEventKey(ticker.codeAndExch(), timeFrame, time, BreachType.LEVELS_SIGNAL)
+            val key = BreachEventKey(ticker.id, timeFrame, time, BreachType.LEVELS_SIGNAL)
 
             if (breachDetected && !existingBreaches.contains(key)) {
                 val side = if (targetOhlcs.at(-1).close - sr.level > 0) Side.Buy else Side.Sell
 
                 val fileName = makeSnapFileName(
                     BreachType.LEVELS_SIGNAL.name,
-                    ticker.codeAndExch(),
+                    ticker.id,
                     timeFrame,
                     time
                 )
@@ -105,7 +105,7 @@ object BreachFinder {
         targetOhlcs: List<Ohlc>
     ): List<SR> {
 
-        val lst = LevelSensitivityConfig.select { LevelSensitivityConfig.codeAndExch eq ticker.codeAndExch() }.toList()
+        val lst = LevelSensitivityConfig.select { LevelSensitivityConfig.instrId eq ticker.id }.toList()
         if (lst.isEmpty()) {
             println("no level senses for ticker ${ticker}")
             return emptyList()

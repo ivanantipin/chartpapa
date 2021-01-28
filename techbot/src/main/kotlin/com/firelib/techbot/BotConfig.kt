@@ -15,11 +15,11 @@ object BotConfig{
     init {
         transaction {
             rSquares = SensitivityConfig.selectAll()
-                .associateBy({ Pair(it[SensitivityConfig.codeAndExch], it[SensitivityConfig.timeframe]) },
+                .associateBy({ Pair(it[SensitivityConfig.instrId], it[SensitivityConfig.timeframe]) },
                     { it[SensitivityConfig.rSquare] })
 
             pivotOrders = SensitivityConfig.selectAll()
-                .associateBy({ Pair(it[SensitivityConfig.codeAndExch], it[SensitivityConfig.timeframe]) },
+                .associateBy({ Pair(it[SensitivityConfig.instrId], it[SensitivityConfig.timeframe]) },
                     { it[SensitivityConfig.pivotOrder] })
         }
     }
@@ -31,11 +31,11 @@ object BotConfig{
     }
 
     fun getRSquare(ticker : InstrId, timeFrame : TimeFrame) : Double{
-        return rSquares.getOrDefault(Pair(ticker.codeAndExch(), timeFrame.name), lineRSquare)
+        return rSquares.getOrDefault(Pair(ticker.id, timeFrame.name), lineRSquare)
     }
 
     fun getPivot(ticker : InstrId, timeFrame : TimeFrame) : Int{
-        return pivotOrders.getOrDefault(Pair(ticker.codeAndExch(), timeFrame.name), pivotOrder)
+        return pivotOrders.getOrDefault(Pair(ticker.id, timeFrame.name), pivotOrder)
     }
 
 

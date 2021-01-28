@@ -21,9 +21,11 @@ class DemarkCommand : CommandHandler {
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
 
-        val (tkr, market, tf) = cmd.tickerAndTf()
+        val instrId = cmd.instr()
+        val tkr = instrId.code
+        val tf = cmd.tf()
 
-        val ohlcs = BotHelper.getOhlcsForTf(InstrId.fromCodeAndExch(tkr, market), tf.interval)
+        val ohlcs = BotHelper.getOhlcsForTf(instrId, tf.interval)
 
         val ann = SequentaAnnCreator.createAnnotations(ohlcs)
 

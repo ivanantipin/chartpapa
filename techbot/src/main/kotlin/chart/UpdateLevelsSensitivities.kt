@@ -14,7 +14,7 @@ object UpdateLevelsSensitivities {
 
     fun updateTicker(ticker: InstrId): Future<Unit> {
         return updateDatabase("levels sens update ${ticker}") {
-            LevelSensitivityConfig.deleteWhere { LevelSensitivityConfig.codeAndExch eq ticker.codeAndExch() }
+            LevelSensitivityConfig.deleteWhere { LevelSensitivityConfig.instrId eq ticker.id }
 
             val targetOhlcs = BotHelper.getOhlcsForTf(ticker, Interval.Min10, 20000)
 
@@ -34,7 +34,7 @@ object UpdateLevelsSensitivities {
                 if (maker.currentLevels.size >= 4) {
                     println("found for ticker ${ticker} hits ${hits} zigzag ${zigzag}")
                     LevelSensitivityConfig.insert {
-                        it[LevelSensitivityConfig.codeAndExch] = ticker.codeAndExch()
+                        it[LevelSensitivityConfig.instrId] = ticker.id
                         it[LevelSensitivityConfig.hits] = hits
                         it[LevelSensitivityConfig.zigzag_pct] = zigzag
                     }

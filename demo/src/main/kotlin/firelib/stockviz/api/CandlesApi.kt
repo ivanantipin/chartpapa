@@ -31,6 +31,6 @@ class CandlesApiController {
                 it.close.toBigDecimal(),
                 it.volume.toInt()
             )
-        }
+        }.toList()
     }
 }
