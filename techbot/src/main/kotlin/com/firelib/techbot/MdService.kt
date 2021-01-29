@@ -32,7 +32,7 @@ object MdService {
             finamMapperWriter().write(FinamDownloader().symbols())
             ret = finamMapperWriter().read()
         }
-        return ret
+        return filter(ret)
     }
 
     fun byId(id : String) : InstrId{
@@ -41,7 +41,13 @@ object MdService {
 
 
     fun group(instruments: List<InstrId>): Map<String, List<InstrId>> {
+        val ret = instruments.groupBy { it.code.substring(0, 1) }
+            .mapValues { it.value.sortedBy { it.code } }
+            .toSortedMap()
+        return ret
+    }
 
+    private fun filter(instruments: List<InstrId>): List<InstrId> {
         val futureSymbols = listOf(
             "BR",
             "RTS",
@@ -53,13 +59,12 @@ object MdService {
         val toSet = FinamDownloader.FinamMarket.values()
             .map { it.id }.toSet()
 
-        return instruments.filter {
+        val filter = instruments.filter {
             toSet.contains(it.market) && it.code.length >= 2
                     && (it.market != FinamDownloader.FinamMarket.FUTURES_MARKET.id || futureSymbols.contains(it.code))
 
-        }.groupBy { it.code.substring(0, 1) }
-            .mapValues { it.value.sortedBy { it.code } }
-            .toSortedMap()
+        }
+        return filter
     }
 
     init {
@@ -129,8 +134,9 @@ fun main() {
     initDatabase()
 
     transaction {
-        MdService.group(MdService.fetchInstruments()).forEach { s, list ->
-            println("size of ${s} is ${list.size}")
+        val group = MdService.group(MdService.fetchInstruments())
+        group.get("S")!!.forEach {
+            println(it)
         }
 
     }
