@@ -8,15 +8,22 @@ import firelib.core.store.finamMapperWriter
 import firelib.finam.FinamDownloader
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.*
 
 object MdService {
 
+    val log = LoggerFactory.getLogger(UsersNotifier::class.java)
+
     val pool = ForkJoinPool(1)
     val storage = MdStorageImpl()
 
     val liveSymbols = CopyOnWriteArrayList<InstrId>()
+    val instrByCodeAndMarket = fetchInstruments().associateBy { Pair(it.code, it.market) }
+    val id2inst = fetchInstruments().associateBy { it.id }
+    val instrByStart = group(fetchInstruments())
+
 
 
     fun fetchInstruments(): List<InstrId> {
@@ -32,10 +39,6 @@ object MdService {
         return id2inst[id]!!
     }
 
-    val instrByCodeAndMarket = fetchInstruments().associateBy { Pair(it.code, it.market) }
-    val id2inst = fetchInstruments().associateBy { it.id }
-
-    val instrByStart = group(fetchInstruments())
 
     fun group(instruments: List<InstrId>): Map<String, List<InstrId>> {
 
@@ -73,6 +76,9 @@ object MdService {
                     listOf(orDefault)
                 }
             })
+
+            log.info("live instruments size is ${liveSymbols.size}")
+
         }
 
     }

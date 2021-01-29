@@ -17,16 +17,16 @@ class RmHandler : CommandHandler {
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
-        val tkr = cmd.opts["ticker"]!!
+        val instrId = cmd.instr()
         val uid = update.chatId().toInt()
         var cnt = 0;
         updateDatabase("delete user", {
-            cnt = Subscriptions.deleteWhere { Subscriptions.user eq uid and (Subscriptions.ticker eq tkr) }
+            cnt = Subscriptions.deleteWhere { Subscriptions.user eq uid and (Subscriptions.ticker eq instrId.code) }
         }).get()
         if (cnt > 0) {
             bot.sendMessage(
                 chatId = uid.toLong(),
-                text = "Символ удален ${tkr}",
+                text = "Символ удален ${instrId}",
                 parseMode = ParseMode.MARKDOWN
             )
         }
