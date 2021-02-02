@@ -69,7 +69,6 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
             val startTime = if (last == null) LocalDateTime.now().minusDays(5000) else last.endTime.atUtc().minus(interval.duration)
 
             source.load(instrId, startTime, interval).chunked(5000).forEach {
-                println("inserted")
                 instant = it.last().endTime
                 dao.insertOhlc(it, makeTable(instrId))
             }

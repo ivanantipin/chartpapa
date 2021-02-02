@@ -39,6 +39,8 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
     @Volatile
     internal var lastFinamCall: Long = 0
 
+    val log = LoggerFactory.getLogger(javaClass)
+
 
     override fun close() {
         try {
@@ -99,11 +101,12 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
     override fun load(instrIdIn: InstrId, start: LocalDateTime, interval: Interval): Sequence<Ohlc> {
         val instrId = fixInstr(instrIdIn)
 
+        log.info("loading data from ${start} for instrument ${instrId}")
+
         var mstart = start
         return sequence {
             while (mstart < LocalDateTime.now()) {
                 val finish = mstart.plusDays(batchDays.toLong())
-                println("query")
                 yieldAll(loadSome(instrId, interval, mstart, finish))
                 mstart = finish.minus(interval.duration)
             }

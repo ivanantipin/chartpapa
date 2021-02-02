@@ -110,7 +110,7 @@ fun runReconnect() {
                     market = it.market!!,
                     currency = it.currency!!,
                     type = it.type!!,
-                    union = it.union ?: "na"
+                    union_trd = it.union ?: "na"
                 )
             )
         )

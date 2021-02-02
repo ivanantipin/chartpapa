@@ -16,6 +16,8 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 class MdDao(internal val ds: SQLiteDataSource) {
 
@@ -25,15 +27,8 @@ class MdDao(internal val ds: SQLiteDataSource) {
     internal var tableCreated = ConcurrentHashMap<String, Boolean>()
 
     private fun saveInTransaction(sql: String, data: List<Map<String, Any>>) {
-
         TransactionTemplate(manager).execute<Any> {
-            val start = System.currentTimeMillis()
             NamedParameterJdbcTemplate(ds).batchUpdate(sql, data.toTypedArray())
-            val dur = (System.currentTimeMillis() - start) / 1000.0
-            log.info(
-                "MdDao: inserting " + data.size + " took " + dur + " sec ," + " rate is " +
-                        data.size / dur + " per sec"
-            )
             null
         }
     }
@@ -69,16 +64,17 @@ class MdDao(internal val ds: SQLiteDataSource) {
                 "VOLUME" to it.volume
             )
         }
-
         try {
-            saveInTransaction(
-                "insert or replace into $table(DT,O,H,L,C,V) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE,:VOLUME)",
-                data
-            )
+            val timeSpent = measureTimeMillis {
+                saveInTransaction(
+                    "insert or replace into $table(DT,O,H,L,C,V) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE,:VOLUME)",
+                    data
+                )
+            }
+            log.info("spent ${timeSpent/1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 
     internal fun ensureExist(table: String) {
