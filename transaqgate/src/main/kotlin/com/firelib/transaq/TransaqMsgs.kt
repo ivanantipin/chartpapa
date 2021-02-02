@@ -248,7 +248,7 @@ data class TrqPortfolio(
     var leverage: String?,
     var margin_level: String?,
     @set:JsonProperty("security")
-    var securities: List<PortfolioSecurity>
+    var securities: List<PortfolioSecurity>?
 ) : TrqMsg
 
 

@@ -25,7 +25,7 @@ export const FilterView = (props: { trades: Array<Trade>, hasCandlestick?: boole
         <Tabs defaultActiveKey="equity">
             <TabPane tab="Equity" key="equity">
                 <Row>
-                    <Col span={24}>
+                    <Col span={22}>
                         <EquityPanel trades={trades}/>
                     </Col>
                 </Row>

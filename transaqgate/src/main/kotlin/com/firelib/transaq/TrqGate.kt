@@ -12,11 +12,9 @@ import firelib.core.store.GlobalConstants
 import io.grpc.Deadline
 import org.apache.commons.text.StringEscapeUtils
 import org.slf4j.LoggerFactory
-import java.math.BigDecimal
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
@@ -26,7 +24,8 @@ data class TrqClientDb(
     val id : String,
     var market: String,
     var currency: String,
-    var type: String
+    var type: String,
+    var union_trd : String
 )
 
 class TrqGate(
@@ -40,12 +39,12 @@ class TrqGate(
 
     val orderNoToTransactionId = ConcurrentHashMap<String, String>()
 
-    val clientId: String
+    val union: String
 
     override fun sendOrder(order: Order) {
 
         try {
-            val resp = dispatcherTrq.stub.command(TrqCommandHelper.newOrder(order, clientId))
+            val resp = dispatcherTrq.stub.command(TrqCommandHelper.newOrder(order, union))
             if (!resp.success) {
                 order.reject("${resp.message}")
             } else {
@@ -66,9 +65,9 @@ class TrqGate(
 
         log.info("using client override ${clId}")
 
-        clientId = clId ?: clientsDao.read().filter { it.market == "1" }[0].id
+        union = clId ?: clientsDao.read().filter { it.market == "1" }[0].union_trd
 
-        log.info("client id set to ${clientId}")
+        log.info("client id set to ${union}")
     }
 
 
@@ -149,24 +148,6 @@ class TrqGate(
     }
 }
 
-fun main() {
-
-    val gate = makeDefaultTransaqGate(Executors.newSingleThreadExecutor())
-
-    val instrId =
-        InstrId(code = "SBER", board = "TQBR", minPriceIncr = BigDecimal(0.1))
-
-    val order = Order(OrderType.Limit, 256.0, 1, Side.Buy, "sber", "0", Instant.now(), instrId, "NoName")
-    order.orderSubscription.subscribe { println(it) }
-
-    gate.sendOrder(order)
-
-    Thread.sleep(10000)
-
-    gate.cancelOrder(order)
-
-}
-
 
 fun makeDefaultStub(): TransaqConnectorGrpc.TransaqConnectorBlockingStub {
     return TransaqClient(GlobalConstants.getProp("stub.ip"), GlobalConstants.getProp("stub.port").toInt()).blockingStub
@@ -185,11 +166,6 @@ fun TransaqConnectorGrpc.TransaqConnectorBlockingStub.command(str: String): TrqR
     )
 }
 
-
-/*
-Ваш логин:
-Ваш пароль: suV7gU
- */
 val loginCmd = TrqCommandHelper.connectCmd(
     GlobalConstants.getProp("login"),
     GlobalConstants.getProp("password"),

@@ -16,7 +16,7 @@ export const EquityPanel = (props: { trades: Array<Trade> }) => {
 
     const [displaySettings, setDisplaySettings] = useState<DisplaySettings>({xAsTradeNo: false, splitBySide: false})
 
-    return <div>
+    return <div style={{paddingRight : "20px"}}>
         <DisplaySettingsComp displaySettings={displaySettings} onChange={(it) => {
             setDisplaySettings(it)
         }}/>
@@ -38,8 +38,10 @@ export const formOpts = (trades: Array<Trade>, displaySettings: DisplaySettings)
         xAxis: {
             type: type
         },
+
         chart: {
-            zoomType: 'x'
+            zoomType: 'x',
+            marginRight : 100
         },
         series: Object.entries(dict).map(value => {
             let eq = calcEquity(value[1], displaySettings.xAsTradeNo)
@@ -53,7 +55,7 @@ export const getSeriesOpts = (label: string, data: Array<[number, number]>): Ser
     return {
         type: 'line',
         name: label,
-        borderWidth: 1,
+        //borderWidth: 1,
         data: data,
         boostThreshold: 10000
     }

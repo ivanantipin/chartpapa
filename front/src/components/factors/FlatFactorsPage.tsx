@@ -14,7 +14,7 @@ let _ = require('lodash');
 
 const {TabPane} = Tabs;
 
-const BUCKETS_NUM = 10
+const BUCKETS_NUM = 30
 
 const getQuantileFunction = (min: number, max: number, valExtract: (tr: Trade) => number): (tr: Trade) => string => {
     const range = max - min; // to allow to avoid last bucket with single metric

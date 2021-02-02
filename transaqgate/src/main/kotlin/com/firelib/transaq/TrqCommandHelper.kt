@@ -92,11 +92,11 @@ object TrqCommandHelper {
             """.trimIndent()
     }
 
-    fun newOrder(order: Order, client: String): String {
+    fun newOrder(order: Order, union: String): String {
         return """
             <command id="neworder">
                 ${mapInstr(order.instr)}
-                <client>${client}</client>
+                <union>${union}</union>
                 <price>${order.price}</price>
                 <quantity>${order.qtyLots}</quantity>
                 <buysell>${if (order.side == Side.Buy) "B" else "S"}</buysell>
@@ -118,6 +118,5 @@ object TrqCommandHelper {
     fun markets() : String{
         return "<command id=\"get_markets\"/>"
     }
-
 
 }

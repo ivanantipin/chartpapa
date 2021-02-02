@@ -12,6 +12,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.function.Supplier;
 
@@ -54,7 +55,7 @@ public class CsvParser<T extends Timed> implements MarketDataReader<T> {
             this.factory = factory;
             File aFile = new File(fileName);
             fileChannel = new RandomAccessFile(aFile, "r").getChannel();
-            charSet = Charset.forName("US-ASCII");
+            charSet = StandardCharsets.US_ASCII;
             charsetDecoder = charSet.newDecoder();
             initStartEndTimes();
             endReadPosition = buffer(0,capacity,charBuffer);

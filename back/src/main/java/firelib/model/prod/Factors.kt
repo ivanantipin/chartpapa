@@ -22,6 +22,13 @@ fun Model.factorWeekday() {
     }
 }
 
+fun Model.factorDay() {
+    enableDiscreteFactor("weekday_int") {
+        currentTime().atNy().toLocalDate().dayOfMonth
+    }
+}
+
+
 fun Model.factorHour() {
     enableFactor("hour_int") {
         currentTime().atMoscow().hour.toDouble()

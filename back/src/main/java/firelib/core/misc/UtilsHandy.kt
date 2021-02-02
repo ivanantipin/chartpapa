@@ -1,7 +1,10 @@
 package firelib.core.misc
 
+import firelib.core.SourceName
+import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.store.MdStorageImpl
+import firelib.core.store.finamMapperWriter
 import firelib.finam.FinamDownloader
 import firelib.model.tickers
 import org.slf4j.LoggerFactory
@@ -28,7 +31,7 @@ object UtilsHandy {
     fun updateTicker(ticker: String, market: String = FinamDownloader.SHARES_MARKET, interval : Interval = Interval.Min1) {
         val downloader = FinamDownloader()
         val symbols = downloader.symbols()
-        val instr = symbols.find { it.code.equals(ticker, true) && it.market == market }
+        val instr = symbols.find { it.code.equals(ticker, true) }
         if (instr != null) {
             log.info("updating instrument ${instr}")
             MdStorageImpl().updateMarketData(instr, interval)
@@ -42,5 +45,9 @@ object UtilsHandy {
 
 
 fun main(args: Array<String>) {
-    UtilsHandy.updateRussianDivStocks(interval = Interval.Min1)
+    //finamMapperWriter().write(FinamDownloader().symbols())
+    //UtilsHandy.updateTicker("UVXY", FinamDownloader.ETF_MARKET, interval = Interval.Min10)
+
+    MdStorageImpl().updateMarketData(InstrId(source = SourceName.IQFEED.name, code = "@VX#"), interval = Interval.Min1)
+
 }
