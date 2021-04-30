@@ -6,12 +6,14 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
+import firelib.core.misc.atNy
 import firelib.core.misc.atUtc
 import firelib.iqfeed.IntervalTransformer
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toString()) : MdStorage {
@@ -89,5 +91,11 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
 fun main() {
     val impl = MdStorageImpl()
-    impl.updateMarketData(InstrId(code = "GOOG", market =  "25", source = SourceName.FINAM.name), Interval.Min10)
+    val instrId = InstrId(code = "UVXY", source = SourceName.IQFEED.name)
+    val date = LocalDate.of(2021, 1, 25)
+    val read = impl.read(instrId, Interval.Min1, LocalDateTime.of(2021, 1, 25, 0, 0, 0))
+
+    IntervalTransformer.transform(Interval.Min10, read.filter { it.endTime.atNy().toLocalDate() ==  date}).forEach {
+        println("${it.endTime.minusSeconds(600) .atNy()}   ->  ${it.close}")
+    }
 }

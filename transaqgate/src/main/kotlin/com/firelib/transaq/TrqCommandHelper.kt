@@ -7,8 +7,8 @@ import firelib.core.domain.Side
 
 object TrqCommandHelper {
 
-    fun getPortfolio(client: String): String {
-        return "<command id=\"get_portfolio\" client=\"${client.toLowerCase()}\"/>"
+    fun getPortfolio(union: String): String {
+        return "<command id=\"get_mc_portfolio\" union=\"${union}\"/>"
     }
 
 

@@ -32,9 +32,15 @@ object ReportWriter {
         if (model.trades.size == 0) {
             log.info("no trades generated")
         } else {
+
+            val invalidTrades = model.trades.filter { it.tradeStat.factors.any { !it.second.isFinite() } }.count()
+            if(invalidTrades > 0){
+                log.error("number of invalid trades is ${invalidTrades} out of trades ${model.trades.size}")
+            }
             measureTimeMillis {
                 model.trades.groupBy { Pair(it.security(), it.order.modelName) }.values.forEach {
-                    StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(it.toTradingCases())
+                    val cases = it.toTradingCases().filter { case->!case.first.tradeStat.factors.any {factor-> !factor.second.isFinite() } }
+                    StreamTradeCaseWriter(cfg.getReportDbFile(), "trades").insertTrades(cases)
                 }
             }.apply {
                 println("took ${this / 1000.0} s to write report")

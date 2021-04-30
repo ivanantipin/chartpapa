@@ -22,10 +22,12 @@ fun Model.factorWeekday() {
     }
 }
 
-fun Model.factorDay() {
-    enableDiscreteFactor("weekday_int") {
+fun Model.factorDay(): (Int) -> Int {
+    val dayFunc: (Int) -> Int = {
         currentTime().atNy().toLocalDate().dayOfMonth
     }
+    enableDiscreteFactor("day", dayFunc)
+    return dayFunc
 }
 
 
@@ -110,6 +112,20 @@ fun Model.factorReturn(): (idx: Int) -> Double {
     return ret
 }
 
+fun Model.factorReturnPct(): (idx: Int) -> Double {
+    val sers = enableSeries(Interval.Day, 5)
+
+    val ret = { tickerIdx: Int ->
+        sers[tickerIdx][0].ret()
+    }
+    enableFactor("retPct", { tickerIdx ->
+        ret(tickerIdx)
+    })
+    return ret
+
+}
+
+
 
 fun Model.factorReturn(daysBack: Int): (idx: Int) -> Double {
     val sers = enableSeries(Interval.Day, daysBack + 5)
@@ -130,8 +146,7 @@ fun Model.factorReturn(daysBack: Int): (idx: Int) -> Double {
     }
 
     enableFactor("return${daysBack}", { tickerIdx ->
-        val rr = ret(tickerIdx)
-        if(rr.isNaN()) -1.0 else rr
+        ret(tickerIdx)
     })
     return ret
 }

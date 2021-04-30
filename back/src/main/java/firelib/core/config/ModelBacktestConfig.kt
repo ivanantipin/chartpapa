@@ -39,11 +39,11 @@ class ModelBacktestConfig() : Cloneable {
 
     var endDate: Instant = Instant.now()
 
-    var maxRiskMoney = 1_500_000L
+    var maxRiskMoney = 15_000_000L
 
     var market : String = FinamDownloader.SHARES_MARKET
 
-    var maxRiskMoneyPerSec = 250_000L
+    var maxRiskMoneyPerSec = 10_000_000L
 
     fun roundedStartTime(): Instant {
         return interval.roundTime(startDateGmt)

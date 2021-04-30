@@ -79,15 +79,15 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         }
     }
 
-    val cache = ConcurrentHashMap<String, InstrId>()
+    val cache = ConcurrentHashMap<Pair<String,String>, InstrId>()
 
     fun fixInstr(instrId: InstrId): InstrId {
         if(instrId.id == "N/A"){
             if(cache.isEmpty()){
-                cache.putAll(symbols().associateBy { it.id })
+                cache.putAll(symbols().associateBy { it.code to it.market })
             }
-            require(cache.containsKey(instrId.id), {"non exisitng ${instrId.id}"})
-            return cache[instrId.id]!!
+            require(cache.containsKey(instrId.code to instrId.market), {"non exisitng ${instrId.id}"})
+            return cache[instrId.code to instrId.market]!!
         }else{
             return instrId
         }

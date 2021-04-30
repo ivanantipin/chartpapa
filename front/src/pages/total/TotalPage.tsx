@@ -1,5 +1,5 @@
-import React, {useEffect, useReducer} from "react";
-import {Collapse, Tabs} from "antd";
+import React, {useEffect, useReducer, useState} from "react";
+import {Checkbox, Collapse, Tabs} from "antd";
 import {useMappedState} from "redux-react-hook";
 import {IMainState} from "../../reducers/reducers";
 import {EquityPanel} from "../../components/equity/EquityPanel";
@@ -29,14 +29,16 @@ export const TotalPage = (props: any) => {
         return state.trades
     })
 
+    const [inversed, setInversed] = useState(false)
+
     const [filter, dispatch] = useReducer((state: FilteredTrades, action: Filter) => {
-        const ff = {...state}
-        ff.filter[action.name] = action
-        let filters = Object.values(ff.filter);
-        ff.trades = origTrades.filter(it => {
+        const tradesAndFilter = {...state}
+        tradesAndFilter.filter[action.name] = action
+        let filters = Object.values(tradesAndFilter.filter);
+        tradesAndFilter.trades = origTrades.filter(it => {
             return filters.length === 0 || filters.every(f => f.filter(it))
         })
-        return ff
+        return tradesAndFilter
     }, {
         filter: {},
         trades: origTrades
@@ -51,8 +53,16 @@ export const TotalPage = (props: any) => {
         <>
             <Collapse defaultActiveKey={['1']}>
                 <Panel header={'Filter'} key="1">
+                    <Checkbox checked={inversed} onChange={e => {
+                        const lastTrade = origTrades[origTrades.length * 0.8 | 0]
+                        if(e.target.checked){
+                            dispatch({name : "oos", filter : (t)=>t.openTime < lastTrade.openTime})
+                        }else {
+                            dispatch({name : "oos", filter : (t)=>true})
+                        }
+                        setInversed(e.target.checked)
+                    }}>oos</Checkbox>
                     <FilterComp onFilter={(f)=>{
-                        console.log("filter", f)
                         dispatch(f)
                     }}/>
                 </Panel>

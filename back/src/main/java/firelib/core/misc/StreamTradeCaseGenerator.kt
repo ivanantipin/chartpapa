@@ -28,6 +28,12 @@ class StreamTradeCaseGenerator {
     }
 
     fun makeCaseWithPositionTrades(posTrades: LinkedList<Trade>, tradingCases: ArrayList<Pair<Trade, Trade>>, trade: Trade) {
+
+        val locDate = trade.dtGmt.atMoscow().toLocalDate()
+        if(locDate.year == 2018 && locDate.monthValue == 1){
+            println(trade)
+        }
+
         if(posTrades.isEmpty() || posTrades.peek().side() == trade.side()){
             posTrades.add(trade)
             return

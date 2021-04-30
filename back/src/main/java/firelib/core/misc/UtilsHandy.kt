@@ -48,6 +48,8 @@ fun main(args: Array<String>) {
     //finamMapperWriter().write(FinamDownloader().symbols())
     //UtilsHandy.updateTicker("UVXY", FinamDownloader.ETF_MARKET, interval = Interval.Min10)
 
-    MdStorageImpl().updateMarketData(InstrId(source = SourceName.IQFEED.name, code = "@VX#"), interval = Interval.Min1)
+    MdStorageImpl().updateMarketData(InstrId(source = SourceName.FINAM.name,
+        code = "BR",
+        market = FinamDownloader.FUTURES_MARKET), interval = Interval.Min1)
 
 }

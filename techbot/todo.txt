@@ -4,3 +4,9 @@ demark check correctness
 Отступ справа нужен
 Сигнал демарка тек цена и стоп как описание текстовое
 релизный апдейт
+
+
+
+init activetick1.activetick.com 443 79a369a2add34a6c98d7e069d7aedfc4 iaa1981 PCZ7f!DdXJvy6TG
+
+79a369a2add34a6c98d7e069d7aedfc4

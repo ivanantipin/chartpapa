@@ -21,3 +21,4 @@
 /techbot/out/*
 /front/node_modules/
 /front/built
+/activetick/out/**

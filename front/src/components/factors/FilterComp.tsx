@@ -2,10 +2,11 @@ import {useMappedState} from "redux-react-hook";
 import {IMainState} from "../../reducers/reducers";
 import {default as React, Fragment, useEffect, useState} from "react";
 import {portfoliosApi} from "../../services/api/services";
-import {Checkbox, Col, Row, Slider} from "antd";
-import {ContinuousMeta, DiscreteMeta, TagsMetaSummary, Trade} from "../../api";
-import {sortCats} from "./FlatFactorsPage";
+import {Col, Row} from "antd";
+import {TagsMetaSummary, Trade} from "../../api";
 import {chunk} from "../../services/tradeUtils";
+import {ContinuosSlider} from "./ContinuosSlider";
+import {DiscreteSlider} from "./DiscreteSlider";
 
 let _ = require('lodash');
 
@@ -44,77 +45,6 @@ export const FilterComp = (props: { onFilter: (filter: Filter) => void }) => {
 export interface Filter {
     name: string,
     filter: (t: Trade) => boolean
-}
-
-const ContinuosSlider = (props: { meta: ContinuousMeta, onFilter: (f: Filter) => void }) => {
-    const {meta, onFilter} = props
-
-    const [range, setRange] = useState<[number, number]>([meta.min, meta.max])
-
-    const step = (meta.max - meta.min) / 60
-
-    return (
-        <div>
-            <h4>{meta.name} {range[0].toFixed(2)} - {range[1].toFixed(2)}</h4>
-            <Slider range step={step} min={meta.min} max={meta.max}
-                    value={[range[0], range[1]]} onChange={(val: [number,number]) => {
-
-                const rr = val as [number, number]
-                setRange(rr)
-
-                onFilter({
-                    name: meta.name,
-                    filter: (t: Trade) => {
-                        let val = t.continuousTags!![meta.name];
-                        return rr[0] < val && rr[1] > val
-                    }
-                })
-
-            }}/>
-        </div>
-    )
-}
-
-const DiscreteSlider = (props: { meta: DiscreteMeta, onFilter: (f: Filter) => void }) => {
-    const {meta, onFilter} = props
-
-    const [range, setRange] = useState([0, meta.values.length - 1])
-
-    const [inversed, setInversed] = useState(false)
-
-    let mapped = sortCats(meta.values);
-
-    const mappedIndex: { [key: string]: number } = {}
-
-    const marks: { [key: number]: string } = {}
-
-    for (let idx = 0; idx < mapped.length; idx++){
-        let str = mapped[idx];
-        marks[idx] = str
-        mappedIndex[str] = idx
-    }
-
-    return (
-        <div>
-            <h4>{meta.name} {marks[range[0]]} - {marks[range[1]]}</h4>
-            <Checkbox checked={inversed} onChange={e=>setInversed(e.target.checked)}>inversed</Checkbox>
-            <Slider marks={marks} step={null} range min={0} max={meta.values.length - 1}
-                    value={[range[0], range[1]]} onChange={(val: [number, number]) => {
-                const range = val as [number, number]
-                setRange(range)
-                onFilter({
-                    name: meta.name,
-                    filter: (t: Trade) => {
-                        const idx = mappedIndex[t.discreteTags!![meta.name]]
-                        return inversed !== (range[0] <= idx && range[1] >= idx);
-                    }
-                })
-
-            }
-            }/>
-
-        </div>
-    )
 }
 
 

@@ -1,7 +1,6 @@
 package com.firelib.transaq
 
 import firelib.core.InstrumentMapper
-import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.atMoscow
@@ -84,17 +83,13 @@ class TrqRealtimeReaderFactory(
         }.start()
     }
 
-    fun map(security: String): InstrId {
-        return instrumentMapper(security)!!
-    }
-
     val stat = ConcurrentHashMap<String, AtomicLong>()
 
     var lastTime = System.currentTimeMillis()
 
     override fun makeReader(security: String): SimplifiedReader {
         log.info("creating reader for security ${security}")
-        val instrId = map(security)
+        val instrId = instrumentMapper(security)!!
         val ret = QueueSimplifiedReader()
         val receiver = dist.add<AllTrades> { it is AllTrades }
 
@@ -106,7 +101,7 @@ class TrqRealtimeReaderFactory(
             val cnt = stat.computeIfAbsent(security) { AtomicLong(0) }
             cnt.addAndGet(ticks.size.toLong())
 
-            if (System.currentTimeMillis() - lastTime > 60 * 60_000  ) {
+            if (System.currentTimeMillis() - lastTime > 60 * 60_000) {
                 log.info("receidev ticks last hour ${stat}")
                 stat.clear()
                 lastTime = System.currentTimeMillis()
