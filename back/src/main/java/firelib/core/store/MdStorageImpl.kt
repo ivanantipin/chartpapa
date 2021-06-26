@@ -63,6 +63,16 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         return updateMd(instrId, source, interval)
     }
 
+    fun deleteSince(instrId: InstrId, interval: Interval, time : Instant){
+        try {
+            log.info("removing ${instrId} from ${time}")
+            val dao = md.getDao(instrId.sourceEnum(), interval)
+            dao.deleteSince(makeTable(instrId), time)
+        }catch (e : Exception){
+            log.info("failed to remove ${instrId} from ${time}", e)
+        }
+    }
+
     fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
         var instant = Instant.now()
         try {

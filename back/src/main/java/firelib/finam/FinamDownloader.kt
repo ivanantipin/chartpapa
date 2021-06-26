@@ -1,6 +1,5 @@
 package firelib.finam
 
-import com.google.common.io.CharStreams.readLines
 import com.opencsv.CSVParserBuilder
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
@@ -162,7 +161,7 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         return client.prepareGet(url).execute()
             .toCompletableFuture()
             .thenApply { response ->
-                val lines = readLines(InputStreamReader(response.responseBodyAsStream, "cp1251"))
+                val lines = InputStreamReader(response.responseBodyAsStream, "cp1251").readLines()
                 lines.map { parseOhlc(it) }.filter { it != null }.map { it!! }
             }.get()
     }

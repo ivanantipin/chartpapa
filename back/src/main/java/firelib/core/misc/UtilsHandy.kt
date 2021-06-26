@@ -49,7 +49,8 @@ fun main(args: Array<String>) {
     //UtilsHandy.updateTicker("UVXY", FinamDownloader.ETF_MARKET, interval = Interval.Min10)
 
     MdStorageImpl().updateMarketData(InstrId(source = SourceName.FINAM.name,
-        code = "BR",
-        market = FinamDownloader.FUTURES_MARKET), interval = Interval.Min1)
+        code = "TSLA",
+        market = FinamDownloader.BATS_MARKET), interval = Interval.Min10)
+
 
 }

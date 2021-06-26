@@ -68,7 +68,6 @@ object MdService {
     }
 
     init {
-
         transaction {
             val live =
                 Subscriptions.selectAll().map { Pair(it[Subscriptions.ticker], it[Subscriptions.market]) }.distinct()
@@ -81,11 +80,8 @@ object MdService {
                     listOf(orDefault)
                 }
             })
-
             log.info("live instruments size is ${liveSymbols.size}")
-
         }
-
     }
 
     fun update(instr: InstrId): CompletableFuture<Unit>? {
@@ -97,16 +93,15 @@ object MdService {
     }
 
     fun updateStock(instrId: InstrId): ForkJoinTask<*> {
-        return pool.submit({
+        return pool.submit {
             measureAndLogTime("update md for ${instrId.code}") {
                 storage.updateMarketData(instrId, Interval.Min10)
             }
-        })
+        }
     }
 
     fun startMd() {
-        Thread({
-
+        Thread {
             //Subscriptions.selectAll().distinctBy { Subscriptions.ticker }.
             timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
                 try {
@@ -115,30 +110,27 @@ object MdService {
                     mainLogger.error("failed to update market data", e)
                 }
             }
-        }).start()
+        }.start()
     }
 
     fun updateAll() {
-        pool.submit({
+        pool.submit {
             liveSymbols.forEach {
                 measureAndLogTime("update market data for instrument ${it.code}") {
                     storage.updateMarketData(it, Interval.Min10)
                 }
             }
-        }).get()
+        }.get()
     }
 
 }
 
 fun main() {
     initDatabase()
-
     transaction {
         val group = MdService.group(MdService.fetchInstruments())
         group.get("S")!!.forEach {
             println(it)
         }
-
     }
-
 }

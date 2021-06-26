@@ -17,14 +17,13 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
-import kotlin.time.measureTime
 
 class MdDao(internal val ds: SQLiteDataSource) {
 
     private val manager: DataSourceTransactionManager = DataSourceTransactionManager(ds)
 
     val log = LoggerFactory.getLogger(javaClass)
-    internal var tableCreated = ConcurrentHashMap<String, Boolean>()
+    val tableCreated = ConcurrentHashMap<String, Boolean>()
 
     private fun saveInTransaction(sql: String, data: List<Map<String, Any>>) {
         TransactionTemplate(manager).execute<Any> {
@@ -42,6 +41,18 @@ class MdDao(internal val ds: SQLiteDataSource) {
                     type ='table' AND  
                     name NOT LIKE 'sqlite_%' """, String::class.java
         )!!
+    }
+
+    fun deleteSince(codeIn: String, fromTime: Instant) {
+        val code = normName(codeIn)
+        ensureExist(code)
+        ds.connection.use {
+            val stmt = it.prepareStatement("delete from $code where dt > ? ", 1)
+            stmt.setLong(1, fromTime.toEpochMilli())
+            stmt.use {
+                it.execute()
+            }
+        }
     }
 
     fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
@@ -71,7 +82,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
                     data
                 )
             }
-            log.info("spent ${timeSpent/1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
+            log.info("spent ${timeSpent / 1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -96,19 +107,20 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun normName(name: String): String {
         return name.replace('-', '_').replace('.', '_')
-            .replace('@','_').replace('#','_')
+            .replace('@', '_').replace('#', '_')
     }
 
     fun queryLast(codeIn: String): Ohlc? {
         val code = normName(codeIn)
         ensureExist(code)
-        return sequence {ds.connection.use {
-            val stmt = it.prepareStatement("select * from $code order by dt desc LIMIT 1 ")
-            stmt.use {
-                val rs = it.executeQuery()
-                val sqLiteRs = rs as JDBC3ResultSet
-                val stmt1 = sqLiteRs.statement as CoreStatement
-                val db = stmt1.datbase
+        return sequence {
+            ds.connection.use {
+                val stmt = it.prepareStatement("select * from $code order by dt desc LIMIT 1 ")
+                stmt.use {
+                    val rs = it.executeQuery()
+                    val sqLiteRs = rs as JDBC3ResultSet
+                    val stmt1 = sqLiteRs.statement as CoreStatement
+                    val db = stmt1.datbase
                     rs.use {
                         while (rs.next()) {
                             // highly optimized code

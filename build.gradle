@@ -3,12 +3,13 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version'1.4.21'
-    id("org.jetbrains.kotlin.kapt") version "1.4.21"
+    id 'org.jetbrains.kotlin.jvm' version "${kotlin_version}"
+    id("org.jetbrains.kotlin.kapt") version "${kotlin_version}"
     id 'idea'
 }
 
-subprojects {
+allprojects {
+
     apply plugin: "idea"
     apply plugin: "org.jetbrains.kotlin.jvm"
     apply plugin: "org.jetbrains.kotlin.kapt"
@@ -38,4 +39,7 @@ subprojects {
         mavenLocal()
         maven { url "https://jitpack.io" }
     }
+}
+repositories {
+    mavenCentral()
 }
