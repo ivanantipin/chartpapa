@@ -4,7 +4,7 @@ import com.firelib.techbot.BotHelper
 import com.firelib.techbot.TimeFrames
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.dispatcher.Cmd
+import com.firelib.techbot.Cmd
 import com.github.kotlintelegrambot.dispatcher.fromUser
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update

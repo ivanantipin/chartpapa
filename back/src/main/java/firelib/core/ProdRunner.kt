@@ -164,7 +164,7 @@ object ProdRunner {
             { storageImpl.updateMd(it, source, cfg.interval) })
 
         println("updated data to $updated")
-        return if (useMin) updated.values.min()!! else updated.values.max()!!
+        return if (useMin) updated.values.minOrNull()!! else updated.values.maxOrNull()!!
     }
 }
 

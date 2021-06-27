@@ -3,11 +3,19 @@ services:
   hiserver:
     image: "ivanantipin/hiexport:1.0"
     restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 4000M
     network_mode: host
   bot:
-    image: "ivanantipin/techbot:20201026-techbot1.0"
+    image: "ivanantipin/techbot:20210627_0"
     restart: on-failure
     network_mode: host
+    deploy:
+      resources:
+        limits:
+          memory: 2000M
     environment:
       - TELEGRAM_TOKEN=1072760314:AAHEzPEfFsFRiI5t6aNWNJ20jhZzpnb7dlM
     volumes:

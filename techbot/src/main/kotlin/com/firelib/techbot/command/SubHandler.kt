@@ -3,7 +3,7 @@ package com.firelib.techbot.command
 import com.firelib.techbot.*
 import com.firelib.techbot.BotHelper.ensureExist
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.dispatcher.Cmd
+import com.firelib.techbot.Cmd
 import com.github.kotlintelegrambot.dispatcher.fromUser
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update

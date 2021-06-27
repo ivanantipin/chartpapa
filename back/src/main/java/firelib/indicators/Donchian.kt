@@ -38,8 +38,8 @@ class Donchian(val tailCondition : (List<Ohlc>)->Boolean) {
             min = Double.MAX_VALUE;
             max = Double.MIN_VALUE;
         }else{
-            min = list.minBy { it.low }!!.low
-            max = list.maxBy { it.high }!!.high
+            min = list.minByOrNull { it.low }!!.low
+            max = list.maxByOrNull { it.high }!!.high
         }
     }
 

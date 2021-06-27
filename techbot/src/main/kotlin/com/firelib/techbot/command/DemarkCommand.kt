@@ -6,10 +6,9 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.SequentaAnnCreator
 import com.firelib.techbot.saveFile
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.dispatcher.Cmd
+import com.firelib.techbot.Cmd
 import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.Update
-import firelib.core.domain.InstrId
 import java.io.File
 
 

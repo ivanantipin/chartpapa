@@ -65,13 +65,13 @@ fun main() {
     val out = IntervalTransformer.transform(Interval.Min10, ohlcs)
 
     require(out.size ==3 )
-    require(out[0].high == ohlcs.subList(0,2).map { it.high }.max() )
-    require(out[0].low == ohlcs.subList(0,2).map { it.low }.min() )
+    require(out[0].high == ohlcs.subList(0,2).map { it.high }.maxOrNull() )
+    require(out[0].low == ohlcs.subList(0,2).map { it.low }.minOrNull() )
     require(out[0].close == ohlcs[1].close)
     require(out[0].volume == ohlcs.subList(0,2).sumBy { it.volume.toInt() }.toLong())
 
-    require(out[1].high == ohlcs.subList(2,4).map { it.high }.max() )
-    require(out[1].low == ohlcs.subList(2,4).map { it.low }.min() )
+    require(out[1].high == ohlcs.subList(2,4).map { it.high }.maxOrNull() )
+    require(out[1].low == ohlcs.subList(2,4).map { it.low }.minOrNull() )
     require(out[1].close == ohlcs[3].close)
     require(out[1].volume == ohlcs.subList(2,4).sumBy { it.volume.toInt() }.toLong())
 

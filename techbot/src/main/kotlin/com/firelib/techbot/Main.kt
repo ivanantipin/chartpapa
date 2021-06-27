@@ -5,7 +5,6 @@ import com.firelib.techbot.command.*
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
-import com.github.kotlintelegrambot.dispatcher.MenuReg
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.logging.LogLevel
@@ -23,14 +22,14 @@ const val debug_token = "1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM"
 fun main() {
     initDatabase()
 
-    MdService.updateAll()
+    //MdService.updateAll()
 
     transaction {
         updateSensitivties()
         UpdateLevelsSensitivities.updateLevelSenses()
     }
 
-    MdService.startMd()
+    //MdService.startMd()
 
     val menuReg = MenuReg()
     menuReg.makeMenu()

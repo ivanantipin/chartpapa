@@ -1,5 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
+
 <configuration>
+
+    <property name="HOME_LOG" value="/ddisk/globaldatabase/techbot.log"/>
+
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HOME_LOG}</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${HOME_LOG}/techbot.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each archived file, size max 10MB -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
+            <totalSizeCap>500MB</totalSizeCap>
+            <!-- 60 days to keep -->
+            <maxHistory>20</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d %p %c{1.} [%t] %m%n</pattern>
+        </encoder>
+    </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -9,12 +29,9 @@
         </layout>
     </appender>
 
-    <logger name="com.mkyong.web" level="debug"
-            additivity="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
 
     <root level="info">
+        <appender-ref ref="FILE-ROLLING"/>
         <appender-ref ref="STDOUT"/>
     </root>
 
