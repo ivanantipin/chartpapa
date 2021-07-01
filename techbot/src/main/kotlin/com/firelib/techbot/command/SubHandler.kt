@@ -5,6 +5,7 @@ import com.firelib.techbot.BotHelper.ensureExist
 import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.Cmd
 import com.github.kotlintelegrambot.dispatcher.fromUser
+import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.sql.and
@@ -56,7 +57,7 @@ class SubHandler : CommandHandler {
 
         if (added) {
             bot.sendMessage(
-                chatId = fromUser.id,
+                chatId = ChatId.fromId(fromUser.id),
                 text = "Добавлен символ ${instr.code}, ${msg}",
                 parseMode = ParseMode.MARKDOWN
             )

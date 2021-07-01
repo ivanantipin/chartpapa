@@ -1,9 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.domain.TimeFrame
-import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.ParseMode
-import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -14,6 +12,12 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
+
+
+fun ChatId.getId() : Long{
+    return (this as ChatId.Id).id
+}
+
 
 object BotHelper {
     fun displaySubscriptions(uid: Int): String {
@@ -53,10 +57,10 @@ object BotHelper {
         }
     }
 
-    fun getTimeFrames(uid: Int): List<String> {
+    fun getTimeFrames(uid: ChatId): List<String> {
         return transaction {
             TimeFrames.select {
-                TimeFrames.user eq uid
+                TimeFrames.user eq uid.getId().toInt()
             }.withDistinct().map { it[TimeFrames.tf] }
         }
     }
@@ -89,18 +93,6 @@ object BotHelper {
         val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(window.toLong()))
         val ohlcs = mdStorageImpl.read(ticker, Interval.Min10, startTime)
         return IntervalTransformer.transform(timeFrame, ohlcs)
-    }
-
-    fun checkTicker(ticker: String, bot: Bot, update: Update): Boolean {
-        if (MdService.liveSymbols.find { it.code.equals(ticker, true) } == null) {
-            bot.sendMessage(
-                chatId = update.message!!.chat.id,
-                text = "invalid ticker ${ticker}",
-                parseMode = ParseMode.MARKDOWN
-            )
-            return false
-        }
-        return true
     }
 
 }

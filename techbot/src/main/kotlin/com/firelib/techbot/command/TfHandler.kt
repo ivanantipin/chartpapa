@@ -6,6 +6,7 @@ import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.Cmd
 import com.github.kotlintelegrambot.dispatcher.fromUser
+import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.sql.and
@@ -40,7 +41,7 @@ class TfHandler : CommandHandler {
 
         if (flag) {
             bot.sendMessage(
-                chatId = fromUser.id,
+                chatId = ChatId.fromId(fromUser.id),
                 text = "Таймфрейм добавлен ${timeFrame}",
                 parseMode = ParseMode.MARKDOWN
             )

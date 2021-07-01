@@ -4,9 +4,9 @@ import com.github.kotlintelegrambot.entities.*
 import java.util.concurrent.atomic.AtomicLong
 
 
-fun Update.chatId(): Long {
+fun Update.chatId(): ChatId {
     val fromUser = this.message?.from ?: this.callbackQuery?.from!!
-    return fromUser.id
+    return ChatId.fromId(fromUser.id)
 }
 
 fun Update.fromUser(): User {

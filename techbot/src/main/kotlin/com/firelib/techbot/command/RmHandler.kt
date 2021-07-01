@@ -4,6 +4,7 @@ import com.firelib.techbot.Subscriptions
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.Cmd
+import com.firelib.techbot.getId
 import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -18,14 +19,14 @@ class RmHandler : CommandHandler {
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val instrId = cmd.instr()
-        val uid = update.chatId().toInt()
+        val uid = update.chatId()
         var cnt = 0;
         updateDatabase("delete user", {
-            cnt = Subscriptions.deleteWhere { Subscriptions.user eq uid and (Subscriptions.ticker eq instrId.code) }
+            cnt = Subscriptions.deleteWhere { Subscriptions.user eq uid.getId().toInt() and (Subscriptions.ticker eq instrId.code) }
         }).get()
         if (cnt > 0) {
             bot.sendMessage(
-                chatId = uid.toLong(),
+                chatId = uid,
                 text = "Символ удален ${instrId}",
                 parseMode = ParseMode.MARKDOWN
             )

@@ -4,10 +4,7 @@ import com.firelib.techbot.command.CommandHandler
 import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.dispatcher.chatId
-import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
-import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
-import com.github.kotlintelegrambot.entities.ParseMode
-import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import firelib.core.misc.JsonHelper
@@ -87,7 +84,7 @@ class MenuReg {
         }
     }
 
-    fun list(buttons: List<List<InlineButton>>, bot: Bot, chatId: Long, title: String) {
+    fun list(buttons: List<List<InlineButton>>, bot: Bot, chatId: ChatId, title: String) {
         val keyboard = InlineKeyboardMarkup.create(
             buttons.map {
                 it.map { but ->
@@ -101,7 +98,7 @@ class MenuReg {
         )
     }
 
-    fun listUncat(buttons: List<InlineButton>, bot: Bot, chatId: Long, rowSize: Int) {
+    fun listUncat(buttons: List<InlineButton>, bot: Bot, chatId: ChatId, rowSize: Int) {
         buttons.chunked(40).forEach { chunk ->
             chunk.groupBy { it.title }.forEach {
                 val ttl = if (it.key.isBlank()) "NA" else it.key;
@@ -123,7 +120,7 @@ class MenuReg {
                             action = { bot, update ->
                                 val bts = makeButtons(
                                     "dema",
-                                    update.chatId().toInt(),
+                                    update.chatId(),
                                     tf,
                                     "Выберите тикер для демарк секвенты"
                                 )
@@ -143,7 +140,7 @@ class MenuReg {
                         parentInlButton(tf.name) {
                             action = { bot, update ->
                                 val bts =
-                                    makeButtons("tl", update.chatId().toInt(), tf, "Выберите тикер для тренд линии")
+                                    makeButtons("tl", update.chatId(), tf, "Выберите тикер для тренд линии")
                                 if (bts.isEmpty()) {
                                     emtyListMsg(bot, update)
                                 } else {
@@ -159,7 +156,7 @@ class MenuReg {
                     action = { bot, update ->
                         val bts = makeButtons(
                             "lvl",
-                            update.chatId().toInt(),
+                            update.chatId(),
                             TimeFrame.M30,
                             "Выберите тикер для горизонтальных линий"
                         )
@@ -194,7 +191,7 @@ class MenuReg {
 
                 parentInlButton("Ваши символы / Удаление") {
                     action = { bot, update ->
-                        val buttons = BotHelper.getSubscriptions(update.chatId().toInt()).distinct()
+                        val buttons = BotHelper.getSubscriptions(update.chatId().getId().toInt()).distinct()
                             .map { InlineButton(it.code, Cmd("unsub", mapOf("id" to it.id)), "") }.chunked(4)
                         list(buttons, bot, update.chatId(), "Ваши символы, нажмите на символ чтобы отписаться")
                     }
@@ -202,7 +199,7 @@ class MenuReg {
 
                 parentInlButton("Ваши таймфреймы / Удаление") {
                     action = { bot, update ->
-                        val buttons = BotHelper.getTimeFrames(update.chatId().toInt())
+                        val buttons = BotHelper.getTimeFrames(update.chatId())
                             .map { InlineButton(it, Cmd("rm_tf", mapOf("tf" to it)), "") }.chunked(1)
                         list(buttons, bot, update.chatId(), "Нажмите на таймфрейм чтобы отписаться")
                     }
@@ -241,11 +238,11 @@ class MenuReg {
 
     private fun makeButtons(
         cmd: String,
-        chatId: Int,
+        chatId: ChatId,
         tf: TimeFrame,
         title: String
     ): List<InlineButton> {
-        val bts = BotHelper.getSubscriptions(chatId).map { instrId ->
+        val bts = BotHelper.getSubscriptions(chatId.getId().toInt()).map { instrId ->
             InlineButton(
                 instrId.code,
                 Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name)),

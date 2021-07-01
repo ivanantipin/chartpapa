@@ -5,6 +5,7 @@ import chart.BreachType
 import chart.SequentaSignals
 import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
+import com.github.kotlintelegrambot.entities.ChatId
 import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -106,7 +107,7 @@ object UsersNotifier {
                 { Subscriptions.ticker eq instrId.code and (Subscriptions.market eq instrId.market) and (TimeFrames.tf eq be.key.tf.name) })
             .selectAll().forEach {
                 mainLogger.info("notifiying user ${it}")
-                val response = bot.sendPhoto(it[Subscriptions.user].toLong(), File(be.photoFile))
+                val response = bot.sendPhoto(ChatId.fromId(it[Subscriptions.user].toLong()), File(be.photoFile))
                 if (response.second != null) {
                     response.second!!.printStackTrace()
                 }
