@@ -27,14 +27,14 @@ fun main() {
 
     initDatabase()
 
-    //MdService.updateAll()
+    MdService.updateAll()
 
     transaction {
         updateSensitivties()
         UpdateLevelsSensitivities.updateLevelSenses()
     }
 
-    //MdService.startMd()
+    MdService.startMd()
 
     val menuReg = MenuReg()
     menuReg.makeMenu()
