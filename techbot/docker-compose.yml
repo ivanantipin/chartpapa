@@ -9,7 +9,7 @@ services:
           memory: 4000M
     network_mode: host
   bot:
-    image: "ivanantipin/techbot:20210627_0"
+    image: "ivanantipin/techbot:20210701_0"
     restart: on-failure
     network_mode: host
     deploy:

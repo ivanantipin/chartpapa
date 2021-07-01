@@ -15,7 +15,7 @@ object JsonHelper {
     }
 
     fun toJsonString(obj: Any): String {
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj)
+        return mapper.writeValueAsString(obj)
     }
 
     fun toJsonBytes(obj: Any): ByteArray {
