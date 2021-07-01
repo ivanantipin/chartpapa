@@ -112,10 +112,10 @@ class TrqRealtimeReaderFactory(
                     Ohlc(
                         endTime = it,
                         open = ticks.first().price,
-                        high = ticks.maxBy { it.price }!!.price,
-                        low = ticks.minBy { it.price }!!.price,
+                        high = ticks.maxByOrNull { it.price }!!.price,
+                        low = ticks.minByOrNull { it.price }!!.price,
                         close = ticks.last().price,
-                        volume = ticks.sumBy { it.quantity }.toLong(),
+                        volume = ticks.sumOf { it.quantity }.toLong(),
                         interpolated = false
 
                     )
