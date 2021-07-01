@@ -59,11 +59,19 @@ fun main() {
         logLevel = LogLevel.Network.Body
         dispatch {
             text(null) {
-                var cmd = if (menuReg.menuActions.containsKey(text) && text != MenuReg.mainMenu) text else "HOME"
-                menuReg.menuActions[cmd]!!(this.bot, this.update)
+                try {
+                    var cmd = if (menuReg.menuActions.containsKey(text) && text != MenuReg.mainMenu) text else "HOME"
+                    menuReg.menuActions[cmd]!!(this.bot, this.update)
+                }catch (e : Exception){
+                    mainLogger.error("exception in action ${text}", e)
+                }
             }
             callbackQuery(null) {
-                menuReg.processData(this.callbackQuery.data, bot, update)
+                try {
+                    menuReg.processData(this.callbackQuery.data, bot, update)
+                }catch (e : Exception){
+                    mainLogger.error("exception in call back query ${this.callbackQuery?.data}")
+                }
             }
         }
 
