@@ -20,15 +20,6 @@ fun ChatId.getId() : Long{
 
 
 object BotHelper {
-    fun displaySubscriptions(uid: Int): String {
-        return transaction {
-            val header = "*Ваши подписки на сигналы*\n"
-            val resp = Subscriptions.select {
-                Subscriptions.user eq uid
-            }.map { it[Subscriptions.ticker] }.sorted().joinToString(separator = "\n")
-            header + resp
-        }
-    }
 
     fun displayTimeFrames(uid: Int): String {
         return transaction {

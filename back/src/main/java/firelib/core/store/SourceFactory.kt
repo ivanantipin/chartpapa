@@ -3,6 +3,7 @@ package firelib.core.store
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.emulator.HistoricalSourceEmulator
+import firelib.eodhist.EodHistSource
 import firelib.finam.FinamDownloader
 import firelib.finam.MoexSource
 import firelib.iqfeed.IqFeedHistoricalSource
@@ -18,7 +19,8 @@ class SourceFactory{
         SourceName.DUMMY to { HistoricalSourceEmulator() },
         SourceName.MOEX to { MoexSource() },
         SourceName.IQFEED to { IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")) },
-        SourceName.MT5 to { MT5SourceSafe() }
+        SourceName.MT5 to { MT5SourceSafe() },
+        SourceName.EODHIST to { EodHistSource() },
     )
 
     val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()

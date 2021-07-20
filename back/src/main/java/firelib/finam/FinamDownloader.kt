@@ -21,6 +21,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.ReentrantLock
 
 class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSource {
 
@@ -112,12 +114,14 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
         }
     }
 
+    @Synchronized
     private fun loadSome(
         instrId: InstrId,
         interval: Interval,
         start: LocalDateTime,
         finishI: LocalDateTime
     ): List<Ohlc> {
+
         while (System.currentTimeMillis() - lastFinamCall < 1100) {
             try {
                 Thread.sleep(100)
@@ -125,9 +129,8 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
                 throw RuntimeException(e)
             }
         }
-        val finish = if (finishI.isAfter(LocalDateTime.now())) LocalDateTime.now() else finishI;
 
-        lastFinamCall = System.currentTimeMillis()
+        val finish = if (finishI.isAfter(LocalDateTime.now())) LocalDateTime.now() else finishI;
 
         val params = listOf(
                 "f" to "table",
@@ -162,6 +165,7 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
             .toCompletableFuture()
             .thenApply { response ->
                 val lines = InputStreamReader(response.responseBodyAsStream, "cp1251").readLines()
+                lastFinamCall = System.currentTimeMillis()
                 lines.map { parseOhlc(it) }.filter { it != null }.map { it!! }
             }.get()
     }

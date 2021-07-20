@@ -15,3 +15,88 @@ init activetick1.activetick.com 443 79a369a2add34a6c98d7e069d7aedfc4 iaa1981 PCZ
 4. teeth
 5. edgar or random forest
 6.
+
+/home/ivan/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.3.72/86613e1a669a701b0c660bfd2af4f82a7ae11fca/kotlin-reflect-1.3.72.jar
+
+
+https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/us-gaap/AccountsPayableCurrent.json
+
+https://data.sec.gov/submissions/CIK0000320193.json
+
+https://data.sec.gov/api/xbrl/companyfacts/CIK0000093410.json
+
+
+
+
+finish pays:
+
+1. seeking alfa
+2. yousician
+
+
+costOfRevenue=21854_000000.00
+depreciation=4286_000000.00
+interestExpense=198_000000
+operatingIncome=1759_000000
+otherOperatingExpenses=29317_000000
+totalOperatingExpenses=7463_000000
+totalAssets=241645_000000.00",
+totalLiab=108712_000000.00",
+totalRevenue=31076_000000
+
+
+
+//discrepancy
+(1459 + 6294 - 7463 - 198) = (1759 -  1667)
+
+
+totalRevenue = 1667 + 17568 + 4286 + 198 + 1459 + 6294 = 31076
+totalRevenue = operatingIncome + <cost of sales> + depreciation -  interestExpense + 1459 + 6294
+
+totalRevenue = operatingIncome + costOfRevenue + totalOperatingExpenses
+1759 + 21854 + 7463
+
+
+============
+
+31076 - 1759 - 21854 + 198
+
+==============
+
+
+cf.depreciation + <cost of sales> = is.costOfRevenue = 21854
+21854 - 4286 = 17568
+
+
+costOfRevenue = otherOperatingExpenses - totalOperatingExpenses
+21854 = 29317 - 7463
+
+is.grossProfit = is.totalRevenue - is.costOfRevenue
+
+
+is.totalRevenue = cf.depreciation + is.interestExpense + is.operatingIncome
+31076 - 4286 + 198 + 1759 = 28747
+
+
+
+
+
+
+BOOKVALUE = (bs.totalAssets - bs.totalLiab)/SharesStats.SharesOutstanding
+
+https://data.sec.gov/api/xbrl/companyfacts/CIK##########.json
+
+
+
+
+
+https://eodhistoricaldata.com/api/eod-bulk-last-day/US?api_token=5e81907493e611.25433232&symbols=MSFT,AAPL&fmt=json&filter=extended
+
+
+https://eodhistoricaldata.com/api/intraday/AAPL.US?fmt=json&api_token=5e81907493e611.25433232&interval=5m&from=1564752900&to=1564753200
+
+
+1. fix historical data
+2. labels on columns
+3. ev/ebitda
+4. brainstorm metrics

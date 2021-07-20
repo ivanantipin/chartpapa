@@ -13,8 +13,10 @@ val defaultLegend = HLegend(
     enabled = true
 )
 
-
 object ChartCreator {
+
+    val GLOBAL_OPTIONS_FOR_BILLIONS = mapOf("lang" to mapOf("numericSymbols" to  listOf("k", "M", "B", "T", "P", "E")))
+
     fun makeOptions(ohlc: List<Ohlc>, title: String): HOptions {
         val data = ohlc.mapIndexed { idx, it ->
             arrayOf(

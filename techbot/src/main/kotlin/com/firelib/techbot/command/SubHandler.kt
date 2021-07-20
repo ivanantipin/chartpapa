@@ -44,9 +44,12 @@ class SubHandler : CommandHandler {
         val fut = MdService.update(instr)
         if (fut != null) {
             fut.thenAccept {
-
-                UpdateSensitivities.updateSens(instr).get()
-                UpdateLevelsSensitivities.updateTicker(instr).get()
+                try {
+                    UpdateSensitivities.updateSens(instr).get()
+                    UpdateLevelsSensitivities.updateTicker(instr).get()
+                }catch (e : Exception){
+                    mainLogger.error("failed to subscribe ", e)
+                }
             }
             mdAvailable = false
         }

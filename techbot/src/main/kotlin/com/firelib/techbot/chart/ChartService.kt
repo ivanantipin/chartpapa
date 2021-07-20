@@ -11,6 +11,7 @@ import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.chart.domain.SequentaAnnnotations
 import com.firelib.techbot.initDatabase
 import firelib.core.domain.*
+import firelib.core.misc.JsonHelper
 import firelib.indicators.SR
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -24,8 +25,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object ChartService {
     val client = HttpClient()
 
-    @Serializable
-    data class HiRequest(val async: Boolean, val infile: HOptions, val constr: String, val scale: Int)
+    data class HiRequest(val async: Boolean, val infile: HOptions, val constr: String, val scale: Int,
+                         var globalOptions : Map<String,*>? = null)
 
     val urlString = "http://localhost:7801"
 
@@ -43,6 +44,9 @@ object ChartService {
                 body = optJson
             }
             val url = "$urlString/" + imagePath
+
+            println(url)
+
             client.get<ByteArray>(url)
         }
     }
@@ -77,27 +81,25 @@ object ChartService {
         }
     }
 
-    private fun post(options: HOptions): ByteArray {
-        val optJson = Json { prettyPrint = true }.encodeToString(
-            HiRequest(
-                async = true,
-                infile = options,
-                constr = "StockChart",
-                2
-            )
-        )
+    fun post(options: HOptions, globalOptions: Map<String, *>? = null, chartType : String = "StockChart"): ByteArray {
+        val optJson = JsonHelper.toStringPretty(HiRequest(
+            async = true,
+            infile = options,
+            constr = chartType,
+            2,
+            globalOptions = globalOptions
+        ))
+        println(optJson)
         return postJson(optJson)
     }
+
+
 
 }
 
 fun main() {
     initDatabase()
     transaction {
-        val ohs = BotHelper.getOhlcsForTf(InstrId.fromCodeAndExch("plzl", "1"), Interval.Day)
-        val sr = SR(ohs[0].endTime, ohs[20].endTime, ohs[20].high)
-        val time = ohs.at(-5).endTime.toEpochMilli()
-        val sigi = LevelSignal(Side.Sell, time, sr)
-        ChartService.drawLevelsBreaches(listOf(sigi), ohs, "some")
+
     }
 }

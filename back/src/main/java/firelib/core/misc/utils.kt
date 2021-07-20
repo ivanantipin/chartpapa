@@ -1,6 +1,11 @@
 package firelib.core.misc
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import firelib.common.Trade
+import org.springframework.web.client.RestTemplate
 import java.text.DecimalFormat
 
 
@@ -11,6 +16,12 @@ fun dbl2Str(vv: Double, decPlaces: Int): String {
     }
     val df = DecimalFormat(dp)
     return df.format(vv)
+}
+
+var mapper = ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).registerModule(KotlinModule())
+
+fun String.readJson() : JsonNode{
+    return mapper.readTree(this)
 }
 
 
@@ -26,4 +37,7 @@ fun Pair<Trade, Trade>.pnl() : Double{
 fun List<Trade>.toTradingCases() : List<Pair<Trade,Trade>>{
     return this.groupBy(Trade::security).values.flatMap { toTradingCasesInt(it) }
 }
+
+
+
 

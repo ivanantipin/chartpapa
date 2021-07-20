@@ -1,7 +1,7 @@
 version: '3'
 services:
   hiserver:
-    image: "ivanantipin/hiexport:1.0"
+    image: "ivanantipin/hiexport:1.1"
     restart: on-failure
     deploy:
       resources:
@@ -17,7 +17,7 @@ services:
         limits:
           memory: 2000M
     environment:
-      - TELEGRAM_TOKEN=1072760314:AAHEzPEfFsFRiI5t6aNWNJ20jhZzpnb7dlM
+      - TELEGRAM_TOKEN=1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM
     volumes:
       - /ddisk/globaldatabase:/ddisk/globaldatabase
     depends_on:

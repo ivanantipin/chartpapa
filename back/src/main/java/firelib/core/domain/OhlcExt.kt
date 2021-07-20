@@ -17,7 +17,7 @@ fun Ohlc.merge(ohlc: Ohlc): Ohlc {
     return Ohlc(ohlc.endTime, open,
             Math.max(high, ohlc.high),
             Math.min(low, ohlc.low),
-            ohlc.close, volume = ohlc.volume + volume
+            ohlc.close, volume = ohlc.volume + volume, interpolated = !(this.interpolated && ohlc.interpolated)
     )
 }
 

@@ -18,6 +18,11 @@ object JsonHelper {
         return mapper.writeValueAsString(obj)
     }
 
+    fun toStringPretty(obj: Any): String {
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj)
+    }
+
+
     fun toJsonBytes(obj: Any): ByteArray {
         return mapper.writeValueAsBytes(obj)
     }

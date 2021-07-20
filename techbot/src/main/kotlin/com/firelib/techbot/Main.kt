@@ -27,14 +27,17 @@ fun main() {
 
     initDatabase()
 
-    MdService.updateAll()
+    if(System.getenv("TELEGRAM_TOKEN") != null){
 
-    transaction {
-        updateSensitivties()
-        UpdateLevelsSensitivities.updateLevelSenses()
+        MdService.updateAll()
+
+        transaction {
+            updateSensitivties()
+            UpdateLevelsSensitivities.updateLevelSenses()
+        }
+        MdService.startMd()
     }
 
-    MdService.startMd()
 
     val menuReg = MenuReg()
     menuReg.makeMenu()
@@ -44,6 +47,7 @@ fun main() {
     menuReg.registerHandler(RmHandler())
 
     menuReg.registerHandler(DemarkCommand())
+    menuReg.registerHandler(FundamentalsCommand())
 
     menuReg.registerHandler(LevelsCommand())
 
@@ -56,7 +60,7 @@ fun main() {
     val bot = bot {
         token = System.getenv("TELEGRAM_TOKEN") ?: debug_token
         timeout = 30
-        logLevel = LogLevel.Network.Body
+        logLevel = LogLevel.Network.Basic
         dispatch {
             text(null) {
                 try {
@@ -126,6 +130,10 @@ fun initDatabase() {
 
         SchemaUtils.create(TimeFrames)
         SchemaUtils.createMissingTablesAndColumns(TimeFrames)
+
+        SchemaUtils.create(CacheTable)
+        SchemaUtils.createMissingTablesAndColumns(CacheTable)
+
 
 
     }

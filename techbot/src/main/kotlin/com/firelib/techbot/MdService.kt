@@ -1,10 +1,15 @@
 package com.firelib.techbot
 
+import firelib.core.HistoricalSource
+import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
+import firelib.core.report.dao.GeGeWriter
 import firelib.core.store.MdStorageImpl
+import firelib.core.store.eodSourceMapperWriter
 import firelib.core.store.finamMapperWriter
+import firelib.eodhist.EodHistSource
 import firelib.finam.FinamDownloader
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -17,6 +22,7 @@ object MdService {
     val log = LoggerFactory.getLogger(UsersNotifier::class.java)
 
     val pool = ForkJoinPool(1)
+    val multiPool = ForkJoinPool(10)
     val storage = MdStorageImpl()
 
     val liveSymbols = CopyOnWriteArrayList<InstrId>()
@@ -27,12 +33,22 @@ object MdService {
 
 
     fun fetchInstruments(): List<InstrId> {
-        var ret = finamMapperWriter().read()
+        var ret = read(finamMapperWriter(), FinamDownloader())
+        log.info("finam instruments size " + ret.size)
+        var ret1 = read(eodSourceMapperWriter(), EodHistSource())
+        log.info("eodhist instruments size " + ret1.size)
+        val filter = filter(ret + ret1)
+        log.info("final instruments size ${filter.size}")
+        return filter
+    }
+
+    private fun read(reader : GeGeWriter<InstrId>, historicalSource: HistoricalSource): List<InstrId> {
+        var ret = reader.read()
         if (ret.isEmpty()) {
-            finamMapperWriter().write(FinamDownloader().symbols())
-            ret = finamMapperWriter().read()
+            reader.write(historicalSource.symbols())
+            ret = reader.read()
         }
-        return filter(ret)
+        return ret
     }
 
     fun byId(id : String) : InstrId{
@@ -56,15 +72,14 @@ object MdService {
             "Si",
         )
 
-        val toSet = FinamDownloader.FinamMarket.values()
-            .map { it.id }.toSet()
-
-        val filter = instruments.filter {
-            toSet.contains(it.market) && it.code.length >= 2
-                    && (it.market != FinamDownloader.FinamMarket.FUTURES_MARKET.id || futureSymbols.contains(it.code))
-
+        return instruments.filter {
+            if(it.source == SourceName.FINAM.name){
+                it.code.length >= 2 &&
+                        (it.market == FinamDownloader.FX  || it.market == FinamDownloader.SHARES_MARKET  || (it.market == FinamDownloader.FinamMarket.FUTURES_MARKET.id && futureSymbols.contains(it.code)))
+            }else{
+                true
+            }
         }
-        return filter
     }
 
     init {
@@ -102,7 +117,6 @@ object MdService {
 
     fun startMd() {
         Thread {
-            //Subscriptions.selectAll().distinctBy { Subscriptions.ticker }.
             timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
                 try {
                     updateAll()
@@ -114,13 +128,21 @@ object MdService {
     }
 
     fun updateAll() {
-        pool.submit {
-            liveSymbols.forEach {
-                measureAndLogTime("update market data for instrument ${it.code}") {
-                    storage.updateMarketData(it, Interval.Min10)
+        fun routeToRightPool(poo : ForkJoinPool, instrId: InstrId): ForkJoinTask<*> {
+            return poo.submit({
+                measureAndLogTime("update market data for instrument ${instrId.code}") {
+                    storage.updateMarketData(instrId, Interval.Min10)
                 }
+            })
+        }
+
+        liveSymbols.map { instrId->
+            if(instrId.source == SourceName.FINAM.name){
+                routeToRightPool(pool, instrId)
+            }else{
+                routeToRightPool(multiPool, instrId)
             }
-        }.get()
+        }.forEach { it.get() }
     }
 
 }

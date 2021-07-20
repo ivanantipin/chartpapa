@@ -1,4 +1,4 @@
-name="ivanantipin/hiexport:1.0"
+name="ivanantipin/hiexport:1.1"
 
 docker build  -t $name .
 

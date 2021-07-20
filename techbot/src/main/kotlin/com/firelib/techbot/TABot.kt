@@ -24,9 +24,14 @@ inline fun <R> measureTime(block: () -> R): Pair<R, Long> {
 }
 
 inline fun <R> measureAndLogTime(msg: String, block: () -> R): Pair<R, Long> {
-    val (r, l) = measureTime(block)
-    mainLogger.info("time spent on ${msg} is ${l / 1000.0} s.")
-    return r to l
+    try {
+        val (r, l) = measureTime(block)
+        mainLogger.info("time spent on ${msg} is ${l / 1000.0} s.")
+        return r to l
+    }catch (e : Exception){
+        mainLogger.error("failed to run ${msg}")
+        throw e
+    }
 }
 
 

@@ -213,6 +213,26 @@ class MenuReg {
                 }
             }
 
+            menuItem("Фундаментальный анализ") {
+                rowSize = 1
+                menuItem("Показать") {
+                    action = { bot, update ->
+                        val bts = makeButtons(
+                            "fund",
+                            update.chatId(),
+                            TimeFrame.D,
+                            "Выберите тикер"
+                        )
+                        if (bts.isEmpty()) {
+                            emtyListMsg(bot, update)
+                        } else {
+                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для горизонтальных уровней")
+                        }
+                    }
+                }
+                menuItem("Главное меню") {}
+            }
+
             menuItem("Помощь") {
                 action = { bot, update ->
                     bot.sendMessage(
