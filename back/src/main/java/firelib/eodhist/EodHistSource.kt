@@ -1,12 +1,14 @@
 package firelib.eodhist
 
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.firelib.techbot.command.CacheService
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.readJson
+import firelib.core.report.initDatabase
 import firelib.core.store.MdStorageImpl
 import firelib.iqfeed.IntervalTransformer
 import org.springframework.web.client.RestTemplate
@@ -21,18 +23,19 @@ class EodHistSource : HistoricalSource {
         return load(instrId, LocalDateTime.now().minusDays(5), Interval.Min1).count() > 0
     }
 
-    override fun symbols(): List<InstrId> {
-        val template = RestTemplate()
-        val url = "https://eodhistoricaldata.com/api/exchange-symbol-list/US?api_token=5e81907493e611.25433232"
 
-        val str = String(EodHistSource::class.java.getResourceAsStream("/eodsymbols.json").readAllBytes())
+    override fun  symbols(): List<InstrId> {
+        val cachedSymbols = CacheService.getCached("eodhist_symbols", {
+            val template = RestTemplate()
+            val url = "https://eodhistoricaldata.com/api/exchange-symbol-list/US?api_token=5e81907493e611.25433232&fmt=json"
+            template.getForEntity(url, String::class.java).body.toByteArray()
+        }, 5*Interval.Week.durationMs)
 
-        //val restStr = template.getForEntity(url, String::class.java).body
-        return str.readJson().filter {
-            //(  it["Exchange"]?.textValue() == "NASDAQ" || it["Exchange"]?.textValue() == "NYSE") &&
-                    it["code"] != null && it["MarketCapitalization"].longValue() > 4000_000_000
+        return String(cachedSymbols).readJson().filter {
+            it["Exchange"]?.textValue() == "NASDAQ" || it["Exchange"]?.textValue() == "NYSE" && it["Code"] != null
+                    && it["Type"]?.textValue() == "Common Stock"
         }.map {
-            InstrId(id=it["code"].textValue(), code = it["code"].textValue(), name = it["name"].textValue(), market = it["exchange_short_name"].textValue(),  source =SourceName.EODHIST.name )
+            InstrId(id=it["Code"].textValue(), code = it["Code"].textValue(), name = it["Name"].textValue(), market = it["Exchange"].textValue(),  source =SourceName.EODHIST.name )
         }
     }
 
@@ -58,27 +61,33 @@ class EodHistSource : HistoricalSource {
 
         val template = RestTemplate()
 
-
-
         var dt = dateTime.toEpochSecond(ZoneOffset.UTC)
         var dtto = getNextTime(dt)
 
         return sequence {
             while (true){
+
+                println("from dt ${LocalDateTime.ofEpochSecond(dt, 0, ZoneOffset.UTC)}")
+                println("to dt ${LocalDateTime.ofEpochSecond(dtto, 0, ZoneOffset.UTC)}")
+
                 val url = "https://eodhistoricaldata.com/api/intraday/${instrId.code}.US?fmt=json&api_token=5e81907493e611.25433232&interval=1m&from=${dt}&to=${dtto}"
+
                 println(url)
 
                 val ms = measureTimeMillis {  template.getForEntity(url, String::class.java).body}
 
+                println("took ${ms} to fetch")
 
-                println("took ${ms}")
                 val restStr = template.getForEntity(url, String::class.java).body
 
                 val json = restStr.readJson()
+
+                println("size is ${json.size()}")
+
                 if((json as ArrayNode).size() != 0){
                     val ohlcs = json.map {
                         Ohlc(
-                            endTime = Instant.ofEpochSecond(it["timestamp"].longValue()),
+                            endTime = Instant.ofEpochSecond(it["timestamp"].longValue() + 60),
                             open = it["open"].doubleValue(),
                             high = it["high"].doubleValue(),
                             low = it["low"].doubleValue(),
@@ -108,7 +117,11 @@ class EodHistSource : HistoricalSource {
 }
 
 fun main() {
+    initDatabase()
+    //println(EodHistSource().symbols().size)
+    //return
+
     val storage = MdStorageImpl()
-    storage.updateMarketData(InstrId(id="BP", code = "BP", source = SourceName.EODHIST.name), Interval.Min10)
+    storage.updateMarketData(InstrId(id="XLE", code = "XLE", source = SourceName.EODHIST.name), Interval.Min10)
 
 }

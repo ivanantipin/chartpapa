@@ -6,6 +6,7 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import firelib.core.report.dao.GeGeWriter
+import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
 import firelib.core.store.eodSourceMapperWriter
 import firelib.core.store.finamMapperWriter
@@ -21,6 +22,13 @@ object MdService {
 
     val log = LoggerFactory.getLogger(UsersNotifier::class.java)
 
+    val lastWritten =  GeGeWriter(
+        GlobalConstants.metaDb,
+        LastWritten::class,
+        listOf("name"),
+        "instrumentsTimestamp"
+    )
+
     val pool = ForkJoinPool(1)
     val multiPool = ForkJoinPool(10)
     val storage = MdStorageImpl()
@@ -29,7 +37,6 @@ object MdService {
     val instrByCodeAndMarket = fetchInstruments().associateBy { Pair(it.code, it.market) }
     val id2inst = fetchInstruments().associateBy { it.id }
     val instrByStart = group(fetchInstruments())
-
 
 
     fun fetchInstruments(): List<InstrId> {
@@ -42,10 +49,17 @@ object MdService {
         return filter
     }
 
+
+    data class LastWritten(val name : String, val ts : Long)
+
     private fun read(reader : GeGeWriter<InstrId>, historicalSource: HistoricalSource): List<InstrId> {
+        val name = historicalSource.getName().name
         var ret = reader.read()
-        if (ret.isEmpty()) {
+        val byName = lastWritten.read().associateBy { it.name }
+        val expired = byName[name] == null || byName[name]!!.ts < System.currentTimeMillis() - Interval.Week.durationMs
+        if(ret.isEmpty() || expired){
             reader.write(historicalSource.symbols())
+            lastWritten.write(listOf(LastWritten(name, System.currentTimeMillis())))
             ret = reader.read()
         }
         return ret
@@ -147,9 +161,15 @@ object MdService {
 
 }
 
+
+
 fun main() {
     initDatabase()
+
+
     transaction {
+
+
         val group = MdService.group(MdService.fetchInstruments())
         group.get("S")!!.forEach {
             println(it)

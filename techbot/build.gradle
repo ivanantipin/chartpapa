@@ -17,7 +17,7 @@ application {
 
 dependencies {
     implementation('info.picocli:picocli:4.5.2')
-    implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.4'
+    implementation 'io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.5'
     implementation("io.ktor:ktor-client-cio:1.4.1")
     compile project(':back')
     implementation "org.jetbrains.exposed:exposed-core:$exposed_version"

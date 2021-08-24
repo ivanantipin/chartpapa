@@ -12,6 +12,8 @@ import org.sqlite.SQLiteDataSource
 import org.sqlite.core.CoreStatement
 import org.sqlite.core.DB
 import org.sqlite.jdbc3.JDBC3ResultSet
+import java.sql.Connection
+import java.sql.PreparedStatement
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -110,29 +112,24 @@ class MdDao(internal val ds: SQLiteDataSource) {
             .replace('@', '_').replace('#', '_')
     }
 
+
     fun queryLast(codeIn: String): Ohlc? {
         val code = normName(codeIn)
         ensureExist(code)
-        return sequence {
-            ds.connection.use {
-                val stmt = it.prepareStatement("select * from $code order by dt desc LIMIT 1 ")
-                stmt.use {
-                    val rs = it.executeQuery()
-                    val sqLiteRs = rs as JDBC3ResultSet
-                    val stmt1 = sqLiteRs.statement as CoreStatement
-                    val db = stmt1.datbase
-                    rs.use {
-                        while (rs.next()) {
-                            // highly optimized code
-                            yield(
-                                mapOh(db, stmt1)
-                            )
-                        }
-                    }
-                }
-            }
+        return queryToSequence { it.prepareStatement("select * from $code order by dt desc LIMIT 1 ") }.firstOrNull()
+    }
+
+    fun queryPoint(codeIn: String, epochMs : Long): Ohlc? {
+        val code = normName(codeIn)
+        ensureExist(code)
+        return queryToSequence {
+            val stmt = it.prepareStatement("select * from $code where dt < ? order by dt desc LIMIT 1 ")
+            stmt.setLong(1, epochMs)
+            stmt
+
         }.firstOrNull()
     }
+
 
     fun queryAll(codeIn: String): List<Ohlc> {
         return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC)).toList()
@@ -146,22 +143,29 @@ class MdDao(internal val ds: SQLiteDataSource) {
             return emptySequence()
         }
 
-        return sequence {
-            ds.connection.use {
-                val stmt = it.prepareStatement("select * from $code where dt > ? order by dt asc")
-                stmt.use {
-                    stmt.setLong(1, start.toInstantDefault().toEpochMilli())
-                    val rs = stmt.executeQuery()
-                    val sqLiteRs = rs as JDBC3ResultSet
-                    val stmt1 = sqLiteRs.statement as CoreStatement
-                    val db = stmt1.datbase
-                    rs.use {
-                        while (rs.next()) {
-                            // highly optimized code
-                            yield(
-                                mapOh(db, stmt1)
-                            )
-                        }
+        return queryToSequence({
+            val stmt = it.prepareStatement("select * from $code where dt > ? order by dt asc")
+            stmt.setLong(1, start.toInstantDefault().toEpochMilli())
+            stmt
+        })
+    }
+
+    private fun queryToSequence(
+        prepStatement : (Connection)->PreparedStatement
+    ) = sequence {
+        ds.connection.use {
+            val stmt =  prepStatement(it)
+            stmt.use {
+                val rs = stmt.executeQuery()
+                val sqLiteRs = rs as JDBC3ResultSet
+                val stmt1 = sqLiteRs.statement as CoreStatement
+                val db = stmt1.datbase
+                rs.use {
+                    while (rs.next()) {
+                        // highly optimized code
+                        yield(
+                            mapOh(db, stmt1)
+                        )
                     }
                 }
             }

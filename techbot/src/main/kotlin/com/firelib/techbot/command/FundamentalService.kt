@@ -2,14 +2,19 @@ package com.firelib.techbot.command
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.firelib.techbot.chart.Series
+import com.firelib.techbot.chart.toSortedList
 import com.firelib.techbot.initDatabase
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.readJson
+import firelib.core.store.MdStorageImpl
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.*
+import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 
 object FundamentalService {
@@ -24,12 +29,13 @@ object FundamentalService {
             val url = "https://eodhistoricaldata.com/api/fundamentals/${ticker}.US?api_token=5e81907493e611.25433232"
             template.getForEntity(url, String::class.java).body.toByteArray()
         }, Interval.Week.durationMs)
+        println(String(cached))
         return String(cached)
     }
 
     fun getByInstrId(instrId: InstrId): List<Series<String>> {
         val json = fetchRest(instrId.code).readJson()
-        return mergeSort(
+        return mergeAndSort(
             listOf(
                 extractFromIncome(json, "operatingIncome"),
                 extractFromIncome(json, "costOfRevenue"),
@@ -42,11 +48,50 @@ object FundamentalService {
         val json = fetchRest(instrId.code).readJson()
         val cashFlow = extractFromCashFlow(json, "freeCashFlow")
         val debt = extractFromBs(json, "netDebt")
-        val merged: List<Series<LocalDate>> = mergeSort(listOf(cashFlow, debt))
+        val merged: List<Series<LocalDate>> = mergeAndSort(listOf(cashFlow, debt))
         val ndata = merged[0].data.mapValues { e ->
             merged[0].data[e.key]!! / merged[1].data[e.key]!!
         }
         return listOf(Series("fcfToDebt", ndata).mapToStr(), merged[1].mapToStr())
+    }
+
+    fun cap(value : Double, cap : Double = 30.0) : Double{
+        if(value.absoluteValue > cap){
+            return 30.0 * value.sign
+        }
+        return value
+    }
+
+    fun getEv(instrId: InstrId, mdDao: MdStorageImpl): List<Series<String>> {
+        val json = fetchRest(instrId.code).readJson()
+        val debt = extractFromBs(json, "netDebt")
+
+
+        val shares = json["SharesStats"]["SharesOutstanding"].longValue()
+
+        val data = debt.data.mapValues {
+            val ms = it.key.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+            mdDao.queryPoint(instrId, Interval.Min10, ms)?.close.let { it?.times(shares) }
+        }.filterValues { it != null }.mapValues { it.value!! }
+
+        val cap = Series("cap", data)
+
+        val ebitda = extractFromIncome(json, "ebitda")
+
+        val merged: List<List<Pair<LocalDate,Double>>> = mergeAndSort(listOf(debt,cap, ebitda)).map { it.toSortedList() }
+
+        val ndata = merged[0].mapIndexed { idx, p ->
+            val dbt = merged[0][idx].second
+            val cp = merged[1][idx].second
+
+            val yearEbitda = merged[2].subList(maxOf(idx - 4, 0), idx + 1).sumOf { it.second }
+            val evEbitda = (dbt + cp) / yearEbitda
+            val evEbitdaCapped = cap(evEbitda)
+            Triple(p.first,evEbitdaCapped, dbt + cp)
+        }
+
+        return listOf(Series("ev", ndata.associateBy({it.first},{it.third})).mapToStr() ,
+            Series("evToEbitda", ndata.associateBy({it.first},{it.second})).mapToStr())
     }
 
     fun extractFromBs(json: JsonNode, name: String): Series<LocalDate> {
@@ -60,7 +105,7 @@ object FundamentalService {
         }.sortedBy { it.first }.takeLast(16).associateBy({ it.first }, { it.second }).toSortedMap()
     }
 
-    fun <T : Comparable<T>> mergeSort(list: List<Series<T>>, lastN: Int = 16): List<Series<T>> {
+    fun <T : Comparable<T>> mergeAndSort(list: List<Series<T>>, lastN: Int = 16): List<Series<T>> {
         val set = list[0].data.keys.toMutableSet()
 
         list.forEach {

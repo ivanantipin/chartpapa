@@ -1,7 +1,5 @@
 package com.firelib.techbot.chart
 
-import chart.at
-import com.firelib.techbot.BotHelper
 import com.firelib.techbot.TdLine
 import com.firelib.techbot.chart.ChartCreator.makeSequentaOpts
 import com.firelib.techbot.chart.HiChartCreator.levelBreaches
@@ -10,15 +8,13 @@ import com.firelib.techbot.chart.HiChartCreator.makeTrendLines
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.chart.domain.SequentaAnnnotations
 import com.firelib.techbot.initDatabase
-import firelib.core.domain.*
+import firelib.core.domain.LevelSignal
+import firelib.core.domain.Ohlc
 import firelib.core.misc.JsonHelper
 import firelib.indicators.SR
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.logTimeSpent
 import org.jetbrains.exposed.sql.transactions.transaction
 

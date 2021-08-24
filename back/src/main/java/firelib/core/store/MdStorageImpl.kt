@@ -63,15 +63,21 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         return updateMd(instrId, source, interval)
     }
 
-    fun deleteSince(instrId: InstrId, interval: Interval, time : Instant){
+    fun deleteSince(instrId: InstrId, interval: Interval, time: Instant) {
         try {
             log.info("removing ${instrId} from ${time}")
             val dao = md.getDao(instrId.sourceEnum(), interval)
             dao.deleteSince(makeTable(instrId), time)
-        }catch (e : Exception){
+        } catch (e: Exception) {
             log.info("failed to remove ${instrId} from ${time}", e)
         }
     }
+
+    fun queryPoint(instrId: InstrId, interval: Interval, epochMs: Long): Ohlc? {
+        val dao = md.getDao(instrId.sourceEnum(), interval)
+        return dao.queryPoint(makeTable(instrId), epochMs)
+    }
+
 
     fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
         var instant = Instant.now()
@@ -105,7 +111,7 @@ fun main() {
     val date = LocalDate.of(2021, 1, 25)
     val read = impl.read(instrId, Interval.Min1, LocalDateTime.of(2021, 1, 25, 0, 0, 0))
 
-    IntervalTransformer.transform(Interval.Min10, read.filter { it.endTime.atNy().toLocalDate() ==  date}).forEach {
-        println("${it.endTime.minusSeconds(600) .atNy()}   ->  ${it.close}")
+    IntervalTransformer.transform(Interval.Min10, read.filter { it.endTime.atNy().toLocalDate() == date }).forEach {
+        println("${it.endTime.minusSeconds(600).atNy()}   ->  ${it.close}")
     }
 }

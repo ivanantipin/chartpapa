@@ -213,21 +213,19 @@ class MenuReg {
                 }
             }
 
-            menuItem("Фундаментальный анализ") {
+            menuItem("Фундаментальные данные") {
                 rowSize = 1
-                menuItem("Показать") {
-                    action = { bot, update ->
-                        val bts = makeButtons(
-                            "fund",
-                            update.chatId(),
-                            TimeFrame.D,
-                            "Выберите тикер"
-                        )
-                        if (bts.isEmpty()) {
-                            emtyListMsg(bot, update)
-                        } else {
-                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для горизонтальных уровней")
-                        }
+                action = { bot, update ->
+                    val bts = makeButtons(
+                        "fund",
+                        update.chatId(),
+                        TimeFrame.D,
+                        "Выберите тикер"
+                    )
+                    if (bts.isEmpty()) {
+                        emtyListMsg(bot, update)
+                    } else {
+                        list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для показа фундаментальных данных")
                     }
                 }
                 menuItem("Главное меню") {}

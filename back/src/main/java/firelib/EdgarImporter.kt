@@ -63,7 +63,8 @@ fun importFile(linesIn: List<CSVRecord>, tableIn: String) {
         }.toTypedArray() as Array<ColDef<Map<String, String>, out Any>>
         ColDefDao(outDb, colDefs, table, getPk(table))
     })
-
+//https://data.sec.gov/api/xbrl/companyfacts/CIK0001293135.json
+//https://data.sec.gov/api/xbrl/frames/us-gaap/AccountsPayableCurrent/USD/CY2021Q2I.json"
     dao.upsert(maps)
 }
 
