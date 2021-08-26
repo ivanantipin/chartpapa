@@ -6,6 +6,7 @@ import com.firelib.techbot.chart.*
 import com.firelib.techbot.command.FundamentalService.mergeAndSort
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.initDatabase
+import com.firelib.techbot.mainLogger
 import com.firelib.techbot.saveFile
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.dispatcher.chatId
@@ -69,15 +70,20 @@ class FundamentalsCommand : CommandHandler {
         val instrId = cmd.instr()
 
         actions.forEach({ ee ->
-            val bytes = ee.value(instrId)
-            val fileName = BreachFinder.makeSnapFileName(
-                ee.key,
-                instrId.code,
-                TimeFrame.D,
-                System.currentTimeMillis()
-            )
-            saveFile(bytes, fileName)
-            bot.sendPhoto(chatId = update.chatId(), photo = File(fileName))
+            try{
+                val bytes = ee.value(instrId)
+                val fileName = BreachFinder.makeSnapFileName(
+                    ee.key,
+                    instrId.code,
+                    TimeFrame.D,
+                    System.currentTimeMillis()
+                )
+                saveFile(bytes, fileName)
+                bot.sendPhoto(chatId = update.chatId(), photo = File(fileName))
+            }catch (e : Exception){
+                mainLogger.error("failed to execute fundamental action ${ee.key}  for cmd ${cmd}", e)
+            }
+
         })
 
     }
