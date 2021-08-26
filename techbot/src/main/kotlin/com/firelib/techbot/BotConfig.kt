@@ -25,9 +25,7 @@ object BotConfig{
     }
 
     fun getConf(ticker: InstrId, timeFrame: TimeFrame) : LineConfig {
-        val ret = LineConfig(getPivot(ticker, timeFrame), getRSquare(ticker, timeFrame))
-        println("returning config for ${ticker} frame ${timeFrame} : ${ret}")
-        return ret
+        return LineConfig(getPivot(ticker, timeFrame), getRSquare(ticker, timeFrame))
     }
 
     fun getRSquare(ticker : InstrId, timeFrame : TimeFrame) : Double{

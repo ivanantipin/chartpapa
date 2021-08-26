@@ -44,7 +44,6 @@ object BreachFinder {
             .filter { !existingBreaches.contains(it.key) }
             .map {
                 val key = it.key
-                println(key)
                 val fileName = makeSnapFileName(
                     BreachType.TREND_LINE.name,
                     ticker.id,

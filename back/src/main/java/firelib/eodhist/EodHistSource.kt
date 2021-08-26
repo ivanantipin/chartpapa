@@ -132,6 +132,11 @@ class EodHistSource : HistoricalSource {
 fun main() {
     initDatabase()
 
+    println(EodHistSource().symbols().find { it.code == "MSFT" })
+    return
+
+
+
     finamMapperWriter().read().filter { it.code == "SLB" && it.market == "25" }.forEach {
         MdStorageImpl().updateMarketData(it, Interval.Min10)
     }

@@ -131,7 +131,7 @@ object MdService {
 
     fun startMd() {
         Thread {
-            timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
+            timeSequence(Instant.now(), Interval.Min60, 10_000L).forEach {
                 try {
                     updateAll()
                 } catch (e: Exception) {

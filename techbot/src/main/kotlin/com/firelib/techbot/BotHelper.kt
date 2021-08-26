@@ -38,7 +38,7 @@ object BotHelper {
             }.withDistinct().flatMap {
                 val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
                 if(ret == null){
-                    println("error failed to map ${it}")
+                    mainLogger.error("failed to map ${it}")
                     emptyList()
                 }else{
                     listOf(ret)

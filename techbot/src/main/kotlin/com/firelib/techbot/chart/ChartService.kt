@@ -39,11 +39,7 @@ object ChartService {
                 header("Content-Type", "application/json")
                 body = optJson
             }
-            val url = "$urlString/" + imagePath
-
-            println(url)
-
-            client.get<ByteArray>(url)
+            client.get<ByteArray>("$urlString/" + imagePath)
         }
     }
 
@@ -85,7 +81,6 @@ object ChartService {
             2,
             globalOptions = globalOptions
         ))
-        println(optJson)
         return postJson(optJson)
     }
 

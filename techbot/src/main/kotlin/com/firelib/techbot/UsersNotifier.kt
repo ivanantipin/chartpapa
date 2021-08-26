@@ -81,9 +81,8 @@ object UsersNotifier {
                 }.get()
             }
         } catch (e: Exception) {
-            log.error("errer in user notifier checking timeframe ${timeFrame}", e)
+            log.error("error in user notifier checking timeframe ${timeFrame}", e)
         }
-        println("transaction finished")
     }
 
 
