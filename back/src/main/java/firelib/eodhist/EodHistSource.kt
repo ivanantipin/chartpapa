@@ -10,6 +10,8 @@ import firelib.core.domain.Ohlc
 import firelib.core.misc.readJson
 import firelib.core.report.initDatabase
 import firelib.core.store.MdStorageImpl
+import firelib.core.store.finamMapperWriter
+import firelib.finam.FinamDownloader
 import firelib.iqfeed.IntervalTransformer
 import org.springframework.web.client.RestTemplate
 import java.time.Instant
@@ -18,6 +20,8 @@ import java.time.ZoneOffset
 import kotlin.system.measureTimeMillis
 
 class EodHistSource : HistoricalSource {
+
+    val mdStorageImpl = MdStorageImpl()
 
     fun mdExists(instrId: InstrId) : Boolean{
         return load(instrId, LocalDateTime.now().minusDays(5), Interval.Min1).count() > 0
@@ -40,7 +44,7 @@ class EodHistSource : HistoricalSource {
     }
 
     override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
-        return load(instrId, Interval.Min5)
+        return load(instrId, LocalDateTime.now().minusDays(600), Interval.Min10)
 
     }
 
@@ -52,6 +56,16 @@ class EodHistSource : HistoricalSource {
 
     override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
 
+        val finam = mdStorageImpl.read(instrId.copy(source = "FINAM", market = FinamDownloader.BATS_MARKET), Interval.Min10, dateTime)
+
+        var dt = if(finam.isNotEmpty()){
+            println("finam is not empty for ${instrId} size ${finam.size}")
+            finam.last().endTime.toEpochMilli()/1000
+        }else{
+            dateTime.toEpochSecond(ZoneOffset.UTC)
+        }
+
+
         if(dateTime.isBefore(LocalDateTime.now().minusDays(100)) &&
                     !mdExists(instrId)
         ){
@@ -60,11 +74,10 @@ class EodHistSource : HistoricalSource {
         }
 
         val template = RestTemplate()
-
-        var dt = dateTime.toEpochSecond(ZoneOffset.UTC)
         var dtto = getNextTime(dt)
 
         return sequence {
+            yieldAll(finam)
             while (true){
 
                 println("from dt ${LocalDateTime.ofEpochSecond(dt, 0, ZoneOffset.UTC)}")
@@ -118,10 +131,21 @@ class EodHistSource : HistoricalSource {
 
 fun main() {
     initDatabase()
+
+    finamMapperWriter().read().filter { it.code == "SLB" && it.market == "25" }.forEach {
+        MdStorageImpl().updateMarketData(it, Interval.Min10)
+    }
+
     //println(EodHistSource().symbols().size)
     //return
 
-    val storage = MdStorageImpl()
-    storage.updateMarketData(InstrId(id="XLE", code = "XLE", source = SourceName.EODHIST.name), Interval.Min10)
+    //val storage = MdStorageImpl()
+
+    val lst = EodHistSource().load(InstrId.dummyInstrument("SLB"), Interval.Min10).toList()
+    println(lst.size)
+
+    //val instrId = InstrId(id = "SLB", code = "SLB", source = SourceName.FINAM.name)
+    //storage.updateMarketData(instrId, Interval.Min10)
+    //storage.updateMarketData(instrId, Interval.Min10)
 
 }

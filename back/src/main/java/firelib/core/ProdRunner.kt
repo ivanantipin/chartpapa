@@ -161,7 +161,7 @@ object ProdRunner {
     fun updateMd(cfg: ModelBacktestConfig, useMin: Boolean): Instant {
         val source = storageImpl.sources[cfg.histSourceName]
         val updated = cfg.instruments.map(source::mapSecurity).associateBy({},
-            { storageImpl.updateMd(it, source, cfg.interval) })
+            { storageImpl.updateMarketData(it.copy(source = source.getName().name), cfg.interval) })
 
         println("updated data to $updated")
         return if (useMin) updated.values.minOrNull()!! else updated.values.maxOrNull()!!

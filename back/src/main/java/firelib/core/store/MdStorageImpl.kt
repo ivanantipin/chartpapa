@@ -79,7 +79,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     }
 
 
-    fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
+    private fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
         var instant = Instant.now()
         try {
             val dao = md.getDao(instrId.sourceEnum(), interval)
