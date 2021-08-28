@@ -15,7 +15,6 @@ import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.store.MdStorageImpl
 import java.io.File
-import java.math.BigDecimal
 
 
 class FundamentalsCommand : CommandHandler {
@@ -40,17 +39,17 @@ class FundamentalsCommand : CommandHandler {
             )
         },
 
-        "fcf2debt" to { instrId ->
-            val fcf2debt = FundamentalService.getFcfToDebt(instrId)
+        "debt2fcf" to { instrId ->
+            val fcf2debt = FundamentalService.debtToFcF(instrId)
             ChartService.post(
-                Fcf2DebtCharter.makeSeries(fcf2debt[0], fcf2debt[1], instrId.code),
+                Debt2FCFCharter.makeSeries(fcf2debt[0], fcf2debt[1], instrId.code),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
 
         "evToEbitda" to { instrId ->
-            val evEbit = FundamentalService.getEv(instrId, mdStorageImpl)
+            val evEbit = FundamentalService.ev2Ebitda(instrId, mdStorageImpl)
             ChartService.post(
                 EvEbitdaCharter.makeSeries(evEbit[0], evEbit[1], instrId.code),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
@@ -92,11 +91,9 @@ class FundamentalsCommand : CommandHandler {
 fun main() {
 
     initDatabase()
-    val instrument = InstrId.dummyInstrument("KOS").copy(source = SourceName.EODHIST.name, market = "NYSE")
+    val instrument = InstrId.dummyInstrument("FTI").copy(source = SourceName.EODHIST.name, market = "NYSE")
 
-    val cmd = FundamentalsCommand()
-
-    val evEbit = FundamentalService.getEv(instrument, MdStorageImpl())
+    val evEbit = FundamentalService.ev2Ebitda(instrument, MdStorageImpl())
 
     ChartService.post(
         EvEbitdaCharter.makeSeries(evEbit[0], evEbit[1], "ev-ebitda"),

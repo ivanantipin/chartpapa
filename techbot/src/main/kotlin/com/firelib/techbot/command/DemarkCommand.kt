@@ -1,7 +1,6 @@
 package com.firelib.techbot.command
 
 import chart.BreachFinder
-import com.fasterxml.jackson.databind.JsonNode
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.saveFile
 import com.github.kotlintelegrambot.Bot
@@ -11,15 +10,7 @@ import com.firelib.techbot.initDatabase
 import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.Update
 import firelib.core.domain.InstrId
-import firelib.core.domain.Interval
-import firelib.eodhist.EodHistSource
-import okhttp3.internal.Internal
 import java.io.File
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 
 class DemarkCommand : CommandHandler {
@@ -56,9 +47,9 @@ fun main() {
     initDatabase()
     //println(EodHistSource().symbols().size)
     //return
-    val byInstrId = FundamentalService.getFcfToDebt(InstrId.dummyInstrument("vet"))
+    val byInstrId = FundamentalService.debtToFcF(InstrId.dummyInstrument("vet"))
     ChartService.post(
-        Fcf2DebtCharter.makeSeries(byInstrId[0], byInstrId[1], "FCF to Debt"),
+        Debt2FCFCharter.makeSeries(byInstrId[0], byInstrId[1], "FCF to Debt"),
         ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
         "Chart"
     )

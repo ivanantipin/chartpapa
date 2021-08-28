@@ -8,6 +8,7 @@ data class HAxis(
     val height: String = "100%",
     val lineWidth: Int = 1,
     val gridLineColor: String? = null,
+    var gridLineDashStyle: String = "Dot",
     val tickColor : String? = null,
     val title: HTitle? = null,
     val gapGridLineWidth: Int = 0,

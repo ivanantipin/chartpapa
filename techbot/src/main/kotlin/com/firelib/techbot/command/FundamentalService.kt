@@ -23,13 +23,19 @@ object FundamentalService {
         return String(FundamentalService::class.java.getResourceAsStream("/cvx.json").readAllBytes())
     }
 
+
+    fun <T> List<T>.mapTrailing(extr : (T)->Double, n : Int): List<Double> {
+        return this.mapIndexed({idx, el->
+            subList(maxOf(idx - n + 1, 0), idx + 1).sumOf { extr(it) }
+        })
+    }
+
     fun fetchRest(ticker: String): String {
         val cached = CacheService.getCached("/fundamentals/${ticker}", {
             val template = RestTemplate()
             val url = "https://eodhistoricaldata.com/api/fundamentals/${ticker}.US?api_token=5e81907493e611.25433232"
             template.getForEntity(url, String::class.java).body.toByteArray()
         }, Interval.Week.durationMs)
-        println(String(cached))
         return String(cached)
     }
 
@@ -44,25 +50,31 @@ object FundamentalService {
         ).map { it.mapToStr() }
     }
 
-    fun getFcfToDebt(instrId: InstrId): List<Series<String>> {
+    fun debtToFcF(instrId: InstrId): List<Series<String>> {
         val json = fetchRest(instrId.code).readJson()
         val cashFlow = extractFromCashFlow(json, "freeCashFlow")
         val debt = extractFromBs(json, "netDebt")
         val merged: List<Series<LocalDate>> = mergeAndSort(listOf(cashFlow, debt))
-        val ndata = merged[0].data.mapValues { e ->
-            merged[0].data[e.key]!! / merged[1].data[e.key]!!
-        }
+        val annualFcf = merged[0].toSortedList().mapTrailing({ it.second }, 4)
+
+        val ndata =  merged[1].toSortedList().mapIndexed({idx, oo->
+           val value = oo.second/annualFcf[idx]
+            oo.first to cap(value, 20.0)
+        }) .toMap()
         return listOf(Series("fcfToDebt", ndata).mapToStr(), merged[1].mapToStr())
     }
 
     fun cap(value : Double, cap : Double = 30.0) : Double{
         if(value.absoluteValue > cap){
-            return 30.0 * value.sign
+            return cap * value.sign
         }
         return value
     }
 
-    fun getEv(instrId: InstrId, mdDao: MdStorageImpl): List<Series<String>> {
+    /*
+    returns 1st ev, 2nd ev-to-ebidta
+     */
+    fun ev2Ebitda(instrId: InstrId, mdDao: MdStorageImpl): List<Series<String>> {
         val json = fetchRest(instrId.code).readJson()
         val debt = extractFromBs(json, "netDebt")
 
@@ -80,12 +92,12 @@ object FundamentalService {
 
         val merged: List<List<Pair<LocalDate,Double>>> = mergeAndSort(listOf(debt,cap, ebitda)).map { it.toSortedList() }
 
+        val trailingYear = merged[2].mapTrailing({ it.second }, 4)
+
         val ndata = merged[0].mapIndexed { idx, p ->
             val dbt = merged[0][idx].second
             val cp = merged[1][idx].second
-
-            val yearEbitda = merged[2].subList(maxOf(idx - 4, 0), idx + 1).sumOf { it.second }
-            val evEbitda = (dbt + cp) / yearEbitda
+            val evEbitda = (dbt + cp) / trailingYear[idx]
             val evEbitdaCapped = cap(evEbitda)
             Triple(p.first,evEbitdaCapped, dbt + cp)
         }

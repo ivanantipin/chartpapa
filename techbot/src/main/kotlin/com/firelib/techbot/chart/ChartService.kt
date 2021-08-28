@@ -39,7 +39,11 @@ object ChartService {
                 header("Content-Type", "application/json")
                 body = optJson
             }
-            client.get<ByteArray>("$urlString/" + imagePath)
+            val imgUrl = "$urlString/" + imagePath
+            //println(optJson)
+            //println(imgUrl)
+
+            client.get<ByteArray>(imgUrl)
         }
     }
 
