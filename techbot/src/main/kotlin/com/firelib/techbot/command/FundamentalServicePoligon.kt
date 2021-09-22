@@ -1,0 +1,243 @@
+package com.firelib.techbot.command
+
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.firelib.techbot.chart.*
+import com.firelib.techbot.command.FundamentalService.mergeAndSort
+import com.firelib.techbot.command.FundamentalService.toQuarter
+import com.firelib.techbot.initDatabase
+import firelib.core.SourceName
+import firelib.core.domain.InstrId
+import firelib.core.domain.Interval
+import firelib.core.misc.mapper
+import firelib.core.misc.readJson
+import firelib.core.store.MdStorageImpl
+import firelib.poligon.PoligonSource
+import org.springframework.web.client.RestTemplate
+import java.time.LocalDate
+import java.time.ZoneOffset
+import kotlin.math.absoluteValue
+import kotlin.math.sign
+
+
+object FundamentalServicePoligon {
+
+    fun fetch(ticker: String): String {
+        return String(FundamentalService::class.java.getResourceAsStream("/fti.json").readAllBytes())
+    }
+
+    fun fetchCursor(url: String, keyAttribute: String): ByteArray {
+        val template = RestTemplate()
+        var json = template.getForEntity(url + "&" + keyAttribute, String::class.java).body.readJson()
+        val arrayNode = json["results"] as ArrayNode
+        while (json["next_url"] != null) {
+            json = template.getForEntity(
+                json["next_url"].textValue() + "&${keyAttribute}",
+                String::class.java
+            ).body.readJson()
+            arrayNode.addAll((json["results"] as ArrayNode))
+        }
+        return mapper.writeValueAsBytes(arrayNode)
+    }
+
+    data class CompanyInfo(val shares: Long)
+
+    val apiKey = "apiKey=mBbK9N0OGVjrr6GrDMyz9N8Nxxnl2BVN"
+
+    fun getCompanyInfo(instrId: InstrId): CompanyInfo {
+        val cached = CacheService.getCached("/companyInfo/${instrId.code}", {
+            val template = RestTemplate()
+            template.getForEntity(
+                "https://api.polygon.io/vX/reference/tickers/${instrId.code}?${apiKey}",
+                String::class.java
+            ).body.toByteArray()
+        }, Interval.Min60.durationMs)
+        return CompanyInfo(String(cached).readJson()["results"]!!["outstanding_shares"]!!.numberValue().toLong())
+    }
+
+
+    fun fetchRest(ticker: String): String {
+        val url = "https://api.polygon.io/vX/reference/financials?ticker=${ticker}&timeframe=quarterly&limit=24"
+        val args = "apiKey=mBbK9N0OGVjrr6GrDMyz9N8Nxxnl2BVN"
+        return String(fetchCursor(url, args))
+    }
+
+
+    fun <T> List<T>.mapTrailing(extr: (T) -> Double, n: Int): List<Double> {
+        return this.mapIndexed({ idx, el ->
+            subList(maxOf(idx - n + 1, 0), idx + 1).sumOf { extr(it) }
+        })
+    }
+
+    fun getFromIncome(instrId: InstrId, list: List<String>): List<Series<String>> {
+        val cached = CacheService.getCached("/fund/${instrId.code}", {
+            fetchRest(instrId.code).toByteArray()
+        }, Interval.Min60.durationMs)
+        return mergeAndSort(
+            list.map {
+                extractFromIncome(it, String(cached).readJson())
+            }
+        ).map { it.mapToStr() }
+    }
+
+    fun getFromBalanceSheet(instrId: InstrId, list: List<String>): List<Series<String>> {
+        val cached = CacheService.getCached("/BS/${instrId.code}", {
+            fetchRest(instrId.code).toByteArray()
+        }, Interval.Min60.durationMs)
+        return mergeAndSort(
+            list.map {
+                extractFromBalanceSheet(it, String(cached).readJson())
+            }
+        ).map { it.mapToStr() }
+    }
+
+    fun getFromCashFlow(instrId: InstrId, list: List<String>): List<Series<String>> {
+        val cached = CacheService.getCached("/fund/cflow/${instrId.code}", {
+            fetchRest(instrId.code).toByteArray()
+        }, Interval.Min60.durationMs)
+        return mergeAndSort(
+            list.map {
+                extractFromCashFlow(it, String(cached).readJson())
+            }
+        ).map { it.mapToStr() }
+    }
+
+
+    fun extractFromIncome(name: String, json: JsonNode): Series<LocalDate> {
+        return extractSeries(json, "financials", "income_statement", name, "value").copy(name = name)
+    }
+
+    fun extractFromBalanceSheet(name: String, json: JsonNode): Series<LocalDate> {
+        return extractSeries(json, "financials", "balance_sheet", name, "value").copy(name = name)
+    }
+
+    fun extractFromCashFlow(name: String, json: JsonNode): Series<LocalDate> {
+        return extractSeries(json, "financials", "cash_flow_statement", name, "value").copy(name = name)
+    }
+
+
+    fun debtToFcF(instrId: InstrId): List<Series<String>> {
+        val json = fetch(instrId.code).readJson()
+        val cashFlow = extractFromCashFlow("net_cash_flow", json)
+        val debt = extractFromBalanceSheet("liabilities", json)
+        val merged: List<Series<LocalDate>> = mergeAndSort(listOf(cashFlow, debt))
+        val annualFcf = merged[0].toSortedList().mapTrailing({ it.second }, 4)
+
+        val ndata = merged[1].toSortedList().mapIndexed({ idx, oo ->
+            val value = oo.second / annualFcf[idx]
+            oo.first to cap(value, 20.0)
+        }).toMap()
+        return listOf(Series("fcfToDebt", ndata).mapToStr(), merged[1].mapToStr())
+    }
+
+    fun cap(value: Double, cap: Double = 30.0): Double {
+        if (value.absoluteValue > cap) {
+            return cap * value.sign
+        }
+        return value
+    }
+
+    /*
+    returns 1st ev, 2nd ev-to-ebidta
+     */
+    fun ev2Ebitda(instrId: InstrId, mdDao: MdStorageImpl): List<SeriesUX> {
+        val json = fetch(instrId.code).readJson()
+        val ev = getEv(json, instrId, mdDao)
+        val ebitda = extractFromIncome("revenues", json)
+        val debt = extractFromBalanceSheet("liabilities", json)
+        val merged = mergeAndSort(listOf(ev, ebitda, debt))
+        return listOf(
+            SeriesUX(merged[0].mapToStr(), "blue", 0, "line", false),
+            SeriesUX(merged[1].mapToStr(), "green", 0, "line", false),
+            SeriesUX(merged[2].mapToStr(), "red", 0, "line", false),
+        )
+    }
+
+    private fun getEv(
+        json: JsonNode,
+        instrId: InstrId,
+        mdDao: MdStorageImpl
+    ): Series<LocalDate> {
+        val debt = extractFromBalanceSheet("liabilities", json)
+
+        val shares = getCompanyInfo(instrId).shares
+
+        val capitalization = debt.data.mapValues {
+            val ms = it.key.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+            mdDao.queryPoint(instrId, Interval.Min10, ms)?.close.let { it?.times(shares) }
+        }.filterValues { it != null }.mapValues { it.value!! }
+
+        val cap = Series("cap", capitalization)
+
+        val merged = mergeAndSort(listOf(debt, cap)).map { it.toSortedList() }
+
+        val ndata = merged[0].mapIndexed { idx, p ->
+            val dbt = merged[0][idx].second
+            val cp = merged[1][idx].second
+            p.first to (dbt + cp)
+        }
+        return Series("ev", ndata.associateBy({ it.first }, { it.second }))
+    }
+
+    fun JsonNode.readNode(vararg path: String): JsonNode? {
+        return path.fold(this, { nd: JsonNode?,
+                                 name ->
+            if (nd == null) null else nd[name]
+        })
+    }
+
+    private fun extractSeries(
+        data: JsonNode,
+        vararg path: String
+    ): Series<LocalDate> {
+        val ret = (data as ArrayNode).associateBy(
+            { LocalDate.parse(it["end_date"].textValue()) },
+            {
+                val ret = it.readNode(*path)
+                ret?.numberValue()?.toDouble() ?: 0.0
+            }
+        ).mapValues { it.value }
+        return Series("", ret)
+    }
+
+
+    fun Series<LocalDate>.mapToStr(): Series<String> {
+        return Series(this.name, this.data.mapKeys { "${it.key.year - 2000}-Q${it.key.toQuarter()}" })
+    }
+
+}
+
+
+fun drawGeneric() {
+
+    val ser0 = makeSer("data0")
+    val ser1 = makeSer("data1")
+
+    val ser0ux = SeriesUX(ser0, "red", 0, type = "line", makeTicks = true)
+    val ser1ux = SeriesUX(ser1, "blue", 1, makeTicks = true)
+
+
+
+    ChartService.post(
+        GenericCharter.makeSeries(listOf(ser0ux, ser1ux), "some", listOf("data0", "data1")),
+        ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+        "Chart"
+    )
+
+
+}
+
+fun main() {
+    initDatabase()
+
+    val instrId = InstrId.dummyInstrument("VET").copy(market = "XNYS", source = SourceName.POLIGON.name)
+    MdStorageImpl().updateMarketData(instrId, Interval.Min10)
+    //val ev2Ebitda = FundamentalServicePoligon.ev2Ebitda(instrId, MdStorageImpl())
+    val ev2Ebitda = FundamentalServicePoligon.getFromIncome(instrId, listOf("revenues")).map { SeriesUX(it, "blue", 0, makeTicks = true ) }
+    ChartService.post(
+        GenericCharter.makeSeries(ev2Ebitda, "ev ebitda", listOf("Money")),
+        ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+        "Chart"
+    )
+
+}

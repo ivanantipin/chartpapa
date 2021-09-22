@@ -2,11 +2,11 @@ package com.firelib.techbot.chart.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class HSeries (
-    var type: String,
+data class HSeriesColumn (
+    var type: String?,
     var name: String,
     var marker: HMarker,
-    var data: List<Array<Double>> = mutableListOf(),
+    var data: List<Double> = mutableListOf(),
     val showInLegend: Boolean,
     val color : String? = null,
     val dashStyle : String? = null,

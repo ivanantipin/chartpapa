@@ -13,8 +13,11 @@ import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.Update
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
+import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdStorageImpl
 import java.io.File
+import java.time.Instant
+import java.time.LocalDate
 
 
 class FundamentalsCommand : CommandHandler {
@@ -23,40 +26,67 @@ class FundamentalsCommand : CommandHandler {
     val mdStorageImpl = MdStorageImpl()
 
     val colors = mapOf<String, String>(
+        "equity_attributable_to_parent" to "green",
+        "equity_attributable_to_noncontrolling_interest" to "blue",
+        "noncurrent_liabilities" to "pink",
+        "current_liabilities" to "red",
         "operatingIncome" to "green",
         "costOfRevenue" to "FF618C",
         "totalOperatingExpenses" to "lightBlue",
 
+        "other_than_fixed_noncurrent_assets" to "blue",
+        "fixed_assets" to "green",
+        "current_assets" to "lightGreen",
+
+
+        "net_cash_flow_from_investing_activities_continuing" to "lightGreen",
+        "net_cash_flow_from_financing_activities" to "gray",
+        "net_cash_flow_from_operating_activities" to "green",
+        "exchange_gains_losses" to "blue"
         )
 
     val actions = mapOf(
-        "earnings" to { instrId: InstrId ->
-            val series = FundamentalService.getByInstrId(instrId)
+        "balanceSheet" to { instrId: InstrId ->
+            val fields = listOf("equity_attributable_to_parent", "equity_attributable_to_noncontrolling_interest", "noncurrent_liabilities",  "current_liabilities")
+            val series = FundamentalServicePoligon.getFromBalanceSheet(instrId, fields)
             ChartService.post(
-                OperatingStructureCharter.makeSeries(mergeAndSort(series), instrId.code, colors),
+                GenericCharter.makeSeries(series.map {
+                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
+                }, "Balance Sheet Structure", listOf("Money")),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
-
-        "debt2fcf" to { instrId ->
-            val fcf2debt = FundamentalService.debtToFcF(instrId)
+        "balanceSheet2" to { instrId: InstrId ->
+            val fields = listOf("current_assets", "other_than_fixed_noncurrent_assets", "fixed_assets")
+            val series = FundamentalServicePoligon.getFromBalanceSheet(instrId, fields)
             ChartService.post(
-                Debt2FCFCharter.makeSeries(fcf2debt[0], fcf2debt[1], instrId.code),
+                GenericCharter.makeSeries(series.map {
+                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
+                }, "Balance Sheet Structure / 2", listOf("Money")),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
-
-        "evToEbitda" to { instrId ->
-            val evEbit = FundamentalService.ev2Ebitda(instrId, mdStorageImpl)
+        "cashFlowStructure" to { instrId: InstrId ->
+            val fields = listOf("net_cash_flow_from_investing_activities_continuing", "net_cash_flow_from_financing_activities", "net_cash_flow_from_operating_activities", "exchange_gains_losses")
+            val series = FundamentalServicePoligon.getFromCashFlow(instrId, fields)
             ChartService.post(
-                EvEbitdaCharter.makeSeries(evEbit[0], evEbit[1], instrId.code),
+                GenericCharter.makeSeries(series.map {
+                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
+                }, "Cash Flow Structure", listOf("Money")),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
-        }
-
+        },
+        "ev2ebitda" to { instrId: InstrId ->
+            val series = FundamentalServicePoligon.ev2Ebitda(instrId, mdStorageImpl)
+            ChartService.post(
+                GenericCharter.makeSeries(series, "Ev2Ebitda", listOf("Ev2Ebitda")),
+                ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+                "Chart"
+            )
+        },
 
     )
 
@@ -89,6 +119,15 @@ class FundamentalsCommand : CommandHandler {
 }
 
 fun main() {
+
+    println(LocalDate.of(2021, 8,25).toInstantDefault().epochSecond)
+    println(LocalDate.of(2021, 9,1).toInstantDefault().epochSecond)
+
+
+    println()
+    println(Instant.ofEpochSecond(1630367881L).minusSeconds(1000))
+    return
+
 
     initDatabase()
     val instrument = InstrId.dummyInstrument("FTI").copy(source = SourceName.EODHIST.name, market = "NYSE")

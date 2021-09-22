@@ -1,0 +1,1 @@
+income_loss_from_continuing_operations_before_tax = ebitda

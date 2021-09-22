@@ -39,7 +39,7 @@ class DemarkCommand : CommandHandler {
         )
         saveFile(bytes, fileName)
 
-        bot.sendPhoto(chatId = update.chatId(), photo = File(fileName))
+        bot.sendPhoto(chatId = update.chatId(),  photo = File(fileName))
     }
 }
 

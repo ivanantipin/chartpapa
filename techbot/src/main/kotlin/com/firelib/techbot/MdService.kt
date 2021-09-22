@@ -1,34 +1,25 @@
 package com.firelib.techbot
 
-import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
-import firelib.core.report.dao.GeGeWriter
-import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
-import firelib.core.store.eodSourceMapperWriter
-import firelib.core.store.finamMapperWriter
-import firelib.eodhist.EodHistSource
 import firelib.finam.FinamDownloader
+import firelib.poligon.PoligonSource
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.concurrent.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.ForkJoinTask
 
 object MdService {
 
     val log = LoggerFactory.getLogger(UsersNotifier::class.java)
-
-    val lastWritten =  GeGeWriter(
-        GlobalConstants.metaDb,
-        LastWritten::class,
-        listOf("name"),
-        "instrumentsTimestamp"
-    )
-
     val pool = ForkJoinPool(1)
     val multiPool = ForkJoinPool(10)
     val storage = MdStorageImpl()
@@ -38,37 +29,19 @@ object MdService {
     val id2inst = fetchInstruments().associateBy { it.id }
     val instrByStart = group(fetchInstruments())
 
-
     fun fetchInstruments(): List<InstrId> {
-        var ret = read(finamMapperWriter(), FinamDownloader())
+        val ret = FinamDownloader().symbols()
         log.info("finam instruments size " + ret.size)
-        var ret1 = read(eodSourceMapperWriter(), EodHistSource())
-        log.info("eodhist instruments size " + ret1.size)
+        val ret1 = PoligonSource().symbols()
+        log.info("poligon instruments size " + ret1.size)
         val filter = filter(ret + ret1)
         log.info("final instruments size ${filter.size}")
         return filter
     }
 
-
-    data class LastWritten(val name : String, val ts : Long)
-
-    private fun read(reader : GeGeWriter<InstrId>, historicalSource: HistoricalSource): List<InstrId> {
-        val name = historicalSource.getName().name
-        var ret = reader.read()
-        val byName = lastWritten.read().associateBy { it.name }
-        val expired = byName[name] == null || byName[name]!!.ts < System.currentTimeMillis() - Interval.Week.durationMs
-        if(ret.isEmpty() || expired){
-            reader.write(historicalSource.symbols())
-            lastWritten.write(listOf(LastWritten(name, System.currentTimeMillis())))
-            ret = reader.read()
-        }
-        return ret
-    }
-
-    fun byId(id : String) : InstrId{
+    fun byId(id: String): InstrId {
         return id2inst[id]!!
     }
-
 
     fun group(instruments: List<InstrId>): Map<String, List<InstrId>> {
         val ret = instruments.groupBy { it.code.substring(0, 1) }
@@ -87,17 +60,45 @@ object MdService {
         )
 
         return instruments.filter {
-            if(it.source == SourceName.FINAM.name){
+            if (it.source == SourceName.FINAM.name) {
                 it.code.length >= 2 &&
-                        (it.market == FinamDownloader.FX  || it.market == FinamDownloader.SHARES_MARKET  || (it.market == FinamDownloader.FinamMarket.FUTURES_MARKET.id && futureSymbols.contains(it.code)))
-            }else{
+                        (it.market == FinamDownloader.FX || it.market == FinamDownloader.SHARES_MARKET || (it.market == FinamDownloader.FinamMarket.FUTURES_MARKET.id && futureSymbols.contains(
+                            it.code
+                        )))
+            } else {
                 true
+            }
+        }
+    }
+
+    fun migrateSubscriptions() {
+        val poligonSymbols = PoligonSource().symbols().associateBy { it.code }
+
+        transaction {
+            val symbols =
+                Subscriptions.selectAll().filter { it[Subscriptions.market] in listOf("NASDAQ", "NYSE", "US") }
+                    .map { it[Subscriptions.ticker] }.toSet()
+
+            println("symbools to migrate")
+            symbols.forEach {
+                println("${it}")
+            }
+
+            symbols.forEach {
+                val instrId = poligonSymbols[it]
+                if (instrId != null) {
+                    val cnt = Subscriptions.update({ Subscriptions.ticker eq instrId.code }) {
+                        it[market] = instrId.market
+                    }
+                    println("updated ${instrId} count is ${cnt}")
+                }
             }
         }
     }
 
     init {
         transaction {
+            MdService.migrateSubscriptions()
             val live =
                 Subscriptions.selectAll().map { Pair(it[Subscriptions.ticker], it[Subscriptions.market]) }.distinct()
             liveSymbols.addAll(live.flatMap { key ->
@@ -131,7 +132,7 @@ object MdService {
 
     fun startMd() {
         Thread {
-            timeSequence(Instant.now(), Interval.Min60, 10_000L).forEach {
+            timeSequence(Instant.now(), Interval.Min10, 10_000L).forEach {
                 try {
                     updateAll()
                 } catch (e: Exception) {
@@ -142,7 +143,7 @@ object MdService {
     }
 
     fun updateAll() {
-        fun routeToRightPool(poo : ForkJoinPool, instrId: InstrId): ForkJoinTask<*> {
+        fun routeToRightPool(poo: ForkJoinPool, instrId: InstrId): ForkJoinTask<*> {
             return poo.submit({
                 measureAndLogTime("update market data for instrument ${instrId.code}") {
                     storage.updateMarketData(instrId, Interval.Min10)
@@ -150,29 +151,19 @@ object MdService {
             })
         }
 
-        liveSymbols.map { instrId->
-            if(instrId.source == SourceName.FINAM.name){
+        liveSymbols.map { instrId ->
+            if (instrId.source == SourceName.FINAM.name) {
                 routeToRightPool(pool, instrId)
-            }else{
+            } else {
                 routeToRightPool(multiPool, instrId)
             }
         }.forEach { it.get() }
     }
-
 }
-
-
 
 fun main() {
     initDatabase()
-
-
     transaction {
-
-
-        val group = MdService.group(MdService.fetchInstruments())
-        group.get("S")!!.forEach {
-            println(it)
-        }
+        MdService.migrateSubscriptions()
     }
 }

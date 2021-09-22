@@ -27,7 +27,7 @@ fun main() {
 
     initDatabase()
 
-    if(System.getenv("TELEGRAM_TOKEN") != null){
+    if(System.getenv("TELEGRAM_TOKEN") != null || true){
 
         MdService.updateAll()
 
@@ -38,25 +38,16 @@ fun main() {
         MdService.startMd()
     }
 
-
     val menuReg = MenuReg()
     menuReg.makeMenu()
-
     menuReg.registerHandler(SubHandler())
-
     menuReg.registerHandler(RmHandler())
-
     menuReg.registerHandler(DemarkCommand())
     menuReg.registerHandler(FundamentalsCommand())
-
     menuReg.registerHandler(LevelsCommand())
-
     menuReg.registerHandler(TrendsCommand())
-
     menuReg.registerHandler(RmTfHandler())
-
     menuReg.registerHandler(TfHandler())
-
     val bot = bot {
         token = System.getenv("TELEGRAM_TOKEN") ?: debug_token
         timeout = 30

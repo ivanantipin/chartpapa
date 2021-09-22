@@ -50,14 +50,6 @@ fun finamMapperWriter(): GeGeWriter<InstrId> {
     )
 }
 
-fun eodSourceMapperWriter(): GeGeWriter<InstrId> {
-    return GeGeWriter(
-        GlobalConstants.metaDb,
-        InstrId::class,
-        listOf("id", "code", "market"),
-        "eod_instruments"
-    )
-}
 
 
 fun dummyMapperWriter(): GeGeWriter<InstrId> {

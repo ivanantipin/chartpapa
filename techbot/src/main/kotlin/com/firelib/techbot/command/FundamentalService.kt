@@ -19,10 +19,6 @@ import kotlin.math.sign
 
 object FundamentalService {
 
-    fun fetch(ticker: String): String {
-        return String(FundamentalService::class.java.getResourceAsStream("/cvx.json").readAllBytes())
-    }
-
 
     fun <T> List<T>.mapTrailing(extr : (T)->Double, n : Int): List<Double> {
         return this.mapIndexed({idx, el->
