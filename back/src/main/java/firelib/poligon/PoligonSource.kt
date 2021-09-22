@@ -39,11 +39,13 @@ class PoligonSource : HistoricalSource {
 
         return String(cachedSymbols).readJson().flatMap {
             try {
+                val code = it["ticker"].textValue()
+                val market = if (it["market"].textValue() == "stocks") it["primary_exchange"].textValue() else it["market"].textValue()
                 listOf(InstrId(
-                    id = it["cik"]?.textValue() ?: "na",
-                    code = it["ticker"].textValue(),
+                    code = code,
                     name = it["name"].textValue(),
-                    market = if(it["market"].textValue() == "stocks") it["primary_exchange"].textValue() else it["market"].textValue(),
+                    id = "${code}_${market}",
+                    market = market,
                     source = SourceName.POLIGON.name
                 ))
             }catch (e : Exception){

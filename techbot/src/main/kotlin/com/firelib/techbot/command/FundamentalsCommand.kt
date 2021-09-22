@@ -52,7 +52,7 @@ class FundamentalsCommand : CommandHandler {
             ChartService.post(
                 GenericCharter.makeSeries(series.map {
                     SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
-                }, "Balance Sheet Structure", listOf("Money")),
+                }, "Balance Sheet Structure ${instrId.code}", listOf("Money")),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
@@ -63,7 +63,7 @@ class FundamentalsCommand : CommandHandler {
             ChartService.post(
                 GenericCharter.makeSeries(series.map {
                     SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
-                }, "Balance Sheet Structure / 2", listOf("Money")),
+                }, "Balance Sheet Structure / 2 ${instrId.code}", listOf("Money")),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
@@ -74,7 +74,7 @@ class FundamentalsCommand : CommandHandler {
             ChartService.post(
                 GenericCharter.makeSeries(series.map {
                     SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
-                }, "Cash Flow Structure", listOf("Money")),
+                }, "Cash Flow Structure ${instrId.code}", listOf("Money")),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
@@ -82,7 +82,7 @@ class FundamentalsCommand : CommandHandler {
         "ev2ebitda" to { instrId: InstrId ->
             val series = FundamentalServicePoligon.ev2Ebitda(instrId, mdStorageImpl)
             ChartService.post(
-                GenericCharter.makeSeries(series, "Ev2Ebitda", listOf("Ev2Ebitda")),
+                GenericCharter.makeSeries(series, "Ev2Ebitda ${instrId.code}", listOf("Ev2Ebitda")),
                 ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
