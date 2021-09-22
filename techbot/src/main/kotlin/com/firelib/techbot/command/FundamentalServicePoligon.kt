@@ -22,10 +22,6 @@ import kotlin.math.sign
 
 object FundamentalServicePoligon {
 
-    fun fetch(ticker: String): String {
-        return String(FundamentalService::class.java.getResourceAsStream("/fti.json").readAllBytes())
-    }
-
     fun fetchCursor(url: String, keyAttribute: String): ByteArray {
         val template = RestTemplate()
         var json = template.getForEntity(url + "&" + keyAttribute, String::class.java).body.readJson()
@@ -62,6 +58,12 @@ object FundamentalServicePoligon {
         return String(fetchCursor(url, args))
     }
 
+    fun fetchRestCached(ticker : String) : ByteArray{
+        return CacheService.getCached("/ff/${ticker}", {
+            fetchRest(ticker).toByteArray()
+        }, Interval.Min60.durationMs)
+    }
+
 
     fun <T> List<T>.mapTrailing(extr: (T) -> Double, n: Int): List<Double> {
         return this.mapIndexed({ idx, el ->
@@ -70,9 +72,7 @@ object FundamentalServicePoligon {
     }
 
     fun getFromIncome(instrId: InstrId, list: List<String>): List<Series<String>> {
-        val cached = CacheService.getCached("/fund/${instrId.code}", {
-            fetchRest(instrId.code).toByteArray()
-        }, Interval.Min60.durationMs)
+        val cached = fetchRestCached(instrId.code)
         return mergeAndSort(
             list.map {
                 extractFromIncome(it, String(cached).readJson())
@@ -81,9 +81,7 @@ object FundamentalServicePoligon {
     }
 
     fun getFromBalanceSheet(instrId: InstrId, list: List<String>): List<Series<String>> {
-        val cached = CacheService.getCached("/BS/${instrId.code}", {
-            fetchRest(instrId.code).toByteArray()
-        }, Interval.Min60.durationMs)
+        val cached = fetchRestCached(instrId.code)
         return mergeAndSort(
             list.map {
                 extractFromBalanceSheet(it, String(cached).readJson())
@@ -92,9 +90,7 @@ object FundamentalServicePoligon {
     }
 
     fun getFromCashFlow(instrId: InstrId, list: List<String>): List<Series<String>> {
-        val cached = CacheService.getCached("/fund/cflow/${instrId.code}", {
-            fetchRest(instrId.code).toByteArray()
-        }, Interval.Min60.durationMs)
+        val cached = fetchRestCached(instrId.code)
         return mergeAndSort(
             list.map {
                 extractFromCashFlow(it, String(cached).readJson())
@@ -115,21 +111,6 @@ object FundamentalServicePoligon {
         return extractSeries(json, "financials", "cash_flow_statement", name, "value").copy(name = name)
     }
 
-
-    fun debtToFcF(instrId: InstrId): List<Series<String>> {
-        val json = fetch(instrId.code).readJson()
-        val cashFlow = extractFromCashFlow("net_cash_flow", json)
-        val debt = extractFromBalanceSheet("liabilities", json)
-        val merged: List<Series<LocalDate>> = mergeAndSort(listOf(cashFlow, debt))
-        val annualFcf = merged[0].toSortedList().mapTrailing({ it.second }, 4)
-
-        val ndata = merged[1].toSortedList().mapIndexed({ idx, oo ->
-            val value = oo.second / annualFcf[idx]
-            oo.first to cap(value, 20.0)
-        }).toMap()
-        return listOf(Series("fcfToDebt", ndata).mapToStr(), merged[1].mapToStr())
-    }
-
     fun cap(value: Double, cap: Double = 30.0): Double {
         if (value.absoluteValue > cap) {
             return cap * value.sign
@@ -137,11 +118,8 @@ object FundamentalServicePoligon {
         return value
     }
 
-    /*
-    returns 1st ev, 2nd ev-to-ebidta
-     */
     fun ev2Ebitda(instrId: InstrId, mdDao: MdStorageImpl): List<SeriesUX> {
-        val json = fetch(instrId.code).readJson()
+        val json = fetchRest(instrId.code).readJson()
         val ev = getEv(json, instrId, mdDao)
         val ebitda = extractFromIncome("revenues", json)
         val debt = extractFromBalanceSheet("liabilities", json)
@@ -229,7 +207,6 @@ fun drawGeneric() {
 
 fun main() {
     initDatabase()
-
     val instrId = InstrId.dummyInstrument("VET").copy(market = "XNYS", source = SourceName.POLIGON.name)
     MdStorageImpl().updateMarketData(instrId, Interval.Min10)
     //val ev2Ebitda = FundamentalServicePoligon.ev2Ebitda(instrId, MdStorageImpl())
