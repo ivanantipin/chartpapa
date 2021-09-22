@@ -3,7 +3,9 @@ package firelib.core.store
 import firelib.core.report.SqlQueries
 import org.apache.commons.io.FileUtils
 import java.nio.file.Paths
-
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
 object GlobalConstants {
 
@@ -22,6 +24,13 @@ object GlobalConstants {
     fun getProp(name: String): String {
         require(props.containsKey(name), { "prop ${name} is absent" })
         return props[name]!! as String
+    }
+
+    val locks = ConcurrentHashMap<String,Lock>()
+    fun lock(id : String) : Lock{
+        return locks.computeIfAbsent(id, {
+            ReentrantLock()
+        })
     }
 
 

@@ -78,8 +78,19 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         return dao.queryPoint(makeTable(instrId), epochMs)
     }
 
+    fun lock(name : String, block : ()->Unit){
+        val lock = GlobalConstants.lock(name)
+        lock.lock()
+        try {
+            block()
+        }finally {
+            lock.unlock()
+        }
+    }
+
 
     private fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
+        val lockName = "${source.getName()}_${interval.name}"
         var instant = Instant.now()
         try {
             val dao = md.getDao(instrId.sourceEnum(), interval)
@@ -88,7 +99,9 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
             source.load(instrId, startTime, interval).chunked(5000).forEach {
                 instant = it.last().endTime
-                dao.insertOhlc(it, makeTable(instrId))
+                lock(lockName){
+                    dao.insertOhlc(it, makeTable(instrId))
+                }
             }
         } catch (e: Exception) {
             log.info("failed to update " + instrId + " " + e.message)
