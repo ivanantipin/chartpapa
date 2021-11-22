@@ -6,6 +6,7 @@ import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import firelib.core.store.MdStorageImpl
 import firelib.finam.FinamDownloader
+import firelib.finam.MoexSource
 import firelib.poligon.PoligonSource
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -30,16 +31,13 @@ object MdService {
     val instrByStart = group(fetchInstruments())
 
     fun fetchInstruments(): List<InstrId> {
-        val ret = FinamDownloader().symbols()
-        log.info("finam instruments size " + ret.size)
         val ret1 = PoligonSource().symbols()
         log.info("poligon instruments size " + ret1.size)
-        val filter = filter(ret + ret1)
-        log.info("final instruments size ${filter.size}")
-        return filter
+        return ret1 + loadFinam()
     }
 
     fun byId(id: String): InstrId {
+        require(id2inst.containsKey(id), {"no instrument for id ${id}"})
         return id2inst[id]!!
     }
 
@@ -50,7 +48,10 @@ object MdService {
         return ret
     }
 
-    private fun filter(instruments: List<InstrId>): List<InstrId> {
+    fun loadFinam(): List<InstrId> {
+        val ret = FinamDownloader().symbols()
+        log.info("finam instruments size " + ret.size)
+
         val futureSymbols = listOf(
             "BR",
             "RTS",
@@ -59,16 +60,23 @@ object MdService {
             "Si",
         )
 
-        return instruments.filter {
-            if (it.source == SourceName.FINAM.name) {
-                it.code.length >= 2 &&
-                        (it.market == FinamDownloader.FX || it.market == FinamDownloader.SHARES_MARKET || (it.market == FinamDownloader.FinamMarket.FUTURES_MARKET.id && futureSymbols.contains(
-                            it.code
-                        )))
+        val moexSymbols: Map<String, InstrId> = MoexSource().symbols().associateBy { it.code }
+
+        return ret.map {
+            if (it.code.length >= 2 &&
+                (it.market == FinamDownloader.FX || it.market == FinamDownloader.SHARES_MARKET || (it.market == FinamDownloader.FinamMarket.FUTURES_MARKET.id && futureSymbols.contains(
+                    it.code
+                )))
+            ) {
+                if (moexSymbols.containsKey(it.code)) {
+                    moexSymbols[it.code]!!
+                } else {
+                    it
+                }
             } else {
-                true
+                null
             }
-        }
+        }.filterNotNull()
     }
 
     fun migrateSubscriptions() {
@@ -98,7 +106,7 @@ object MdService {
 
     init {
         transaction {
-            MdService.migrateSubscriptions()
+            migrateSubscriptions()
             val live =
                 Subscriptions.selectAll().map { Pair(it[Subscriptions.ticker], it[Subscriptions.market]) }.distinct()
             liveSymbols.addAll(live.flatMap { key ->

@@ -38,6 +38,7 @@ class MoexSource : HistoricalSource {
         //"SECID", "BOARDID", "SHORTNAME", "PREVPRICE", "LOTSIZE"
         return obj["securities"]["data"].map {
             InstrId(
+                id = it[header["SECID"]!!].asText(),
                 code = it[header["SECID"]!!].asText(),
                 lot = it[header["LOTSIZE"]!!].asInt(),
                 board = it[header["BOARDID"]!!].asText(),
@@ -132,10 +133,17 @@ fun main() {
 
     val moexSource = MoexSource()
     val symbols = moexSource.symbols()
+    symbols.forEach {
+        if(it.code == "GAZP"){
+            println(moexSource.load(it, LocalDateTime.now().minusDays(2), Interval.Min10).toList())
+        }
+        println(it)
+    }
+    /*
     symbols.filter { tickers.contains(it.code.toLowerCase()) }.forEachIndexed{ idx, tt->
         println("index ${idx} out of ${symbols.size}")
         impl.updateMarketData(tt , Interval.Min10)
-    }
+    }*/
 
 
 //    val load = moexSource.load(first, LocalDate.now().minusDays(10000).atStartOfDay(), Interval.Min10)
