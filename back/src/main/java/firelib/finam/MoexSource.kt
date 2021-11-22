@@ -38,13 +38,14 @@ class MoexSource : HistoricalSource {
         //"SECID", "BOARDID", "SHORTNAME", "PREVPRICE", "LOTSIZE"
         return obj["securities"]["data"].map {
             InstrId(
-                id = it[header["SECID"]!!].asText(),
+                id = it[header["SECID"]!!].asText() + "_MOEX",
                 code = it[header["SECID"]!!].asText(),
                 lot = it[header["LOTSIZE"]!!].asInt(),
                 board = it[header["BOARDID"]!!].asText(),
                 minPriceIncr = BigDecimal.ONE.divide(BigDecimal(Math.pow(10.0,it[header["DECIMALS"]!!].asText().toDouble())) ),
                 name = it[header["SHORTNAME"]!!].asText(),
-                source = SourceName.MOEX.name
+                source = SourceName.MOEX.name,
+                market = "MOEX"
             )
         }
 
@@ -125,6 +126,84 @@ class MoexSource : HistoricalSource {
 
 }
 
+val lst = listOf(
+"SBER",
+"GAZP",
+"LKOH",
+"POLY",
+"TCSG",
+"QIWI",
+"ALRS",
+"AFLT",
+"VTBR",
+"GMKN",
+"SIBN",
+"DSKY",
+"IRAO",
+"LNTA",
+"MAGN",
+"MRKP",
+"MTSS",
+"MGNT",
+"MTLR",
+"MOEX",
+"NLMK",
+"NVTK",
+"OGKB",
+"PLZL",
+"RUAL",
+"RASP",
+"ROSN",
+"RTKM",
+"HYDR",
+"CHMF",
+"AFKS",
+"SNGS",
+"TGKA",
+"TATN",
+"TRNFP",
+"FEES",
+"PHOR",
+"SBERP",
+"TATNP",
+"SNGSP",
+"UPRO",
+"TTLK",
+"AGRO",
+"GLTR",
+"MAIL",
+"ENRU",
+"LSNGP",
+"POGR",
+"ETLN",
+"LSNG",
+"NMTP",
+"T-RM",
+"MTLRP",
+"GAZAP",
+"RTKMP",
+"RNFT",
+"FIVE",
+"FESH",
+"UNAC",
+"RSTI",
+"BANEP",
+"LSRG",
+"TWTR-RM",
+"PIKK",
+"LNZL",
+"ENPG",
+"RSTIP",
+"RUSP",
+"AQUA",
+"AKRN",
+"VIPS-RM",
+"SGZH",
+"FLOT",
+"TSLA-RM",
+"BELU",
+"YNDX",
+)
 
 fun main() {
 
@@ -132,23 +211,14 @@ fun main() {
 
 
     val moexSource = MoexSource()
-    val symbols = moexSource.symbols()
+    val symbols = moexSource.symbols().map { it.code }.toSet()
+
     symbols.forEach {
-        if(it.code == "GAZP"){
-            println(moexSource.load(it, LocalDateTime.now().minusDays(2), Interval.Min10).toList())
+        if(lst.contains(it)){
+            println(it)
         }
-        println(it)
     }
-    /*
-    symbols.filter { tickers.contains(it.code.toLowerCase()) }.forEachIndexed{ idx, tt->
-        println("index ${idx} out of ${symbols.size}")
-        impl.updateMarketData(tt , Interval.Min10)
-    }*/
 
 
-//    val load = moexSource.load(first, LocalDate.now().minusDays(10000).atStartOfDay(), Interval.Min10)
-//
-//    println("firest ${load.first()}")
-//    println("last ${load.last()}")
 
 }

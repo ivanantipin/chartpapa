@@ -25,10 +25,12 @@ object MdService {
     val multiPool = ForkJoinPool(10)
     val storage = MdStorageImpl()
 
+    val instruments = fetchInstruments()
+
     val liveSymbols = CopyOnWriteArrayList<InstrId>()
-    val instrByCodeAndMarket = fetchInstruments().associateBy { Pair(it.code, it.market) }
-    val id2inst = fetchInstruments().associateBy { it.id }
-    val instrByStart = group(fetchInstruments())
+    val instrByCodeAndMarket = instruments.associateBy { Pair(it.code, it.market) }
+    val id2inst = instruments.associateBy { it.id }
+    val instrByStart = group(instruments)
 
     fun fetchInstruments(): List<InstrId> {
         val ret1 = PoligonSource().symbols()
