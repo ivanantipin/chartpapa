@@ -31,11 +31,11 @@ object HistoricalTrendLines{
                 saveFile(bytes, fileName)
                 updateDatabase("update trend lines events") {
                     BreachEvents.insert {
-                        it[BreachEvents.instrId] = ticker.id
-                        it[BreachEvents.timeframe] = timeFrame.name
+                        it[instrId] = ticker.id
+                        it[timeframe] = timeFrame.name
                         it[BreachEvents.eventTimeMs] = eventTimeMs
-                        it[BreachEvents.photoFile] = fileName
-                        it[BreachEvents.eventType] = BreachType.TREND_LINE_SNAPSHOT.name
+                        it[photoFile] = fileName
+                        it[eventType] = BreachType.TREND_LINE_SNAPSHOT.name
                     }
                 }.get()
                 HistoricalBreaches(filePath = fileName)

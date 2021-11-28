@@ -46,7 +46,6 @@ class SubHandler : CommandHandler {
             fut.thenAccept {
                 try {
                     UpdateSensitivities.updateSens(instr).get()
-                    UpdateLevelsSensitivities.updateTicker(instr).get()
                 }catch (e : Exception){
                     mainLogger.error("failed to subscribe ", e)
                 }
@@ -54,8 +53,7 @@ class SubHandler : CommandHandler {
             mdAvailable = false
         }
 
-        val msg =
-            if (mdAvailable) "" else " маркет данные будут вскоре обновлены, графики могут быть недоступны в течении некоторого времени"
+        val msg = if (mdAvailable) "" else " маркет данные будут вскоре обновлены, графики могут быть недоступны в течении некоторого времени"
 
 
         if (added) {

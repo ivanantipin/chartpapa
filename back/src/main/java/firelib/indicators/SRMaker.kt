@@ -6,7 +6,8 @@ import org.apache.commons.math3.ml.clustering.DBSCANClusterer
 import java.time.Instant
 import java.util.*
 
-inline class Cl(val point : Pair<Instant,Double>) : Clusterable {
+@JvmInline
+value class Cl(val point : Pair<Instant,Double>) : Clusterable {
     override fun getPoint(): DoubleArray {
         return doubleArrayOf(point.second)
     }

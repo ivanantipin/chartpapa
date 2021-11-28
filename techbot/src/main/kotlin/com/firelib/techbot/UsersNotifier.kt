@@ -13,10 +13,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Instant
 
-
-data class BreachEventKey(val instrId: String, val tf: TimeFrame, val eventTimeMs: Long, val type: BreachType)
-data class BreachEvent(val key: BreachEventKey, val photoFile: String)
-
 object UsersNotifier {
 
     val log = LoggerFactory.getLogger(UsersNotifier::class.java)
@@ -40,31 +36,20 @@ object UsersNotifier {
     fun check(bot: Bot, timeFrame: TimeFrame, breachWindow: Int) {
         try {
             transaction {
-
-                val pares = Subscriptions.selectAll().map {
+                val pairs = Subscriptions.selectAll().map {
                     it[Subscriptions.ticker] to it[Subscriptions.market]
-                }.distinct()
+                }.toSet()
 
                 val existingEvents = loadExistingBreaches().map { it.key }.toSet()
 
-                val breaches =
-                    MdService.liveSymbols.filter { pares.contains(it.code to it.market) }.flatMap { instrId ->
+                val breaches = MdService.liveSymbols.filter { pairs.contains(it.code to it.market) }.flatMap { instrId ->
                         BreachFinder.findNewBreaches(
-                            instrId,
-                            timeFrame,
-                            breachWindow,
-                            existingEvents
-                        ) + BreachFinder.findLevelBreaches(
                             instrId,
                             timeFrame,
                             breachWindow,
                             existingEvents
                         ) + SequentaSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
                     }
-
-                if(breaches.isNotEmpty()){
-                    log.info("found ${breaches.size}")
-                }
 
                 breaches.forEach {
                     notify(it, bot)

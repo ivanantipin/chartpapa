@@ -14,6 +14,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.File
 import java.io.FileOutputStream
 
 
@@ -33,18 +34,16 @@ fun main() {
 
         transaction {
             updateSensitivties()
-            UpdateLevelsSensitivities.updateLevelSenses()
         }
         MdService.startMd()
     }
 
-    val menuReg = MenuReg()
+    val menuReg = MenuRegistry()
     menuReg.makeMenu()
     menuReg.registerHandler(SubHandler())
     menuReg.registerHandler(RmHandler())
     menuReg.registerHandler(DemarkCommand())
     menuReg.registerHandler(FundamentalsCommand())
-    menuReg.registerHandler(LevelsCommand())
     menuReg.registerHandler(TrendsCommand())
     menuReg.registerHandler(RmTfHandler())
     menuReg.registerHandler(TfHandler())
@@ -55,7 +54,7 @@ fun main() {
         dispatch {
             text(null) {
                 try {
-                    var cmd = if (menuReg.menuActions.containsKey(text) && text != MenuReg.mainMenu) text else "HOME"
+                    var cmd = if (menuReg.menuActions.containsKey(text) && text != MenuRegistry.mainMenu) text else "HOME"
                     menuReg.menuActions[cmd]!!(this.bot, this.update)
                 }catch (e : Exception){
                     mainLogger.error("exception in action ${text}", e)
@@ -113,9 +112,6 @@ fun initDatabase() {
         SchemaUtils.create(BreachEvents)
         SchemaUtils.createMissingTablesAndColumns(BreachEvents)
 
-        SchemaUtils.create(LevelSensitivityConfig)
-        SchemaUtils.createMissingTablesAndColumns(LevelSensitivityConfig)
-
         SchemaUtils.create(CommandsLog)
         SchemaUtils.createMissingTablesAndColumns(CommandsLog)
 
@@ -131,6 +127,7 @@ fun initDatabase() {
 }
 
 fun saveFile(bytes: ByteArray, fileName: String) {
+    File(fileName).parentFile.mkdirs()
     FileOutputStream(fileName).use {
         it.write(bytes)
     }

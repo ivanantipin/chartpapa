@@ -56,10 +56,10 @@ object UpdateSensitivities{
                     SensitivityConfig.instrId eq instr.id and (SensitivityConfig.timeframe eq tf.name)
                 }
                 SensitivityConfig.insert {
-                    it[SensitivityConfig.instrId] = instr.id
-                    it[SensitivityConfig.timeframe] = tf.name
+                    it[instrId] = instr.id
+                    it[timeframe] = tf.name
                     it[rSquare] = lineRSquare
-                    it[SensitivityConfig.pivotOrder] = pvtOrder
+                    it[pivotOrder] = pvtOrder
                 }
                 return true
             }

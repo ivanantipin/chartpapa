@@ -91,7 +91,7 @@ object SequentaAnnCreator {
                             }
                             val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]
 
-                            var hline = HLine(
+                            val hline = HLine(
                                 ohlcs[ci - 3].endTime.toEpochMilli(),
                                 endOh.endTime.toEpochMilli(),
                                 sequenta.calcStop(s.reference.up, s.reference.start, s.idx),

@@ -126,7 +126,7 @@ fun main() {
     initDatabase()
 
 
-    PoligonSource().symbols().filter { it.code == "BP" }.forEach {
+    PoligonSource().symbols().filter { it.code == "BR" }.forEach {
         println(it)
     }
 
