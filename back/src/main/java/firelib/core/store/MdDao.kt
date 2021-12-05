@@ -42,7 +42,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
                 WHERE  
                     type ='table' AND  
                     name NOT LIKE 'sqlite_%' """, String::class.java
-        )!!
+        )
     }
 
     fun deleteSince(codeIn: String, fromTime: Instant) {
@@ -109,7 +109,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun normName(name: String): String {
         return name.replace('-', '_').replace('.', '_')
-            .replace('@', '_').replace('#', '_')
+            .replace('@', '_').replace('#', '_').replace(':','_')
     }
 
 
