@@ -102,7 +102,7 @@ object MacdSignals {
             val time = ohlcs[last.first].endTime
             val key = BreachEventKey(instr.id, tf, time.toEpochMilli(), BreachType.DEMARK_SIGNAL)
             val newSignal = last.first > ohlcs.size - window && !existing.contains(key)
-            if(newSignal) {
+            if (newSignal) {
                 val img = ChartService.post(makeMacdOptions(hShapes, ohlcs, macd, signal, "macd"))
                 val fileName = makeSnapFileName(
                     BreachType.MACD.name,
@@ -110,7 +110,7 @@ object MacdSignals {
                     tf,
                     time.toEpochMilli()
                 )
-                saveFile(img, fileName)
+                BotHelper.saveFile(img, fileName)
                 return BreachEvent(key, fileName)
             }
         }

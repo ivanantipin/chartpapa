@@ -5,6 +5,7 @@ import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.ChartService.post
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.persistence.BotConfig
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import org.jetbrains.exposed.sql.and
@@ -39,7 +40,7 @@ object HistoricalTrendLines {
                         lines
                     )
                 )
-                saveFile(bytes, fileName)
+                BotHelper.saveFile(bytes, fileName)
                 updateDatabase("update trend lines events") {
                     BreachEvents.insert {
                         it[instrId] = ticker.id

@@ -4,6 +4,7 @@ import com.firelib.techbot.*
 import com.firelib.techbot.BotHelper.ensureExist
 import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.menu.fromUser
+import com.firelib.techbot.persistence.Subscriptions
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update

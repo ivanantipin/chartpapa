@@ -1,5 +1,6 @@
 package com.firelib.techbot
 
+import com.firelib.techbot.persistence.Subscriptions
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval

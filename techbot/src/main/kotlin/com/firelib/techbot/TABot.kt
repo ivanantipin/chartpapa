@@ -1,18 +1,13 @@
 package com.firelib.techbot
 
-import com.firelib.techbot.command.CommandHandler
-import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-
 
 val databaseExecutor = Executors.newSingleThreadExecutor()
 
@@ -52,28 +47,6 @@ fun <T> updateDatabase(name: String, block: () -> T): Future<T> {
             }
         },
     )
-}
-
-class TABot {
-
-    val map = mutableMapOf<String, CommandHandler>()
-
-    val executors = Executors.newFixedThreadPool(20)
-
-    fun handle(cmd: String, bot: Bot, update: Update) {
-        executors.execute {
-            updateDatabase("save command") {
-                val user = update.message!!.from!!
-                BotHelper.ensureExist(user)
-                CommandsLog.insert {
-                    it[CommandsLog.user] = user.id.toInt()
-                    it[CommandsLog.cmd] = cmd
-                    it[timestamp] = System.currentTimeMillis()
-                }
-            }
-        }
-    }
-
 }
 
 

@@ -5,6 +5,8 @@ import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.persistence.Subscriptions
+import com.firelib.techbot.persistence.TimeFrames
 import com.firelib.techbot.sequenta.SequentaSignals
 import com.firelib.techbot.tdline.TdLineSignals
 import com.github.kotlintelegrambot.Bot
@@ -86,7 +88,8 @@ object UsersNotifier {
     fun notify(be: BreachEvent, bot: Bot) {
         val instrId = MdService.byId(be.key.instrId)
         Subscriptions
-            .join(TimeFrames, joinType = JoinType.INNER, Subscriptions.user, TimeFrames.user,
+            .join(
+                TimeFrames, joinType = JoinType.INNER, Subscriptions.user, TimeFrames.user,
                 { Subscriptions.ticker eq instrId.code and (Subscriptions.market eq instrId.market) and (TimeFrames.tf eq be.key.tf.name) })
             .selectAll().forEach {
                 mainLogger.info("notifiying user ${it}")
@@ -96,16 +99,4 @@ object UsersNotifier {
                 }
             }
     }
-}
-
-fun main() {
-    initDatabase()
-    //UpdateSensitivities.updateSensitivties()
-
-    val bot = makeBot(TABot())
-
-    TimeFrame.values().forEach { tf ->
-        UsersNotifier.check(bot, tf, 20)
-    }
-
 }

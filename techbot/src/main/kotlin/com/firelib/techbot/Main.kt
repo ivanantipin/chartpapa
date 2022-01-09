@@ -4,7 +4,10 @@ import com.firelib.techbot.UpdateSensitivities.updateSensitivties
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.command.*
 import com.firelib.techbot.menu.MenuRegistry
-import com.github.kotlintelegrambot.Bot
+import com.firelib.techbot.persistence.SensitivityConfig
+import com.firelib.techbot.persistence.Subscriptions
+import com.firelib.techbot.persistence.TimeFrames
+import com.firelib.techbot.persistence.Users
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
@@ -16,9 +19,6 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
-import java.io.FileOutputStream
-
 
 const val debug_token = "1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM"
 
@@ -30,7 +30,7 @@ fun main() {
 
     initDatabase()
 
-    if(System.getenv("TELEGRAM_TOKEN") != null || true){
+    if (System.getenv("TELEGRAM_TOKEN") != null) {
 
         MdService.updateAll()
 
@@ -56,43 +56,26 @@ fun main() {
         dispatch {
             text(null) {
                 try {
-                    var cmd = if (menuReg.menuActions.containsKey(text) && text != MenuRegistry.mainMenu) text else "HOME"
+                    val cmd =
+                        if (menuReg.menuActions.containsKey(text) && text != MenuRegistry.mainMenu) text else "HOME"
                     menuReg.menuActions[cmd]!!(this.bot, this.update)
-                }catch (e : Exception){
+                } catch (e: Exception) {
                     mainLogger.error("exception in action ${text}", e)
                 }
             }
             callbackQuery(null) {
                 try {
                     menuReg.processData(this.callbackQuery.data, bot, update)
-                }catch (e : Exception){
+                } catch (e: Exception) {
                     mainLogger.error("exception in call back query ${this.callbackQuery?.data}")
                 }
             }
         }
 
-
     }
     UsersNotifier.start(bot)
     bot.startPolling()
 }
-
-
-fun makeBot(taBot: TABot): Bot {
-    val bt = bot {
-        token = System.getenv("TELEGRAM_TOKEN") ?: debug_token
-        timeout = 30
-        logLevel = LogLevel.Network.Body
-
-        dispatch {
-            text(null) {
-                taBot.handle(text, bot, update)
-            }
-        }
-    }
-    return bt
-}
-
 
 fun initDatabase() {
     Database.connect(
@@ -122,15 +105,5 @@ fun initDatabase() {
 
         SchemaUtils.create(CacheTable)
         SchemaUtils.createMissingTablesAndColumns(CacheTable)
-
-
-
-    }
-}
-
-fun saveFile(bytes: ByteArray, fileName: String) {
-    File(fileName).parentFile.mkdirs()
-    FileOutputStream(fileName).use {
-        it.write(bytes)
     }
 }

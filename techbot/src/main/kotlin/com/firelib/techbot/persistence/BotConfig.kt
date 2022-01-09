@@ -1,5 +1,6 @@
-package com.firelib.techbot
+package com.firelib.techbot.persistence
 
+import com.firelib.techbot.LineConfig
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.InstrId
 import org.jetbrains.exposed.sql.selectAll

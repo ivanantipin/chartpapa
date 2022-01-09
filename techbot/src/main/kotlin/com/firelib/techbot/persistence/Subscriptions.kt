@@ -1,4 +1,4 @@
-package com.firelib.techbot
+package com.firelib.techbot.persistence
 
 import firelib.finam.FinamDownloader
 import org.jetbrains.exposed.dao.id.IntIdTable
@@ -10,15 +10,6 @@ object Subscriptions : IntIdTable() {
 
     init {
         index(true, user, ticker, market)
-    }
-}
-
-object TimeFrames : IntIdTable() {
-    val user = integer("user_id")
-    val tf = varchar("tf", 10)
-
-    init {
-        index(true, user, tf)
     }
 }
 

@@ -2,6 +2,7 @@ package com.firelib.techbot
 
 import com.firelib.techbot.BotHelper.getOhlcsForTf
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.persistence.SensitivityConfig
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import org.jetbrains.exposed.sql.and

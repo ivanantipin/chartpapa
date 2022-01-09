@@ -2,7 +2,6 @@ package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.breachevent.BreachEvents
-import com.firelib.techbot.saveFile
 import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.chart.*
 import com.firelib.techbot.initDatabase
@@ -39,9 +38,9 @@ class DemarkCommand : CommandHandler {
             tf,
             ohlcs.last().endTime.toEpochMilli()
         )
-        saveFile(bytes, fileName)
+        BotHelper.saveFile(bytes, fileName)
 
-        bot.sendPhoto(chatId = update.chatId(),  photo = File(fileName))
+        bot.sendPhoto(chatId = update.chatId(), photo = File(fileName))
     }
 }
 

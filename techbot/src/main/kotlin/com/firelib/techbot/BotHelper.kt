@@ -1,6 +1,10 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.persistence.BotConfig
+import com.firelib.techbot.persistence.Subscriptions
+import com.firelib.techbot.persistence.TimeFrames
+import com.firelib.techbot.persistence.Users
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
@@ -11,6 +15,8 @@ import firelib.iqfeed.IntervalTransformer
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDateTime
 
 
@@ -84,6 +90,13 @@ object BotHelper {
         val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(window.toLong()))
         val ohlcs = mdStorageImpl.read(ticker, Interval.Min10, startTime)
         return IntervalTransformer.transform(timeFrame, ohlcs)
+    }
+
+    fun saveFile(bytes: ByteArray, fileName: String) {
+        File(fileName).parentFile.mkdirs()
+        FileOutputStream(fileName).use {
+            it.write(bytes)
+        }
     }
 
 }

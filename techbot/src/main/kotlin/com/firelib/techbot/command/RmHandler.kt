@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.Subscriptions
+import com.firelib.techbot.persistence.Subscriptions
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.getId

@@ -37,7 +37,7 @@ object SequentaSignals {
                     tf,
                     time.toEpochMilli()
                 )
-                saveFile(img, fileName)
+                BotHelper.saveFile(img, fileName)
                 listOf(BreachEvent(key, fileName))
             } else {
                 emptyList()

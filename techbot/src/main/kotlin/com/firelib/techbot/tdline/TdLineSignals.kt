@@ -8,6 +8,7 @@ import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.ChartService.post
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.persistence.BotConfig
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -47,7 +48,7 @@ object TdLineSignals {
                 val time = timeFormatter.format(Instant.ofEpochMilli(it.key.eventTimeMs).atMoscow())
                 val title = "Breakout for ${ticker.code} (${timeFrame}, time is ${time} msk)"
                 val img = post(TrendLinesRenderer.makeTrendLines(targetOhlcs, title, it.value))
-                saveFile(img, fileName)
+                BotHelper.saveFile(img, fileName)
                 BreachEvent(key, fileName)
             }
     }
