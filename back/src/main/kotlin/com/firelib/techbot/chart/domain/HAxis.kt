@@ -13,6 +13,7 @@ data class HAxis(
     val title: HTitle? = null,
     val gapGridLineWidth: Int = 0,
     var left : String? = null,
+    var top : String? = null,
     var offset : Int? = null,
     var opposite : Boolean? = null,
     var categories : List<String>? = null,

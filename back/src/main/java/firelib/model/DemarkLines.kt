@@ -2,7 +2,8 @@ package firelib.model
 
 import com.firelib.techbot.TdLineDated
 import com.firelib.techbot.TrendsCreator
-import com.firelib.techbot.chart.HiChartCreator
+import com.firelib.techbot.chart.RenderUtils
+import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.domain.LineType
 import firelib.core.*
 import firelib.core.config.ModelBacktestConfig
@@ -47,8 +48,8 @@ class DemarkLines(context: ModelContext, val props: Map<String, String>) : Model
                     val ohlcs = closingTrade.tradeCtxValue as List<Ohlc>
                     val start = ohlcs.indexOfFirst { it.endTime.toEpochMilli() == locCtx.line.x0 }
                     val toh = if(start == -1) ohlcs else ohlcs.subList(start, ohlcs.size)
-                    val opts = HiChartCreator.trendLinesWithoutBySell(toh, "Xxx", listOf(locCtx.line.toTdLine(toh)))
-                    opts.annotations += HiChartCreator.buySells(listOf(openTrade,closingTrade))
+                    val opts = TrendLinesRenderer.trendLinesWithoutBySell(toh, "Xxx", listOf(locCtx.line.toTdLine(toh)))
+                    opts.annotations += RenderUtils.buySells(listOf(openTrade,closingTrade))
                     Json { prettyPrint = true }.encodeToString( opts).toByteArray()
                 }
             }

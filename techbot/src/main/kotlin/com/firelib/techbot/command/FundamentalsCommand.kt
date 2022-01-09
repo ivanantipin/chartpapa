@@ -3,7 +3,6 @@ package com.firelib.techbot.command
 import chart.BreachFinder
 import com.firelib.techbot.Cmd
 import com.firelib.techbot.chart.*
-import com.firelib.techbot.command.FundamentalService.mergeAndSort
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.initDatabase
 import com.firelib.techbot.mainLogger
@@ -53,7 +52,7 @@ class FundamentalsCommand : CommandHandler {
                 GenericCharter.makeSeries(series.map {
                     SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
                 }, "Balance Sheet Structure ${instrId.code}", listOf("Money")),
-                ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+                RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
@@ -64,7 +63,7 @@ class FundamentalsCommand : CommandHandler {
                 GenericCharter.makeSeries(series.map {
                     SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
                 }, "Balance Sheet Structure / 2 ${instrId.code}", listOf("Money")),
-                ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+                RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
@@ -75,7 +74,7 @@ class FundamentalsCommand : CommandHandler {
                 GenericCharter.makeSeries(series.map {
                     SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
                 }, "Cash Flow Structure ${instrId.code}", listOf("Money")),
-                ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+                RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
@@ -83,7 +82,7 @@ class FundamentalsCommand : CommandHandler {
             val series = FundamentalServicePoligon.ev2Ebitda(instrId, mdStorageImpl)
             ChartService.post(
                 GenericCharter.makeSeries(series, "Ev2Ebitda ${instrId.code}", listOf("Ev2Ebitda")),
-                ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+                RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
@@ -136,7 +135,7 @@ fun main() {
 
     ChartService.post(
         EvEbitdaCharter.makeSeries(evEbit[0], evEbit[1], "ev-ebitda"),
-        ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+        RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
         "Chart"
     )
 

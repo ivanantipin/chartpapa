@@ -3,15 +3,14 @@ package chart
 import com.firelib.techbot.*
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.domain.TimeFrame
-import firelib.core.domain.*
+import firelib.core.SourceName
+import firelib.core.domain.InstrId
+import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
 import firelib.core.store.GlobalConstants
+import firelib.core.store.MdStorageImpl
 import firelib.finam.timeFormatter
-import firelib.indicators.SR
-import firelib.indicators.SRMaker
-import org.jetbrains.exposed.sql.select
 import java.time.Instant
-import kotlin.math.sign
 
 object BreachFinder {
 
@@ -58,16 +57,11 @@ object BreachFinder {
 }
 
 
-fun List<Ohlc>.at(idx: Int): Ohlc {
-    if (idx < 0) {
-        return this[this.size + idx]
-    }
-    return this[idx]
-}
-
 fun main() {
     initDatabase()
-    BreachFinder.findNewBreaches(InstrId(code ="RASP", market = "1"), TimeFrame.H, 5, emptySet())
+    val ticker = InstrId(code = "GMKN", market = "1", source = SourceName.FINAM.name)
+    MdStorageImpl().updateMarketData(ticker, Interval.Min10);
+    BreachFinder.findNewBreaches(ticker, TimeFrame.D, 5, emptySet())
     //UpdateLevelsSensitivities.updateLevelSenses()
 
 }

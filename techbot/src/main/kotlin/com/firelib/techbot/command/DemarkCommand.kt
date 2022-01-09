@@ -7,6 +7,7 @@ import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.Cmd
 import com.firelib.techbot.chart.*
 import com.firelib.techbot.initDatabase
+import com.firelib.techbot.sequenta.SequentaAnnCreator
 import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.Update
 import firelib.core.domain.InstrId
@@ -27,9 +28,11 @@ class DemarkCommand : CommandHandler {
 
         val ohlcs = BotHelper.getOhlcsForTf(instrId, tf.interval)
 
-        val ann = SequentaAnnCreator.createAnnotations(ohlcs)
+        val signals = SequentaAnnCreator.genSignals(ohlcs)
 
-        val bytes = ChartService.drawSequenta(ann, ohlcs, "Demark indicator for ${tkr} (${tf})")
+        val ann = SequentaAnnCreator.createAnnotations(signals, ohlcs)
+
+        val bytes = SequentaAnnCreator.drawSequenta(ann, ohlcs, "Demark indicator for ${tkr} (${tf})")
 
         val fileName = BreachFinder.makeSnapFileName(
             "demark",
@@ -50,7 +53,7 @@ fun main() {
     val byInstrId = FundamentalService.debtToFcF(InstrId.dummyInstrument("vet"))
     ChartService.post(
         Debt2FCFCharter.makeSeries(byInstrId[0], byInstrId[1], "FCF to Debt"),
-        ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+        RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
         "Chart"
     )
 }

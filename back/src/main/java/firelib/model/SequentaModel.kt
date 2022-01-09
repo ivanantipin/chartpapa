@@ -83,7 +83,7 @@ class SequentaModel(context: ModelContext, properties: Map<String, String>) : Mo
                         descriptor = PendingSignal(
                             currentTime().atUtc().toLocalDate(),
                             signal,
-                            sequenta.calcStop(signal.reference.up, signal.reference.start, sequenta.data.size)
+                            sequenta.data.calcStop(signal.reference.up, signal.reference.start, sequenta.data.size)
                         )
                     }
 

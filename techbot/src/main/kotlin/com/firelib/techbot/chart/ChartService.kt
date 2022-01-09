@@ -1,22 +1,13 @@
 package com.firelib.techbot.chart
 
 import com.firelib.techbot.TdLine
-import com.firelib.techbot.chart.ChartCreator.makeSequentaOpts
-import com.firelib.techbot.chart.HiChartCreator.levelBreaches
-import com.firelib.techbot.chart.HiChartCreator.makeLevelOptions
-import com.firelib.techbot.chart.HiChartCreator.makeTrendLines
 import com.firelib.techbot.chart.domain.HOptions
-import com.firelib.techbot.chart.domain.SequentaAnnnotations
-import com.firelib.techbot.initDatabase
-import firelib.core.domain.LevelSignal
 import firelib.core.domain.Ohlc
 import firelib.core.misc.JsonHelper
-import firelib.indicators.SR
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.logTimeSpent
-import org.jetbrains.exposed.sql.transactions.transaction
 
 object ChartService {
     val client = HttpClient()
@@ -25,12 +16,6 @@ object ChartService {
                          var globalOptions : Map<String,*>? = null)
 
     val urlString = "http://localhost:7801"
-
-    fun drawSequenta(ann: SequentaAnnnotations, hours: List<Ohlc>, title: String): ByteArray {
-        return logTimeSpent("draw sequenta hicharts server") {
-            post(makeSequentaOpts(ann, hours, title))
-        }
-    }
 
     private fun postJson(optJson: String): ByteArray {
         return runBlocking {
@@ -47,25 +32,6 @@ object ChartService {
         }
     }
 
-    fun drawLevels(
-        lines: List<SR>,
-        hours: List<Ohlc>,
-        title: String
-    ): ByteArray {
-        return logTimeSpent("draw levels hicharts server") {
-            post(makeLevelOptions(hours, title, lines))
-        }
-    }
-
-    fun drawLevelsBreaches(
-        signals: List<LevelSignal>,
-        hours: List<Ohlc>,
-        title: String
-    ): ByteArray {
-        return logTimeSpent("draw levels hicharts server") {
-            post(levelBreaches(hours, title, signals))
-        }
-    }
 
     fun drawLines(
         lines: List<TdLine>,
@@ -73,7 +39,7 @@ object ChartService {
         title: String
     ): ByteArray {
         return logTimeSpent("draw lines hicharts server") {
-            post(makeTrendLines(hours, title, lines))
+            post(TrendLinesRenderer.makeTrendLines(hours, title, lines))
         }
     }
 
@@ -85,16 +51,7 @@ object ChartService {
             2,
             globalOptions = globalOptions
         ))
+        println(optJson)
         return postJson(optJson)
-    }
-
-
-
-}
-
-fun main() {
-    initDatabase()
-    transaction {
-
     }
 }

@@ -229,18 +229,18 @@ class Sequenta(val counts : Array<Int> = arrayOf(13, 21)) {
 }
 
 
-fun Sequenta.calcStop(up : Boolean, start : Int, end : Int): Double {
+fun List<Ohlc>.calcStop(up : Boolean, start : Int, end : Int): Double {
     var curLevel: Double
     if (up) {
         curLevel = java.lang.Double.MIN_VALUE
         for (i in start until end) {
-            val ohh = data[i]
+            val ohh = this[i]
             curLevel = Math.max(curLevel, ohh.high + ohh.range())
         }
     } else {
         curLevel = java.lang.Double.MAX_VALUE
         for (i in start until end) {
-            val ohh = data[i]
+            val ohh = this[i]
             curLevel = Math.min(curLevel, ohh.low - ohh.range())
         }
     }

@@ -12,7 +12,6 @@ import firelib.core.domain.Interval
 import firelib.core.misc.mapper
 import firelib.core.misc.readJson
 import firelib.core.store.MdStorageImpl
-import firelib.poligon.PoligonSource
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -198,7 +197,7 @@ fun drawGeneric() {
 
     ChartService.post(
         GenericCharter.makeSeries(listOf(ser0ux, ser1ux), "some", listOf("data0", "data1")),
-        ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+        RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
         "Chart"
     )
 
@@ -213,7 +212,7 @@ fun main() {
     val ev2Ebitda = FundamentalServicePoligon.getFromIncome(instrId, listOf("revenues")).map { SeriesUX(it, "blue", 0, makeTicks = true ) }
     ChartService.post(
         GenericCharter.makeSeries(ev2Ebitda, "ev ebitda", listOf("Money")),
-        ChartCreator.GLOBAL_OPTIONS_FOR_BILLIONS,
+        RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
         "Chart"
     )
 

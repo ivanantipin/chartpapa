@@ -12,5 +12,6 @@ data class HSeries (
     val dashStyle : String? = null,
     val lineWidth: Double? = null,
     @get:JsonProperty("yAxis")
-    val yAxis : Int? = null
+    val yAxis : Int? = null,
+    val dataGrouping : HGrouping = HGrouping()
 ) : ISeries()

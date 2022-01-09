@@ -2,8 +2,6 @@ package com.firelib.edgar
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.firelib.techbot.chart.ChartCreator
-import com.firelib.techbot.chart.ChartService
 import java.time.LocalDate
 
 class ParseFacts {

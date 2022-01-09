@@ -2,8 +2,8 @@ package com.firelib.techbot
 
 import chart.BreachFinder
 import chart.BreachType
-import chart.SequentaSignals
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.sequenta.SequentaSignals
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import firelib.core.misc.timeSequence
