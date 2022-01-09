@@ -1,14 +1,13 @@
 package com.firelib.techbot.command
 
-import chart.BreachFinder
-import com.firelib.techbot.Cmd
+import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
 import com.firelib.techbot.chart.*
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.initDatabase
 import com.firelib.techbot.mainLogger
+import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.saveFile
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.Update
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -17,7 +16,6 @@ import firelib.core.store.MdStorageImpl
 import java.io.File
 import java.time.Instant
 import java.time.LocalDate
-
 
 class FundamentalsCommand : CommandHandler {
 
@@ -100,7 +98,7 @@ class FundamentalsCommand : CommandHandler {
         actions.forEach({ ee ->
             try{
                 val bytes = ee.value(instrId)
-                val fileName = BreachFinder.makeSnapFileName(
+                val fileName = makeSnapFileName(
                     ee.key,
                     instrId.code,
                     TimeFrame.D,

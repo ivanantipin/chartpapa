@@ -1,8 +1,10 @@
 package com.firelib.techbot.sequenta
 
-import chart.BreachFinder
 import chart.BreachType
 import com.firelib.techbot.*
+import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.breachevent.BreachEventKey
+import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -29,7 +31,7 @@ object SequentaSignals {
                     SequentaAnnCreator.createAnnotations(signals, ohlcs), ohlcs,
                     "Sequenta signal ${instr.code} (${tf}, time is ${timeFormatter.format(time.atMoscow())} msk)"
                 )
-                val fileName = BreachFinder.makeSnapFileName(
+                val fileName = BreachEvents.makeSnapFileName(
                     BreachType.DEMARK_SIGNAL.name,
                     instr.id,
                     tf,

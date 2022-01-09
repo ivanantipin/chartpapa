@@ -1,25 +1,24 @@
-package chart
+package com.firelib.techbot.tdline
 
+import chart.BreachType
 import com.firelib.techbot.*
-import com.firelib.techbot.chart.ChartService
+import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.breachevent.BreachEventKey
+import com.firelib.techbot.breachevent.BreachEvents
+import com.firelib.techbot.chart.ChartService.post
+import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.atMoscow
-import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
 import firelib.finam.timeFormatter
 import java.time.Instant
 
-object BreachFinder {
+object TdLineSignals {
 
-    fun makeSnapFileName(prefix: String, ticker: String, timeFrame: TimeFrame, eventTimeMs: Long): String {
-        val fileName = "${prefix}_${ticker}_${timeFrame}_$eventTimeMs"
-        return GlobalConstants.imgFolder.resolve("${fileName}.png").toFile().absoluteFile.toString()
-    }
-
-    fun findNewBreaches(
+    fun checkSignals(
         ticker: InstrId,
         timeFrame: TimeFrame,
         breachWindow: Int,
@@ -38,7 +37,7 @@ object BreachFinder {
             .filter { !existingBreaches.contains(it.key) }
             .map {
                 val key = it.key
-                val fileName = makeSnapFileName(
+                val fileName = BreachEvents.makeSnapFileName(
                     BreachType.TREND_LINE.name,
                     ticker.id,
                     timeFrame,
@@ -47,7 +46,7 @@ object BreachFinder {
 
                 val time = timeFormatter.format(Instant.ofEpochMilli(it.key.eventTimeMs).atMoscow())
                 val title = "Breakout for ${ticker.code} (${timeFrame}, time is ${time} msk)"
-                val img = ChartService.drawLines(it.value, targetOhlcs, title)
+                val img = post(TrendLinesRenderer.makeTrendLines(targetOhlcs, title, it.value))
                 saveFile(img, fileName)
                 BreachEvent(key, fileName)
             }
@@ -61,7 +60,7 @@ fun main() {
     initDatabase()
     val ticker = InstrId(code = "GMKN", market = "1", source = SourceName.FINAM.name)
     MdStorageImpl().updateMarketData(ticker, Interval.Min10);
-    BreachFinder.findNewBreaches(ticker, TimeFrame.D, 5, emptySet())
+    TdLineSignals.checkSignals(ticker, TimeFrame.D, 5, emptySet())
     //UpdateLevelsSensitivities.updateLevelSenses()
 
 }

@@ -1,4 +1,4 @@
-package com.github.kotlintelegrambot.dispatcher
+package com.firelib.techbot.menu
 
 import com.github.kotlintelegrambot.entities.*
 import java.util.concurrent.atomic.AtomicLong

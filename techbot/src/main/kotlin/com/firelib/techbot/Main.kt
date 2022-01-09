@@ -1,7 +1,9 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.UpdateSensitivities.updateSensitivties
+import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.command.*
+import com.firelib.techbot.menu.MenuRegistry
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch

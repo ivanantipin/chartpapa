@@ -32,17 +32,6 @@ object ChartService {
         }
     }
 
-
-    fun drawLines(
-        lines: List<TdLine>,
-        hours: List<Ohlc>,
-        title: String
-    ): ByteArray {
-        return logTimeSpent("draw lines hicharts server") {
-            post(TrendLinesRenderer.makeTrendLines(hours, title, lines))
-        }
-    }
-
     fun post(options: HOptions, globalOptions: Map<String, *>? = null, chartType : String = "StockChart"): ByteArray {
         val optJson = JsonHelper.toStringPretty(HiRequest(
             async = true,
@@ -54,4 +43,5 @@ object ChartService {
         println(optJson)
         return postJson(optJson)
     }
+
 }

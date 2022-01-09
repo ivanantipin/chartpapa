@@ -3,9 +3,8 @@ package com.firelib.techbot.command
 import com.firelib.techbot.Subscriptions
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
-import com.firelib.techbot.Cmd
 import com.firelib.techbot.getId
-import com.github.kotlintelegrambot.dispatcher.chatId
+import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.sql.and

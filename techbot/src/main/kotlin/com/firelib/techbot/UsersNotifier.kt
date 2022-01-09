@@ -1,9 +1,12 @@
 package com.firelib.techbot
 
-import chart.BreachFinder
 import chart.BreachType
+import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.breachevent.BreachEventKey
+import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.sequenta.SequentaSignals
+import com.firelib.techbot.tdline.TdLineSignals
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import firelib.core.misc.timeSequence
@@ -43,12 +46,8 @@ object UsersNotifier {
                 val existingEvents = loadExistingBreaches().map { it.key }.toSet()
 
                 val breaches = MdService.liveSymbols.filter { pairs.contains(it.code to it.market) }.flatMap { instrId ->
-                        BreachFinder.findNewBreaches(
-                            instrId,
-                            timeFrame,
-                            breachWindow,
-                            existingEvents
-                        ) + SequentaSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
+                        TdLineSignals.checkSignals(instrId,timeFrame,breachWindow,existingEvents) +
+                                SequentaSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
                     }
 
                 breaches.forEach {

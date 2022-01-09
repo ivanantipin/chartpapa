@@ -1,4 +1,4 @@
-package com.firelib.techbot
+package com.firelib.techbot.breachevent
 
 import chart.BreachType
 import com.firelib.techbot.domain.TimeFrame

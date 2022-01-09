@@ -1,5 +1,6 @@
-package com.firelib.techbot
+package com.firelib.techbot.command
 
+import com.firelib.techbot.MdService
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.InstrId
 

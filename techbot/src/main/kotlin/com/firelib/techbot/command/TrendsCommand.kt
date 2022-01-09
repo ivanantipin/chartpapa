@@ -2,8 +2,7 @@ package com.firelib.techbot.command
 
 import chart.HistoricalTrendLines.historicalTrendLines
 import com.github.kotlintelegrambot.Bot
-import com.firelib.techbot.Cmd
-import com.github.kotlintelegrambot.dispatcher.chatId
+import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.entities.Update
 import java.io.File
 

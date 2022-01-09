@@ -1,7 +1,7 @@
-package com.firelib.techbot
+package com.firelib.techbot.menu
 
+import com.firelib.techbot.command.Cmd
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.dispatcher.getCmdName
 import com.github.kotlintelegrambot.entities.Update
 
 class InlineButton(val name: String, val data: Cmd, val title: String, var rowSize: Int = 3) {

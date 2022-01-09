@@ -1,6 +1,8 @@
-package com.firelib.techbot
+package com.firelib.techbot.breachevent
 
 import chart.BreachType
+import com.firelib.techbot.domain.TimeFrame
+import firelib.core.store.GlobalConstants
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 object BreachEvents : IntIdTable() {
@@ -13,4 +15,13 @@ object BreachEvents : IntIdTable() {
     init {
         index(false, eventTimeMs)
     }
+
+    fun makeSnapFileName(prefix: String, ticker: String, timeFrame: TimeFrame, eventTimeMs: Long): String {
+        val fileName = "${prefix}_${ticker}_${timeFrame}_$eventTimeMs"
+        return GlobalConstants.imgFolder.resolve("${fileName}.png").toFile().absoluteFile.toString()
+    }
+
 }
+
+
+

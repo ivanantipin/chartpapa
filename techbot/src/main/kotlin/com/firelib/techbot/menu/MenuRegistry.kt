@@ -1,9 +1,10 @@
-package com.firelib.techbot
+package com.firelib.techbot.menu
 
+import com.firelib.techbot.*
+import com.firelib.techbot.command.Cmd
 import com.firelib.techbot.command.CommandHandler
 import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.dispatcher.chatId
 import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton

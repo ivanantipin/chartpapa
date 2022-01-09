@@ -1,14 +1,13 @@
 package com.firelib.techbot.command
 
-import chart.BreachFinder
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.saveFile
 import com.github.kotlintelegrambot.Bot
-import com.firelib.techbot.Cmd
 import com.firelib.techbot.chart.*
 import com.firelib.techbot.initDatabase
 import com.firelib.techbot.sequenta.SequentaAnnCreator
-import com.github.kotlintelegrambot.dispatcher.chatId
+import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.entities.Update
 import firelib.core.domain.InstrId
 import java.io.File
@@ -34,7 +33,7 @@ class DemarkCommand : CommandHandler {
 
         val bytes = SequentaAnnCreator.drawSequenta(ann, ohlcs, "Demark indicator for ${tkr} (${tf})")
 
-        val fileName = BreachFinder.makeSnapFileName(
+        val fileName = BreachEvents.makeSnapFileName(
             "demark",
             tkr,
             tf,

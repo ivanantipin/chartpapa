@@ -1,8 +1,10 @@
 package com.firelib.techbot.macd
 
-import chart.BreachFinder
 import chart.BreachType
 import com.firelib.techbot.*
+import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.breachevent.BreachEventKey
+import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.domain.*
@@ -102,7 +104,7 @@ object MacdSignals {
             val newSignal = last.first > ohlcs.size - window && !existing.contains(key)
             if(newSignal) {
                 val img = ChartService.post(makeMacdOptions(hShapes, ohlcs, macd, signal, "macd"))
-                val fileName = BreachFinder.makeSnapFileName(
+                val fileName = makeSnapFileName(
                     BreachType.MACD.name,
                     instr.id,
                     tf,
