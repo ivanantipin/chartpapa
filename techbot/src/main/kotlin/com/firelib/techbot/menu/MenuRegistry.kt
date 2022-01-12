@@ -5,7 +5,10 @@ import com.firelib.techbot.command.Cmd
 import com.firelib.techbot.command.CommandHandler
 import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.*
+import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
+import com.github.kotlintelegrambot.entities.ParseMode
+import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import firelib.core.misc.JsonHelper
 import java.util.concurrent.Executors
@@ -28,7 +31,10 @@ class MenuRegistry {
             val keyboard = InlineKeyboardMarkup.create(
                 buttons.map {
                     it.map { but ->
-                        InlineKeyboardButton.CallbackData(text = but.name, callbackData = JsonHelper.toJsonString(but.data))
+                        InlineKeyboardButton.CallbackData(
+                            text = but.name,
+                            callbackData = JsonHelper.toJsonString(but.data)
+                        )
                     }
                 })
             bot.sendMessage(
@@ -40,13 +46,7 @@ class MenuRegistry {
 
     }
 
-    private fun registerMenu(ret: MenuItem) {
-        menuActions[ret.name] = ret::act
-        ret.buttons.forEach { registerButton(it) }
-        ret.children.forEach { registerMenu(it) }
-    }
-
-    private fun registerButton(inlineButton: InlineButton) {
+    fun registerButton(inlineButton: InlineButton) {
         require(
             !commandData.containsKey(inlineButton.data.name),
             { "already registered button ${inlineButton.data.name}" })
@@ -79,7 +79,6 @@ class MenuRegistry {
         }
     }
 
-
     fun listUncat(buttons: List<InlineButton>, bot: Bot, chatId: ChatId, rowSize: Int) {
         buttons.chunked(40).forEach { chunk ->
             chunk.groupBy { it.title }.forEach {
@@ -95,50 +94,46 @@ class MenuRegistry {
             makeTechMenu()
             makeInstrumentMenu()
             makeFundamentalMenu()
-            menuItem("Помощь") {
-                action = { bot, update ->
-                    bot.sendMessage(
-                        chatId = update.chatId(),
-                        text = "[Поддержка](https://t.me/techBotSupport)",
-                        parseMode = ParseMode.MARKDOWN
-                    )
-                }
-            }
+            addActionMenu("Помощь", { bot, update ->
+                bot.sendMessage(
+                    chatId = update.chatId(),
+                    text = "[Поддержка](https://t.me/techBotSupport)",
+                    parseMode = ParseMode.MARKDOWN
+                )
+            })
         }
-        registerMenu(root)
+        //menuActions[ret.name()] = ret::act
+        root.register(this)        //ret.buttons.forEach { registerButton(it) }
+        //ret.children.forEach { registerMenu(it) }
     }
 
     private fun MenuItem.makeFundamentalMenu() {
-        menuItem("Фундаментальные данные") {
-            rowSize = 1
-            action = { bot, update ->
-                val bts = makeButtons(
-                    "fund",
+        addActionMenu("Фундаментальные данные", { bot, update ->
+            val bts = makeButtons(
+                "fund",
+                update.chatId(),
+                TimeFrame.D,
+                "Выберите тикер"
+            )
+            if (bts.isEmpty()) {
+                emtyListMsg(bot, update)
+            } else {
+                list(
+                    bts.chunked(4),
+                    bot,
                     update.chatId(),
-                    TimeFrame.D,
-                    "Выберите тикер"
+                    "Выберите компанию для показа фундаментальных данных"
                 )
-                if (bts.isEmpty()) {
-                    emtyListMsg(bot, update)
-                } else {
-                    list(
-                        bts.chunked(4),
-                        bot,
-                        update.chatId(),
-                        "Выберите компанию для показа фундаментальных данных"
-                    )
-                }
             }
-            menuItem("Главное меню") {}
-        }
+        })
+        addButtonMenu("Главное меню") {}
     }
 
     private fun MenuItem.makeInstrumentMenu() {
-        menuItem("Инструменты/Подписки") {
+        addButtonMenu("Инструменты/Подписки") {
             rowSize = 1
             parentInlButton("Добавить символ") {
                 rowSize = 4
-
                 MdService.instrByStart.keys.forEach { start ->
                     subInlButton(start, "Выберите начальную букву тикера:") {
                         rowSize = 2
@@ -179,9 +174,9 @@ class MenuRegistry {
     }
 
     private fun MenuItem.makeTechMenu() {
-        menuItem("Технический анализ") {
+        addParentMenu("Технический анализ") {
             rowSize = 2
-            menuItem("Демарк секвента") {
+            addButtonMenu("Демарк секвента") {
                 title = "Выберите таймфрейм для демарк секвенты"
                 TimeFrame.values().forEach { tf ->
                     parentInlButton(tf.name) {
@@ -202,7 +197,7 @@ class MenuRegistry {
                 }
             }
 
-            menuItem("Тренд линии") {
+            addButtonMenu("Тренд линии") {
                 title = "Выберите таймфрейм для тренд линий"
                 TimeFrame.values().forEach { tf ->
                     parentInlButton(tf.name) {
@@ -218,7 +213,7 @@ class MenuRegistry {
                     }
                 }
             }
-            menuItem("Главное меню") {}
+            addButtonMenu("Главное меню") {}
         }
     }
 

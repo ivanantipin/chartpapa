@@ -1,71 +1,47 @@
 package com.firelib.techbot.menu
 
-import com.firelib.techbot.command.Cmd
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
 import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 
-interface IMenu{
-    fun act(bot: Bot, update: Update )
-}
-
 class MenuItem(
     val name: String,
-    val children: MutableList<MenuItem> = mutableListOf(),
-    val buttons: MutableList<InlineButton> = mutableListOf(),
-    var title: String = name,
+    val children: MutableList<IMenu> = mutableListOf(),
     var rowSize: Int = 3
-
 ) : IMenu {
 
-    var action: ((bot: Bot, update: Update) -> Unit)? = null
-
-    fun menuItem(chName: String, aa: MenuItem.() -> Unit): MenuItem {
-        require(buttons.isEmpty(), { "to add menu item, buttons items must be empty" })
-        val ret = MenuItem(chName)
-        aa(ret)
-        children += ret
-        return ret
+    fun addButtonMenu(chName: String, aa: MenuItemButtons.() -> Unit): MenuItemButtons {
+        children += MenuItemButtons(chName).apply(aa)
+        return children.last() as MenuItemButtons
     }
 
-    fun inlButton(chName: String, data: Cmd, title: String = "", aa: InlineButton.() -> Unit): InlineButton {
-
-        require(children.isEmpty(), { "to add inline button, menu items must be empty" })
-
-        val ret = InlineButton(chName, data, title)
-        aa(ret)
-        buttons += ret
-        return ret
+    fun addParentMenu(chName: String, aa: MenuItem.() -> Unit) {
+        children += MenuItem(chName).apply(aa)
     }
 
+    fun addActionMenu(chName: String, action: ((bot: Bot, update: Update) -> Unit)) {
+        children += ActionMenuItem(chName, action)
+    }
 
-    fun parentInlButton(chName: String, aa: InlineButton.() -> Unit): InlineButton {
-
-        require(children.isEmpty(), { "to add inline button, menu items must be empty" })
-
-        val ret = InlineButton(chName, Cmd(getCmdName()), title)
-        aa(ret)
-        buttons += ret
-        return ret
+    override fun name(): String {
+        return name
     }
 
     override fun act(bot: Bot, update: Update) {
-        if (action != null) {
-            action!!(bot, update)
-        } else if (children.isNotEmpty()) {
-            val sm = children.map { KeyboardButton(it.name) }.chunked(rowSize)
-            val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
-            bot.sendMessage(
-                chatId = update.chatId(),
-                text = name,
-                replyMarkup = keyboardMarkup
-            )
+        val sm = children.map { KeyboardButton(it.name()) }.chunked(rowSize)
+        val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
+        bot.sendMessage(
+            chatId = update.chatId(),
+            text = name,
+            replyMarkup = keyboardMarkup
+        )
+    }
 
-        } else {
-            MenuRegistry.list(buttons.chunked(rowSize), bot, update.chatId(), title)
-        }
-
+    override fun register(registry: MenuRegistry) {
+        registry.menuActions[name] = this::act
+        children.forEach{it.register(registry)}
     }
 
 }
+
