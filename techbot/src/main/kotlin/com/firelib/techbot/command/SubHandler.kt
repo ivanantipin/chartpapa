@@ -26,16 +26,17 @@ class SubHandler : CommandHandler {
 
         ensureExist(fromUser)
 
-        var added = false
-        updateDatabase("update subscription") {
+        val added = updateDatabase("update subscription") {
             if (Subscriptions.select { Subscriptions.user eq uid and (Subscriptions.ticker eq instr.code) }
                     .empty()) {
                 Subscriptions.insert {
                     it[user] = uid
                     it[ticker] = instr.code
-                    it[Subscriptions.market] = instr.market
+                    it[market] = instr.market
                 }
-                added = true;
+                true
+            }else{
+                false
             }
         }.get()
 

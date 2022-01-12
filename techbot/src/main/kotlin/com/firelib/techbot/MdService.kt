@@ -12,6 +12,7 @@ import firelib.poligon.PoligonSource
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.CompletableFuture
@@ -21,7 +22,7 @@ import java.util.concurrent.ForkJoinTask
 
 object MdService {
 
-    val log = LoggerFactory.getLogger(UsersNotifier::class.java)
+    val log: Logger = LoggerFactory.getLogger(UsersNotifier::class.java)
     val pool = ForkJoinPool(1)
     val multiPool = ForkJoinPool(10)
     val storage = MdStorageImpl()
@@ -46,7 +47,7 @@ object MdService {
 
     fun group(instruments: List<InstrId>): Map<String, List<InstrId>> {
         val ret = instruments.groupBy { it.code.substring(0, 1) }
-            .mapValues { it.value.sortedBy { it.code } }
+            .mapValues { it -> it.value.sortedBy { it.code } }
             .toSortedMap()
         return ret
     }
@@ -92,7 +93,7 @@ object MdService {
 
             println("symbools to migrate")
             symbols.forEach {
-                println("${it}")
+                println(it)
             }
 
             symbols.forEach {

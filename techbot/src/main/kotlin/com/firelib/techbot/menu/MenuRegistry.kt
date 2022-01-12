@@ -7,7 +7,6 @@ import com.firelib.techbot.domain.TimeFrame
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
-import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import firelib.core.misc.JsonHelper
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
@@ -25,33 +24,29 @@ class MenuRegistry {
 
     companion object {
         val mainMenu = "Главное меню"
-    }
-
-    private fun reg(ret: MenuItem) {
-        if (ret.action != null) {
-            menuActions[ret.name] = ret.action!!
-        } else if (ret.children.isNotEmpty()) {
-
-            menuActions[ret.name] = { bot, update ->
-                val sm = ret.children.map { KeyboardButton(it.name) }.chunked(ret.rowSize)
-                val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
-                bot.sendMessage(
-                    chatId = update.chatId(),
-                    text = ret.name,
-                    replyMarkup = keyboardMarkup
-                )
-            }
-        } else {
-            menuActions[ret.name] = { bot, update ->
-                list(ret.buttons.chunked(ret.rowSize), bot, update.chatId(), ret.title)
-            }
+        fun list(buttons: List<List<InlineButton>>, bot: Bot, chatId: ChatId, title: String) {
+            val keyboard = InlineKeyboardMarkup.create(
+                buttons.map {
+                    it.map { but ->
+                        InlineKeyboardButton.CallbackData(text = but.name, callbackData = JsonHelper.toJsonString(but.data))
+                    }
+                })
+            bot.sendMessage(
+                chatId = chatId,
+                text = title,
+                replyMarkup = keyboard
+            )
         }
 
-        ret.buttons.forEach { reg(it) }
-        ret.children.forEach { reg(it) }
     }
 
-    private fun reg(inlineButton: InlineButton) {
+    private fun registerMenu(ret: MenuItem) {
+        menuActions[ret.name] = ret::act
+        ret.buttons.forEach { registerButton(it) }
+        ret.children.forEach { registerMenu(it) }
+    }
+
+    private fun registerButton(inlineButton: InlineButton) {
         require(
             !commandData.containsKey(inlineButton.data.name),
             { "already registered button ${inlineButton.data.name}" })
@@ -62,7 +57,7 @@ class MenuRegistry {
                 listUncat(inlineButton.buttons, bot, update.chatId(), inlineButton.rowSize)
             }
         }
-        inlineButton.buttons.forEach { reg(it) }
+        inlineButton.buttons.forEach { registerButton(it) }
     }
 
     val pool: ThreadPoolExecutor = Executors.newCachedThreadPool() as ThreadPoolExecutor
@@ -84,19 +79,6 @@ class MenuRegistry {
         }
     }
 
-    fun list(buttons: List<List<InlineButton>>, bot: Bot, chatId: ChatId, title: String) {
-        val keyboard = InlineKeyboardMarkup.create(
-            buttons.map {
-                it.map { but ->
-                    InlineKeyboardButton.CallbackData(text = but.name, callbackData = JsonHelper.toJsonString(but.data))
-                }
-            })
-        bot.sendMessage(
-            chatId = chatId,
-            text = title,
-            replyMarkup = keyboard
-        )
-    }
 
     fun listUncat(buttons: List<InlineButton>, bot: Bot, chatId: ChatId, rowSize: Int) {
         buttons.chunked(40).forEach { chunk ->
@@ -123,7 +105,7 @@ class MenuRegistry {
                 }
             }
         }
-        reg(root)
+        registerMenu(root)
     }
 
     private fun MenuItem.makeFundamentalMenu() {
