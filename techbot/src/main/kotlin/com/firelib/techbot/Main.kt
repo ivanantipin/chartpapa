@@ -42,13 +42,14 @@ fun main() {
 
     val menuReg = MenuRegistry()
     menuReg.makeMenu()
-    menuReg.registerHandler(SubHandler())
-    menuReg.registerHandler(RmHandler())
-    menuReg.registerHandler(DemarkCommand())
-    menuReg.registerHandler(FundamentalsCommand())
-    menuReg.registerHandler(TrendsCommand())
-    menuReg.registerHandler(RmTfHandler())
-    menuReg.registerHandler(TfHandler())
+    menuReg.commandData[SubHandler.name] = SubHandler()::handle
+    menuReg.commandData[UnsubHandler.name] = UnsubHandler()::handle
+    menuReg.commandData[DemarkCommand.name] = DemarkCommand()::handle
+    menuReg.commandData[TrendsCommand.name] = TrendsCommand()::handle
+    menuReg.commandData[TfHandler.name] = TfHandler()::handle
+    menuReg.commandData[RmTfHandler.name] = RmTfHandler()::handle
+    menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand()::handle
+
     val bot = bot {
         token = System.getenv("TELEGRAM_TOKEN") ?: debug_token
         timeout = 30
@@ -56,8 +57,7 @@ fun main() {
         dispatch {
             text(null) {
                 try {
-                    val cmd =
-                        if (menuReg.menuActions.containsKey(text) && text != MenuRegistry.mainMenu) text else "HOME"
+                    val cmd = if (menuReg.menuActions.containsKey(text) && text != MenuRegistry.mainMenu) text else "HOME"
                     menuReg.menuActions[cmd]!!(this.bot, this.update)
                 } catch (e: Exception) {
                     mainLogger.error("exception in action ${text}", e)

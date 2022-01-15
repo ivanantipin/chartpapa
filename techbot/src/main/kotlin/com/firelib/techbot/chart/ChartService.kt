@@ -26,7 +26,7 @@ object ChartService {
             }
             val imgUrl = "$urlString/" + imagePath
             //println(optJson)
-            println(imgUrl)
+            //println(imgUrl)
 
             client.get<ByteArray>(imgUrl)
         }
@@ -40,7 +40,7 @@ object ChartService {
             2,
             globalOptions = globalOptions
         ))
-        println(optJson)
+        //println(optJson)
         return postJson(optJson)
     }
 

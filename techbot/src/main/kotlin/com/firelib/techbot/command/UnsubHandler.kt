@@ -10,18 +10,20 @@ import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 
-class RmHandler : CommandHandler {
+class UnsubHandler : CommandHandler {
+    companion object{
+        val name = "unsub"
+    }
 
     override fun command(): String {
-        return "unsub"
+        return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val instrId = cmd.instr()
         val uid = update.chatId()
-        var cnt = 0;
-        updateDatabase("delete user", {
-            cnt = Subscriptions.deleteWhere { Subscriptions.user eq uid.getId().toInt() and (Subscriptions.ticker eq instrId.code) }
+        val cnt = updateDatabase("delete user", {
+            Subscriptions.deleteWhere { Subscriptions.user eq uid.getId().toInt() and (Subscriptions.ticker eq instrId.code) }
         }).get()
         if (cnt > 0) {
             bot.sendMessage(

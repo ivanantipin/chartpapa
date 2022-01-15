@@ -5,7 +5,7 @@ import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
 import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 
-class MenuItem(
+class ParentMenuItem(
     val name: String,
     val children: MutableList<IMenu> = mutableListOf(),
     var rowSize: Int = 3
@@ -16,8 +16,8 @@ class MenuItem(
         return children.last() as MenuItemButtons
     }
 
-    fun addParentMenu(chName: String, aa: MenuItem.() -> Unit) {
-        children += MenuItem(chName).apply(aa)
+    fun addParentMenu(chName: String, aa: ParentMenuItem.() -> Unit) {
+        children += ParentMenuItem(chName).apply(aa)
     }
 
     fun addActionMenu(chName: String, action: ((bot: Bot, update: Update) -> Unit)) {
@@ -28,7 +28,7 @@ class MenuItem(
         return name
     }
 
-    override fun act(bot: Bot, update: Update) {
+    private fun listSubMenus(bot: Bot, update: Update) {
         val sm = children.map { KeyboardButton(it.name()) }.chunked(rowSize)
         val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
         bot.sendMessage(
@@ -39,8 +39,8 @@ class MenuItem(
     }
 
     override fun register(registry: MenuRegistry) {
-        registry.menuActions[name] = this::act
-        children.forEach{it.register(registry)}
+        registry.menuActions[name] = this::listSubMenus
+        children.forEach { it.register(registry) }
     }
 
 }

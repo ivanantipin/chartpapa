@@ -12,11 +12,7 @@ class ActionMenuItem(
         return name
     }
 
-    override fun act(bot: Bot, update: Update) {
-        action(bot, update)
-    }
-
     override fun register(registry: MenuRegistry) {
+        registry.menuActions[name] = action
     }
-
 }

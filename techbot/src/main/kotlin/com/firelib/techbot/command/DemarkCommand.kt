@@ -14,8 +14,12 @@ import java.io.File
 
 class DemarkCommand : CommandHandler {
 
+    companion object{
+        val name = "dema"
+    }
+
     override fun command(): String {
-        return "dema"
+        return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {

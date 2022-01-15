@@ -13,8 +13,12 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 
 class TfHandler : CommandHandler {
+
+    companion object{
+        val name = "add_tf"
+    }
     override fun command(): String {
-        return "add_tf"
+        return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {

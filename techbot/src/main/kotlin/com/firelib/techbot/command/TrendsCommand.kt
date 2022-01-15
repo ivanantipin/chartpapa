@@ -9,8 +9,12 @@ import java.io.File
 
 class TrendsCommand : CommandHandler {
 
+    companion object{
+        val name = "tl"
+    }
+
     override fun command(): String {
-        return "tl"
+        return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {

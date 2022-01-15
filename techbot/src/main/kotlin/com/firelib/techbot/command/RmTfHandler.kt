@@ -12,8 +12,14 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 
 class RmTfHandler : CommandHandler {
+
+    companion object{
+        val name = "rm_tf"
+    }
+
+
     override fun command(): String {
-        return "rm_tf"
+        return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {

@@ -19,6 +19,9 @@ import java.time.LocalDate
 
 class FundamentalsCommand : CommandHandler {
 
+    companion object{
+        val name = "fund"
+    }
 
     val mdStorageImpl = MdStorageImpl()
 
@@ -88,7 +91,7 @@ class FundamentalsCommand : CommandHandler {
     )
 
     override fun command(): String {
-        return "fund"
+        return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {

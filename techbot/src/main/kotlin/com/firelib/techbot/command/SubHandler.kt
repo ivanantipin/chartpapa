@@ -14,8 +14,14 @@ import org.jetbrains.exposed.sql.select
 
 
 class SubHandler : CommandHandler {
+
+    companion object{
+        val name = "sub"
+    }
+
+
     override fun command(): String {
-        return "sub"
+        return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
