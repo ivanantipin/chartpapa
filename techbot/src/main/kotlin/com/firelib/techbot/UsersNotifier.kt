@@ -59,7 +59,7 @@ object UsersNotifier {
             timeFrames.flatMap { timeFrame ->
                 userTickers.getOrDefault(userId, emptyList())!!.flatMap { ticker ->
                     signalTypes.getOrDefault(userId, emptyList()).map { signalType ->
-                        val settings = userSettings.get(userId)!!
+                        val settings = userSettings.getOrDefault(userId, emptyList())
                         if (signalType == SignalType.MACD) {
                             val macdSettings = settings.find { it["command"] == "macd" }
                             NotifyGroup(ticker, signalType, timeFrame, macdSettings ?: emptyMap()) to userId
