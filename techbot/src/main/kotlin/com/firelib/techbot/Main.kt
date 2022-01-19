@@ -4,10 +4,7 @@ import com.firelib.techbot.UpdateSensitivities.updateSensitivties
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.command.*
 import com.firelib.techbot.menu.MenuRegistry
-import com.firelib.techbot.persistence.SensitivityConfig
-import com.firelib.techbot.persistence.Subscriptions
-import com.firelib.techbot.persistence.TimeFrames
-import com.firelib.techbot.persistence.Users
+import com.firelib.techbot.persistence.*
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
@@ -44,6 +41,7 @@ fun main() {
     menuReg.makeMenu()
     menuReg.commandData[SubHandler.name] = SubHandler()::handle
     menuReg.commandData[UnsubHandler.name] = UnsubHandler()::handle
+    menuReg.commandData[MacdCommand.name] = MacdCommand()::handle
     menuReg.commandData[DemarkCommand.name] = DemarkCommand()::handle
     menuReg.commandData[TrendsCommand.name] = TrendsCommand()::handle
     menuReg.commandData[TfHandler.name] = TfHandler()::handle
@@ -57,6 +55,11 @@ fun main() {
         dispatch {
             text(null) {
                 try {
+                    val split = text.split(" ", "\t")
+                    if(split.isNotEmpty() && split[0] == "/set"){
+                        SettingsCommand().handle(split, this.bot, this.update)
+                    }
+
                     val cmd = if (menuReg.menuActions.containsKey(text) && text != MenuRegistry.mainMenu) text else "HOME"
                     menuReg.menuActions[cmd]!!(this.bot, this.update)
                 } catch (e: Exception) {
@@ -105,5 +108,9 @@ fun initDatabase() {
 
         SchemaUtils.create(CacheTable)
         SchemaUtils.createMissingTablesAndColumns(CacheTable)
+
+        SchemaUtils.create(Settings)
+        SchemaUtils.createMissingTablesAndColumns(Settings)
+
     }
 }

@@ -70,13 +70,20 @@ class MenuRegistry {
             makeTechMenu()
             makeInstrumentMenu()
             makeFundamentalMenu()
-            addActionMenu("Помощь", { bot, update ->
-                bot.sendMessage(
-                    chatId = update.chatId(),
-                    text = "[Поддержка](https://t.me/techBotSupport)",
-                    parseMode = ParseMode.MARKDOWN
-                )
-            })
+            addParentMenu("Помощь"){
+                addActionMenu("Канал поддержки", { bot, update ->
+                    bot.sendMessage(
+                        chatId = update.chatId(),
+                        text = "[Поддержка](https://t.me/techBotSupport)",
+                        parseMode = ParseMode.MARKDOWN
+                    )
+                })
+                addActionMenu("MACD Конфигурация", { bot, update ->
+                    MacdCommand.displayMACD_Help(bot, update)
+                })
+                addButtonMenu("Главное меню") {}
+            }
+
         }
         root.register(this)
     }
@@ -86,8 +93,7 @@ class MenuRegistry {
             val bts = makeButtons(
                 FundamentalsCommand.name,
                 update.chatId(),
-                TimeFrame.D,
-                "Выберите тикер"
+                TimeFrame.D
             )
             if (bts.isEmpty()) {
                 emtyListMsg(bot, update)
@@ -100,7 +106,6 @@ class MenuRegistry {
                 )
             }
         })
-        addButtonMenu("Главное меню") {}
     }
 
     private fun ParentMenuItem.makeInstrumentMenu() {
@@ -121,7 +126,7 @@ class MenuRegistry {
             addActionButton("Ваши символы / Удаление", { bot, update ->
                 val buttons = BotHelper.getSubscriptions(update.chatId().getId().toInt()).distinct()
                     .map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
-                list(buttons, bot, update.chatId(), "Ваши символы, нажмите на символ чтобы отписаться")
+                list(buttons, bot, update.chatId(), "*Ваши символы*\n нажмите на символ чтобы отписаться")
             })
 
             addActionButton("Ваши таймфреймы / Удаление", { bot, update ->
@@ -146,12 +151,7 @@ class MenuRegistry {
                 title = "Выберите таймфрейм для демарк секвенты"
                 TimeFrame.values().forEach { tf ->
                     addActionButton(tf.name, { bot, update ->
-                        val bts = makeButtons(
-                            "dema",
-                            update.chatId(),
-                            tf,
-                            "Выберите тикер для демарк секвенты"
-                        )
+                        val bts = makeButtons(DemarkCommand.name,update.chatId(),tf)
                         if (bts.isEmpty()) {
                             emtyListMsg(bot, update)
                         } else {
@@ -165,7 +165,7 @@ class MenuRegistry {
                 title = "Выберите таймфрейм для тренд линий"
                 TimeFrame.values().forEach { tf ->
                     addActionButton(tf.name, { bot, update ->
-                        val bts = makeButtons("tl", update.chatId(), tf, "Выберите тикер для тренд линии")
+                        val bts = makeButtons(TrendsCommand.name, update.chatId(), tf)
                         if (bts.isEmpty()) {
                             emtyListMsg(bot, update)
                         } else {
@@ -173,6 +173,25 @@ class MenuRegistry {
                         }
                     })
                 }
+            }
+
+            addButtonMenu("MACD") {
+                title = "Выберите таймфрейм для MACD"
+                TimeFrame.values().forEach { tf ->
+                    addActionButton(tf.name, { bot, update ->
+                        val bts = makeButtons(MacdCommand.name, update.chatId(), tf)
+                        if (bts.isEmpty()) {
+                            emtyListMsg(bot, update)
+                        } else {
+                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для macd")
+                        }
+                    })
+                }
+            }
+            addActionMenu("Установки") {bot, update->
+                SettingsCommand.displaySettings(bot, update.chatId().getId().toLong())
+                MacdCommand.displayMACD_Help(bot, update)
+
             }
             addButtonMenu("Главное меню") {}
         }
@@ -191,14 +210,12 @@ class MenuRegistry {
     private fun makeButtons(
         cmd: String,
         chatId: ChatId,
-        tf: TimeFrame,
-        title: String
-    ): List<StaticButtonParent> {
+        tf: TimeFrame
+    ): List<SimpleButton> {
         val bts = BotHelper.getSubscriptions(chatId.getId().toInt()).map { instrId ->
-            StaticButtonParent(
+            SimpleButton(
                 instrId.code,
-                Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name)),
-                title
+                Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name))
             )
         }
         return bts

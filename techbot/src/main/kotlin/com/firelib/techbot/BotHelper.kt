@@ -1,24 +1,25 @@
 package com.firelib.techbot
 
+import chart.SignalType
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.persistence.BotConfig
-import com.firelib.techbot.persistence.Subscriptions
-import com.firelib.techbot.persistence.TimeFrames
-import com.firelib.techbot.persistence.Users
+import com.firelib.techbot.menu.chatId
+import com.firelib.techbot.persistence.*
 import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
+import firelib.core.misc.JsonHelper
 import firelib.core.store.MdStorageImpl
 import firelib.iqfeed.IntervalTransformer
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDateTime
-
 
 fun ChatId.getId() : Long{
     return (this as ChatId.Id).id
@@ -50,7 +51,52 @@ object BotHelper {
                     listOf(ret)
                 }
             }
+        }
+    }
 
+    fun getSubscriptions(): Map<UserId, List<InstrId>> {
+        return transaction {
+            Subscriptions.selectAll().flatMap {
+                val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
+                if(ret == null){
+                    mainLogger.error("failed to map ${it}")
+                    emptyList()
+                }else{
+                    listOf(UserId(it[Subscriptions.user].toLong()) to ret)
+                }
+            }.groupBy({it.first}, {it.second})
+        }
+    }
+
+    fun getTimeFrames(): Map<UserId, List<TimeFrame>> {
+        return transaction {
+            TimeFrames.selectAll().map {
+                UserId(it[TimeFrames.user].toLong()) to TimeFrame.valueOf(it[TimeFrames.tf])
+            }.groupBy({ it.first },{it.second})
+        }
+    }
+
+    fun getSignalTypes(): Map<UserId, List<chart.SignalType>> {
+        return transaction {
+            Users.selectAll().map { UserId(it[Users.userId].toLong()) to SignalType.values().toList() }.associateBy({it.first}, {it.second})
+        }
+    }
+
+    fun getAllSettings(): Map<UserId, List<Map<String,String>>> {
+        return Settings.selectAll().map {
+            UserId(it[Settings.user].toLong()) to JsonHelper.fromJson<Map<String,String>>(it[Settings.value])
+        }.groupBy({it.first}, {it.second})
+    }
+
+    fun readSettings(update : Update) : List<Map<String,String>>{
+        return readSettings(update.chatId().getId())
+    }
+
+    fun readSettings(userId: Long): List<Map<String, String>> {
+        return transaction {
+            Settings.select { (Settings.user eq userId.toInt()) }.map {
+                JsonHelper.fromJson(it[Settings.value])
+            }
         }
     }
 

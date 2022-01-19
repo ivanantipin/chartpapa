@@ -9,7 +9,6 @@ import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.sequenta.SequentaAnnCreator
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -17,11 +16,10 @@ import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.core.store.MdStorageImpl
 import firelib.indicators.EmaSimple
-import org.jetbrains.exposed.sql.logTimeSpent
 
 data class MacdResult(
-    val signals : List<Pair<Int, Side>>,
-    val options : HOptions
+    val signals: List<Pair<Int, Side>>,
+    val options: HOptions
 )
 
 object MacdSignals {
@@ -34,9 +32,9 @@ object MacdSignals {
             val up = s.sign < 0
             val level = if (up) oh.high else oh.low
             val point = HPoint(x = oh.endTime.toEpochMilli(), y = level, xAxis = 0, yAxis = 0)
-            if(up){
+            if (up) {
                 shapes.add(RenderUtils.makeBuySellPoint("red", point.x!!, point.y!!, Side.Sell))
-            }else{
+            } else {
                 shapes.add(RenderUtils.makeBuySellPoint("green", point.x!!, point.y!!, Side.Buy))
             }
         }
@@ -65,27 +63,52 @@ object MacdSignals {
         return options
     }
 
-    fun addChart(options: HOptions, data : List<Array<Double>>, signal : List<Array<Double>>,){
+    fun addChart(options: HOptions, data: List<Array<Double>>, signal: List<Array<Double>>) {
         options.yAxis += HAxis(height = "30%", lineWidth = 1, offset = 10, opposite = false, top = "70%")
         options.series += HSeries("column", "macd", data = data, marker = HMarker(true), showInLegend = true, yAxis = 1)
-        options.series += HSeries("line", "signal", data = signal, marker = HMarker(false), showInLegend = true, yAxis = 1)
+        options.series += HSeries(
+            "line",
+            "signal",
+            data = signal,
+            marker = HMarker(false),
+            showInLegend = true,
+            yAxis = 1
+        )
     }
 
-    fun checkSignals(instr: InstrId, tf: TimeFrame, window: Int, existing: Set<BreachEventKey>): BreachEvent? {
+    fun checkSignals(
+        instr: InstrId,
+        tf: TimeFrame,
+        window: Int,
+        existing: Set<BreachEventKey>,
+        settings: Map<String, String>
+    ): BreachEvent? {
         val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
 
-        val result = render(ohlcs, 12, 26, 9)
+        val longEma = settings.getOrDefault("longEma", "26").toInt()
+        val shortEma = settings.getOrDefault("shortEma", "12").toInt()
+        val signalEma = settings.getOrDefault("signalEma", "9").toInt()
 
-        if(result.signals.isNotEmpty()){
+        val result = render(
+            ohlcs,
+            shortEma,
+            longEma,
+            signalEma,
+            "Signal: Macd(${shortEma},${longEma},${signalEma}) ${instr.code} ${tf.name}"
+        )
+        val suffix = "_${shortEma}_${longEma}_${signalEma}"
+
+        if (result.signals.isNotEmpty()) {
             val last = result.signals.last()
             val time = ohlcs[last.first].endTime
-            val key = BreachEventKey(instr.id, tf, time.toEpochMilli(), BreachType.DEMARK_SIGNAL)
+            val key = BreachEventKey(instr.id + suffix , tf, time.toEpochMilli(), BreachType.MACD)
             val newSignal = last.first > ohlcs.size - window && !existing.contains(key)
             if (newSignal) {
                 val img = ChartService.post(result.options)
+
                 val fileName = makeSnapFileName(
                     BreachType.MACD.name,
-                    instr.id,
+                    instr.id + suffix,
                     tf,
                     time.toEpochMilli()
                 )
@@ -96,7 +119,7 @@ object MacdSignals {
         return null
     }
 
-    fun render(ohlcs: List<Ohlc>, shortEmaLen : Int, longEmaLen : Int, signalEmaLen : Int): MacdResult {
+    fun render(ohlcs: List<Ohlc>, shortEmaLen: Int, longEmaLen: Int, signalEmaLen: Int, title: String): MacdResult {
         val shortEma = EmaSimple(shortEmaLen, ohlcs.first().close)
         val longEma = EmaSimple(longEmaLen, ohlcs.first().close)
         val signalEma = EmaSimple(signalEmaLen, 0.0)
@@ -112,7 +135,7 @@ object MacdSignals {
         }
 
         val signals = signal.flatMapIndexed { idx, value ->
-            if (idx > 13) {
+            if (idx > 26) {
                 val currValue = macd[idx] - signal[idx]
                 val prevValue = macd[idx - 1] - signal[idx - 1]
                 if (currValue * prevValue < 0) {
@@ -127,7 +150,7 @@ object MacdSignals {
 
         val hShapes = createAnnotations(signals, ohlcs)
 
-        val options = makeMacdOptions(hShapes, ohlcs, macd, signal, "macd")
+        val options = makeMacdOptions(hShapes, ohlcs, macd, signal, title)
         return MacdResult(signals, options)
     }
 
@@ -138,5 +161,5 @@ fun main() {
     val ticker = InstrId(code = "GAZP", market = "1", source = SourceName.FINAM.name)
     //val ticker = InstrId(code = "VIST", market = "XNAS", source = SourceName.POLIGON.name)
     MdStorageImpl().updateMarketData(ticker, Interval.Min10);
-    MacdSignals.checkSignals(ticker, TimeFrame.D, 180, emptySet())
+    MacdSignals.checkSignals(ticker, TimeFrame.D, 180, emptySet(), emptyMap())
 }
