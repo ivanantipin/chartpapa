@@ -21,6 +21,10 @@ data class Ohlc(
         return endTime
     }
 
+    fun normalPrice() : Double{
+        return (high + low + close)/3.0
+    }
+
     override fun compareTo(other: Ohlc): Int {
         return this.endTime.compareTo(other.endTime)
     }

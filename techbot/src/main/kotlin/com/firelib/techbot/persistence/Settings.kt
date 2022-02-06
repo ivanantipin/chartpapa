@@ -7,5 +7,5 @@ object Settings : Table() {
     val name = varchar("name", 50)
     val value = varchar("settings", 500)
 
-    override val primaryKey = PrimaryKey(user, name = "settings_pk")
+    override val primaryKey = PrimaryKey(user, name, name = "settings_pk")
 }

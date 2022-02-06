@@ -25,12 +25,10 @@ class UnsubHandler : CommandHandler {
         val cnt = updateDatabase("delete user", {
             Subscriptions.deleteWhere { Subscriptions.user eq uid.getId().toInt() and (Subscriptions.ticker eq instrId.code) }
         }).get()
-        if (cnt > 0) {
-            bot.sendMessage(
-                chatId = uid,
-                text = "Символ удален ${instrId}",
-                parseMode = ParseMode.MARKDOWN
-            )
-        }
+        bot.sendMessage(
+            chatId = uid,
+            text = "Символ удален ${instrId.code}",
+            parseMode = ParseMode.MARKDOWN
+        )
     }
 }

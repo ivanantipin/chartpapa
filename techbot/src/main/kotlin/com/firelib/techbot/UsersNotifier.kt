@@ -7,6 +7,7 @@ import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.macd.MacdSignals
+import com.firelib.techbot.macd.RsiBolingerSignals
 import com.firelib.techbot.sequenta.SequentaSignals
 import com.firelib.techbot.tdline.TdLineSignals
 import com.github.kotlintelegrambot.Bot
@@ -57,17 +58,12 @@ object UsersNotifier {
         val userTickers = getUserTickers()
         val pairs = getUserTimeframes().flatMap { (userId, timeFrames) ->
             timeFrames.flatMap { timeFrame ->
-                userTickers.getOrDefault(userId, emptyList())!!.flatMap { ticker ->
+                userTickers.getOrDefault(userId, emptyList()).flatMap { ticker ->
                     signalTypes.getOrDefault(userId, emptyList()).map { signalType ->
                         val settings = userSettings.getOrDefault(userId, emptyList())
-                        if (signalType == SignalType.MACD) {
-                            val macdSettings = settings.find { it["command"] == "macd" }
-                            NotifyGroup(ticker, signalType, timeFrame, macdSettings ?: emptyMap()) to userId
-                        } else {
-                            NotifyGroup(ticker, signalType, timeFrame, emptyMap()) to userId
-                        }
+                        val macdSettings = settings.find { it["command"] == signalType.settingsName } ?: emptyMap()
+                        NotifyGroup(ticker, signalType, timeFrame, macdSettings) to userId
                     }
-
                 }
             }
         }
@@ -111,6 +107,8 @@ object UsersNotifier {
                         )
                     }else if (group.signalType == SignalType.DEMARK){
                         SequentaSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
+                    }else if (group.signalType == SignalType.RSI_BOLINGER){
+                        listOfNotNull(RsiBolingerSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents, group.settings))
                     }else if (group.signalType == SignalType.TREND_LINE){
                         TdLineSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
                     }else{

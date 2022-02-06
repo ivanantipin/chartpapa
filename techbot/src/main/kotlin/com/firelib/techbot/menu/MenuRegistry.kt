@@ -1,5 +1,6 @@
 package com.firelib.techbot.menu
 
+import chart.SignalType
 import com.firelib.techbot.*
 import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.TimeFrame
@@ -81,11 +82,19 @@ class MenuRegistry {
                 addActionMenu("MACD Конфигурация", { bot, update ->
                     MacdCommand.displayMACD_Help(bot, update)
                 })
-                addButtonMenu("Главное меню") {}
+                addActionMenu("RSI-BOLINGER Конфигурация", { bot, update ->
+                    RsiBolingerCommand.displayHelp(bot, update)
+                })
+
+                mainMenu()
             }
 
         }
         root.register(this)
+    }
+
+    private fun ParentMenuItem.mainMenu() {
+        addButtonMenu("Главное меню") {}
     }
 
     private fun ParentMenuItem.makeFundamentalMenu() {
@@ -109,12 +118,12 @@ class MenuRegistry {
     }
 
     private fun ParentMenuItem.makeInstrumentMenu() {
-        addButtonMenu("Инструменты/Подписки") {
-            rowSize = 1
-            addButton("Добавить символ", "Выберите начальную букву тикера:") {
-                rowSize = 4
-                MdService.instrByStart.keys.forEach { start ->
-                    addButtonToButton(start, "Выберите начальную букву тикера:") {
+        addParentMenu("Инструменты") {
+            rowSize = 2
+            addButtonMenu("Добавить символ") {
+                this.rowSize = 4
+                MdService.instrByStart.keys.forEach {start->
+                    this.addButton(start, "Выберите начальную букву"){
                         rowSize = 2
                         buttons +=  MdService.instrByStart.getOrDefault(start, emptyList()).map { code ->
                             SimpleButton("(${code.code}) ${code.name}", Cmd(SubHandler.name, mapOf("id" to code.id)))
@@ -123,25 +132,54 @@ class MenuRegistry {
                 }
             }
 
-            addActionButton("Ваши символы / Удаление", { bot, update ->
+            addActionMenu("Ваши символы / Удаление", { bot, update ->
                 val buttons = BotHelper.getSubscriptions(update.chatId().getId().toInt()).distinct()
                     .map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
-                list(buttons, bot, update.chatId(), "*Ваши символы*\n нажмите на символ чтобы отписаться")
+                list(buttons, bot, update.chatId(), "==Ваши символы==\nнажмите на символ чтобы отписаться")
             })
+            mainMenu()
+        }
 
-            addActionButton("Ваши таймфреймы / Удаление", { bot, update ->
+
+        addParentMenu("Установки") {
+            rowSize = 2
+
+            addActionMenu("Отписаться от таймфрейма", { bot, update ->
                 val buttons = BotHelper.getTimeFrames(update.chatId())
                     .map { SimpleButton(it, Cmd(RmTfHandler.name, mapOf("tf" to it))) }.chunked(1)
                 list(buttons, bot, update.chatId(), "Нажмите на таймфрейм чтобы отписаться")
             })
 
-            addButton("Добавить таймфрейм", "Выберите таймфрейм") {
+            addButtonMenu("Добавить таймфрейм") {
                 rowSize = 1
                 buttons += TimeFrame.values().map { tf ->
                     SimpleButton(tf.name, Cmd(TfHandler.name, mapOf("tf" to tf.name)))
                 }
             }
+
+            addActionMenu("Отписаться от сигнала", { bot, update ->
+                val buttons = BotHelper.getSignalTypes(update.chatId())
+                    .map { SimpleButton(it, Cmd(RmSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it))) }.chunked(1)
+                list(buttons, bot, update.chatId(), "==Ваши подписки==\nнажмите чтобы отписаться")
+            })
+
+            addButtonMenu("Добавить тип сигнала") {
+                rowSize = 1
+                buttons += SignalType.values().map { signalType ->
+                    SimpleButton(signalType.name, Cmd(SignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to signalType.name)))
+                }
+            }
+
+            addActionMenu("Другие настройки") {bot, update->
+                SettingsCommand.displaySettings(bot, update.chatId().getId().toLong())
+                MacdCommand.displayMACD_Help(bot, update)
+
+            }
+
+
+            mainMenu()
         }
+
     }
 
     private fun ParentMenuItem.makeTechMenu() {
@@ -188,11 +226,21 @@ class MenuRegistry {
                     })
                 }
             }
-            addActionMenu("Установки") {bot, update->
-                SettingsCommand.displaySettings(bot, update.chatId().getId().toLong())
-                MacdCommand.displayMACD_Help(bot, update)
 
+            addButtonMenu("RSI-BOLINGER") {
+                title = "Выберите таймфрейм для RSI-BOLINGER"
+                TimeFrame.values().forEach { tf ->
+                    addActionButton(tf.name, { bot, update ->
+                        val bts = makeButtons(RsiBolingerCommand.name, update.chatId(), tf)
+                        if (bts.isEmpty()) {
+                            emtyListMsg(bot, update)
+                        } else {
+                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для RSI-BOLINGER")
+                        }
+                    })
+                }
             }
+
             addButtonMenu("Главное меню") {}
         }
     }

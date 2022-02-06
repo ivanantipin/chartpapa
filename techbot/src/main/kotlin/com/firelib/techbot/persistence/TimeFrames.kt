@@ -10,3 +10,12 @@ object TimeFrames : IntIdTable() {
         index(true, user, tf)
     }
 }
+
+object SignalTypes : IntIdTable() {
+    val user = integer("user_id")
+    val signalType = varchar("signalType", 20)
+
+    init {
+        index(true, user, signalType)
+    }
+}

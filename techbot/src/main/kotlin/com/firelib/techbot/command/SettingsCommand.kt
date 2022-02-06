@@ -1,5 +1,6 @@
 package com.firelib.techbot.command
 
+import chart.SignalType
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.Settings
@@ -8,7 +9,6 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
-import com.github.kotlintelegrambot.entities.User
 import firelib.core.misc.JsonHelper
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
@@ -46,16 +46,28 @@ class SettingsCommand {
 
         val uid = fromUser.id.toInt()
 
-        if (!MacdCommand.validate(cmd)) {
-            MacdCommand.displayMACD_Help(bot, update)
+        val signalType = SignalType.values().find { cmd[1] == it.settingsName }
+
+        if(signalType == null){
+            bot.sendMessage(
+                chatId = ChatId.fromId(uid.toLong()),
+                text = "Неизвестная команда",
+                parseMode = ParseMode.MARKDOWN_V2
+            )
             return
         }
-        val parsed = MacdCommand.parsePayload(cmd.subList(1, cmd.size))
+
+        if (!signalType.validate(cmd)) {
+            signalType.displayHelp(bot, update)
+            return
+        }
+        val parsed = signalType.parsePayload(cmd)
+
         val settingsJson = JsonHelper.toJsonString(parsed)
 
         updateDatabase("update subscription") {
             val recs: Int = Settings.deleteWhere {
-                Settings.user eq uid and (Settings.name eq "macd")
+                Settings.user eq uid and (Settings.name eq signalType.settingsName)
             }
             Settings.insert {
                 it[user] = uid

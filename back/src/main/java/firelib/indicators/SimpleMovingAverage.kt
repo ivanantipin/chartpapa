@@ -10,6 +10,11 @@ class SimpleMovingAverage(val period: Int, val calcSko: Boolean) {
     private var currentSma = 0.0
     private var pos = 0
 
+    fun initMa(init : Double){
+        repeat(period){
+            add(init)
+        }
+    }
 
     fun value ()= currentSma / period
 
@@ -26,7 +31,7 @@ class SimpleMovingAverage(val period: Int, val calcSko: Boolean) {
 
         if (calcSko) {
             val value = value()
-            currentSko = Math.pow(closes.sumByDouble {
+            currentSko = Math.pow(closes.sumOf {
                 Math.pow(it - value, 2.0)
             }/period, 0.5)
         }

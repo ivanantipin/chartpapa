@@ -1,10 +1,10 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.persistence.TimeFrames
+import com.firelib.techbot.menu.fromUser
+import com.firelib.techbot.persistence.SignalTypes
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
-import com.firelib.techbot.menu.fromUser
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -12,17 +12,18 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 
-class TfHandler : CommandHandler {
+class SignalTypeHandler : CommandHandler {
 
     companion object{
-        val name = "add_tf"
+        val name = "addS"
+        val SIGNAL_TYPE_ATTRIBUTE = "sT"
     }
     override fun command(): String {
         return name
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
-        val timeFrame = cmd.opts["tf"]!!
+        val signalType = cmd.opts[SIGNAL_TYPE_ATTRIBUTE]!!
         val fromUser = update.fromUser()
 
         val uid = fromUser.id.toInt()
@@ -31,12 +32,12 @@ class TfHandler : CommandHandler {
 
         var flag = false
 
-        updateDatabase("update timeframes") {
-            if (TimeFrames.select { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }
+        updateDatabase("update signal type") {
+            if (SignalTypes.select { SignalTypes.user eq uid and (SignalTypes.signalType eq signalType) }
                     .empty()) {
-                TimeFrames.insert {
-                    it[user] = uid
-                    it[tf] = timeFrame
+                SignalTypes.insert {
+                    it[SignalTypes.user] = uid
+                    it[SignalTypes.signalType] = signalType
                 }
                 flag = true
             }
@@ -45,10 +46,9 @@ class TfHandler : CommandHandler {
         if (flag) {
             bot.sendMessage(
                 chatId = ChatId.fromId(fromUser.id),
-                text = "Таймфрейм добавлен ${timeFrame}",
+                text = "Тип сигнала добавлен в нотификации ${signalType}",
                 parseMode = ParseMode.MARKDOWN
             )
         }
     }
 }
-

@@ -21,10 +21,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDateTime
 
-fun ChatId.getId() : Long{
+fun ChatId.getId(): Long {
     return (this as ChatId.Id).id
 }
-
 
 object BotHelper {
 
@@ -44,10 +43,10 @@ object BotHelper {
                 Subscriptions.user eq uid
             }.withDistinct().flatMap {
                 val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
-                if(ret == null){
+                if (ret == null) {
                     mainLogger.error("failed to map ${it}")
                     emptyList()
-                }else{
+                } else {
                     listOf(ret)
                 }
             }
@@ -58,13 +57,13 @@ object BotHelper {
         return transaction {
             Subscriptions.selectAll().flatMap {
                 val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
-                if(ret == null){
+                if (ret == null) {
                     mainLogger.error("failed to map ${it}")
                     emptyList()
-                }else{
+                } else {
                     listOf(UserId(it[Subscriptions.user].toLong()) to ret)
                 }
-            }.groupBy({it.first}, {it.second})
+            }.groupBy({ it.first }, { it.second })
         }
     }
 
@@ -72,23 +71,25 @@ object BotHelper {
         return transaction {
             TimeFrames.selectAll().map {
                 UserId(it[TimeFrames.user].toLong()) to TimeFrame.valueOf(it[TimeFrames.tf])
-            }.groupBy({ it.first },{it.second})
+            }.groupBy({ it.first }, { it.second })
         }
     }
 
-    fun getSignalTypes(): Map<UserId, List<chart.SignalType>> {
+    fun getSignalTypes(): Map<UserId, List<SignalType>> {
         return transaction {
-            Users.selectAll().map { UserId(it[Users.userId].toLong()) to SignalType.values().toList() }.associateBy({it.first}, {it.second})
+            SignalTypes.selectAll().map {
+                UserId(it[SignalTypes.user].toLong()) to SignalType.valueOf(it[SignalTypes.signalType])
+            }.groupBy({ it.first }, { it.second })
         }
     }
 
-    fun getAllSettings(): Map<UserId, List<Map<String,String>>> {
+    fun getAllSettings(): Map<UserId, List<Map<String, String>>> {
         return Settings.selectAll().map {
-            UserId(it[Settings.user].toLong()) to JsonHelper.fromJson<Map<String,String>>(it[Settings.value])
-        }.groupBy({it.first}, {it.second})
+            UserId(it[Settings.user].toLong()) to JsonHelper.fromJson<Map<String, String>>(it[Settings.value])
+        }.groupBy({ it.first }, { it.second })
     }
 
-    fun readSettings(update : Update) : List<Map<String,String>>{
+    fun readSettings(update: Update): List<Map<String, String>> {
         return readSettings(update.chatId().getId())
     }
 
@@ -108,6 +109,14 @@ object BotHelper {
         }
     }
 
+    fun getSignalTypes(uid: ChatId): List<String> {
+        return transaction {
+            SignalTypes.select {
+                SignalTypes.user eq uid.getId().toInt()
+            }.withDistinct().map { it[SignalTypes.signalType] }
+        }
+    }
+
     fun ensureExist(user: User) {
         updateDatabase("user update") {
             if (Users.select { Users.userId eq user.id }.count() == 0L) {
@@ -120,6 +129,12 @@ object BotHelper {
                     TimeFrames.insert {
                         it[this.user] = user.id.toInt()
                         it[tf] = tff.name
+                    }
+                }
+                SignalType.values().filter { it != SignalType.MACD }.forEach { tff ->
+                    SignalTypes.insert {
+                        it[this.user] = user.id.toInt()
+                        it[this.signalType] = tff.name
                     }
                 }
             }

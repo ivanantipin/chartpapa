@@ -21,7 +21,7 @@ object RenderUtils {
 
     val GLOBAL_OPTIONS_FOR_BILLIONS = mapOf("lang" to mapOf("numericSymbols" to listOf("k", "M", "B", "T", "P", "E")))
 
-    fun makeOptions(ohlc: List<Ohlc>, title: String): HOptions {
+    fun makeOptions(ohlc: List<Ohlc>, title: String, pct : Int = 80): HOptions {
         val data = ohlc.mapIndexed { idx, it ->
             arrayOf(
                 it.endTime.toEpochMilli().toDouble(),
@@ -37,7 +37,7 @@ object RenderUtils {
             rangeSelector = HRangeSelector(false),
             legend = defaultLegend
         ).apply {
-            yAxis += HAxis(height = "80%", lineWidth = 1, offset = 10, opposite = false)
+            yAxis += HAxis(height = "${pct}%", lineWidth = 1, offset = 10, opposite = false)
             xAxis = HAxis(gapGridLineWidth = 1, lineWidth = 1)
             series += HSeries("ohlc", "price", data = data, marker = HMarker(true), showInLegend = true)
             navigator = HNavigator(false)
