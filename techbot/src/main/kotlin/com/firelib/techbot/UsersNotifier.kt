@@ -92,46 +92,49 @@ object UsersNotifier {
                 val existingEvents = loadExistingBreaches().map { it.key }.toSet()
 
                 getNotifyGroups().forEach { (group, users) ->
-                    val instrId = group.ticker
-                    val timeFrame = group.timeFrame
+                    try{
+                        val instrId = group.ticker
+                        val timeFrame = group.timeFrame
 
-                    val breaches = if(group.signalType == SignalType.MACD){
-                        listOfNotNull(
-                            MacdSignals.checkSignals(
-                                instrId,
-                                timeFrame,
-                                breachWindow,
-                                existingEvents,
-                                group.settings
+                        val breaches = if(group.signalType == SignalType.MACD){
+                            listOfNotNull(
+                                MacdSignals.checkSignals(
+                                    instrId,
+                                    timeFrame,
+                                    breachWindow,
+                                    existingEvents,
+                                    group.settings
+                                )
                             )
-                        )
-                    }else if (group.signalType == SignalType.DEMARK){
-                        SequentaSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
-                    }else if (group.signalType == SignalType.RSI_BOLINGER){
-                        listOfNotNull(RsiBolingerSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents, group.settings))
-                    }else if (group.signalType == SignalType.TREND_LINE){
-                        TdLineSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
-                    }else{
-                        emptyList()
+                        }else if (group.signalType == SignalType.DEMARK){
+                            SequentaSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
+                        }else if (group.signalType == SignalType.RSI_BOLINGER){
+                            listOfNotNull(RsiBolingerSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents, group.settings))
+                        }else if (group.signalType == SignalType.TREND_LINE){
+                            TdLineSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
+                        }else{
+                            emptyList()
+                        }
+
+                        breaches.forEach {
+                            notify(it, bot, users)
+                        }
+
+                        if(breaches.isNotEmpty()){
+                            updateDatabase("insert breaches ${breaches.size}") {
+                                BreachEvents.batchInsert(breaches) {
+                                    this[BreachEvents.instrId] = it.key.instrId
+                                    this[BreachEvents.timeframe] = it.key.tf.name
+                                    this[BreachEvents.eventTimeMs] = it.key.eventTimeMs
+                                    this[BreachEvents.photoFile] = it.photoFile
+                                    this[BreachEvents.eventType] = it.key.type.name
+                                }
+                            }.get()
+
+                        }
+                    }catch (e : Exception){
+                        mainLogger.error("failed to notify group ${group}", e)
                     }
-
-                    breaches.forEach {
-                        notify(it, bot, users)
-                    }
-
-                    if(breaches.isNotEmpty()){
-                        updateDatabase("insert breaches ${breaches.size}") {
-                            BreachEvents.batchInsert(breaches) {
-                                this[BreachEvents.instrId] = it.key.instrId
-                                this[BreachEvents.timeframe] = it.key.tf.name
-                                this[BreachEvents.eventTimeMs] = it.key.eventTimeMs
-                                this[BreachEvents.photoFile] = it.photoFile
-                                this[BreachEvents.eventType] = it.key.type.name
-                            }
-                        }.get()
-
-                    }
-
                 }
 
             }
