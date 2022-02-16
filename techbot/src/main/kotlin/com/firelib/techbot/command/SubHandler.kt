@@ -28,7 +28,7 @@ class SubHandler : CommandHandler {
         val instr = cmd.instr()
         val fromUser = update.fromUser()
 
-        val uid = fromUser.id.toInt()
+        val uid = fromUser.id
 
         ensureExist(fromUser)
 

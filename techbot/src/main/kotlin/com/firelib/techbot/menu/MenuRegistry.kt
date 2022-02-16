@@ -133,7 +133,7 @@ class MenuRegistry {
             }
 
             addActionMenu("Ваши символы / Удаление", { bot, update ->
-                val buttons = BotHelper.getSubscriptions(update.chatId().getId().toInt()).distinct()
+                val buttons = BotHelper.getSubscriptions(update.chatId().getId()).distinct()
                     .map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
                 list(buttons, bot, update.chatId(), "==Ваши символы==\nнажмите на символ чтобы отписаться")
             })
@@ -260,7 +260,7 @@ class MenuRegistry {
         chatId: ChatId,
         tf: TimeFrame
     ): List<SimpleButton> {
-        val bts = BotHelper.getSubscriptions(chatId.getId().toInt()).map { instrId ->
+        val bts = BotHelper.getSubscriptions(chatId.getId()).map { instrId ->
             SimpleButton(
                 instrId.code,
                 Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name))

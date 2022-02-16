@@ -3,7 +3,7 @@ package com.firelib.techbot.persistence
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 object TimeFrames : IntIdTable() {
-    val user = integer("user_id")
+    val user = long("user_id")
     val tf = varchar("tf", 10)
 
     init {
@@ -12,7 +12,7 @@ object TimeFrames : IntIdTable() {
 }
 
 object SignalTypes : IntIdTable() {
-    val user = integer("user_id")
+    val user = long("user_id")
     val signalType = varchar("signalType", 20)
 
     init {

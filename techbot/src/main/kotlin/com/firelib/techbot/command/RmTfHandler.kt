@@ -25,7 +25,7 @@ class RmTfHandler : CommandHandler {
         val timeFrame = cmd.opts["tf"]!!
         val fromUser = update.fromUser()
 
-        val uid = fromUser.id.toInt()
+        val uid = fromUser.id
 
         BotHelper.ensureExist(fromUser)
 

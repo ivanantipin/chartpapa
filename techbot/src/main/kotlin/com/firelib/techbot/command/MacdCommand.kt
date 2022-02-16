@@ -85,7 +85,7 @@ class MacdCommand : CommandHandler {
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
 
-        val userId = update.chatId().getId().toInt()
+        val userId = update.chatId().getId()
 
         val value = transaction {
             Settings.select { (Settings.user eq userId) and (Settings.name eq "macd") }.map { it[Settings.value] }.firstOrNull()

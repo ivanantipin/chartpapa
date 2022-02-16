@@ -44,7 +44,7 @@ class SettingsCommand {
 
         val fromUser = update.fromUser()
 
-        val uid = fromUser.id.toInt()
+        val uid = fromUser.id
 
         val signalType = SignalType.values().find { cmd[1] == it.settingsName }
 

@@ -94,15 +94,15 @@ fun initDatabase() {
             if(siggi.isEmpty()){
                 mainLogger.info("populating for user ${userRow[Users.name]}  ${userRow[Users.familyName]}" )
                 SignalTypes.insert {
-                    it[SignalTypes.user] = userRow[Users.userId].toInt()
+                    it[SignalTypes.user] = userRow[Users.userId]
                     it[SignalTypes.signalType] = SignalType.TREND_LINE.name
                 }
                 SignalTypes.insert {
-                    it[SignalTypes.user] = userRow[Users.userId].toInt()
+                    it[SignalTypes.user] = userRow[Users.userId]
                     it[SignalTypes.signalType] = SignalType.DEMARK.name
                 }
                 SignalTypes.insert {
-                    it[SignalTypes.user] = userRow[Users.userId].toInt()
+                    it[SignalTypes.user] = userRow[Users.userId]
                     it[SignalTypes.signalType] = SignalType.RSI_BOLINGER.name
                 }
 

@@ -26,7 +26,7 @@ class SignalTypeHandler : CommandHandler {
         val signalType = cmd.opts[SIGNAL_TYPE_ATTRIBUTE]!!
         val fromUser = update.fromUser()
 
-        val uid = fromUser.id.toInt()
+        val uid = fromUser.id
 
         BotHelper.ensureExist(fromUser)
 

@@ -27,7 +27,7 @@ fun ChatId.getId(): Long {
 
 object BotHelper {
 
-    fun displayTimeFrames(uid: Int): String {
+    fun displayTimeFrames(uid: Long): String {
         return transaction {
             val header = "*Ваши таймфреймы*\n"
             val resp = TimeFrames.select {
@@ -37,7 +37,7 @@ object BotHelper {
         }
     }
 
-    fun getSubscriptions(uid: Int): List<InstrId> {
+    fun getSubscriptions(uid: Long): List<InstrId> {
         return transaction {
             Subscriptions.select {
                 Subscriptions.user eq uid
@@ -95,7 +95,7 @@ object BotHelper {
 
     fun readSettings(userId: Long): List<Map<String, String>> {
         return transaction {
-            Settings.select { (Settings.user eq userId.toInt()) }.map {
+            Settings.select { (Settings.user eq userId) }.map {
                 JsonHelper.fromJson(it[Settings.value])
             }
         }
@@ -104,7 +104,7 @@ object BotHelper {
     fun getTimeFrames(uid: ChatId): List<String> {
         return transaction {
             TimeFrames.select {
-                TimeFrames.user eq uid.getId().toInt()
+                TimeFrames.user eq uid.getId()
             }.withDistinct().map { it[TimeFrames.tf] }
         }
     }
@@ -112,7 +112,7 @@ object BotHelper {
     fun getSignalTypes(uid: ChatId): List<String> {
         return transaction {
             SignalTypes.select {
-                SignalTypes.user eq uid.getId().toInt()
+                SignalTypes.user eq uid.getId()
             }.withDistinct().map { it[SignalTypes.signalType] }
         }
     }
@@ -127,13 +127,13 @@ object BotHelper {
                 }
                 TimeFrame.values().forEach { tff ->
                     TimeFrames.insert {
-                        it[this.user] = user.id.toInt()
+                        it[this.user] = user.id
                         it[tf] = tff.name
                     }
                 }
                 SignalType.values().filter { it != SignalType.MACD }.forEach { tff ->
                     SignalTypes.insert {
-                        it[this.user] = user.id.toInt()
+                        it[this.user] = user.id
                         it[this.signalType] = tff.name
                     }
                 }
