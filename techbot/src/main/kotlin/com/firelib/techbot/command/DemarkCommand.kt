@@ -50,8 +50,6 @@ class DemarkCommand : CommandHandler {
 
 fun main() {
     initDatabase()
-    //println(EodHistSource().symbols().size)
-    //return
     val byInstrId = FundamentalService.debtToFcF(InstrId.dummyInstrument("vet"))
     ChartService.post(
         Debt2FCFCharter.makeSeries(byInstrId[0], byInstrId[1], "FCF to Debt"),

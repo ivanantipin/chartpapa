@@ -105,7 +105,6 @@ fun printMatrix(mx : PrimitiveMatrix){
         for(j in 0 until mx.countColumns()){
             print("${mx[i,j].toStrWithDecPlaces(3)} ")
         }
-        println()
     }
 }
 

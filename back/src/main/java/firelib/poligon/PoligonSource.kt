@@ -70,7 +70,7 @@ class PoligonSource : HistoricalSource {
 
         val msTime = (System.nanoTime() - startTime) / 1000_000
         if(msTime > 1000){
-            println("took $msTime ms")
+            println("took $msTime ms to fetch ${instrId.code}")
         }
         val json = restStr.readJson()
         if(json["results"] == null){
@@ -101,7 +101,6 @@ class PoligonSource : HistoricalSource {
 
             while (true) {
                 val ohlcs = fetchChunk(instrId, from, to, interval).filter { it.endTime > filterBefore }
-                println(ohlcs.size)
                 if (ohlcs.isEmpty()) {
                     if(to.isBefore(LocalDate.now().minusDays(5))){
                         from = to

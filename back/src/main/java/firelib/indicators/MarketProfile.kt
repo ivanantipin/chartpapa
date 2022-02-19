@@ -137,7 +137,6 @@ class FastArray{
     fun inc(idx : Int, value : Long){
         resizeForIdx(idx)
         if(idx >= data.size){
-            println()
             resizeForIdx(idx)
         }
         data[idx] += value
