@@ -84,7 +84,9 @@ class MdDao(internal val ds: SQLiteDataSource) {
                     data
                 )
             }
-            log.info("spent ${timeSpent / 1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
+            if(timeSpent > 1000){
+                log.info("spent ${timeSpent / 1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
