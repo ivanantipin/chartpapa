@@ -22,6 +22,32 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.DecimalFormat
 import java.util.concurrent.atomic.AtomicInteger
 
+data class SignalEvent(
+    val idx : Int,
+    val up : Boolean,
+    val type: SignalType,
+    val setupStart : Int,
+    val setupEnd : Int,
+    val tdst : Double,
+    val cntdn : Int,
+    val completedSignal : Int,
+    val recycleRatio : Double?
+){
+    companion object{
+        fun convert(signal: Signal) : SignalEvent{
+            return SignalEvent(signal.idx, signal.reference.up, signal.type,
+                signal.reference.start,
+                signal.reference.end,
+                signal.reference.tdst,
+                signal.reference.countDowns.size,
+                signal.reference.completedSignal,
+                signal.reference.recycleRatio()
+            )
+        }
+    }
+}
+
+
 object SequentaAnnCreator {
 
     internal val displayedCounts = arrayOf(11, 12)
@@ -30,10 +56,10 @@ object SequentaAnnCreator {
         return DecimalFormat("#.##").format(dbl)
     }
 
-    fun genSignals(ohlcs: List<Ohlc>): List<Pair<Int, Signal>> {
+    fun genSignals(ohlcs: List<Ohlc>): List<SignalEvent> {
         val sequenta = Sequenta(arrayOf(13))
         return ohlcs.flatMapIndexed { idx, oh ->
-            sequenta.onOhlc(oh).map { Pair(idx, it) }
+            sequenta.onOhlc(oh).map { SignalEvent.convert(it) }
         }
     }
 
@@ -56,7 +82,7 @@ object SequentaAnnCreator {
     }
 
 
-    fun createAnnotations(signals: List<Pair<Int, Signal>>, ohlcs: List<Ohlc>): SequentaAnnnotations {
+    fun createAnnotations(signals: List<SignalEvent>, ohlcs: List<Ohlc>): SequentaAnnnotations {
 
         val labels = ArrayList<HLabel>()
         val shapes = ArrayList<HShape>()
@@ -65,70 +91,70 @@ object SequentaAnnCreator {
 
         val curLine = AtomicInteger(0)
 
-        signals.forEach { (ci, s) ->
-            val oh = ohlcs[ci]
-            val level = if (s.reference.up) oh.high else oh.low
+        signals.forEach { s ->
+            val oh = ohlcs[s.idx]
+            val level = if (s.up) oh.high else oh.low
             val point = HPoint(x = oh.endTime.toEpochMilli(), y = level, xAxis = 0, yAxis = 0)
             val base = HLabel(
                 point = point,
-                drawOnTop = s.reference.up,
+                drawOnTop = s.up,
                 backgroundColor = "rgba(255,255,255,0)", //if (s.reference.up) "red" else "green",
-                borderColor = if (s.reference.up) "rgba(255,0,0,0.5)" else "rgba(0,255,0,0.5)",
-                verticalAlign = if (s.reference.up) "bottom" else "top",
-                distance = if (s.reference.up) 10 else -30,
+                borderColor = if (s.up) "rgba(255,0,0,0.5)" else "rgba(0,255,0,0.5)",
+                verticalAlign = if (s.up) "bottom" else "top",
+                distance = if (s.up) 10 else -30,
                 style = HStyle(fontSize = "8px")
             )
 
             when (s.type) {
                 SignalType.Cdn -> {
-                    val count = s.reference.countDowns.size
-                    if (count == 8 || ci > ohlcs.size - 10 && displayedCounts.contains(count)) {
+                    val count = s.cntdn
+                    if (count == 8 || displayedCounts.contains(count)) {
                         labels.add(
                             base.copy(text = "" + count, shape = "connector")
                         )
                     }
                 }
-                SignalType.Deffered -> if (s.reference.completedSignal < 13) {
+                SignalType.Deffered -> if (s.completedSignal < 13) {
                     labels.add(
                         base.copy(text = "+", shape = "connector", style = HStyle(fontSize = "6px"), distance = 6)
                     )
                 }
                 SignalType.Signal -> {
 
-                    val ratio = s.reference.recycleRatio()
+                    val ratio = s.recycleRatio
                     val recycle = if (ratio != null) "/R=${formatDbl(ratio)}" else "";
 
                     if (ratio == null || ratio < 20) {
-                        labels.add(base.copy(text = "${s.reference.completedSignal}" + recycle))
+                        labels.add(base.copy(text = "${s.completedSignal}" + recycle))
 
-                        if (s.reference.up) {
+                        if (s.up) {
                             val color = if (ratio != null && ratio > 1) "pink" else "red"
                             shapes.add(makeBuySellPoint(color, point.x!!, point.y!!, Side.Sell))
                         } else {
                             val color = if (ratio != null && ratio > 1) "lightgreen" else "green"
                             shapes.add(makeBuySellPoint(color, point.x!!, point.y!!, Side.Buy))
                         }
-                        val endOh = ohlcs[Math.min(ci + 3, ohlcs.size - 1)]
+                        val endOh = ohlcs[Math.min(s.idx + 3, ohlcs.size - 1)]
 
                         val hline = HLine(
-                            ohlcs[ci - 3].endTime.toEpochMilli(),
+                            ohlcs[s.idx - 3].endTime.toEpochMilli(),
                             endOh.endTime.toEpochMilli(),
-                            ohlcs.calcStop(s.reference.up, s.reference.start, s.idx),
+                            ohlcs.calcStop(s.up, s.setupStart, s.idx),
                             dashStyle = "Solid",
-                            color = if (s.reference.up) "red" else "green"
+                            color = if (s.up) "red" else "green"
                         )
                         lines0.add(hline)
                     }
                 }
                 SignalType.SetupReach -> {
                     val hhline = HLine(
-                        s.reference.getStart().toEpochMilli(),
-                        s.reference.getEnd().toEpochMilli(),
-                        s.reference.tdst,
+                        ohlcs[s.setupStart].endTime.toEpochMilli(),
+                        ohlcs[s.setupEnd].endTime.toEpochMilli(),
+                        s.tdst,
                         dashStyle = "ShortDash",
-                        color = if (s.reference.up) "green" else "red"
+                        color = if (s.up) "green" else "red"
                     )
-                    labels.add(markLevel(s.reference.getStart().toEpochMilli(), s.reference.tdst, s.reference.up))
+                    labels.add(markLevel(ohlcs[s.setupStart].endTime.toEpochMilli(), s.tdst, s.up))
                     lines.add(hhline)
                     while (curLine.get() < lines.size - 5) {
                         lines[curLine.get()] = lines[curLine.get()].copy(end = oh.endTime.toEpochMilli())
@@ -136,10 +162,10 @@ object SequentaAnnCreator {
                     }
                 }
                 SignalType.Flip -> {
-                    if (s.reference.up) oh.high else oh.low
+                    if (s.up) oh.high else oh.low
                     labels.add(
                         base.copy(
-                            distance = if (s.reference.up) 5 else -15,
+                            distance = if (s.up) 5 else -15,
                             text = "x",
                             style = HStyle(fontSize = "6px"),
                             shape = "circle"
@@ -161,6 +187,7 @@ object SequentaAnnCreator {
 fun main() {
     initDatabase()
     transaction {
+
         val ohs = BotHelper.getOhlcsForTf(InstrId("VEON", market = "1"), Interval.Day).subList(0, 100)
         val signals = SequentaAnnCreator.genSignals(ohs)
         val ann = SequentaAnnCreator.createAnnotations(signals, ohs)
