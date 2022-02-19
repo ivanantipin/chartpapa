@@ -48,14 +48,14 @@ class MenuRegistry {
 
         pool.execute {
             val command = JsonHelper.fromJson<Cmd>(data)
-            measureAndLogTime("processing command ${command}") {
+            measureAndLogTime("processing command ${command}", {
                 try {
                     commandData.get(command.handlerName)?.invoke(command, bot, update)
                 } catch (e: Exception) {
                     bot.sendMessage(update.chatId(), "error happened ${e.message}", parseMode = ParseMode.MARKDOWN)
                     e.printStackTrace()
                 }
-            }
+            })
         }
     }
 

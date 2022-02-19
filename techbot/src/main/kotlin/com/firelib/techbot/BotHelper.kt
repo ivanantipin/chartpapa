@@ -150,7 +150,28 @@ object BotHelper {
     fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval, window: Int): List<Ohlc> {
         val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(window.toLong()))
         val ohlcs = mdStorageImpl.read(ticker, Interval.Min10, startTime)
-        return IntervalTransformer.transform(timeFrame, ohlcs)
+        if(ohlcs.isEmpty()){
+            return emptyList()
+        }
+        val ret = IntervalTransformer.transform(timeFrame, ohlcs)
+
+        val maxAllowedReminder = when(timeFrame){
+            Interval.Day, Interval.Week->{
+                0.25
+            }
+            else -> 0.001
+        }
+
+        val last = ret.last()
+
+        val reminder = (last.endTime.toEpochMilli() - ohlcs.last().endTime.toEpochMilli()) / timeFrame.durationMs
+        val completeBar = reminder <= maxAllowedReminder
+        return if(completeBar){
+            ret
+        }else{
+            println("filtered")
+            ret.subList(0, ret.size - 1)
+        }
     }
 
     fun saveFile(bytes: ByteArray, fileName: String) {

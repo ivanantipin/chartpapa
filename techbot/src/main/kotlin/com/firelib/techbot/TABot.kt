@@ -18,10 +18,12 @@ inline fun <R> measureTime(block: () -> R): Pair<R, Long> {
     return answer to System.currentTimeMillis() - start
 }
 
-inline fun <R> measureAndLogTime(msg: String, block: () -> R): Pair<R, Long> {
+inline fun <R> measureAndLogTime(msg: String, block: () -> R, minTimeMs : Long = 1000): Pair<R, Long> {
     try {
         val (r, l) = measureTime(block)
-        mainLogger.info("time spent on ${msg} is ${l / 1000.0} s.")
+        if(minTimeMs < l){
+            mainLogger.info("time spent on ${msg} is ${l / 1000.0} s.")
+        }
         return r to l
     }catch (e : Exception){
         mainLogger.error("failed to run ${msg}")

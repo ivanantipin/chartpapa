@@ -20,12 +20,6 @@ object SequentaSignals {
         val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
         val signals = SequentaAnnCreator.genSignals(ohlcs)
 
-        val img = SequentaAnnCreator.drawSequenta(
-            SequentaAnnCreator.createAnnotations(signals, ohlcs), ohlcs,
-            "Sequenta signal ${instr.code} (${tf}, time is  msk)"
-        )
-
-
         return signals.flatMap {
             val time = ohlcs.last().endTime
             val key = BreachEventKey(instr.id, tf, time.toEpochMilli(), BreachType.DEMARK_SIGNAL)

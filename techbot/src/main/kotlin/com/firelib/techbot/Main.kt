@@ -52,7 +52,7 @@ fun main() {
     val bot = bot {
         token = System.getenv("TELEGRAM_TOKEN") ?: debug_token
         timeout = 30
-        logLevel = LogLevel.Network.Basic
+        logLevel = LogLevel.Error
         dispatch {
             text(null) {
                 try {

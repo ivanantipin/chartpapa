@@ -136,9 +136,9 @@ object MdService {
 
     fun updateStock(instrId: InstrId): ForkJoinTask<*> {
         return pool.submit {
-            measureAndLogTime("update md for ${instrId.code}") {
+            measureAndLogTime("update md for ${instrId.code}", {
                 storage.updateMarketData(instrId, Interval.Min10)
-            }
+            })
         }
     }
 
@@ -157,9 +157,9 @@ object MdService {
     fun updateAll() {
         fun routeToRightPool(poo: ForkJoinPool, instrId: InstrId): ForkJoinTask<*> {
             return poo.submit({
-                measureAndLogTime("update market data for instrument ${instrId.code}") {
+                measureAndLogTime("update market data for instrument ${instrId.code}", {
                     storage.updateMarketData(instrId, Interval.Min10)
-                }
+                })
             })
         }
 
