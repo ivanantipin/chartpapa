@@ -102,7 +102,7 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
     override fun load(instrIdIn: InstrId, start: LocalDateTime, interval: Interval): Sequence<Ohlc> {
         val instrId = fixInstr(instrIdIn)
 
-        log.info("loading data from ${start} for instrument ${instrId}")
+        //log.info("loading data from ${start} for instrument ${instrId}")
 
         var mstart = start
         return sequence {
