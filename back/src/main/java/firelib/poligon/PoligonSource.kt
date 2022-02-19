@@ -68,7 +68,11 @@ class PoligonSource : HistoricalSource {
         println(url)
         val startTime = System.nanoTime()
         val restStr = template.getForEntity(url, String::class.java).body
-        println("took ${(System.nanoTime() - startTime) / 1000_000} ms")
+
+        val msTime = (System.nanoTime() - startTime) / 1000_000
+        if(msTime > 1000){
+            println("took $msTime ms")
+        }
         val json = restStr.readJson()
         if(json["results"] == null){
             return emptyList()
