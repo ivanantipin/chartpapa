@@ -87,18 +87,17 @@ object UsersNotifier {
     }
 
     fun check(bot: Bot, breachWindow: Int) {
-        try {
-            transaction {
-                val existingEvents = loadExistingBreaches().map { it.key }.toSet()
-                getNotifyGroups().forEach { (group, users) ->
+        transaction {
+            val existingEvents = loadExistingBreaches().map { it.key }.toSet()
+            getNotifyGroups().forEach { (group, users) ->
+                try {
                     measureAndLogTime("group ${group} processing took",{
                         processGroup(group, breachWindow, existingEvents, bot, users)
                     })
+                }catch (e : Exception){
+                    log.error("error notifying group ${group}")
                 }
-
             }
-        } catch (e: Exception) {
-            log.error("error in user notifier ", e)
         }
     }
 
@@ -157,7 +156,6 @@ object UsersNotifier {
                     this[BreachEvents.eventType] = it.key.type.name
                 }
             }.get()
-
         }
     }
 
