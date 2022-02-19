@@ -65,7 +65,6 @@ class PoligonSource : HistoricalSource {
         val mins = interval.duration.toMinutes()
         val url =
             "https://api.polygon.io/v2/aggs/ticker/${instrId.code}/range/${mins}/minute/${from}/${to}?adjusted=true&sort=asc&limit=50000&apiKey=mBbK9N0OGVjrr6GrDMyz9N8Nxxnl2BVN"
-        println(url)
         val startTime = System.nanoTime()
         val restStr = template.getForEntity(url, String::class.java).body
 
