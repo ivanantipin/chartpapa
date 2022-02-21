@@ -91,15 +91,16 @@ object UsersNotifier {
             val existingEvents = loadExistingBreaches().map { it.key }.toSet()
             getNotifyGroups().forEach { (group, users) ->
                 try {
-                    measureAndLogTime("group ${group} processing took",{
+                    measureAndLogTime("group ${group} processing took", {
                         processGroup(group, breachWindow, existingEvents, bot, users)
                     })
-                }catch (e : Exception){
-                    log.error("error notifying group ${group}")
+                } catch (e: Exception) {
+                    log.error("error notifying group ${group}", e)
                 }
             }
         }
     }
+
 
     private fun processGroup(
         group: NotifyGroup,
@@ -111,35 +112,13 @@ object UsersNotifier {
         val instrId = group.ticker
         val timeFrame = group.timeFrame
 
-        val breaches = when (group.signalType) {
-            SignalType.MACD -> {
-                listOfNotNull(
-                    MacdSignals.checkSignals(
-                        instrId,
-                        timeFrame,
-                        breachWindow,
-                        existingEvents,
-                        group.settings
-                    )
-                )
-            }
-            SignalType.DEMARK -> {
-                SequentaSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
-            }
-            SignalType.RSI_BOLINGER -> {
-                listOfNotNull(
-                    RsiBolingerSignals.checkSignals(
-                        instrId,
-                        timeFrame,
-                        breachWindow,
-                        existingEvents,
-                        group.settings
-                    )
-                )
-            }
-            SignalType.TREND_LINE -> {
-                TdLineSignals.checkSignals(instrId, timeFrame, breachWindow, existingEvents)
-            }
+        val breaches = SignalType.values().flatMap {
+            it.signalGenerator.checkSignals(
+                instrId,
+                timeFrame,
+                breachWindow,
+                existingEvents,
+                group.settings)
         }
 
         breaches.forEach {
@@ -182,3 +161,4 @@ object UsersNotifier {
         }
     }
 }
+

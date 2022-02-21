@@ -13,9 +13,7 @@ import firelib.core.domain.Ohlc
 import firelib.core.misc.JsonHelper
 import firelib.core.store.MdStorageImpl
 import firelib.iqfeed.IntervalTransformer
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.io.FileOutputStream
@@ -44,7 +42,7 @@ object BotHelper {
             }.withDistinct().flatMap {
                 val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
                 if (ret == null) {
-                    mainLogger.error("failed to map ${it}")
+                    deleteUnmappedSubscription(it)
                     emptyList()
                 } else {
                     listOf(ret)
@@ -53,12 +51,17 @@ object BotHelper {
         }
     }
 
+    private fun deleteUnmappedSubscription(it: ResultRow) {
+        mainLogger.error("failed to map ${it} deleting")
+        Subscriptions.deleteWhere { Subscriptions.ticker eq it[Subscriptions.ticker] and (Subscriptions.market eq it[Subscriptions.market]) }
+    }
+
     fun getSubscriptions(): Map<UserId, List<InstrId>> {
         return transaction {
             Subscriptions.selectAll().flatMap {
                 val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
                 if (ret == null) {
-                    mainLogger.error("failed to map ${it}")
+                    deleteUnmappedSubscription(it)
                     emptyList()
                 } else {
                     listOf(UserId(it[Subscriptions.user].toLong()) to ret)

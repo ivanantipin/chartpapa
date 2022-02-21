@@ -1,13 +1,10 @@
 package com.firelib.techbot.chart
 
-import com.firelib.techbot.TdLine
 import com.firelib.techbot.chart.domain.HOptions
-import firelib.core.domain.Ohlc
 import firelib.core.misc.JsonHelper
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.logTimeSpent
 
 object ChartService {
     val client = HttpClient()

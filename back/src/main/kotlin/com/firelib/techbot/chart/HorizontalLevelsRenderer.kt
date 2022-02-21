@@ -43,10 +43,11 @@ class HorizontalLevelsRenderer {
     fun levelBreaches(
         hours: List<Ohlc>,
         title: String,
-        signals: List<LevelSignal>
+        signals: List<LevelSignal>,
+        levels : List<SR>
     ): HOptions {
         val options = RenderUtils.makeOptions(hours, title)
-        options.series += level2series(signals.map { it.level }, hours)
+        options.series += level2series(levels, hours)
         val shapes = signals.map {
             RenderUtils.makeBuySellPoint(RenderUtils.getLineColor(it.side), it.time, it.level.level, it.side)
         }

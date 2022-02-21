@@ -57,11 +57,11 @@ class SettingsCommand {
             return
         }
 
-        if (!signalType.validate(cmd)) {
-            signalType.displayHelp(bot, update)
+        if (!signalType.signalGenerator.validate(cmd)) {
+            signalType.signalGenerator.displayHelp(bot, update)
             return
         }
-        val parsed = signalType.parsePayload(cmd)
+        val parsed = signalType.signalGenerator.parsePayload(cmd)
 
         val settingsJson = JsonHelper.toJsonString(parsed)
 

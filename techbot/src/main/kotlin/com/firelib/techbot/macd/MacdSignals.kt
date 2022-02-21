@@ -1,6 +1,7 @@
 package com.firelib.techbot.macd
 
 import chart.BreachType
+import chart.SignalType
 import com.firelib.techbot.*
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
@@ -9,6 +10,10 @@ import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.menu.chatId
+import com.github.kotlintelegrambot.Bot
+import com.github.kotlintelegrambot.entities.ParseMode
+import com.github.kotlintelegrambot.entities.Update
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -22,7 +27,22 @@ data class MacdResult(
     val options: HOptions
 )
 
-object MacdSignals {
+data class MacdParams(
+    val longEma: Int,
+    val shortEma: Int,
+    val signalEma: Int
+) {
+    companion object {
+        fun fromSettings(settings: Map<String, String>): MacdParams {
+            val longEma = settings.getOrDefault("longEma", "26").toInt()
+            val shortEma = settings.getOrDefault("shortEma", "12").toInt()
+            val signalEma = settings.getOrDefault("signalEma", "9").toInt()
+            return MacdParams(longEma, shortEma, signalEma)
+        }
+    }
+}
+
+object MacdSignals : SignalGenerator {
 
     fun createAnnotations(signals: List<Pair<Int, Side>>, ohlcs: List<Ohlc>): List<HShape> {
         val shapes = ArrayList<HShape>()
@@ -76,32 +96,31 @@ object MacdSignals {
         )
     }
 
-    fun checkSignals(
+    override fun signalType(): SignalType {
+        return SignalType.MACD
+    }
+
+    override fun checkSignals(
         instr: InstrId,
         tf: TimeFrame,
         window: Int,
         existing: Set<BreachEventKey>,
         settings: Map<String, String>
-    ): BreachEvent? {
+    ): List<BreachEvent> {
         val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
 
-        val longEma = settings.getOrDefault("longEma", "26").toInt()
-        val shortEma = settings.getOrDefault("shortEma", "12").toInt()
-        val signalEma = settings.getOrDefault("signalEma", "9").toInt()
-
+        val macdParams = MacdParams.fromSettings(settings)
         val result = render(
             ohlcs,
-            shortEma,
-            longEma,
-            signalEma,
-            "Signal: Macd(${shortEma},${longEma},${signalEma}) ${instr.code} ${tf.name}"
+            macdParams,
+            "Signal: ${makeTitle(tf, instr, settings)}"
         )
-        val suffix = "_${shortEma}_${longEma}_${signalEma}"
+        val suffix = "_${macdParams.shortEma}_${macdParams.longEma}_${macdParams.signalEma}"
 
         if (result.signals.isNotEmpty()) {
             val last = result.signals.last()
             val time = ohlcs[last.first].endTime
-            val key = BreachEventKey(instr.id + suffix , tf, time.toEpochMilli(), BreachType.MACD)
+            val key = BreachEventKey(instr.id + suffix, tf, time.toEpochMilli(), BreachType.MACD)
             val newSignal = last.first > ohlcs.size - window && !existing.contains(key)
             if (newSignal) {
                 val img = ChartService.post(result.options)
@@ -113,16 +132,27 @@ object MacdSignals {
                     time.toEpochMilli()
                 )
                 BotHelper.saveFile(img, fileName)
-                return BreachEvent(key, fileName)
+                return listOf(BreachEvent(key, fileName))
             }
         }
-        return null
+        return emptyList()
     }
 
-    fun render(ohlcs: List<Ohlc>, shortEmaLen: Int, longEmaLen: Int, signalEmaLen: Int, title: String): MacdResult {
-        val shortEma = EmaSimple(shortEmaLen, ohlcs.first().close)
-        val longEma = EmaSimple(longEmaLen, ohlcs.first().close)
-        val signalEma = EmaSimple(signalEmaLen, 0.0)
+    override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>): HOptions {
+        val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val macdParams = MacdParams.fromSettings(settings)
+        return render(ohlcs, macdParams, makeTitle(tf, instr, settings)).options
+    }
+
+    fun makeTitle(timeFrame: TimeFrame, instr: InstrId, settings: Map<String, String>): String {
+        val params = MacdParams.fromSettings(settings)
+        return "Macd(${params.shortEma},${params.longEma},${params.signalEma}) ${instr.code} ${timeFrame.name}"
+    }
+
+    fun render(ohlcs: List<Ohlc>, macdParams: MacdParams, title: String): MacdResult {
+        val shortEma = EmaSimple(macdParams.shortEma, ohlcs.first().close)
+        val longEma = EmaSimple(macdParams.longEma, ohlcs.first().close)
+        val signalEma = EmaSimple(macdParams.signalEma, 0.0)
 
         val macd = ohlcs.map {
             longEma.onRoll(it.close)
@@ -152,6 +182,56 @@ object MacdSignals {
 
         val options = makeMacdOptions(hShapes, ohlcs, macd, signal, title)
         return MacdResult(signals, options)
+    }
+
+    override fun validate(split: List<String>): Boolean {
+        try {
+            if (split.size != 5) {
+                return false
+            }
+            split.subList(2, split.size).forEach { it.toInt() }
+        } catch (e: Exception) {
+            return false
+        }
+        return true
+    }
+
+    override fun parsePayload(split: List<String>): Map<String, String> {
+        return mapOf(
+            "command" to split[1],
+            "shortEma" to split[2],
+            "longEma" to split[3],
+            "signalEma" to split[4],
+        )
+    }
+
+    override fun displayHelp(bot: Bot, update: Update) {
+        val header = """
+        *Конфигурация индикатора MACD*
+        
+        Вы можете установить параметры вашего макд с помощью команды:
+                
+        ``` /set macd <shortEma> <longEma> <signalEma>```
+                
+        *пример*
+        
+        ``` /set macd 12 26 9```
+        
+        по умолчанию параметры 
+        shortEma=12 
+        longEma=26 
+        signalEma=9
+        
+        более подробно читайте об индикаторе например "[здесь](https://ru.tradingview.com/chart/BTCUSD/LD80HDLn-indikator-macd-printsip-raboty-sekrety-nahozhdeniya-divergentsij)"
+                      
+    """.trimIndent()
+
+
+        bot.sendMessage(
+            chatId = update.chatId(),
+            text = header,
+            parseMode = ParseMode.MARKDOWN
+        )
     }
 
 }

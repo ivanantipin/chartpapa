@@ -39,10 +39,11 @@ fun main() {
     menuReg.makeMenu()
     menuReg.commandData[SubHandler.name] = SubHandler()::handle
     menuReg.commandData[UnsubHandler.name] = UnsubHandler()::handle
-    menuReg.commandData[MacdCommand.name] = MacdCommand()::handle
-    menuReg.commandData[RsiBolingerCommand.name] = RsiBolingerCommand()::handle
-    menuReg.commandData[DemarkCommand.name] = DemarkCommand()::handle
-    menuReg.commandData[TrendsCommand.name] = TrendsCommand()::handle
+
+    SignalType.values().forEach {
+        menuReg.commandData[it.settingsName] = IndicatorCommand()::handle
+    }
+
     menuReg.commandData[TfHandler.name] = TfHandler()::handle
     menuReg.commandData[SignalTypeHandler.name] = SignalTypeHandler()::handle
     menuReg.commandData[RmSignalTypeHandler.name] = RmSignalTypeHandler()::handle

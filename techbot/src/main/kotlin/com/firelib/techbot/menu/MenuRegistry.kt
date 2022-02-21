@@ -4,6 +4,8 @@ import chart.SignalType
 import com.firelib.techbot.*
 import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.macd.MacdSignals
+import com.firelib.techbot.macd.RsiBolingerSignals
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
@@ -80,10 +82,10 @@ class MenuRegistry {
                     )
                 })
                 addActionMenu("MACD Конфигурация", { bot, update ->
-                    MacdCommand.displayMACD_Help(bot, update)
+                    MacdSignals.displayHelp(bot, update)
                 })
                 addActionMenu("RSI-BOLINGER Конфигурация", { bot, update ->
-                    RsiBolingerCommand.displayHelp(bot, update)
+                    RsiBolingerSignals.displayHelp(bot, update)
                 })
 
                 mainMenu()
@@ -172,8 +174,7 @@ class MenuRegistry {
 
             addActionMenu("Другие настройки") {bot, update->
                 SettingsCommand.displaySettings(bot, update.chatId().getId().toLong())
-                MacdCommand.displayMACD_Help(bot, update)
-
+                MacdSignals.displayHelp(bot, update)
             }
 
 
@@ -185,62 +186,21 @@ class MenuRegistry {
     private fun ParentMenuItem.makeTechMenu() {
         addParentMenu("Технический анализ") {
             rowSize = 2
-            addButtonMenu("Демарк секвента") {
-                title = "Выберите таймфрейм для демарк секвенты"
-                TimeFrame.values().forEach { tf ->
-                    addActionButton(tf.name, { bot, update ->
-                        val bts = makeButtons(DemarkCommand.name,update.chatId(),tf)
-                        if (bts.isEmpty()) {
-                            emtyListMsg(bot, update)
-                        } else {
-                            list(bts.chunked(4), bot, update.chatId(), "Компании")
-                        }
-                    })
+            SignalType.values().forEach {stype->
+                addButtonMenu(stype.name) {
+                    title = "Выберите таймфрейм для ${stype.name}"
+                    TimeFrame.values().forEach { tf ->
+                        addActionButton(tf.name, { bot, update ->
+                            val bts = makeButtons(stype.settingsName,update.chatId(),tf)
+                            if (bts.isEmpty()) {
+                                emtyListMsg(bot, update)
+                            } else {
+                                list(bts.chunked(4), bot, update.chatId(), "Компании")
+                            }
+                        })
+                    }
                 }
             }
-
-            addButtonMenu("Тренд линии") {
-                title = "Выберите таймфрейм для тренд линий"
-                TimeFrame.values().forEach { tf ->
-                    addActionButton(tf.name, { bot, update ->
-                        val bts = makeButtons(TrendsCommand.name, update.chatId(), tf)
-                        if (bts.isEmpty()) {
-                            emtyListMsg(bot, update)
-                        } else {
-                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для тренд линий")
-                        }
-                    })
-                }
-            }
-
-            addButtonMenu("MACD") {
-                title = "Выберите таймфрейм для MACD"
-                TimeFrame.values().forEach { tf ->
-                    addActionButton(tf.name, { bot, update ->
-                        val bts = makeButtons(MacdCommand.name, update.chatId(), tf)
-                        if (bts.isEmpty()) {
-                            emtyListMsg(bot, update)
-                        } else {
-                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для macd")
-                        }
-                    })
-                }
-            }
-
-            addButtonMenu("RSI-BOLINGER") {
-                title = "Выберите таймфрейм для RSI-BOLINGER"
-                TimeFrame.values().forEach { tf ->
-                    addActionButton(tf.name, { bot, update ->
-                        val bts = makeButtons(RsiBolingerCommand.name, update.chatId(), tf)
-                        if (bts.isEmpty()) {
-                            emtyListMsg(bot, update)
-                        } else {
-                            list(bts.chunked(4), bot, update.chatId(), "Выберите компанию для RSI-BOLINGER")
-                        }
-                    })
-                }
-            }
-
             addButtonMenu("Главное меню") {}
         }
     }
