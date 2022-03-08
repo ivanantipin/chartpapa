@@ -37,7 +37,7 @@ object MdService {
     fun fetchInstruments(): List<InstrId> {
         val ret1 = PoligonSource().symbols()
         log.info("poligon instruments size " + ret1.size)
-        return ret1 + loadFinam()
+        return ret1 // fixme + loadFinam()
     }
 
     fun byId(id: String): InstrId {
