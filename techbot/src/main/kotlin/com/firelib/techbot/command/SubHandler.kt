@@ -32,7 +32,7 @@ class SubHandler : CommandHandler {
 
         ensureExist(fromUser)
 
-        val added = updateDatabase("update subscription") {
+        updateDatabase("update subscription") {
             if (Subscriptions.select { Subscriptions.user eq uid and (Subscriptions.ticker eq instr.code) }
                     .empty()) {
                 Subscriptions.insert {
@@ -44,32 +44,33 @@ class SubHandler : CommandHandler {
             }else{
                 false
             }
-        }.get()
+        }.thenAccept{added->
+            var mdAvailable = true
 
-        var mdAvailable = true
-
-        val fut = MdService.update(instr)
-        if (fut != null) {
-            fut.thenAccept {
-                try {
-                    UpdateSensitivities.updateSens(instr).get()
-                }catch (e : Exception){
-                    mainLogger.error("failed to subscribe ", e)
+            val fut = MdService.update(instr)
+            if (fut != null) {
+                fut.thenAccept {
+                    try {
+                        UpdateSensitivities.updateSens(instr).get()
+                    }catch (e : Exception){
+                        mainLogger.error("failed to subscribe ", e)
+                    }
                 }
+                mdAvailable = false
             }
-            mdAvailable = false
+
+            val msg = if (mdAvailable) "" else " маркет данные будут вскоре обновлены, графики могут быть недоступны в течении некоторого времени"
+
+            if (added) {
+                bot.sendMessage(
+                    chatId = ChatId.fromId(fromUser.id),
+                    text = "Добавлен символ ${instr.code}, ${msg}",
+                    parseMode = ParseMode.MARKDOWN
+                )
+            }
         }
 
-        val msg = if (mdAvailable) "" else " маркет данные будут вскоре обновлены, графики могут быть недоступны в течении некоторого времени"
 
-
-        if (added) {
-            bot.sendMessage(
-                chatId = ChatId.fromId(fromUser.id),
-                text = "Добавлен символ ${instr.code}, ${msg}",
-                parseMode = ParseMode.MARKDOWN
-            )
-        }
     }
 }
 

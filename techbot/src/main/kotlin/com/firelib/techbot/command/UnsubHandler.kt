@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 
 class UnsubHandler : CommandHandler {
-    companion object{
+    companion object {
         val name = "unsub"
     }
 
@@ -22,13 +22,14 @@ class UnsubHandler : CommandHandler {
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val instrId = cmd.instr()
         val uid = update.chatId()
-        val cnt = updateDatabase("delete user", {
+        updateDatabase("delete user", {
             Subscriptions.deleteWhere { Subscriptions.user eq uid.getId() and (Subscriptions.ticker eq instrId.code) }
-        }).get()
-        bot.sendMessage(
-            chatId = uid,
-            text = "Символ удален ${instrId.code}",
-            parseMode = ParseMode.MARKDOWN
-        )
+        }).thenAccept {
+            bot.sendMessage(
+                chatId = uid,
+                text = "Символ удален ${instrId.code}",
+                parseMode = ParseMode.MARKDOWN
+            )
+        }
     }
 }

@@ -87,9 +87,11 @@ object BotHelper {
     }
 
     fun getAllSettings(): Map<UserId, List<Map<String, String>>> {
-        return Settings.selectAll().map {
-            UserId(it[Settings.user].toLong()) to JsonHelper.fromJson<Map<String, String>>(it[Settings.value])
-        }.groupBy({ it.first }, { it.second })
+        return transaction {
+            Settings.selectAll().map {
+                UserId(it[Settings.user].toLong()) to JsonHelper.fromJson<Map<String, String>>(it[Settings.value])
+            }.groupBy({ it.first }, { it.second })
+        }
     }
 
     fun readSettings(update: Update): List<Map<String, String>> {
@@ -153,13 +155,13 @@ object BotHelper {
     fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval, window: Int): List<Ohlc> {
         val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(window.toLong()))
         val ohlcs = mdStorageImpl.read(ticker, Interval.Min10, startTime)
-        if(ohlcs.isEmpty()){
+        if (ohlcs.isEmpty()) {
             return emptyList()
         }
         val ret = IntervalTransformer.transform(timeFrame, ohlcs)
 
-        val maxAllowedReminder = when(timeFrame){
-            Interval.Day, Interval.Week->{
+        val maxAllowedReminder = when (timeFrame) {
+            Interval.Day, Interval.Week -> {
                 0.25
             }
             else -> 0.001
@@ -169,9 +171,9 @@ object BotHelper {
 
         val reminder = (last.endTime.toEpochMilli() - ohlcs.last().endTime.toEpochMilli()) / timeFrame.durationMs
         val completeBar = reminder <= maxAllowedReminder
-        return if(completeBar){
+        return if (completeBar) {
             ret
-        }else{
+        } else {
             println("filtered")
             ret.subList(0, ret.size - 1)
         }

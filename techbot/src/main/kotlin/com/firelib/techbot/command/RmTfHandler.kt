@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 
 class RmTfHandler : CommandHandler {
 
-    companion object{
+    companion object {
         val name = "rm_tf"
     }
 
@@ -31,13 +31,14 @@ class RmTfHandler : CommandHandler {
 
         updateDatabase("update timeframes") {
             TimeFrames.deleteWhere { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }
-        }.get()
+        }.thenAccept({
+            bot.sendMessage(
+                chatId = ChatId.fromId(fromUser.id),
+                text = BotHelper.displayTimeFrames(uid),
+                parseMode = ParseMode.HTML
+            )
+        })
 
-        bot.sendMessage(
-            chatId = ChatId.fromId(fromUser.id),
-            text = BotHelper.displayTimeFrames(uid),
-            parseMode = ParseMode.HTML
-        )
     }
 }
 

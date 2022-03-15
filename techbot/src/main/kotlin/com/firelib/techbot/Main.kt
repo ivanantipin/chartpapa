@@ -25,13 +25,12 @@ fun main() {
 
     initDatabase()
 
-    if (System.getenv("TELEGRAM_TOKEN") != null) {
+    if (System.getenv("TELEGRAM_TOKEN") != null || true) {
 
         MdService.updateAll()
 
-        transaction {
-            updateSensitivties()
-        }
+        updateSensitivties()
+
         MdService.startMd()
     }
 
@@ -89,24 +88,26 @@ fun initDatabase() {
     )
 
     fun populateSignalTypes(){
-        val allSignals: Map<UserId, List<SignalType>> = BotHelper.getSignalTypes()
-        Users.selectAll().forEach { userRow->
-            val siggi = allSignals.getOrDefault(UserId(userRow[Users.userId]), emptyList())
-            if(siggi.isEmpty()){
-                mainLogger.info("populating for user ${userRow[Users.name]}  ${userRow[Users.familyName]}" )
-                SignalTypes.insert {
-                    it[SignalTypes.user] = userRow[Users.userId]
-                    it[SignalTypes.signalType] = SignalType.TREND_LINE.name
-                }
-                SignalTypes.insert {
-                    it[SignalTypes.user] = userRow[Users.userId]
-                    it[SignalTypes.signalType] = SignalType.DEMARK.name
-                }
-                SignalTypes.insert {
-                    it[SignalTypes.user] = userRow[Users.userId]
-                    it[SignalTypes.signalType] = SignalType.RSI_BOLINGER.name
-                }
+        updateDatabase("populate signal types"){
+            val allSignals: Map<UserId, List<SignalType>> = BotHelper.getSignalTypes()
+            Users.selectAll().forEach { userRow->
+                val siggi = allSignals.getOrDefault(UserId(userRow[Users.userId]), emptyList())
+                if(siggi.isEmpty()){
+                    mainLogger.info("populating for user ${userRow[Users.name]}  ${userRow[Users.familyName]}" )
+                    SignalTypes.insert {
+                        it[user] = userRow[Users.userId]
+                        it[signalType] = SignalType.TREND_LINE.name
+                    }
+                    SignalTypes.insert {
+                        it[user] = userRow[Users.userId]
+                        it[signalType] = SignalType.DEMARK.name
+                    }
+                    SignalTypes.insert {
+                        it[user] = userRow[Users.userId]
+                        it[signalType] = SignalType.RSI_BOLINGER.name
+                    }
 
+                }
             }
         }
     }
@@ -141,9 +142,8 @@ fun initDatabase() {
         SchemaUtils.create(Settings)
         SchemaUtils.createMissingTablesAndColumns(Settings)
 
-        populateSignalTypes()
-
     }
+    populateSignalTypes()
 
 
 }

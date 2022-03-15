@@ -30,8 +30,6 @@ class SignalTypeHandler : CommandHandler {
 
         BotHelper.ensureExist(fromUser)
 
-        var flag = false
-
         updateDatabase("update signal type") {
             if (SignalTypes.select { SignalTypes.user eq uid and (SignalTypes.signalType eq signalType) }
                     .empty()) {
@@ -39,16 +37,21 @@ class SignalTypeHandler : CommandHandler {
                     it[SignalTypes.user] = uid
                     it[SignalTypes.signalType] = signalType
                 }
-                flag = true
+                true
+            }else{
+                false
             }
-        }.get()
 
-        if (flag) {
-            bot.sendMessage(
-                chatId = ChatId.fromId(fromUser.id),
-                text = "Тип сигнала добавлен в нотификации ${signalType}",
-                parseMode = ParseMode.MARKDOWN
-            )
+        }.thenAccept{flag->
+            if (flag) {
+                bot.sendMessage(
+                    chatId = ChatId.fromId(fromUser.id),
+                    text = "Тип сигнала добавлен в нотификации ${signalType}",
+                    parseMode = ParseMode.MARKDOWN
+                )
+            }
         }
+
+
     }
 }

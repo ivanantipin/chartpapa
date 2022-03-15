@@ -6,10 +6,13 @@ import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 val databaseExecutor = Executors.newSingleThreadExecutor()
+
+val resultExecutor = Executors.newFixedThreadPool(10)
 
 
 inline fun <R> measureTime(block: () -> R): Pair<R, Long> {
@@ -35,9 +38,8 @@ inline fun <R> measureAndLogTime(msg: String, block: () -> R, minTimeMs : Long =
 val mainLogger = LoggerFactory.getLogger("main")
 
 
-fun <T> updateDatabase(name: String, block: () -> T): Future<T> {
-
-    return databaseExecutor.submit(
+fun <T> updateDatabase(name: String, block: () -> T): CompletableFuture<T> {
+    val f = databaseExecutor.submit(
         Callable<T> {
             transaction {
                 addLogger(StdOutSqlLogger)
@@ -47,8 +49,9 @@ fun <T> updateDatabase(name: String, block: () -> T): Future<T> {
                 mainLogger.info("time spent on ${name} is ${duration / 1000.0} s.")
                 value
             }
-        },
+        }
     )
+    return CompletableFuture.supplyAsync({f.get()}, resultExecutor)
 }
 
 

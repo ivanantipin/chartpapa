@@ -25,19 +25,16 @@ class RmSignalTypeHandler : CommandHandler {
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val signalType = cmd.opts[SIGNAL_TYPE_ATTRIBUTE]!!
         val fromUser = update.fromUser()
-
-        val uid = fromUser.id
-
         BotHelper.ensureExist(fromUser)
-
         updateDatabase("update signal type") {
-            SignalTypes.deleteWhere { SignalTypes.user eq uid and (SignalTypes.signalType eq signalType) }
-        }.get()
+            SignalTypes.deleteWhere { SignalTypes.user eq fromUser.id and (SignalTypes.signalType eq signalType) }
+        }.thenAccept({
+            bot.sendMessage(
+                chatId = ChatId.fromId(fromUser.id),
+                text = "Подписка на ${signalType} удалена",
+                parseMode = ParseMode.HTML
+            )
+        })
 
-        bot.sendMessage(
-            chatId = ChatId.fromId(fromUser.id),
-            text = "Подписка на ${signalType} удалена",
-            parseMode = ParseMode.HTML
-        )
     }
 }

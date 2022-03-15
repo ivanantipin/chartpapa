@@ -41,7 +41,7 @@ object MdService {
     }
 
     fun byId(id: String): InstrId {
-        require(id2inst.containsKey(id), {"no instrument for id ${id}"})
+        require(id2inst.containsKey(id), { "no instrument for id ${id}" })
         return id2inst[id]!!
     }
 
@@ -86,7 +86,7 @@ object MdService {
     fun migrateSubscriptions() {
         val poligonSymbols = PoligonSource().symbols().associateBy { it.code }
 
-        transaction {
+        updateDatabase("migrate subscriptions") {
             val symbols =
                 Subscriptions.selectAll().filter { it[Subscriptions.market] in listOf("NASDAQ", "NYSE", "US") }
                     .map { it[Subscriptions.ticker] }.toSet()
@@ -109,8 +109,8 @@ object MdService {
     }
 
     init {
+        migrateSubscriptions()
         transaction {
-            migrateSubscriptions()
             val live =
                 Subscriptions.selectAll().map { Pair(it[Subscriptions.ticker], it[Subscriptions.market]) }.distinct()
             liveSymbols.addAll(live.flatMap { key ->

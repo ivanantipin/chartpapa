@@ -75,10 +75,9 @@ class SettingsCommand {
                 it[value] = settingsJson
             }
             recs > 0
-        }.get()
-
-        displaySettings(bot, fromUser.id)
-
+        }.thenAccept{
+            displaySettings(bot, fromUser.id)
+        }
     }
 
 }

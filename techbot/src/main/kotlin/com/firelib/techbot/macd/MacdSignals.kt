@@ -109,6 +109,10 @@ object MacdSignals : SignalGenerator {
     ): List<BreachEvent> {
         val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
 
+        if(ohlcs.isEmpty()){
+            return emptyList()
+        }
+
         val macdParams = MacdParams.fromSettings(settings)
         val result = render(
             ohlcs,
@@ -150,6 +154,7 @@ object MacdSignals : SignalGenerator {
     }
 
     fun render(ohlcs: List<Ohlc>, macdParams: MacdParams, title: String): MacdResult {
+
         val shortEma = EmaSimple(macdParams.shortEma, ohlcs.first().close)
         val longEma = EmaSimple(macdParams.longEma, ohlcs.first().close)
         val signalEma = EmaSimple(macdParams.signalEma, 0.0)
