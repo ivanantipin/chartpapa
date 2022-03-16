@@ -96,15 +96,13 @@ object UsersNotifier {
         val instrId = group.ticker
         val timeFrame = group.timeFrame
 
-        val breaches = SignalType.values().flatMap {
-            it.signalGenerator.checkSignals(
-                instrId,
-                timeFrame,
-                breachWindow,
-                existingEvents,
-                group.settings
-            )
-        }
+        val breaches = group.signalType.signalGenerator.checkSignals(
+            instrId,
+            timeFrame,
+            breachWindow,
+            existingEvents,
+            group.settings
+        )
 
         breaches.forEach {
             notify(it, bot, users)
