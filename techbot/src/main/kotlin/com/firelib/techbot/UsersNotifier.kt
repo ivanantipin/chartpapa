@@ -57,7 +57,7 @@ object UsersNotifier {
             timeSequence(Instant.now(), Interval.Min30, 10000).forEach {
                 try {
                     measureAndLogTime("signal checking", {
-                        check(bot, 1)
+                        check(bot, 2)
                     })
                 } catch (e: Exception) {
                     log.error("error in user notifier", e)
