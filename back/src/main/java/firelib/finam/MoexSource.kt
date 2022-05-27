@@ -11,6 +11,7 @@ import firelib.core.misc.atMoscow
 import firelib.core.misc.toInstantMoscow
 import firelib.core.store.MdStorageImpl
 import firelib.model.tickers
+import org.slf4j.LoggerFactory
 import org.springframework.web.client.RestTemplate
 import java.math.BigDecimal
 import java.time.Instant
@@ -21,34 +22,46 @@ import java.time.format.DateTimeFormatter
 var pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 var timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-
 class MoexSource : HistoricalSource {
+
+    val log = LoggerFactory.getLogger(javaClass)
     override fun symbols(): List<InstrId> {
-        val request =
-            "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?iss.meta=off&iss.only=securities"
-        val template = RestTemplate()
+        try {
+            val request =
+                "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?iss.meta=off&iss.only=securities"
+            val template = RestTemplate()
 
-        val entity = template.getForEntity(request, String::class.java)
+            val entity = template.getForEntity(request, String::class.java)
 
-        val mapper = ObjectMapper()
-        val obj: JsonNode = mapper.readTree(entity.body!!)
+            val mapper = ObjectMapper()
+            val obj: JsonNode = mapper.readTree(entity.body!!)
 
-        val header = obj["securities"]["columns"].mapIndexed { idx, hh -> hh.asText()!! to idx }.toMap()
+            val header = obj["securities"]["columns"].mapIndexed { idx, hh -> hh.asText()!! to idx }.toMap()
 
-        //"SECID", "BOARDID", "SHORTNAME", "PREVPRICE", "LOTSIZE"
-        return obj["securities"]["data"].map {
-            InstrId(
-                id = it[header["SECID"]!!].asText() + "_MOEX",
-                code = it[header["SECID"]!!].asText(),
-                lot = it[header["LOTSIZE"]!!].asInt(),
-                board = it[header["BOARDID"]!!].asText(),
-                minPriceIncr = BigDecimal.ONE.divide(BigDecimal(Math.pow(10.0,it[header["DECIMALS"]!!].asText().toDouble())) ),
-                name = it[header["SHORTNAME"]!!].asText(),
-                source = SourceName.MOEX.name,
-                market = "MOEX"
-            )
+            //"SECID", "BOARDID", "SHORTNAME", "PREVPRICE", "LOTSIZE"
+            return obj["securities"]["data"].map {
+                InstrId(
+                    id = it[header["SECID"]!!].asText() + "_MOEX",
+                    code = it[header["SECID"]!!].asText(),
+                    lot = it[header["LOTSIZE"]!!].asInt(),
+                    board = it[header["BOARDID"]!!].asText(),
+                    minPriceIncr = BigDecimal.ONE.divide(
+                        BigDecimal(
+                            Math.pow(
+                                10.0,
+                                it[header["DECIMALS"]!!].asText().toDouble()
+                            )
+                        )
+                    ),
+                    name = it[header["SHORTNAME"]!!].asText(),
+                    source = SourceName.MOEX.name,
+                    market = "MOEX"
+                )
+            }
+        } catch (e: Exception) {
+            log.error("error happened", e)
+            return emptyList()
         }
-
     }
 
     override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
@@ -58,7 +71,8 @@ class MoexSource : HistoricalSource {
     override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
 
         val template = RestTemplate()
-        val url = "http://iss.moex.com/iss/engines/stock/markets/shares/boards/${instrId.board}/securities/${instrId.code}/candles.json"
+        val url =
+            "http://iss.moex.com/iss/engines/stock/markets/shares/boards/${instrId.board}/securities/${instrId.code}/candles.json"
 
         val ret = mutableListOf<Ohlc>()
 
@@ -76,7 +90,8 @@ class MoexSource : HistoricalSource {
 
             //"columns": ["open", "close", "high", "low", "value", "volume", "begin", "end"],
 
-            val indexMap = obj["candles"]["columns"].toList().mapIndexed({ idx, nd -> Pair(nd.textValue(), idx) }).toMap()
+            val indexMap =
+                obj["candles"]["columns"].toList().mapIndexed({ idx, nd -> Pair(nd.textValue(), idx) }).toMap()
             val openIdx = indexMap["open"]!!.toInt()
             val closeIdx = indexMap["close"]!!.toInt()
             val highIdx = indexMap["high"]!!.toInt()
@@ -91,7 +106,8 @@ class MoexSource : HistoricalSource {
                     low = it[lowIdx].doubleValue(),
                     close = it[closeIdx].doubleValue(),
                     volume = it[volumeIdx].longValue(),
-                    endTime = LocalDateTime.parse(it[beginIdx].asText(), timeFormatter).toInstantMoscow().plusSeconds(600),
+                    endTime = LocalDateTime.parse(it[beginIdx].asText(), timeFormatter).toInstantMoscow()
+                        .plusSeconds(600),
                     interpolated = false
                 )
             }.filter { it.endTime > prevFetched }
@@ -127,98 +143,95 @@ class MoexSource : HistoricalSource {
 }
 
 val lst = listOf(
-"SBER",
-"GAZP",
-"LKOH",
-"POLY",
-"TCSG",
-"QIWI",
-"ALRS",
-"AFLT",
-"VTBR",
-"GMKN",
-"SIBN",
-"DSKY",
-"IRAO",
-"LNTA",
-"MAGN",
-"MRKP",
-"MTSS",
-"MGNT",
-"MTLR",
-"MOEX",
-"NLMK",
-"NVTK",
-"OGKB",
-"PLZL",
-"RUAL",
-"RASP",
-"ROSN",
-"RTKM",
-"HYDR",
-"CHMF",
-"AFKS",
-"SNGS",
-"TGKA",
-"TATN",
-"TRNFP",
-"FEES",
-"PHOR",
-"SBERP",
-"TATNP",
-"SNGSP",
-"UPRO",
-"TTLK",
-"AGRO",
-"GLTR",
-"MAIL",
-"ENRU",
-"LSNGP",
-"POGR",
-"ETLN",
-"LSNG",
-"NMTP",
-"T-RM",
-"MTLRP",
-"GAZAP",
-"RTKMP",
-"RNFT",
-"FIVE",
-"FESH",
-"UNAC",
-"RSTI",
-"BANEP",
-"LSRG",
-"TWTR-RM",
-"PIKK",
-"LNZL",
-"ENPG",
-"RSTIP",
-"RUSP",
-"AQUA",
-"AKRN",
-"VIPS-RM",
-"SGZH",
-"FLOT",
-"TSLA-RM",
-"BELU",
-"YNDX",
+    "SBER",
+    "GAZP",
+    "LKOH",
+    "POLY",
+    "TCSG",
+    "QIWI",
+    "ALRS",
+    "AFLT",
+    "VTBR",
+    "GMKN",
+    "SIBN",
+    "DSKY",
+    "IRAO",
+    "LNTA",
+    "MAGN",
+    "MRKP",
+    "MTSS",
+    "MGNT",
+    "MTLR",
+    "MOEX",
+    "NLMK",
+    "NVTK",
+    "OGKB",
+    "PLZL",
+    "RUAL",
+    "RASP",
+    "ROSN",
+    "RTKM",
+    "HYDR",
+    "CHMF",
+    "AFKS",
+    "SNGS",
+    "TGKA",
+    "TATN",
+    "TRNFP",
+    "FEES",
+    "PHOR",
+    "SBERP",
+    "TATNP",
+    "SNGSP",
+    "UPRO",
+    "TTLK",
+    "AGRO",
+    "GLTR",
+    "MAIL",
+    "ENRU",
+    "LSNGP",
+    "POGR",
+    "ETLN",
+    "LSNG",
+    "NMTP",
+    "T-RM",
+    "MTLRP",
+    "GAZAP",
+    "RTKMP",
+    "RNFT",
+    "FIVE",
+    "FESH",
+    "UNAC",
+    "RSTI",
+    "BANEP",
+    "LSRG",
+    "TWTR-RM",
+    "PIKK",
+    "LNZL",
+    "ENPG",
+    "RSTIP",
+    "RUSP",
+    "AQUA",
+    "AKRN",
+    "VIPS-RM",
+    "SGZH",
+    "FLOT",
+    "TSLA-RM",
+    "BELU",
+    "YNDX",
 )
 
 fun main() {
 
     val impl = MdStorageImpl()
 
-
     val moexSource = MoexSource()
     val symbols = moexSource.symbols().map { it.code }.toSet()
 
     symbols.forEach {
-        if(lst.contains(it)){
+        if (lst.contains(it)) {
             println(it)
         }
     }
-
-
 
 }
