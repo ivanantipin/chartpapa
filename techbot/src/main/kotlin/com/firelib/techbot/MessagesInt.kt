@@ -15,12 +15,15 @@ enum class Msg {
     Instruments,
     AddSymbol,
     YourSymbolsOrRemoval,
+    YourSymbolsPressToRemove,
     SettingsU,
     Unsubscribe,
+    Language,
     AddTf,
     TfsTitle,
     UnsubscribeFromSignal,
     SupportChannel,
+    SupportMsg,
     RsiBolingerConf,
     AddSignalType,
     OtherSettings,
@@ -40,7 +43,8 @@ enum class Msg {
     ChooseCompanyToSubscribe,
     PickCompany,
     SubscrptionRemoved,
-    TimeFrameAdded
+    TimeFrameAdded,
+    ChooseLanguage,
 
     ;
 
@@ -59,7 +63,7 @@ enum class Msg {
                 HELP to "Помощь",
                 MacdConf to "MACD Конфигурация",
                 FUNDAMENTALS to "Фундаментальные данные",
-                Instruments to "Инструменты",
+                Instruments to "Мои инструменты",
                 AddSymbol to "Добавить символ",
                 YourSymbolsOrRemoval to "Ваши символы / Удаление",
                 SettingsU to "Установки",
@@ -79,7 +83,13 @@ enum class Msg {
                 PickCompany to "Выберите компанию",
                 SubscrptionRemoved to "Подписка удалена для ",
                 TimeFrameAdded to "Таймфрейм добавлен ",
-
+                TREND_LINE to "Трендовые линии",
+                DEMARK to "DeMark Секвента",
+                TDST to "Горизонтальные уровни",
+                RSI_BOLINGER to "RSI-Bolinger Система",
+                MACD to "MACD",
+                SupportMsg to "Поддержка",
+                YourSymbolsPressToRemove to "*Ваши инструменты*\nНажмите чтобы отписаться"
             ),
 
             Langs.EN to mapOf<Msg, String>(
@@ -89,9 +99,9 @@ enum class Msg {
                 HELP to "Help",
                 MacdConf to "Macd configuration",
                 FUNDAMENTALS to "Fundamentals",
-                Instruments to "Instruments",
-                AddSymbol to "Add Symbol",
-                YourSymbolsOrRemoval to "You symbols / Removal",
+                Instruments to "My instruments",
+                AddSymbol to "Add Instrument",
+                YourSymbolsOrRemoval to "My instruments / Removal",
                 SettingsU to "Settings",
                 Unsubscribe to "Unsubscribe from timeframe",
                 AddTf to "Add timeframe",
@@ -103,13 +113,21 @@ enum class Msg {
                 ChooseTfFor to "Choose timeframe for ",
                 PressTfToUnsubscribe to "Press timeframe to unsubscribe",
                 TfsTitle to "Press timeframe to subscribe",
-                YourSignalsOrRemoval to "==Your signals==\npress to unsubscribe",
+                YourSignalsOrRemoval to "*Your signals*\npress to unsubscribe",
                 PressSignalToSubscribe to "Press to subscribe for a signal",
                 YourTimeframes to "*Your timeframes*\n",
                 Choose1stLetterOfCompany to "Choose 1st letter of ticker you want to subscribe to",
                 PickCompany to "Choose company",
                 SubscrptionRemoved to "Subscription removed for ",
-                TimeFrameAdded to "Timeframe added "
+                TimeFrameAdded to "Timeframe added ",
+                TREND_LINE to "Trend Lines",
+                DEMARK to "DeMark Sequenta",
+                TDST to "Horizontal Levels",
+                RSI_BOLINGER to "Rsi-Bolinger System",
+                MACD to "MACD",
+                SupportMsg to "Support",
+                YourSymbolsPressToRemove to "*Your instruments*\nPress to remove"
+
 
 
             )

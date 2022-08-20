@@ -18,6 +18,7 @@ import com.firelib.techbot.macd.RsiBolingerSignals.RSI_HIGH_ATTR
 import com.firelib.techbot.macd.RsiBolingerSignals.RSI_LOW_ATTR
 import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
+import com.firelib.techbot.menu.langCode
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -193,6 +194,9 @@ object RsiBolingerSignals : SignalGenerator {
     ): MacdResult {
 
         val simpleMa = SimpleMovingAverage(params.bolingerPeriod, true)
+        if(ohlcs.isEmpty()){
+            return MacdResult(emptyList(), HOptions())
+        }
 
         simpleMa.initMa(ohlcs.first().close)
 
@@ -277,6 +281,7 @@ object RsiBolingerSignals : SignalGenerator {
         rsiLow=25
         rsiHigh=75                       
     """.trimIndent()
+        update.langCode()
         bot.sendMessage(
             chatId = update.chatId(),
             text = header,

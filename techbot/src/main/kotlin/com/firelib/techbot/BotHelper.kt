@@ -116,11 +116,11 @@ object BotHelper {
         }
     }
 
-    fun getSignalTypes(uid: ChatId): List<String> {
+    fun getSignalTypes(uid: ChatId): List<SignalType> {
         return transaction {
             SignalTypes.select {
                 SignalTypes.user eq uid.getId()
-            }.withDistinct().map { it[SignalTypes.signalType] }
+            }.withDistinct().map {  SignalType.valueOf(it[SignalTypes.signalType]) }
         }
     }
 
@@ -131,6 +131,7 @@ object BotHelper {
                     it[userId] = user.id
                     it[name] = user.firstName
                     it[familyName] = user.lastName ?: "NA"
+                    it[lang] = user.languageCode ?: Langs.RU.name
                 }
                 TimeFrame.values().forEach { tff ->
                     TimeFrames.insert {
@@ -148,9 +149,11 @@ object BotHelper {
         }
     }
 
+
+
+
+
     val mdStorageImpl = MdStorageImpl()
-
-
 
     fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
         val (ret, _) = measureAndLogTime("load for ticker tf ${ticker.code} tf ${timeFrame}",{

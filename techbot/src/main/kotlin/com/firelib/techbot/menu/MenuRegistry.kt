@@ -77,7 +77,7 @@ class MenuRegistry {
                 addActionMenu( Msg.SupportChannel, { bot, update ->
                     bot.sendMessage(
                         chatId = update.chatId(),
-                        text = "[Поддержка](https://t.me/techBotSupport)",
+                        text = "[${Msg.SupportMsg.toLocal(update.langCode())}](https://t.me/techBotSupport)",
                         parseMode = ParseMode.MARKDOWN
                     )
                 })
@@ -138,7 +138,7 @@ class MenuRegistry {
             addActionMenu(Msg.YourSymbolsOrRemoval, { bot, update ->
                 val buttons = BotHelper.getSubscriptions(update.chatId().getId()).distinct()
                     .map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
-                list(buttons, bot, update.chatId(), "==Ваши символы==\nнажмите на символ чтобы отписаться")
+                list(buttons, bot, update.chatId(), "${Msg.YourSymbolsPressToRemove.toLocal(update.langCode())}")
             })
             mainMenu()
         }
@@ -146,6 +146,11 @@ class MenuRegistry {
 
         addParentMenu(Msg.SettingsU ) {
             rowSize = 2
+
+            addActionMenu(Msg.Language, { bot, update ->
+                val buttons = Langs.values().map { SimpleButton(it.name, Cmd(LanguageHandler.name, mapOf("lang" to it.name))) }.chunked(1)
+                list(buttons, bot, update.chatId(), Msg.ChooseLanguage.toLocal(update.langCode()) )
+            })
 
             addActionMenu(Msg.Unsubscribe, { bot, update ->
                 val buttons = BotHelper.getTimeFrames(update.chatId())
@@ -163,7 +168,8 @@ class MenuRegistry {
 
             addActionMenu(Msg.UnsubscribeFromSignal, { bot, update ->
                 val buttons = BotHelper.getSignalTypes(update.chatId())
-                    .map { SimpleButton(it, Cmd(RmSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it))) }.chunked(1)
+                    .map { SimpleButton(it.msg.toLocal(update.langCode()),
+                        Cmd(RmSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it.name))) }.chunked(1)
                 list(buttons, bot, update.chatId(), Msg.YourSignalsOrRemoval.toLocal(update.langCode()) )
             })
 

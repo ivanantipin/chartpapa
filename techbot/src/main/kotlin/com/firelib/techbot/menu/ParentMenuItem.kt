@@ -2,10 +2,14 @@ package com.firelib.techbot.menu
 
 import com.firelib.techbot.Langs
 import com.firelib.techbot.Msg
+import com.firelib.techbot.persistence.Users
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
 import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class ParentMenuItem(
     val name: Msg,
@@ -48,5 +52,17 @@ class ParentMenuItem(
 }
 
 fun Update.langCode() : Langs{
-    return Langs.valueOf(this.fromUser().languageCode!!.uppercase())
+    val update = this
+    return transaction {
+        val langs = Users.select { Users.userId eq update.fromUser().id }.map {
+            it[Users.lang]
+        }
+        langs.firstOrNull().let {
+            if(it == null){
+                Langs.RU
+            }else{
+                Langs.valueOf(it)
+            }
+        }
+    }
 }

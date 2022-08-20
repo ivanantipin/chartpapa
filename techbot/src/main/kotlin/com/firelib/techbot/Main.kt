@@ -47,6 +47,7 @@ fun main() {
     menuReg.commandData[SignalTypeHandler.name] = SignalTypeHandler()::handle
     menuReg.commandData[RmSignalTypeHandler.name] = RmSignalTypeHandler()::handle
     menuReg.commandData[RmTfHandler.name] = RmTfHandler()::handle
+    menuReg.commandData[LanguageHandler.name] = LanguageHandler()::handle
     menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand()::handle
 
     val bot = bot {
