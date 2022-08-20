@@ -3,6 +3,8 @@ package com.firelib.techbot
 import chart.SignalType
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.menu.chatId
+import com.firelib.techbot.menu.fromUser
+import com.firelib.techbot.menu.langCode
 import com.firelib.techbot.persistence.*
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.Update
@@ -25,13 +27,13 @@ fun ChatId.getId(): Long {
 
 object BotHelper {
 
-    fun displayTimeFrames(uid: Long): String {
+    fun displayTimeFrames(uid: Update): String {
         return transaction {
-            val header = "*Ваши таймфреймы*\n"
+            val header = Msg.YourTimeframes
             val resp = TimeFrames.select {
-                TimeFrames.user eq uid
+                TimeFrames.user eq uid.fromUser().id
             }.map { it[TimeFrames.tf] }.sorted().joinToString(separator = "\n")
-            header + resp
+            header.toLocal(uid.langCode()) + resp
         }
     }
 
@@ -148,8 +150,14 @@ object BotHelper {
 
     val mdStorageImpl = MdStorageImpl()
 
+
+
     fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
-        return getOhlcsForTf(ticker, timeFrame, BotConfig.window.toInt())
+        val (ret, _) = measureAndLogTime("load for ticker tf ${ticker.code} tf ${timeFrame}",{
+            getOhlcsForTf(ticker, timeFrame, BotConfig.window.toInt())
+        }, minTimeMs = 100)
+        return ret
+
     }
 
     fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval, window: Int): List<Ohlc> {

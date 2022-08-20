@@ -15,7 +15,7 @@ import firelib.core.store.GlobalConstants
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-const val debug_token = "1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM"
+const val debug_token = "5406386828:AAGxrq7n-wyDzois-NSZe8-Ye3vIfyNj0-o"
 
 fun main() {
 
@@ -25,7 +25,7 @@ fun main() {
 
     initDatabase()
 
-    if (System.getenv("TELEGRAM_TOKEN") != null || true) {
+    if (System.getenv("TELEGRAM_TOKEN") != null) {
 
         MdService.updateAll()
 
@@ -61,7 +61,9 @@ fun main() {
                         SettingsCommand().handle(split, this.bot, this.update)
                     }
 
-                    val cmd = if (menuReg.menuActions.containsKey(text) && text != MenuRegistry.mainMenu) text else "HOME"
+                    val msg = Msg.getReverseMap(text)
+
+                    val cmd = if (menuReg.menuActions.containsKey(msg) && msg != Msg.MAIN_MENU) msg else Msg.HOME
                     menuReg.menuActions[cmd]!!(this.bot, this.update)
                 } catch (e: Exception) {
                     mainLogger.error("exception in action ${text}", e)

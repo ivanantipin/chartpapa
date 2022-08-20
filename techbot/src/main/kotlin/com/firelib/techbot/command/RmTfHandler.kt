@@ -34,8 +34,8 @@ class RmTfHandler : CommandHandler {
         }.thenAccept({
             bot.sendMessage(
                 chatId = ChatId.fromId(fromUser.id),
-                text = BotHelper.displayTimeFrames(uid),
-                parseMode = ParseMode.HTML
+                text = BotHelper.displayTimeFrames(update),
+                parseMode = ParseMode.MARKDOWN_V2
             )
         })
 

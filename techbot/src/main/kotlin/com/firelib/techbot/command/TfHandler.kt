@@ -1,10 +1,12 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.Msg
 import com.firelib.techbot.persistence.TimeFrames
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.menu.fromUser
+import com.firelib.techbot.menu.langCode
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -44,7 +46,7 @@ class TfHandler : CommandHandler {
             if (flag) {
                 bot.sendMessage(
                     chatId = ChatId.fromId(fromUser.id),
-                    text = "Таймфрейм добавлен ${timeFrame}",
+                    text = Msg.TimeFrameAdded.toLocal(update.langCode()) ,
                     parseMode = ParseMode.MARKDOWN
                 )
             }

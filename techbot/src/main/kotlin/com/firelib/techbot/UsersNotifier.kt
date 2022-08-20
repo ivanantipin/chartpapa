@@ -67,7 +67,7 @@ object UsersNotifier {
         }, "breach_notifier").start()
     }
 
-    val notifyExecutor = Executors.newFixedThreadPool(10)
+    val notifyExecutor = Executors.newFixedThreadPool(40)
 
     fun check(bot: Bot, breachWindow: Int) {
         val existingEvents = loadExistingBreaches().map { it.key }.toSet()

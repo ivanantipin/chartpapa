@@ -17,12 +17,12 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 
 class MenuRegistry {
-    val menuActions = mutableMapOf<String, (Bot, Update) -> Unit>()
+    val menuActions = mutableMapOf<Msg, (Bot, Update) -> Unit>()
 
     val commandData = mutableMapOf<String, (Cmd, Bot, Update) -> Unit>()
 
     companion object {
-        val mainMenu = "Главное меню"
+        val mainMenu = Msg.MAIN_MENU
 
         fun list(buttons: List<List<IButton>>, bot: Bot, chatId: ChatId, title: String) {
             val keyboard = InlineKeyboardMarkup.create(
@@ -68,23 +68,23 @@ class MenuRegistry {
     }
 
     fun makeMenu() {
-        val root = ParentMenuItem("HOME").apply {
+        val root = ParentMenuItem(Msg.HOME ).apply {
             rowSize = 2
             makeTechMenu()
             makeInstrumentMenu()
             makeFundamentalMenu()
-            addParentMenu("Помощь"){
-                addActionMenu("Канал поддержки", { bot, update ->
+            addParentMenu(Msg.HELP){
+                addActionMenu( Msg.SupportChannel, { bot, update ->
                     bot.sendMessage(
                         chatId = update.chatId(),
                         text = "[Поддержка](https://t.me/techBotSupport)",
                         parseMode = ParseMode.MARKDOWN
                     )
                 })
-                addActionMenu("MACD Конфигурация", { bot, update ->
+                addActionMenu(Msg.MacdConf , { bot, update ->
                     MacdSignals.displayHelp(bot, update)
                 })
-                addActionMenu("RSI-BOLINGER Конфигурация", { bot, update ->
+                addActionMenu(Msg.RsiBolingerConf , { bot, update ->
                     RsiBolingerSignals.displayHelp(bot, update)
                 })
 
@@ -96,11 +96,11 @@ class MenuRegistry {
     }
 
     private fun ParentMenuItem.mainMenu() {
-        addButtonMenu("Главное меню") {}
+        addButtonMenu(Msg.MAIN_MENU) {}
     }
 
     private fun ParentMenuItem.makeFundamentalMenu() {
-        addActionMenu("Фундаментальные данные", { bot, update ->
+        addActionMenu(Msg.FUNDAMENTALS , { bot, update ->
             val bts = makeButtons(
                 FundamentalsCommand.name,
                 update.chatId(),
@@ -120,12 +120,13 @@ class MenuRegistry {
     }
 
     private fun ParentMenuItem.makeInstrumentMenu() {
-        addParentMenu("Инструменты") {
+        addParentMenu(Msg.Instruments) {
             rowSize = 2
-            addButtonMenu("Добавить символ") {
+            addButtonMenu( Msg.AddSymbol) {
+                title = {lang-> Msg.Choose1stLetterOfCompany.toLocal(lang) }
                 this.rowSize = 4
                 MdService.instrByStart.keys.forEach {start->
-                    this.addButton(start, "Выберите начальную букву"){
+                    this.addButton(start, {langs -> Msg.PickCompany.toLocal(langs) }){
                         rowSize = 2
                         buttons +=  MdService.instrByStart.getOrDefault(start, emptyList()).map { code ->
                             SimpleButton("(${code.code}) ${code.name}", Cmd(SubHandler.name, mapOf("id" to code.id)))
@@ -134,7 +135,7 @@ class MenuRegistry {
                 }
             }
 
-            addActionMenu("Ваши символы / Удаление", { bot, update ->
+            addActionMenu(Msg.YourSymbolsOrRemoval, { bot, update ->
                 val buttons = BotHelper.getSubscriptions(update.chatId().getId()).distinct()
                     .map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
                 list(buttons, bot, update.chatId(), "==Ваши символы==\nнажмите на символ чтобы отписаться")
@@ -143,36 +144,38 @@ class MenuRegistry {
         }
 
 
-        addParentMenu("Установки") {
+        addParentMenu(Msg.SettingsU ) {
             rowSize = 2
 
-            addActionMenu("Отписаться от таймфрейма", { bot, update ->
+            addActionMenu(Msg.Unsubscribe, { bot, update ->
                 val buttons = BotHelper.getTimeFrames(update.chatId())
                     .map { SimpleButton(it, Cmd(RmTfHandler.name, mapOf("tf" to it))) }.chunked(1)
-                list(buttons, bot, update.chatId(), "Нажмите на таймфрейм чтобы отписаться")
+                list(buttons, bot, update.chatId(), Msg.PressTfToUnsubscribe.toLocal(update.langCode()) )
             })
 
-            addButtonMenu("Добавить таймфрейм") {
+            addButtonMenu(Msg.AddTf) {
+                title = {lang->Msg.TfsTitle.toLocal(lang)}
                 rowSize = 1
                 buttons += TimeFrame.values().map { tf ->
                     SimpleButton(tf.name, Cmd(TfHandler.name, mapOf("tf" to tf.name)))
                 }
             }
 
-            addActionMenu("Отписаться от сигнала", { bot, update ->
+            addActionMenu(Msg.UnsubscribeFromSignal, { bot, update ->
                 val buttons = BotHelper.getSignalTypes(update.chatId())
                     .map { SimpleButton(it, Cmd(RmSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it))) }.chunked(1)
-                list(buttons, bot, update.chatId(), "==Ваши подписки==\nнажмите чтобы отписаться")
+                list(buttons, bot, update.chatId(), Msg.YourSignalsOrRemoval.toLocal(update.langCode()) )
             })
 
-            addButtonMenu("Добавить тип сигнала") {
+            addButtonMenu(Msg.AddSignalType ) {
+                title = {lang->Msg.PressSignalToSubscribe.toLocal(lang)}
                 rowSize = 1
                 buttons += SignalType.values().map { signalType ->
                     SimpleButton(signalType.name, Cmd(SignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to signalType.name)))
                 }
             }
 
-            addActionMenu("Другие настройки") {bot, update->
+            addActionMenu(Msg.OtherSettings ) {bot, update->
                 SettingsCommand.displaySettings(bot, update.chatId().getId().toLong())
                 MacdSignals.displayHelp(bot, update)
             }
@@ -184,24 +187,24 @@ class MenuRegistry {
     }
 
     private fun ParentMenuItem.makeTechMenu() {
-        addParentMenu("Технический анализ") {
+        addParentMenu(Msg.TECH_ANALYSIS) {
             rowSize = 2
             SignalType.values().forEach {stype->
-                addButtonMenu(stype.name) {
-                    title = "Выберите таймфрейм для ${stype.name}"
+                addButtonMenu(stype.msg) {
+                    title = {lang->  Msg.ChooseTfFor.toLocal(lang) + stype.msg.toLocal(lang)}
                     TimeFrame.values().forEach { tf ->
                         addActionButton(tf.name, { bot, update ->
                             val bts = makeButtons(stype.settingsName,update.chatId(),tf)
                             if (bts.isEmpty()) {
                                 emtyListMsg(bot, update)
                             } else {
-                                list(bts.chunked(4), bot, update.chatId(), "Компании")
+                                list(bts.chunked(4), bot, update.chatId(), Msg.Companies.toLocal(update.langCode()) )
                             }
                         })
                     }
                 }
             }
-            addButtonMenu("Главное меню") {}
+            addButtonMenu(Msg.MAIN_MENU) {}
         }
     }
 
@@ -212,7 +215,7 @@ class MenuRegistry {
             parseMode = ParseMode.MARKDOWN
         )
 
-        menuActions["Настройки"]!!(bot, update)
+        menuActions[Msg.SETTINGS]!!(bot, update)
     }
 
     private fun makeButtons(

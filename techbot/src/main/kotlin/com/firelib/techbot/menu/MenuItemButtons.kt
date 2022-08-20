@@ -1,27 +1,30 @@
 package com.firelib.techbot.menu
 
+import com.firelib.techbot.Langs
+import com.firelib.techbot.Msg
 import com.firelib.techbot.command.Cmd
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 
 class MenuItemButtons(
-    val name: String,
+    val name: Msg,
     val buttons: MutableList<IButton> = mutableListOf(),
-    var title: String = name,
+    var title : (lang : Langs)->String,
     var rowSize: Int = 3
 ) : IMenu {
-    override fun name(): String {
+
+    override fun name(): Msg {
         return name
     }
 
     override fun register(registry: MenuRegistry) {
         registry.menuActions[name] = { bot, update ->
-            registry.listUncat(buttons, bot, update.chatId(), rowSize, title)
+            registry.listUncat(buttons, bot, update.chatId(), rowSize,  title(update.langCode()))
         }
         buttons.forEach { it.register(registry) }
     }
 
-    fun addButton(chName: String, buttonTitle: String, aa: StaticButtonParent.() -> Unit) {
+    fun addButton(chName: String, buttonTitle: (Langs)->String, aa: StaticButtonParent.() -> Unit) {
         buttons += StaticButtonParent(chName, Cmd(getCmdName()), buttonTitle).apply(aa)
     }
 

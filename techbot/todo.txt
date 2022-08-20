@@ -1,7 +1,0 @@
-bot description page
-tdst breach
-backtest and run in prod bot
-
-
-
-1 = sum(f(x))
