@@ -1,10 +1,10 @@
 package com.firelib.techbot.sequenta
 
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.RenderUtils.makeBuySellPoint
 import com.firelib.techbot.chart.RenderUtils.markLevel
-import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.initDatabase
 import com.firelib.techbot.sequenta.SequentaAnnCreator.drawSequenta

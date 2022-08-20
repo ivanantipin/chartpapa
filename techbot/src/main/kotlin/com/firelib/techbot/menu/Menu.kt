@@ -1,8 +1,9 @@
 package com.firelib.techbot.menu
 
-import com.github.kotlintelegrambot.entities.*
+import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import java.util.concurrent.atomic.AtomicLong
-
 
 fun Update.chatId(): ChatId {
     val fromUser = this.message?.from ?: this.callbackQuery?.from!!

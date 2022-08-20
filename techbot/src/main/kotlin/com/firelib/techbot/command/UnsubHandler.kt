@@ -1,12 +1,12 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.Msg
-import com.firelib.techbot.persistence.Subscriptions
-import com.firelib.techbot.updateDatabase
-import com.github.kotlintelegrambot.Bot
 import com.firelib.techbot.getId
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
+import com.firelib.techbot.persistence.Subscriptions
+import com.firelib.techbot.updateDatabase
+import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.sql.and

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 val databaseExecutor = Executors.newSingleThreadExecutor()
 

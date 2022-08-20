@@ -2,7 +2,9 @@ package com.firelib.techbot.tdline
 
 import chart.BreachType
 import chart.SignalType
-import com.firelib.techbot.*
+import com.firelib.techbot.BotHelper
+import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.TrendsCreator
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
@@ -10,11 +12,11 @@ import com.firelib.techbot.chart.ChartService.post
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.initDatabase
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
-import firelib.core.domain.Ohlc
 import firelib.core.misc.atMoscow
 import firelib.core.store.MdStorageImpl
 import firelib.finam.timeFormatter

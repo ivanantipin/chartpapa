@@ -1,19 +1,13 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.Langs
-import com.firelib.techbot.persistence.TimeFrames
+import com.firelib.techbot.menu.fromUser
+import com.firelib.techbot.persistence.Users
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
-import com.firelib.techbot.menu.fromUser
-import com.firelib.techbot.persistence.Subscriptions
-import com.firelib.techbot.persistence.Users
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.update
 
 class LanguageHandler : CommandHandler {

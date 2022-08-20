@@ -1,10 +1,10 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.TimeFrames
 import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
-import com.firelib.techbot.menu.fromUser
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update

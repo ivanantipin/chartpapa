@@ -1,17 +1,19 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.*
 import com.firelib.techbot.BotHelper.ensureExist
-import com.github.kotlintelegrambot.Bot
+import com.firelib.techbot.MdService
+import com.firelib.techbot.UpdateSensitivities
+import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.Subscriptions
+import com.firelib.techbot.updateDatabase
+import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-
 
 class SubHandler : CommandHandler {
 

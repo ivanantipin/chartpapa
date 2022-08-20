@@ -1,7 +1,8 @@
 package com.firelib.techbot.sequenta
 
 import chart.BreachType
-import com.firelib.techbot.*
+import com.firelib.techbot.BotHelper
+import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
@@ -9,6 +10,7 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.HorizontalLevelsRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.initDatabase
 import firelib.core.SourceName
 import firelib.core.domain.*
 import firelib.core.store.MdStorageImpl

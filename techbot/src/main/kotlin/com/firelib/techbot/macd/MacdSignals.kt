@@ -2,14 +2,16 @@ package com.firelib.techbot.macd
 
 import chart.BreachType
 import chart.SignalType
-import com.firelib.techbot.*
+import com.firelib.techbot.BotHelper
+import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
-import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.ChartService
+import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.initDatabase
 import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
