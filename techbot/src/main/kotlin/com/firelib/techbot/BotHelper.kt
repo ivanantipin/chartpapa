@@ -126,12 +126,20 @@ object BotHelper {
 
     fun ensureExist(user: User) {
         updateDatabase("user update") {
+
+            val llang = try {
+                Langs.valueOf(user.languageCode!!).name
+            }catch (e : Exception){
+                Langs.EN.name
+            }
+
+
             if (Users.select { Users.userId eq user.id }.count() == 0L) {
                 Users.insert {
                     it[userId] = user.id
                     it[name] = user.firstName
                     it[familyName] = user.lastName ?: "NA"
-                    it[lang] = user.languageCode ?: Langs.RU.name
+                    it[lang] = llang
                 }
                 TimeFrame.values().forEach { tff ->
                     TimeFrames.insert {
