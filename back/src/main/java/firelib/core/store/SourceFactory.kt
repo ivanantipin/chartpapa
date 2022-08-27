@@ -14,7 +14,7 @@ import java.nio.file.Paths
 import java.util.concurrent.ConcurrentHashMap
 
 class SourceFactory{
-    val sources = mapOf<SourceName, ()-> HistoricalSource>(
+    val sources = mapOf(
         SourceName.FINAM to { FinamDownloader() },
         SourceName.VANTAGE to { VantageDownloader() },
         SourceName.DUMMY to { HistoricalSourceEmulator() },
@@ -22,7 +22,7 @@ class SourceFactory{
         SourceName.IQFEED to { IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")) },
         SourceName.MT5 to { MT5SourceSafe() },
         SourceName.EODHIST to { EodHistSource() },
-        SourceName.POLIGON to { PoligonSource() },
+        SourceName.POLIGON to { PoligonSource(GlobalConstants.getProp("POLYGON_TOKEN")) },
     )
 
     val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()

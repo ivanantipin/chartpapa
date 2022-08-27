@@ -25,14 +25,17 @@ fun main() {
 
     initDatabase()
 
-    if (System.getenv("TELEGRAM_TOKEN") != null) {
-
-        MdService.updateAll()
-
-        updateSensitivties()
-
-        MdService.startMd()
+    transaction {
+        ConfigService.selectAll().forEach {
+            System.setProperty(it.get(ConfigService.name), it.get(ConfigService.value))
+        }
     }
+
+    MdService.updateAll()
+
+    updateSensitivties()
+
+    MdService.startMd()
 
     val menuReg = MenuRegistry()
     menuReg.makeMenu()
@@ -51,7 +54,7 @@ fun main() {
     menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand()::handle
 
     val bot = bot {
-        token = System.getenv("TELEGRAM_TOKEN") ?: debug_token
+        token = ConfigParameters.TELEGRAM_TOKEN.get()  ?: debug_token
         timeout = 30
         logLevel = LogLevel.Error
         dispatch {
@@ -144,6 +147,9 @@ fun initDatabase() {
 
         SchemaUtils.create(Settings)
         SchemaUtils.createMissingTablesAndColumns(Settings)
+
+        SchemaUtils.create(ConfigService)
+        SchemaUtils.createMissingTablesAndColumns(ConfigService)
 
     }
     populateSignalTypes()

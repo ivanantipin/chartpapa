@@ -22,6 +22,9 @@ object GlobalConstants {
     val props = SqlQueries.readProps(metaDb, "envs", env)
 
     fun getProp(name: String): String {
+        if(System.getProperty(name) != null){
+            return System.getProperty(name)
+        }
         require(props.containsKey(name), { "prop ${name} is absent" })
         return props[name]!! as String
     }

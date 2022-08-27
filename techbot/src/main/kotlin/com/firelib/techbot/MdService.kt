@@ -35,9 +35,23 @@ object MdService {
     val instrByStart = group(instruments)
 
     fun fetchInstruments(): List<InstrId> {
-        val ret1 = PoligonSource().symbols()
+        val ret1 = PoligonSource(ConfigParameters.POLYGON_TOKEN.get()!!).symbols()
         log.info("poligon instruments size " + ret1.size)
-        return ret1 + loadFinam()
+        return ret1 + safeLoadFinamWithRetryEmptyIfFailed()
+    }
+
+    fun safeLoadFinamWithRetryEmptyIfFailed() : List<InstrId>{
+        var retryCount = 0
+        while (retryCount < 3) {
+            try {
+                return loadFinam()
+            } catch (e: Exception) {
+                log.error("failed to load finam instruments, retryCount " + retryCount, e)
+                retryCount++
+            }
+        }
+        log.error("returning empty finam instruments")
+        return emptyList()
     }
 
     fun byId(id: String): InstrId {
@@ -84,7 +98,7 @@ object MdService {
     }
 
     fun migrateSubscriptions() {
-        val poligonSymbols = PoligonSource().symbols().associateBy { it.code }
+        val poligonSymbols = PoligonSource(ConfigParameters.POLYGON_TOKEN.get()!!).symbols().associateBy { it.code }
 
         updateDatabase("migrate subscriptions") {
             val symbols =

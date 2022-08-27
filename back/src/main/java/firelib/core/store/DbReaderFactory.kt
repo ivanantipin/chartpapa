@@ -15,8 +15,6 @@ class DbReaderFactory(val source : SourceName, val interval: Interval, val start
 
     override fun makeReader(security: String): SimplifiedReader {
 
-        //require(source == SourceName.FINAM, {"not supported source ${source}"})
-
         return SimplifiedReaderImpl(
             mdStorage,
             InstrId(code = security, market=market, source = source.name),

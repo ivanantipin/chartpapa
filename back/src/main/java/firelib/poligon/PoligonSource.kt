@@ -17,21 +17,19 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class PoligonSource : HistoricalSource {
-
-
-
+class PoligonSource(val token: String) : HistoricalSource {
 
     override fun symbols(): List<InstrId> {
         val cachedSymbols = CacheService.getCached("poligon_symbols_v1", {
             val template = RestTemplate()
-            val args = "active=true&apiKey=mBbK9N0OGVjrr6GrDMyz9N8Nxxnl2BVN&limit=1000"
+            val args = "active=true&apiKey=${token}&limit=1000"
             val url = "https://api.polygon.io/v3/reference/tickers?$args"
             var json = template.getForEntity(url, String::class.java).body.readJson()
             val arrayNode = json["results"] as ArrayNode
 
             while (json["next_url"] != null) {
-                json = template.getForEntity(json["next_url"].textValue() + "&${args}", String::class.java).body.readJson()
+                json =
+                    template.getForEntity(json["next_url"].textValue() + "&${args}", String::class.java).body.readJson()
                 arrayNode.addAll((json["results"] as ArrayNode))
             }
             mapper.writeValueAsBytes(arrayNode)
@@ -40,15 +38,18 @@ class PoligonSource : HistoricalSource {
         return String(cachedSymbols).readJson().flatMap {
             try {
                 val code = it["ticker"].textValue()
-                val market = if (it["market"].textValue() == "stocks") it["primary_exchange"].textValue() else it["market"].textValue()
-                listOf(InstrId(
-                    code = code,
-                    name = it["name"].textValue(),
-                    id = "${code}_${market}",
-                    market = market,
-                    source = SourceName.POLIGON.name
-                ))
-            }catch (e : Exception){
+                val market =
+                    if (it["market"].textValue() == "stocks") it["primary_exchange"].textValue() else it["market"].textValue()
+                listOf(
+                    InstrId(
+                        code = code,
+                        name = it["name"].textValue(),
+                        id = "${code}_${market}",
+                        market = market,
+                        source = SourceName.POLIGON.name
+                    )
+                )
+            } catch (e: Exception) {
                 println("failed to parse ${it}")
                 emptyList()
             }
@@ -69,11 +70,11 @@ class PoligonSource : HistoricalSource {
         val restStr = template.getForEntity(url, String::class.java).body
 
         val msTime = (System.nanoTime() - startTime) / 1000_000
-        if(msTime > 1000){
+        if (msTime > 1000) {
             println("took $msTime ms to fetch ${instrId.code}")
         }
         val json = restStr.readJson()
-        if(json["results"] == null){
+        if (json["results"] == null) {
             return emptyList()
         }
         return (json["results"] as ArrayNode).map {
@@ -90,7 +91,6 @@ class PoligonSource : HistoricalSource {
 
     }
 
-
     override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
         val chunkDays = 200L
         return sequence {
@@ -102,13 +102,13 @@ class PoligonSource : HistoricalSource {
             while (true) {
                 val ohlcs = fetchChunk(instrId, from, to, interval).filter { it.endTime > filterBefore }
                 if (ohlcs.isEmpty()) {
-                    if(to.isBefore(LocalDate.now().minusDays(5))){
+                    if (to.isBefore(LocalDate.now().minusDays(5))) {
                         from = to
                         to = from.plusDays(chunkDays)
-                    }else{
+                    } else {
                         break
                     }
-                }else{
+                } else {
                     yieldAll(ohlcs)
                     from = ohlcs.last().date()
                     to = from.plusDays(chunkDays)
@@ -121,16 +121,4 @@ class PoligonSource : HistoricalSource {
     override fun getName(): SourceName {
         return SourceName.POLIGON
     }
-}
-
-fun main() {
-
-    initDatabase()
-
-
-    PoligonSource().symbols().filter { it.code == "BR" }.forEach {
-        println(it)
-    }
-
-
 }

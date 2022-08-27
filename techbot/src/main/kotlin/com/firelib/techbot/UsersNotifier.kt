@@ -55,14 +55,20 @@ object UsersNotifier {
     fun start(bot: Bot) {
         Thread({
             timeSequence(Instant.now(), Interval.Min30, 10000).forEach {
-                try {
-                    measureAndLogTime("signal checking", {
-                        check(bot, 2)
-                    })
-                } catch (e: Exception) {
-                    log.error("error in user notifier", e)
+                val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get().let {
+                    it == "true"
                 }
-
+                if(!enabled){
+                    log.info("Notifications are disabled")
+                }else{
+                    try {
+                        measureAndLogTime("signal checking", {
+                            check(bot, 2)
+                        })
+                    } catch (e: Exception) {
+                        log.error("error in user notifier", e)
+                    }
+                }
             }
         }, "breach_notifier").start()
     }
