@@ -96,10 +96,6 @@ object BotHelper {
         }
     }
 
-    fun readSettings(update: Update): List<Map<String, String>> {
-        return readSettings(update.chatId().getId())
-    }
-
     fun readSettings(userId: Long): List<Map<String, String>> {
         return transaction {
             Settings.select { (Settings.user eq userId) }.map {
@@ -120,7 +116,7 @@ object BotHelper {
         return transaction {
             SignalTypes.select {
                 SignalTypes.user eq uid.getId()
-            }.withDistinct().map {  SignalType.valueOf(it[SignalTypes.signalType]) }
+            }.withDistinct().map { SignalType.valueOf(it[SignalTypes.signalType]) }
         }
     }
 
@@ -129,7 +125,7 @@ object BotHelper {
 
             val llang = try {
                 Langs.valueOf(user.languageCode!!).name
-            }catch (e : Exception){
+            } catch (e: Exception) {
                 Langs.EN.name
             }
 
@@ -157,14 +153,10 @@ object BotHelper {
         }
     }
 
-
-
-
-
     val mdStorageImpl = MdStorageImpl()
 
     fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
-        val (ret, _) = measureAndLogTime("load for ticker tf ${ticker.code} tf ${timeFrame}",{
+        val (ret, _) = measureAndLogTime("load for ticker tf ${ticker.code} tf ${timeFrame}", {
             getOhlcsForTf(ticker, timeFrame, BotConfig.window.toInt())
         }, minTimeMs = 100)
         return ret

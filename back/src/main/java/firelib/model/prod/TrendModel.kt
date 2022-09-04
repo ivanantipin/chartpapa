@@ -6,7 +6,9 @@ import firelib.core.config.ModelConfig
 import firelib.core.config.runStrat
 import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
+import firelib.core.misc.UtilsHandy
 import firelib.core.misc.atMoscow
+import firelib.core.store.MdStorageImpl
 import firelib.model.tickers
 import java.time.LocalDate
 
@@ -73,6 +75,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
 
 fun main() {
+    UtilsHandy.updateRussianDivStocks(interval = Interval.Min10)
     TrendModel.modelConfig().runStrat(ModelBacktestConfig().apply {
         instruments = tickers
         interval = Interval.Min1
