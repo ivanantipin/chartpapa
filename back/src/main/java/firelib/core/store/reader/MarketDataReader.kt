@@ -32,28 +32,11 @@ interface SimplifiedReader{
     fun poll() : Ohlc
 }
 
-class SimplifiedReaderAdapter(val mdReader : MarketDataReader<Ohlc>) : SimplifiedReader{
-    override fun peek(): Ohlc {
-        return mdReader.current()
-    }
-
-    override fun poll(): Ohlc {
-        mdReader.read()
-        return mdReader.current()
-    }
-
-}
-
 fun SimplifiedReader.skipUntil(time : Instant){
     while (peek() != null && peek()!!.time() < time){
         poll()
     }
 }
-
-fun MarketDataReader<Ohlc>.toSequence(): SimplifiedReader {
-    return SimplifiedReaderAdapter(this)
-}
-
 
 class QueueSimplifiedReader : SimplifiedReader{
     val queue = LinkedBlockingQueue<Ohlc>()
