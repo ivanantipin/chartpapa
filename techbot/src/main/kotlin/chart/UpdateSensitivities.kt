@@ -1,6 +1,5 @@
 package com.firelib.techbot
 
-import com.firelib.techbot.BotHelper.getOhlcsForTf
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.SensitivityConfig
 import firelib.core.domain.InstrId
@@ -24,7 +23,7 @@ object UpdateSensitivities{
         return updateDatabase("senses update ${ticker.code}") {
             SensitivityConfig.deleteWhere { SensitivityConfig.instrId eq ticker.id }
             TimeFrame.values().forEach { timeFrame ->
-                val targetOhlcs = getOhlcsForTf(ticker, timeFrame.interval)
+                val targetOhlcs = OhlcsService.instance.getOhlcsForTf(ticker, timeFrame.interval)
 
                 var updated = false
                 for (i in 7 downTo 2) {
