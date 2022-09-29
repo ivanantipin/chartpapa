@@ -50,7 +50,7 @@ dependencies {
     runtimeOnly("org.slf4j:slf4j-simple")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     runtimeOnly("com.h2database:h2")
-    compile project(':back')
+    implementation project(':back')
 
     implementation "org.jetbrains.exposed:exposed-core:$exposed_version"
     implementation "org.jetbrains.exposed:exposed-dao:$exposed_version"

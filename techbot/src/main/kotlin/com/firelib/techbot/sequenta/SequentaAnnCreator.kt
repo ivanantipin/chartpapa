@@ -1,6 +1,6 @@
 package com.firelib.techbot.sequenta
 
-import com.firelib.techbot.BotHelper
+import com.firelib.techbot.OhlcsService
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.RenderUtils.makeBuySellPoint
@@ -188,7 +188,7 @@ fun main() {
     initDatabase()
     transaction {
 
-        val ohs = BotHelper.getOhlcsForTf(InstrId("VEON", market = "1"), Interval.Day).subList(0, 100)
+        val ohs = OhlcsService.instance.getOhlcsForTf(InstrId("VEON", market = "1"), Interval.Day).subList(0, 100)
         val signals = SequentaAnnCreator.genSignals(ohs)
         val ann = SequentaAnnCreator.createAnnotations(signals, ohs)
         drawSequenta(ann, ohs, "rtkm")

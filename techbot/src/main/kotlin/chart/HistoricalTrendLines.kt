@@ -1,14 +1,11 @@
 package chart
 
-import com.firelib.techbot.BotHelper
-import com.firelib.techbot.TrendsCreator
+import com.firelib.techbot.*
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.ChartService.post
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.initDatabase
 import com.firelib.techbot.persistence.BotConfig
-import com.firelib.techbot.updateDatabase
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import org.jetbrains.exposed.sql.and
@@ -30,7 +27,7 @@ object HistoricalTrendLines {
         }
 
         return if (be == null) {
-            val targetOhlcs = BotHelper.getOhlcsForTf(ticker, timeFrame.interval)
+            val targetOhlcs = OhlcsService.instance.getOhlcsForTf(ticker, timeFrame.interval)
             val fileName = BreachEvents.makeSnapFileName(BreachType.TREND_LINE.name, ticker.id, timeFrame, eventTimeMs)
             val conf = BotConfig.getConf(ticker, timeFrame)
             val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)

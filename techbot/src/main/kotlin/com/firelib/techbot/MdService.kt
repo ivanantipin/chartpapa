@@ -37,7 +37,7 @@ object MdService {
     fun fetchInstruments(): List<InstrId> {
         val ret1 = PoligonSource(ConfigParameters.POLYGON_TOKEN.get()!!).symbols()
         log.info("poligon instruments size " + ret1.size)
-        return ret1 + safeLoadFinamWithRetryEmptyIfFailed()
+        return ret1 //+ safeLoadFinamWithRetryEmptyIfFailed()
     }
 
     fun safeLoadFinamWithRetryEmptyIfFailed() : List<InstrId>{

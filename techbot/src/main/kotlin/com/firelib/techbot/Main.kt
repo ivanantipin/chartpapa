@@ -15,8 +15,6 @@ import firelib.core.store.GlobalConstants
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-const val debug_token = "5406386828:AAGxrq7n-wyDzois-NSZe8-Ye3vIfyNj0-o"
-
 fun main() {
 
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
@@ -25,11 +23,7 @@ fun main() {
 
     initDatabase()
 
-    transaction {
-        ConfigService.selectAll().forEach {
-            System.setProperty(it.get(ConfigService.name), it.get(ConfigService.value))
-        }
-    }
+    ConfigService.initSystemVars()
 
     MdService.updateAll()
 
@@ -54,7 +48,7 @@ fun main() {
     menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand()::handle
 
     val bot = bot {
-        token = ConfigParameters.TELEGRAM_TOKEN.get()  ?: debug_token
+        token = ConfigParameters.TELEGRAM_TOKEN.get()!!
         timeout = 30
         logLevel = LogLevel.Error
         dispatch {

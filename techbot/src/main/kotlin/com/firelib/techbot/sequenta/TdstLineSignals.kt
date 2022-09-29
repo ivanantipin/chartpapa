@@ -2,6 +2,7 @@ package com.firelib.techbot.sequenta
 
 import chart.BreachType
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.OhlcsService
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
@@ -17,6 +18,7 @@ import firelib.core.store.MdStorageImpl
 import firelib.indicators.SR
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
+import kotlinx.coroutines.runBlocking
 import java.lang.Integer.min
 
 data class TdstResult(val lines: List<SR>, val signals: List<LevelSignal>)
@@ -76,7 +78,11 @@ object TdstLineSignals : SignalGenerator {
         existing: Set<BreachEventKey>,
         settings: Map<String, String>
     ): List<BreachEvent> {
-        val targetOhlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+
+        val targetOhlcs =  runBlocking {
+            OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        }
+
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
         val options = HorizontalLevelsRenderer().levelBreaches(targetOhlcs, title, result.signals, result.lines)
@@ -105,7 +111,7 @@ object TdstLineSignals : SignalGenerator {
     }
 
     override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>): HOptions {
-        val targetOhlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
         val options = HorizontalLevelsRenderer().levelBreaches(targetOhlcs, title, result.signals, result.lines)

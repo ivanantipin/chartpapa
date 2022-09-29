@@ -1,11 +1,11 @@
 
 dependencies{
-    compile ('firelib:java:0.1-SNAPSHOT')
+    implementation ('firelib:java:0.1-SNAPSHOT')
 
     // https://mvnrepository.com/artifact/io.grpc/grpc-core
-    compile group: 'io.grpc', name: 'grpc-core', version: '1.21.1'
+    implementation group: 'io.grpc', name: 'grpc-core', version: '1.21.1'
 
 
-    compile project (':back')
-    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.10.1'
+    implementation project (':back')
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.10.1'
 }

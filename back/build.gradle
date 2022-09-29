@@ -9,58 +9,33 @@ buildscript {
 apply plugin: 'kotlinx-serialization'
 
 dependencies {
-
-    compile("org.slf4j:slf4j-api:1.7.28")
-    compile("ch.qos.logback:logback-classic:1.2.3")
-    compile("ch.qos.logback:logback-core:1.2.3")
-
-    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.3.2'
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
-    compile group: 'javolution', name: 'javolution', version: '5.5.1'
-    compile group: 'org.springframework', name: 'spring-jdbc', version: '5.1.9.RELEASE'
-    compile group: 'org.springframework', name: 'spring-web', version: '5.1.9.RELEASE'
-
+    implementation("org.slf4j:slf4j-api:1.7.28")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("ch.qos.logback:logback-core:1.2.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+    implementation group: 'javolution', name: 'javolution', version: '5.5.1'
+    implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.1.9.RELEASE'
+    implementation group: 'org.springframework', name: 'spring-web', version: '5.1.9.RELEASE'
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}")
-
-    compile 'net.lingala.zip4j:zip4j:1.3.2'
-
-    compile group: 'org.asynchttpclient', name: 'async-http-client', version: '2.5.2'
-    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9'
-    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.10'
-
-    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
-    compile group: 'com.opencsv', name: 'opencsv', version: '5.3'
-
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-csv
-    compile group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
-
-
-    // https://mvnrepository.com/artifact/com.github.wendykierp/JTransforms
-    compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
-
-
-    // https://mvnrepository.com/artifact/org.zeromq/jeromq
-    compile group: 'org.zeromq', name: 'jeromq', version: '0.5.2'
-
-
-    // https://mvnrepository.com/artifact/org.ojalgo/ojalgo
-//    compile group: 'org.ojalgo', name: 'ojalgo', version: '48.2.0'
-
-    // https://mvnrepository.com/artifact/org.ojalgo/ojalgo-finance
-    compile "org.ojalgo:ojalgo-finance:2.1.0"
-
-
+    implementation 'net.lingala.zip4j:zip4j:1.3.2'
+    implementation group: 'org.asynchttpclient', name: 'async-http-client', version: '2.5.2'
+    implementation group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9'
+    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
+    implementation group: 'com.opencsv', name: 'opencsv', version: '5.3'
+    implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
+    implementation group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
+    implementation group: 'org.zeromq', name: 'jeromq', version: '0.5.2'
+    implementation "org.ojalgo:ojalgo-finance:2.1.0"
     implementation "org.jetbrains.exposed:exposed-core:$exposed_version"
     implementation "org.jetbrains.exposed:exposed-dao:$exposed_version"
     implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
-
-// https://mvnrepository.com/artifact/io.ktor/ktor-client-apache
-    compile group: 'io.ktor', name: 'ktor-client-apache', version: '1.3.1'
-    compile "io.ktor:ktor-client-jackson:1.3.0"
-
+    implementation group: 'io.ktor', name: 'ktor-client-apache', version: '1.3.1'
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4'
+    implementation "io.ktor:ktor-client-jackson:1.3.0"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1"
-
-    testCompile("junit:junit:4.13")
-
+    testImplementation("junit:junit:4.13")
 }

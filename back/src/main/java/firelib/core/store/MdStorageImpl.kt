@@ -20,7 +20,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
     val log = LoggerFactory.getLogger(javaClass)
 
-    val md = MdDaoContainer()
+    val daos = MdDaoContainer()
 
     val sources = SourceFactory()
 
@@ -28,8 +28,14 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         FileUtils.forceMkdir(File(folder))
     }
 
+    companion object{
+        fun makeTable(instrId: InstrId): String {
+            return "${instrId.code}_${instrId.market}"
+        }
+    }
+
     override fun read(instrId: InstrId, interval: Interval, targetInterval: Interval): List<Ohlc> {
-        val dao = md.getDao(instrId.sourceEnum(), interval)
+        val dao = daos.getDao(instrId.sourceEnum(), interval)
         val startTime = LocalDateTime.now().minusSeconds(targetInterval.durationMs * 600 / 1000)
         var ret = dao.queryAll(makeTable(instrId), startTime).toList()
         if (ret.isEmpty()) {
@@ -45,16 +51,12 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     }
 
     override fun read(instrId: InstrId, interval: Interval, start: LocalDateTime): List<Ohlc> {
-        val dao = md.getDao(instrId.sourceEnum(), interval)
+        val dao = daos.getDao(instrId.sourceEnum(), interval)
         return dao.queryAll(makeTable(instrId), start).toList()
     }
 
-    fun makeTable(instrId: InstrId): String {
-        return "${instrId.code}_${instrId.market}"
-    }
-
     override fun insert(instrId: InstrId, interval: Interval, ohlcs: List<Ohlc>) {
-        val dao = md.getDao(instrId.sourceEnum(), interval)
+        val dao = daos.getDao(instrId.sourceEnum(), interval)
         dao.insertOhlc(ohlcs, makeTable(instrId))
     }
 
@@ -66,7 +68,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     fun deleteSince(instrId: InstrId, interval: Interval, time: Instant) {
         try {
             log.info("removing ${instrId} from ${time}")
-            val dao = md.getDao(instrId.sourceEnum(), interval)
+            val dao = daos.getDao(instrId.sourceEnum(), interval)
             dao.deleteSince(makeTable(instrId), time)
         } catch (e: Exception) {
             log.info("failed to remove ${instrId} from ${time}", e)
@@ -74,34 +76,20 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     }
 
     fun queryPoint(instrId: InstrId, interval: Interval, epochMs: Long): Ohlc? {
-        val dao = md.getDao(instrId.sourceEnum(), interval)
+        val dao = daos.getDao(instrId.sourceEnum(), interval)
         return dao.queryPoint(makeTable(instrId), epochMs)
     }
 
-    fun lock(name : String, block : ()->Unit){
-        val lock = GlobalConstants.lock(name)
-        lock.lock()
-        try {
-            block()
-        }finally {
-            lock.unlock()
-        }
-    }
-
-
     private fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
-        val lockName = "${source.getName()}_${interval.name}"
         var instant = Instant.now()
         try {
-            val dao = md.getDao(instrId.sourceEnum(), interval)
+            val dao = daos.getDao(instrId.sourceEnum(), interval)
             val last = dao.queryLast(makeTable(instrId))
             val startTime = if (last == null) LocalDateTime.now().minusDays(5000) else last.endTime.atUtc().minus(interval.duration)
 
             source.load(instrId, startTime, interval).chunked(5000).forEach {
                 instant = it.last().endTime
-                lock(lockName){
-                    dao.insertOhlc(it, makeTable(instrId))
-                }
+                dao.insertOhlc(it, makeTable(instrId))
             }
         } catch (e: Exception) {
             log.info("failed to update " + instrId + " " + e.message)
@@ -111,8 +99,8 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     }
 
     fun transform(instrId: InstrId, from: Interval, to: Interval) {
-        val dao = md.getDao(instrId.sourceEnum(), from)
-        val daoTo = md.getDao(instrId.sourceEnum(), to)
+        val dao = daos.getDao(instrId.sourceEnum(), from)
+        val daoTo = daos.getDao(instrId.sourceEnum(), to)
         val toOhlc = IntervalTransformer.transform(to, dao.queryAll(instrId.code))
         daoTo.insertOhlc(toOhlc, dao.normName(instrId.code))
     }

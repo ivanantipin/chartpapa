@@ -4,10 +4,18 @@ import com.firelib.techbot.chart.domain.HOptions
 import firelib.core.misc.JsonHelper
 import io.ktor.client.*
 import io.ktor.client.request.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.springframework.beans.factory.config.Scope
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 object ChartService {
     val client = HttpClient()
+
+    val executor = Executors.newSingleThreadExecutor()
 
     data class HiRequest(val async: Boolean, val infile: HOptions, val constr: String, val scale: Int,
                          var globalOptions : Map<String,*>? = null)
@@ -15,18 +23,20 @@ object ChartService {
     val urlString = "http://localhost:7801"
 
     private fun postJson(optJson: String): ByteArray {
-        return runBlocking {
-            val imagePath = client.post<String> {
-                url(urlString)
-                header("Content-Type", "application/json")
-                body = optJson
-            }
-            val imgUrl = "$urlString/" + imagePath
-            //println(optJson)
-            //println(imgUrl)
+        return executor.submit(Callable {
+            runBlocking {
+                val imagePath = client.post<String> {
+                    url(urlString)
+                    header("Content-Type", "application/json")
+                    body = optJson
+                }
+                val imgUrl = "$urlString/" + imagePath
+                //println(optJson)
+                //println(imgUrl)
 
-            client.get<ByteArray>(imgUrl)
-        }
+                client.get<ByteArray>(imgUrl)
+            }
+        }).get()
     }
 
     fun post(options: HOptions, globalOptions: Map<String, *>? = null, chartType : String = "StockChart"): ByteArray {

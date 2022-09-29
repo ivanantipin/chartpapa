@@ -2,7 +2,6 @@ package com.firelib.techbot
 
 import chart.SignalType
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.menu.langCode
 import com.firelib.techbot.persistence.*
@@ -153,48 +152,11 @@ object BotHelper {
         }
     }
 
-    val mdStorageImpl = MdStorageImpl()
-
-    fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
-        val (ret, _) = measureAndLogTime("load for ticker tf ${ticker.code} tf ${timeFrame}", {
-            getOhlcsForTf(ticker, timeFrame, BotConfig.window.toInt())
-        }, minTimeMs = 100)
-        return ret
-
-    }
-
-    fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval, window: Int): List<Ohlc> {
-        val startTime = LocalDateTime.now().minus(timeFrame.duration.multipliedBy(window.toLong()))
-        val ohlcs = mdStorageImpl.read(ticker, Interval.Min10, startTime)
-        if (ohlcs.isEmpty()) {
-            return emptyList()
-        }
-        val ret = IntervalTransformer.transform(timeFrame, ohlcs)
-
-        val maxAllowedReminder = when (timeFrame) {
-            Interval.Day, Interval.Week -> {
-                0.25
-            }
-            else -> 0.001
-        }
-
-        val last = ret.last()
-
-        val reminder = (last.endTime.toEpochMilli() - ohlcs.last().endTime.toEpochMilli()) / timeFrame.durationMs
-        val completeBar = reminder <= maxAllowedReminder
-        return if (completeBar) {
-            ret
-        } else {
-            println("filtered")
-            ret.subList(0, ret.size - 1)
-        }
-    }
-
     fun saveFile(bytes: ByteArray, fileName: String) {
         File(fileName).parentFile.mkdirs()
         FileOutputStream(fileName).use {
             it.write(bytes)
         }
     }
-
 }
+

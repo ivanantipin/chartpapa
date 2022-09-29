@@ -2,6 +2,7 @@ package com.firelib.techbot.sequenta
 
 import chart.BreachType
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.OhlcsService
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
@@ -26,7 +27,7 @@ object SequentaSignals : SignalGenerator {
         existing: Set<BreachEventKey>,
         settings: Map<String, String>
     ): List<BreachEvent> {
-        val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
         val signals = SequentaAnnCreator.genSignals(ohlcs)
 
         return signals.flatMap {
@@ -57,7 +58,7 @@ object SequentaSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame, settings: Map<String, String>
     ): HOptions {
-        val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
         val signals = SequentaAnnCreator.genSignals(ohlcs)
         val annotations = SequentaAnnCreator.createAnnotations(signals, ohlcs)
         return SequentaAnnCreator.makeSequentaOpts(annotations, ohlcs, makeTitle(tf, instr, settings))

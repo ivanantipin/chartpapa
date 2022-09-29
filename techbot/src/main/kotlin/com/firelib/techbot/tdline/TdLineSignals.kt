@@ -2,9 +2,7 @@ package com.firelib.techbot.tdline
 
 import chart.BreachType
 import chart.SignalType
-import com.firelib.techbot.BotHelper
-import com.firelib.techbot.SignalGenerator
-import com.firelib.techbot.TrendsCreator
+import com.firelib.techbot.*
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
@@ -12,7 +10,6 @@ import com.firelib.techbot.chart.ChartService.post
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.initDatabase
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -35,7 +32,7 @@ object TdLineSignals : SignalGenerator {
         existing: Set<BreachEventKey>,
         settings: Map<String, String>
     ): List<BreachEvent> {
-        val targetOhlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
 
@@ -59,9 +56,9 @@ object TdLineSignals : SignalGenerator {
 
     override fun drawPicture(
         instr: InstrId,
-        tf: TimeFrame,  settings: Map<String, String>
+        tf: TimeFrame, settings: Map<String, String>
     ): HOptions {
-        val targetOhlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
         return TrendLinesRenderer.makeTrendLines(targetOhlcs, makeTitle(tf, instr, settings), lines)

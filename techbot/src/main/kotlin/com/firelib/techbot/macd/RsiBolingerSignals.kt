@@ -2,8 +2,7 @@ package com.firelib.techbot.macd
 
 import chart.BreachType
 import chart.SignalType
-import com.firelib.techbot.BotHelper
-import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.*
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
@@ -11,12 +10,10 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.initDatabase
 import com.firelib.techbot.macd.RsiBolingerSignals.BOLINGER_ATTR
 import com.firelib.techbot.macd.RsiBolingerSignals.RSI_ATTR
 import com.firelib.techbot.macd.RsiBolingerSignals.RSI_HIGH_ATTR
 import com.firelib.techbot.macd.RsiBolingerSignals.RSI_LOW_ATTR
-import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
 import com.github.kotlintelegrambot.Bot
@@ -138,7 +135,7 @@ object RsiBolingerSignals : SignalGenerator {
         existing: Set<BreachEventKey>,
         settings: Map<String, String>
     ): List<BreachEvent> {
-        val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
         val params = RsiBolingerParams.fromSettings(settings)
 
         val result = render(
@@ -171,7 +168,7 @@ object RsiBolingerSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame, settings: Map<String, String>
     ): HOptions {
-        val ohlcs = BotHelper.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
         return render(ohlcs, RsiBolingerParams.fromSettings(settings), makeTitle(tf, instr, settings)).options
     }
 

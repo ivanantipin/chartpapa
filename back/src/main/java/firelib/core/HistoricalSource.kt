@@ -10,12 +10,7 @@ interface HistoricalSource {
     fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc>
     fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc>
     fun getName(): SourceName
-
     fun mapSecurity(security : String) : InstrId {
         return InstrId(code = security)
     }
-}
-
-enum class SourceName{
-    FINAM,TRANSAQ, TCS, DUMMY, VANTAGE, IQFEED,MT5,MOEX, EODHIST,POLIGON
 }

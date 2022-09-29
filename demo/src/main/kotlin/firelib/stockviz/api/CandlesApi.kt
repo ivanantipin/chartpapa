@@ -19,7 +19,7 @@ class CandlesApiController {
     ): List<Candle> {
 
         val storage = MdStorageImpl()
-        val dao = storage.md.getDao(SourceName.FINAM, Interval.Min10)
+        val dao = storage.daos.getDao(SourceName.FINAM, Interval.Min10)
         val ohlcs = dao.queryAll(symbol.replace(".MICEX", ""), Instant.ofEpochMilli(fromTs).atMoscow())
 
         return ohlcs.map {
