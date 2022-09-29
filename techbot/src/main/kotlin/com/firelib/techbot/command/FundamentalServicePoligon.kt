@@ -2,10 +2,12 @@ package com.firelib.techbot.command
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.firelib.techbot.ConfigParameters
 import com.firelib.techbot.chart.*
 import com.firelib.techbot.command.FundamentalService.mergeAndSort
 import com.firelib.techbot.command.FundamentalService.toQuarter
 import com.firelib.techbot.initDatabase
+import com.firelib.techbot.persistence.ConfigService
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -37,9 +39,10 @@ object FundamentalServicePoligon {
 
     data class CompanyInfo(val shares: Long)
 
-    val apiKey = "apiKey=mBbK9N0OGVjrr6GrDMyz9N8Nxxnl2BVN"
+    val apiKey = "apiKey=${ConfigParameters.POLYGON_TOKEN.get()}"
 
     fun getCompanyInfo(instrId: InstrId): CompanyInfo {
+
         val cached = CacheService.getCached("/companyInfo/${instrId.code}", {
             val template = RestTemplate()
             template.getForEntity(
@@ -53,8 +56,7 @@ object FundamentalServicePoligon {
 
     fun fetchRest(ticker: String): String {
         val url = "https://api.polygon.io/vX/reference/financials?ticker=${ticker}&timeframe=quarterly&limit=24"
-        val args = "apiKey=mBbK9N0OGVjrr6GrDMyz9N8Nxxnl2BVN"
-        return String(fetchCursor(url, args))
+        return String(fetchCursor(url, apiKey))
     }
 
     fun fetchRestCached(ticker : String) : ByteArray{
@@ -184,25 +186,6 @@ object FundamentalServicePoligon {
 
 }
 
-
-fun drawGeneric() {
-
-    val ser0 = makeSer("data0")
-    val ser1 = makeSer("data1")
-
-    val ser0ux = SeriesUX(ser0, "red", 0, type = "line", makeTicks = true)
-    val ser1ux = SeriesUX(ser1, "blue", 1, makeTicks = true)
-
-
-
-    ChartService.post(
-        GenericCharter.makeSeries(listOf(ser0ux, ser1ux), "some", listOf("data0", "data1")),
-        RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
-        "Chart"
-    )
-
-
-}
 
 fun main() {
     initDatabase()

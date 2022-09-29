@@ -127,9 +127,6 @@ enum class Msg {
                 MACD to "MACD",
                 SupportMsg to "Support",
                 YourSymbolsPressToRemove to "*Your instruments*\nPress to remove"
-
-
-
             )
         )
 
