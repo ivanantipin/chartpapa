@@ -4,11 +4,7 @@ import com.firelib.techbot.chart.domain.HOptions
 import firelib.core.misc.JsonHelper
 import io.ktor.client.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.springframework.beans.factory.config.Scope
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
