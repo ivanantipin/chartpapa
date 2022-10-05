@@ -5,6 +5,7 @@ import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.menu.langCode
 import com.firelib.techbot.persistence.*
+import com.firelib.techbot.staticdata.StaticDataService
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
@@ -31,39 +32,9 @@ object BotHelper {
         }
     }
 
-    fun getSubscriptions(uid: Long): List<InstrId> {
-        return transaction {
-            Subscriptions.select {
-                Subscriptions.user eq uid
-            }.withDistinct().flatMap {
-                val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
-                if (ret == null) {
-                    deleteUnmappedSubscription(it)
-                    emptyList()
-                } else {
-                    listOf(ret)
-                }
-            }
-        }
-    }
-
     private fun deleteUnmappedSubscription(it: ResultRow) {
         mainLogger.error("failed to map ${it} deleting")
         Subscriptions.deleteWhere { Subscriptions.ticker eq it[Subscriptions.ticker] and (Subscriptions.market eq it[Subscriptions.market]) }
-    }
-
-    fun getSubscriptions(): Map<UserId, List<InstrId>> {
-        return transaction {
-            Subscriptions.selectAll().flatMap {
-                val ret = MdService.instrByCodeAndMarket[it[Subscriptions.ticker] to it[Subscriptions.market]]
-                if (ret == null) {
-                    deleteUnmappedSubscription(it)
-                    emptyList()
-                } else {
-                    listOf(UserId(it[Subscriptions.user].toLong()) to ret)
-                }
-            }.groupBy({ it.first }, { it.second })
-        }
     }
 
     fun getTimeFrames(): Map<UserId, List<TimeFrame>> {
