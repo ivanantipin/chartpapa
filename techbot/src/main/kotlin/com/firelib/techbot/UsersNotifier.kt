@@ -1,14 +1,11 @@
 package com.firelib.techbot
 
 import chart.BreachType
-import chart.SignalType
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
-import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.ChatId
-import firelib.core.domain.InstrId
+import com.firelib.techbot.staticdata.SubscriptionService
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.batchInsert
@@ -16,33 +13,27 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.time.Instant
 import java.util.concurrent.Executors
 
 @JvmInline
 value class UserId(val id: Long)
 
-data class NotifyGroup(
-    val ticker: InstrId,
-    val signalType: SignalType,
-    val timeFrame: TimeFrame,
-    val settings: Map<String, String>
-)
-
-object UsersNotifier {
+class UsersNotifier(val techBotApp: TechBotApp) {
 
     fun getNotifyGroups(): Map<NotifyGroup, List<UserId>> {
         val signalTypes = BotHelper.getSignalTypes()
         val userSettings = BotHelper.getAllSettings()
-        val userTickers = BotHelper.getSubscriptions()
+
+        val flattenSubscriptions = techBotApp.getSubscriptionService().subscriptions.mapValues { it.value.values.toList() }
+
         val pairs = BotHelper.getTimeFrames().flatMap { (userId, timeFrames) ->
             timeFrames.flatMap { timeFrame ->
-                userTickers.getOrDefault(userId, emptyList()).flatMap { ticker ->
+                flattenSubscriptions.getOrDefault(userId, emptyList()).flatMap { ticker ->
                     signalTypes.getOrDefault(userId, emptyList()).map { signalType ->
                         val settings = userSettings.getOrDefault(userId, emptyList())
-                        val macdSettings = settings.find { it["command"] == signalType.settingsName } ?: emptyMap()
-                        NotifyGroup(ticker, signalType, timeFrame, macdSettings) to userId
+                        val signalSettings = settings.find { it["command"] == signalType.settingsName } ?: emptyMap()
+                        NotifyGroup(ticker, signalType, timeFrame, signalSettings) to userId
                     }
                 }
             }
@@ -52,7 +43,7 @@ object UsersNotifier {
 
     val log: Logger = LoggerFactory.getLogger(UsersNotifier::class.java)
 
-    fun start(bot: Bot) {
+    fun start() {
         Thread({
             timeSequence(Instant.now(), Interval.Min30, 10000).forEach {
                 val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get().let {
@@ -63,7 +54,7 @@ object UsersNotifier {
                 }else{
                     try {
                         measureAndLogTime("signal checking", {
-                            check(bot, 2)
+                            check(2)
                         })
                     } catch (e: Exception) {
                         log.error("error in user notifier", e)
@@ -75,7 +66,7 @@ object UsersNotifier {
 
     val notifyExecutor = Executors.newFixedThreadPool(40)
 
-    fun check(bot: Bot, breachWindow: Int) {
+    fun check(breachWindow: Int) {
         val existingEvents = loadExistingBreaches().map { it.key }.toSet()
         val notifyGroups = getNotifyGroups()
         log.info("notify group count is ${notifyGroups.size}")
@@ -83,7 +74,7 @@ object UsersNotifier {
             notifyExecutor.submit{
                 try {
                     measureAndLogTime("group ${group} processing took", {
-                        processGroup(group, breachWindow, existingEvents, bot, users)
+                        processGroup(group, breachWindow, existingEvents, users)
                     })
                 } catch (e: Exception) {
                     log.error("error notifying group ${group}", e)
@@ -96,7 +87,6 @@ object UsersNotifier {
         group: NotifyGroup,
         breachWindow: Int,
         existingEvents: Set<BreachEventKey>,
-        bot: Bot,
         users: List<UserId>
     ) {
         val instrId = group.ticker
@@ -107,11 +97,12 @@ object UsersNotifier {
             timeFrame,
             breachWindow,
             existingEvents,
-            group.settings
+            group.settings,
+            techBotApp
         )
 
         breaches.forEach {
-            notify(it, bot, users)
+            notify(it, users)
         }
 
         if (breaches.isNotEmpty()) {
@@ -142,14 +133,8 @@ object UsersNotifier {
         }
     }
 
-    fun notify(be: BreachEvent, bot: Bot, users: List<UserId>) {
-        users.forEach { userId ->
-            mainLogger.info("notifiying user ${userId}")
-            val response = bot.sendPhoto(ChatId.fromId(userId.id), File(be.photoFile))
-            if (response.second != null) {
-                response.second!!.printStackTrace()
-            }
-        }
+    fun notify(be: BreachEvent, users: List<UserId>) {
+        techBotApp.botInterface().sendBreachEvent(be, users)
     }
 }
 

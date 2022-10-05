@@ -2,8 +2,9 @@ package com.firelib.techbot.sequenta
 
 import chart.BreachType
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.OhlcsService
+import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
@@ -25,9 +26,10 @@ object SequentaSignals : SignalGenerator {
         tf: TimeFrame,
         window: Int,
         existing: Set<BreachEventKey>,
-        settings: Map<String, String>
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
     ): List<BreachEvent> {
-        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val signals = SequentaAnnCreator.genSignals(ohlcs)
 
         return signals.flatMap {
@@ -56,9 +58,9 @@ object SequentaSignals : SignalGenerator {
 
     override fun drawPicture(
         instr: InstrId,
-        tf: TimeFrame, settings: Map<String, String>
+        tf: TimeFrame, settings: Map<String, String>,techBotApp: TechBotApp
     ): HOptions {
-        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val signals = SequentaAnnCreator.genSignals(ohlcs)
         val annotations = SequentaAnnCreator.createAnnotations(signals, ohlcs)
         return SequentaAnnCreator.makeSequentaOpts(annotations, ohlcs, makeTitle(tf, instr, settings))
@@ -67,14 +69,5 @@ object SequentaSignals : SignalGenerator {
     fun makeTitle(timeFrame: TimeFrame, instr: InstrId, settings: Map<String, String>): String {
         return "Sequenta ${instr.code} (${timeFrame}"
     }
-
-}
-
-fun main() {
-    initDatabase()
-    //val ticker = InstrId(code = "GAZP", market = "1", source = SourceName.FINAM.name)
-    val ticker = InstrId(code = "HAL", market = "XNYS", source = SourceName.POLIGON.name)
-    //MdStorageImpl().updateMarketData(ticker, Interval.Min10);
-    SequentaSignals.checkSignals(ticker, TimeFrame.D, 180, emptySet(), emptyMap())
 
 }

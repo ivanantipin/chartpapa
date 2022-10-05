@@ -51,7 +51,7 @@ class SingletonsContainer : AutoCloseable {
 
     @Synchronized
     fun <T : Any> getWithExpiration(name: String, provider: ()->T, minsToExpire: Long): T {
-        val ret = (expirable as java.util.Map<String, CachedUnit>).computeIfAbsent(name) { k -> CachedUnit(System.currentTimeMillis(), provider()) }
+        val ret = expirable.computeIfAbsent(name) { k -> CachedUnit(System.currentTimeMillis(), provider()) }
         if ((System.currentTimeMillis() - ret.timestamp) / 60000 > minsToExpire) {
             try {
                 expirable[name] = CachedUnit(System.currentTimeMillis(), provider())

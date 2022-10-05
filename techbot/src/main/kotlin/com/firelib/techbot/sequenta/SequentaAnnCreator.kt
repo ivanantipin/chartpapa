@@ -1,16 +1,11 @@
 package com.firelib.techbot.sequenta
 
-import com.firelib.techbot.OhlcsService
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.RenderUtils.makeBuySellPoint
 import com.firelib.techbot.chart.RenderUtils.markLevel
 import com.firelib.techbot.chart.domain.*
-import com.firelib.techbot.initDatabase
-import com.firelib.techbot.sequenta.SequentaAnnCreator.drawSequenta
 import com.funstat.domain.HLine
-import firelib.core.domain.InstrId
-import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.sequenta.Sequenta
@@ -18,24 +13,24 @@ import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.SignalType
 import firelib.indicators.sequenta.calcStop
 import org.jetbrains.exposed.sql.logTimeSpent
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.DecimalFormat
 import java.util.concurrent.atomic.AtomicInteger
 
 data class SignalEvent(
-    val idx : Int,
-    val up : Boolean,
+    val idx: Int,
+    val up: Boolean,
     val type: SignalType,
-    val setupStart : Int,
-    val setupEnd : Int,
-    val tdst : Double,
-    val cntdn : Int,
-    val completedSignal : Int,
-    val recycleRatio : Double?
-){
-    companion object{
-        fun convert(signal: Signal) : SignalEvent{
-            return SignalEvent(signal.idx, signal.reference.up, signal.type,
+    val setupStart: Int,
+    val setupEnd: Int,
+    val tdst: Double,
+    val cntdn: Int,
+    val completedSignal: Int,
+    val recycleRatio: Double?
+) {
+    companion object {
+        fun convert(signal: Signal): SignalEvent {
+            return SignalEvent(
+                signal.idx, signal.reference.up, signal.type,
                 signal.reference.start,
                 signal.reference.end,
                 signal.reference.tdst,
@@ -46,7 +41,6 @@ data class SignalEvent(
         }
     }
 }
-
 
 object SequentaAnnCreator {
 
@@ -80,7 +74,6 @@ object SequentaAnnCreator {
         options.series += series
         return options
     }
-
 
     fun createAnnotations(signals: List<SignalEvent>, ohlcs: List<Ohlc>): SequentaAnnnotations {
 
@@ -181,16 +174,5 @@ object SequentaAnnCreator {
         }
         lines.addAll(lines0)
         return SequentaAnnnotations(labels, shapes, lines)
-    }
-}
-
-fun main() {
-    initDatabase()
-    transaction {
-
-        val ohs = OhlcsService.instance.getOhlcsForTf(InstrId("VEON", market = "1"), Interval.Day).subList(0, 100)
-        val signals = SequentaAnnCreator.genSignals(ohs)
-        val ann = SequentaAnnCreator.createAnnotations(signals, ohs)
-        drawSequenta(ann, ohs, "rtkm")
     }
 }

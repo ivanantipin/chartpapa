@@ -11,6 +11,7 @@ import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.BotConfig
+import com.firelib.techbot.staticdata.OhlcsService
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -30,9 +31,10 @@ object TdLineSignals : SignalGenerator {
         tf: TimeFrame,
         window: Int,
         existing: Set<BreachEventKey>,
-        settings: Map<String, String>
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
     ): List<BreachEvent> {
-        val targetOhlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
 
@@ -56,9 +58,11 @@ object TdLineSignals : SignalGenerator {
 
     override fun drawPicture(
         instr: InstrId,
-        tf: TimeFrame, settings: Map<String, String>
+        tf: TimeFrame,
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
     ): HOptions {
-        val targetOhlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
         return TrendLinesRenderer.makeTrendLines(targetOhlcs, makeTitle(tf, instr, settings), lines)
@@ -67,14 +71,5 @@ object TdLineSignals : SignalGenerator {
     fun makeTitle(timeFrame: TimeFrame, instr: InstrId, settings: Map<String, String>): String {
         return "Trend line ${instr.code} (${timeFrame})"
     }
-
-}
-
-fun main() {
-    initDatabase()
-    val ticker = InstrId(code = "GMKN", market = "1", source = SourceName.FINAM.name)
-    MdStorageImpl().updateMarketData(ticker, Interval.Min10);
-    TdLineSignals.checkSignals(ticker, TimeFrame.D, 5, emptySet(), emptyMap())
-    //UpdateLevelsSensitivities.updateLevelSenses()
 
 }

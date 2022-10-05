@@ -2,8 +2,9 @@ package com.firelib.techbot.sequenta
 
 import chart.BreachType
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.OhlcsService
+import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
@@ -76,12 +77,12 @@ object TdstLineSignals : SignalGenerator {
         tf: TimeFrame,
         window: Int,
         existing: Set<BreachEventKey>,
-        settings: Map<String, String>
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
+
     ): List<BreachEvent> {
 
-        val targetOhlcs =  runBlocking {
-            OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
-        }
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
 
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
@@ -90,7 +91,7 @@ object TdstLineSignals : SignalGenerator {
         val threshold = targetOhlcs[targetOhlcs.size - window - 1].endTime.toEpochMilli()
 
         val newSignals = result.signals
-            .filter { it.time >=  threshold}
+            .filter { it.time >= threshold }
             .map { BreachEventKey(instr.id, tf, targetOhlcs.last().endTime.toEpochMilli(), BreachType.TDST_SIGNAL) }
             .filter { !existing.contains(it) }
 
@@ -110,8 +111,8 @@ object TdstLineSignals : SignalGenerator {
         }
     }
 
-    override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>): HOptions {
-        val targetOhlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+    override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp): HOptions {
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
         val options = HorizontalLevelsRenderer().levelBreaches(targetOhlcs, title, result.signals, result.lines)
@@ -121,11 +122,4 @@ object TdstLineSignals : SignalGenerator {
     fun makeTitle(timeFrame: TimeFrame, instr: InstrId, settings: Map<String, String>): String {
         return "TDST tf=${timeFrame} ${instr.code}"
     }
-}
-
-fun main() {
-    initDatabase()
-    val ticker = InstrId(code = "MTLRP", market = "1", source = SourceName.FINAM.name)
-    MdStorageImpl().updateMarketData(ticker, Interval.Min10);
-    TdstLineSignals.checkSignals(ticker, TimeFrame.H4, 2, emptySet(), emptyMap())
 }

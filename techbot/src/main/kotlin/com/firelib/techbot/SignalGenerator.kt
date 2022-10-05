@@ -23,10 +23,11 @@ interface SignalGenerator {
         tf: TimeFrame,
         window: Int,
         existing: Set<BreachEventKey>,
-        settings: Map<String, String>
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
     ): List<BreachEvent>
 
-    fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>): HOptions
+    fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp): HOptions
 
     fun fetchSettings(userId: Long): Map<String, String> {
         val value = transaction {
@@ -37,14 +38,15 @@ interface SignalGenerator {
         else JsonHelper.fromJson(value)
     }
 
-    fun validate(split: List<String>): Boolean{
+    fun validate(split: List<String>): Boolean {
         return true
     }
 
-    fun parsePayload(split: List<String>): Map<String, String>{
+    fun parsePayload(split: List<String>): Map<String, String> {
         return emptyMap()
     }
-    fun displayHelp(bot: Bot, update: Update){
+
+    fun displayHelp(bot: Bot, update: Update) {
 
     }
 

@@ -6,6 +6,7 @@ import com.firelib.techbot.chart.ChartService.post
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.BotConfig
+import com.firelib.techbot.staticdata.OhlcsService
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import org.jetbrains.exposed.sql.and
@@ -13,7 +14,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object HistoricalTrendLines {
+class HistoricalTrendLines(val ohlcsService: OhlcsService) {
     fun historicalTrendLines(ticker: InstrId, timeFrame: TimeFrame): HistoricalBreaches {
         val eventTimeMs = Interval.Min10.truncTime(System.currentTimeMillis())
 
@@ -27,7 +28,7 @@ object HistoricalTrendLines {
         }
 
         return if (be == null) {
-            val targetOhlcs = OhlcsService.instance.getOhlcsForTf(ticker, timeFrame.interval)
+            val targetOhlcs = ohlcsService.getOhlcsForTf(ticker, timeFrame.interval).value
             val fileName = BreachEvents.makeSnapFileName(BreachType.TREND_LINE.name, ticker.id, timeFrame, eventTimeMs)
             val conf = BotConfig.getConf(ticker, timeFrame)
             val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
@@ -53,10 +54,4 @@ object HistoricalTrendLines {
             HistoricalBreaches(filePath = be[BreachEvents.photoFile])
         }
     }
-}
-
-fun main() {
-    initDatabase()
-    val lines = HistoricalTrendLines.historicalTrendLines(InstrId("RASP", "1"), TimeFrame.H)
-    println(lines)
 }

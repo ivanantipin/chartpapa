@@ -1,21 +1,16 @@
 package com.firelib.techbot.command
 
+import com.firelib.techbot.*
 import com.firelib.techbot.BotHelper.ensureExist
-import com.firelib.techbot.MdService
-import com.firelib.techbot.UpdateSensitivities
-import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.fromUser
-import com.firelib.techbot.persistence.Subscriptions
-import com.firelib.techbot.updateDatabase
+import com.firelib.techbot.staticdata.StaticDataService
+import com.firelib.techbot.staticdata.SubscriptionService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
 
-class SubHandler : CommandHandler {
+class SubHandler(val subscriptionService: SubscriptionService, val staticDataService: StaticDataService) : CommandHandler {
 
     companion object{
         val name = "sub"
@@ -27,52 +22,17 @@ class SubHandler : CommandHandler {
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
-        val instr = cmd.instr()
+        val instr = cmd.instr(staticDataService)
         val fromUser = update.fromUser()
-
         val uid = fromUser.id
-
         ensureExist(fromUser)
-
-        updateDatabase("update subscription") {
-            if (Subscriptions.select { Subscriptions.user eq uid and (Subscriptions.ticker eq instr.code) }
-                    .empty()) {
-                Subscriptions.insert {
-                    it[user] = uid
-                    it[ticker] = instr.code
-                    it[market] = instr.market
-                }
-                true
-            }else{
-                false
-            }
-        }.thenAccept{added->
-            var mdAvailable = true
-
-            val fut = MdService.update(instr)
-            if (fut != null) {
-                fut.thenAccept {
-                    try {
-                        UpdateSensitivities.updateSens(instr).get()
-                    }catch (e : Exception){
-                        mainLogger.error("failed to subscribe ", e)
-                    }
-                }
-                mdAvailable = false
-            }
-
-            val msg = if (mdAvailable) "" else " маркет данные будут вскоре обновлены, графики могут быть недоступны в течении некоторого времени"
-
-            if (added) {
-                bot.sendMessage(
-                    chatId = ChatId.fromId(fromUser.id),
-                    text = "Добавлен символ ${instr.code}, ${msg}",
-                    parseMode = ParseMode.MARKDOWN
-                )
-            }
+        if(subscriptionService.addSubscription(UserId(uid), instr)){
+            bot.sendMessage(
+                chatId = ChatId.fromId(fromUser.id),
+                text = "Добавлен символ ${instr.code} ",
+                parseMode = ParseMode.MARKDOWN
+            )
         }
-
-
     }
 }
 

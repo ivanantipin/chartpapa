@@ -16,70 +16,16 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun main() {
-
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
         mainLogger.error("unhandled exception thrown", throwable)
     }
-
     initDatabase()
-
     ConfigService.initSystemVars()
+    val app = TechBotApp()
 
-    MdService.updateAll()
-
-    updateSensitivties()
-
-    MdService.startMd()
-
-    val menuReg = MenuRegistry()
-    menuReg.makeMenu()
-    menuReg.commandData[SubHandler.name] = SubHandler()::handle
-    menuReg.commandData[UnsubHandler.name] = UnsubHandler()::handle
-
-    SignalType.values().forEach {
-        menuReg.commandData[it.settingsName] = IndicatorCommand()::handle
-    }
-
-    menuReg.commandData[TfHandler.name] = TfHandler()::handle
-    menuReg.commandData[SignalTypeHandler.name] = SignalTypeHandler()::handle
-    menuReg.commandData[RmSignalTypeHandler.name] = RmSignalTypeHandler()::handle
-    menuReg.commandData[RmTfHandler.name] = RmTfHandler()::handle
-    menuReg.commandData[LanguageHandler.name] = LanguageHandler()::handle
-    menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand()::handle
-
-    val bot = bot {
-        token = ConfigParameters.TELEGRAM_TOKEN.get()!!
-        timeout = 30
-        logLevel = LogLevel.Error
-        dispatch {
-            text(null) {
-                try {
-                    val split = text.split(" ", "\t")
-                    if(split.isNotEmpty() && split[0] == "/set"){
-                        SettingsCommand().handle(split, this.bot, this.update)
-                    }
-
-                    val msg = Msg.getReverseMap(text)
-
-                    val cmd = if (menuReg.menuActions.containsKey(msg) && msg != Msg.MAIN_MENU) msg else Msg.HOME
-                    menuReg.menuActions[cmd]!!(this.bot, this.update)
-                } catch (e: Exception) {
-                    mainLogger.error("exception in action ${text}", e)
-                }
-            }
-            callbackQuery(null) {
-                try {
-                    menuReg.processData(this.callbackQuery.data, bot, update)
-                } catch (e: Exception) {
-                    mainLogger.error("exception in call back query ${this.callbackQuery?.data}")
-                }
-            }
-        }
-
-    }
-    UsersNotifier.start(bot)
-    bot.startPolling()
+    updateSensitivties(app.getSubscriptionService(), app.ohlcService())
 }
+
 
 fun initDatabase() {
     Database.connect(

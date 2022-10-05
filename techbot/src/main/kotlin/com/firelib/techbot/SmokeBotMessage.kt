@@ -14,7 +14,7 @@ fun main() {
     }
 
     val bot = bot {
-        token = System.getenv("TELEGRAM_TOKEN") ?: debug_token
+        token = ConfigParameters.TELEGRAM_TOKEN.get()!!
         timeout = 30
         logLevel = LogLevel.Network.Basic
         dispatch {

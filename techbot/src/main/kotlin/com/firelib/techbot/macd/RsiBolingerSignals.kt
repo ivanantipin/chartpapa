@@ -2,7 +2,9 @@ package com.firelib.techbot.macd
 
 import chart.BreachType
 import chart.SignalType
-import com.firelib.techbot.*
+import com.firelib.techbot.BotHelper
+import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
@@ -10,27 +12,27 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.macd.RsiBolingerSignals.BOLINGER_ATTR
-import com.firelib.techbot.macd.RsiBolingerSignals.RSI_ATTR
-import com.firelib.techbot.macd.RsiBolingerSignals.RSI_HIGH_ATTR
-import com.firelib.techbot.macd.RsiBolingerSignals.RSI_LOW_ATTR
+import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
+import com.firelib.techbot.staticdata.OhlcsService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
-import firelib.core.SourceName
 import firelib.core.domain.InstrId
-import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
-import firelib.core.store.MdStorageImpl
 import firelib.indicators.Rsi
 import firelib.indicators.SimpleMovingAverage
 
 data class BolingerBands(val ma: Double, val lowerBand: Double, val upperBand: Double) {
     val arr = arrayOf(ma, lowerBand, upperBand)
 }
+
+val BOLINGER_ATTR = "bolinger"
+val RSI_ATTR = "rsi"
+val RSI_LOW_ATTR = "rsiLow"
+val RSI_HIGH_ATTR = "rsiHigh"
 
 data class RsiBolingerParams(
     val rsiPeriod: Int,
@@ -133,9 +135,10 @@ object RsiBolingerSignals : SignalGenerator {
         tf: TimeFrame,
         window: Int,
         existing: Set<BreachEventKey>,
-        settings: Map<String, String>
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
     ): List<BreachEvent> {
-        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val params = RsiBolingerParams.fromSettings(settings)
 
         val result = render(
@@ -166,9 +169,9 @@ object RsiBolingerSignals : SignalGenerator {
 
     override fun drawPicture(
         instr: InstrId,
-        tf: TimeFrame, settings: Map<String, String>
+        tf: TimeFrame, settings: Map<String, String>,techBotApp: TechBotApp
     ): HOptions {
-        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         return render(ohlcs, RsiBolingerParams.fromSettings(settings), makeTitle(tf, instr, settings)).options
     }
 
@@ -227,12 +230,6 @@ object RsiBolingerSignals : SignalGenerator {
         return MacdResult(signals, options)
     }
 
-
-    const val BOLINGER_ATTR = "bolinger"
-    const val RSI_ATTR = "rsi"
-    const val RSI_LOW_ATTR = "rsiLow"
-    const val RSI_HIGH_ATTR = "rsiHigh"
-
     override fun validate(split: List<String>): Boolean {
         try {
             if (split.size != 6) {
@@ -261,6 +258,7 @@ object RsiBolingerSignals : SignalGenerator {
     }
 
     override fun displayHelp(bot: Bot, update: Update) {
+        //fixme internationalize
         val header = """
         *Конфигурация индикатора RSI-BOLINGER*
         
@@ -285,14 +283,4 @@ object RsiBolingerSignals : SignalGenerator {
             parseMode = ParseMode.MARKDOWN
         )
     }
-
-
-}
-
-fun main() {
-    initDatabase()
-    //val ticker = InstrId(code = "VTBR", market = "1", source = SourceName.FINAM.name)
-    val ticker = InstrId(code = "KOS", market = "XNAS", source = SourceName.POLIGON.name)
-    MdStorageImpl().updateMarketData(ticker, Interval.Min10);
-    RsiBolingerSignals.checkSignals(ticker, TimeFrame.D, 600, emptySet(), emptyMap())
 }

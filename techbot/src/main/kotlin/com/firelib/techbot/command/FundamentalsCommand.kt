@@ -7,6 +7,7 @@ import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.initDatabase
 import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
+import com.firelib.techbot.staticdata.StaticDataService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 import firelib.core.SourceName
@@ -17,7 +18,7 @@ import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 
-class FundamentalsCommand : CommandHandler {
+class FundamentalsCommand(val staticDataService: StaticDataService) : CommandHandler {
 
     companion object{
         val name = "fund"
@@ -96,7 +97,7 @@ class FundamentalsCommand : CommandHandler {
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
 
-        val instrId = cmd.instr()
+        val instrId = cmd.instr(staticDataService)
 
         actions.forEach({ ee ->
             try {

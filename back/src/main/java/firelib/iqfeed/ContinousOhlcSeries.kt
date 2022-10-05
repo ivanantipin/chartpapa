@@ -3,25 +3,11 @@ package firelib.iqfeed
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.merge
-import java.util.concurrent.atomic.AtomicReference
 
 class ContinousOhlcSeries(val interval: Interval) {
     var lastFetchedTs: Long = -1L
 
-    private val data = mutableListOf<Ohlc>()
-
-    val cache = AtomicReference<Pair<List<Ohlc>, Long>>()
-
-    fun getDataSafe(): List<Ohlc> {
-        val ret = cache.get()
-        if (ret == null || ret.second != lastFetchedTs) {
-            val dt = mutableListOf<Ohlc>().apply {
-                addAll(data)
-            }
-            cache.set(dt to lastFetchedTs)
-        }
-        return cache.get().first
-    }
+    val data = mutableListOf<Ohlc>()
 
     fun add(ohlcsIn: List<Ohlc>) {
         val ohlcs = ohlcsIn.filter { it.endTime.toEpochMilli() > lastFetchedTs }

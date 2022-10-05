@@ -6,6 +6,8 @@ import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.macd.MacdSignals
 import com.firelib.techbot.macd.RsiBolingerSignals
+import com.firelib.techbot.staticdata.StaticDataService
+import com.firelib.techbot.staticdata.SubscriptionService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
@@ -16,7 +18,7 @@ import firelib.core.misc.JsonHelper
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 
-class MenuRegistry {
+class MenuRegistry(val techBotApp: TechBotApp) {
     val menuActions = mutableMapOf<Msg, (Bot, Update) -> Unit>()
 
     val commandData = mutableMapOf<String, (Cmd, Bot, Update) -> Unit>()
@@ -125,10 +127,11 @@ class MenuRegistry {
             addButtonMenu( Msg.AddSymbol) {
                 title = {lang-> Msg.Choose1stLetterOfCompany.toLocal(lang) }
                 this.rowSize = 4
-                MdService.instrByStart.keys.forEach {start->
+                val staticDataService = techBotApp.staticDataService()
+                staticDataService.instrumentByFirstCharacter.keys.forEach { start->
                     this.addButton(start, {langs -> Msg.PickCompany.toLocal(langs) }){
                         rowSize = 2
-                        buttons +=  MdService.instrByStart.getOrDefault(start, emptyList()).map { code ->
+                        buttons +=  staticDataService.instrumentByFirstCharacter.getOrDefault(start, emptyMap()).values.map { code ->
                             SimpleButton("(${code.code}) ${code.name}", Cmd(SubHandler.name, mapOf("id" to code.id)))
                         }
                     }
@@ -136,9 +139,10 @@ class MenuRegistry {
             }
 
             addActionMenu(Msg.YourSymbolsOrRemoval, { bot, update ->
-                val buttons = BotHelper.getSubscriptions(update.chatId().getId()).distinct()
-                    .map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
-                list(buttons, bot, update.chatId(), "${Msg.YourSymbolsPressToRemove.toLocal(update.langCode())}")
+                val subs = techBotApp.getSubscriptionService().subscriptions[UserId(update.chatId().getId())]!!.values.distinct()
+
+                val buttons = subs.map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
+                list(buttons, bot, update.chatId(), Msg.YourSymbolsPressToRemove.toLocal(update.langCode()))
             })
             mainMenu()
         }
@@ -229,7 +233,8 @@ class MenuRegistry {
         chatId: ChatId,
         tf: TimeFrame
     ): List<SimpleButton> {
-        val bts = BotHelper.getSubscriptions(chatId.getId()).map { instrId ->
+        val subs = techBotApp.getSubscriptionService().subscriptions.get(UserId(chatId.getId()))!!
+        val bts = subs.values.map { instrId ->
             SimpleButton(
                 instrId.code,
                 Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name))

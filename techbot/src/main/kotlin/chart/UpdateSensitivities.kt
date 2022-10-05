@@ -2,6 +2,9 @@ package com.firelib.techbot
 
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.SensitivityConfig
+import com.firelib.techbot.staticdata.OhlcsService
+import com.firelib.techbot.staticdata.StaticDataService
+import com.firelib.techbot.staticdata.SubscriptionService
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import org.jetbrains.exposed.sql.and
@@ -9,21 +12,20 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import java.util.concurrent.Future
 
+object UpdateSensitivities {
 
-object UpdateSensitivities{
-
-    fun updateSensitivties() {
-        MdService.liveSymbols.forEach { instr ->
-            updateSens(instr).get()
+    fun updateSensitivties(subscriptionService: SubscriptionService, ohlcsService: OhlcsService) {
+        subscriptionService.liveInstruments().forEach { instr ->
+            updateSens(instr, ohlcsService).get()
         }
     }
 
-    fun updateSens(ticker: InstrId): Future<Unit> {
+    fun updateSens(ticker: InstrId, ohlcsService: OhlcsService): Future<Unit> {
 
         return updateDatabase("senses update ${ticker.code}") {
             SensitivityConfig.deleteWhere { SensitivityConfig.instrId eq ticker.id }
             TimeFrame.values().forEach { timeFrame ->
-                val targetOhlcs = OhlcsService.instance.getOhlcsForTf(ticker, timeFrame.interval)
+                val targetOhlcs = ohlcsService.getOhlcsForTf(ticker, timeFrame.interval).value
 
                 var updated = false
                 for (i in 7 downTo 2) {
@@ -37,9 +39,7 @@ object UpdateSensitivities{
                 }
             }
         }
-
     }
-
 
     private fun updateForOrder(
         targetOhlcs: List<Ohlc>,
@@ -67,9 +67,4 @@ object UpdateSensitivities{
         }
         return false
     }
-}
-
-fun main() {
-    initDatabase()
-    UpdateSensitivities.updateSensitivties()
 }

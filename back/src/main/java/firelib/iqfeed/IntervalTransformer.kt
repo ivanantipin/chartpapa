@@ -9,6 +9,6 @@ object IntervalTransformer {
     fun transform(interval: Interval, ohlcs: List<Ohlc>): List<Ohlc> {
         val ser = ContinousOhlcSeries(interval)
         ser.add(ohlcs)
-        return ser.getDataSafe()
+        return ser.data
     }
 }

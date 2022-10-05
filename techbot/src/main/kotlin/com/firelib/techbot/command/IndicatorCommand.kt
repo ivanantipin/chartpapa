@@ -2,16 +2,18 @@ package com.firelib.techbot.command
 
 import chart.SignalType
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.OhlcsService
+import com.firelib.techbot.TechBotApp
+import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.getId
 import com.firelib.techbot.menu.chatId
+import com.firelib.techbot.staticdata.StaticDataService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 import java.io.File
 
-class IndicatorCommand {
+class IndicatorCommand(val techBotApp: TechBotApp) {
 
     companion object {
         val indi = SignalType.values().associateBy({  it.settingsName}, {it.signalGenerator})
@@ -21,11 +23,11 @@ class IndicatorCommand {
         val userId = update.chatId().getId()
         val signalGenerator = indi[cmd.handlerName]!!
         val settings = signalGenerator.fetchSettings(userId)
-        val instrId = cmd.instr()
+        val instrId = cmd.instr(techBotApp.staticDataService())
         val tkr = instrId.code
         val tf = cmd.tf()
-        val ohlcs = OhlcsService.instance.getOhlcsForTf(instrId, tf.interval)
-        val hOptions = signalGenerator.drawPicture(instrId, tf, settings)
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instrId, tf.interval).value
+        val hOptions = signalGenerator.drawPicture(instrId, tf, settings, techBotApp)
         val bytes = ChartService.post(hOptions)
         val fileName = BreachEvents.makeSnapFileName(
             cmd.handlerName,

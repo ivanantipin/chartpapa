@@ -3,8 +3,9 @@ package com.firelib.techbot.macd
 import chart.BreachType
 import chart.SignalType
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.OhlcsService
+import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
@@ -25,25 +26,6 @@ import firelib.core.domain.Side
 import firelib.core.store.MdStorageImpl
 import firelib.indicators.EmaSimple
 
-data class MacdResult(
-    val signals: List<Pair<Int, Side>>,
-    val options: HOptions
-)
-
-data class MacdParams(
-    val longEma: Int,
-    val shortEma: Int,
-    val signalEma: Int
-) {
-    companion object {
-        fun fromSettings(settings: Map<String, String>): MacdParams {
-            val longEma = settings.getOrDefault("longEma", "26").toInt()
-            val shortEma = settings.getOrDefault("shortEma", "12").toInt()
-            val signalEma = settings.getOrDefault("signalEma", "9").toInt()
-            return MacdParams(longEma, shortEma, signalEma)
-        }
-    }
-}
 
 object MacdSignals : SignalGenerator {
 
@@ -108,9 +90,10 @@ object MacdSignals : SignalGenerator {
         tf: TimeFrame,
         window: Int,
         existing: Set<BreachEventKey>,
-        settings: Map<String, String>
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
     ): List<BreachEvent> {
-        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
 
         if (ohlcs.isEmpty()) {
             return emptyList()
@@ -145,8 +128,8 @@ object MacdSignals : SignalGenerator {
         return emptyList()
     }
 
-    override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>): HOptions {
-        val ohlcs = OhlcsService.instance.getOhlcsForTf(instr, tf.interval)
+    override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp): HOptions {
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val macdParams = MacdParams.fromSettings(settings)
         return render(ohlcs, macdParams, makeTitle(tf, instr, settings)).options
     }
@@ -214,6 +197,7 @@ object MacdSignals : SignalGenerator {
     }
 
     override fun displayHelp(bot: Bot, update: Update) {
+        //fixme internationalize
         val header = """
         *Конфигурация индикатора MACD*
         
@@ -241,13 +225,24 @@ object MacdSignals : SignalGenerator {
             parseMode = ParseMode.MARKDOWN
         )
     }
-
 }
 
-fun main() {
-    initDatabase()
-    val ticker = InstrId(code = "GAZP", market = "1", source = SourceName.FINAM.name)
-    //val ticker = InstrId(code = "VIST", market = "XNAS", source = SourceName.POLIGON.name)
-    MdStorageImpl().updateMarketData(ticker, Interval.Min10);
-    MacdSignals.checkSignals(ticker, TimeFrame.D, 180, emptySet(), emptyMap())
+data class MacdResult(
+    val signals: List<Pair<Int, Side>>,
+    val options: HOptions
+)
+
+data class MacdParams(
+    val longEma: Int,
+    val shortEma: Int,
+    val signalEma: Int
+) {
+    companion object {
+        fun fromSettings(settings: Map<String, String>): MacdParams {
+            val longEma = settings.getOrDefault("longEma", "26").toInt()
+            val shortEma = settings.getOrDefault("shortEma", "12").toInt()
+            val signalEma = settings.getOrDefault("signalEma", "9").toInt()
+            return MacdParams(longEma, shortEma, signalEma)
+        }
+    }
 }

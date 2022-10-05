@@ -1,6 +1,5 @@
 package com.firelib.techbot
 
-import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -54,8 +53,3 @@ fun <T> updateDatabase(name: String, block: () -> T): CompletableFuture<T> {
 }
 
 
-object CommandsLog : IntIdTable() {
-    val user = integer("user_id")
-    val cmd = varchar("cmd", 300)
-    val timestamp = long("timestamp_ms")
-}
