@@ -252,11 +252,6 @@ class FinamDownloader(val batchDays : Int = 100) : AutoCloseable, HistoricalSour
 
 
 fun main() {
-
-
-    val ins = URL("https://www.finam.ru/cache/N72Hgd54/icharts/icharts.js").openStream()
-    val lines : List<String> = IOUtils.readLines(ins, "utf-8") as List<String>
-    lines.forEach { println(it) }
-
+    FinamDownloader().symbols().forEach { println(it) }
 }
 

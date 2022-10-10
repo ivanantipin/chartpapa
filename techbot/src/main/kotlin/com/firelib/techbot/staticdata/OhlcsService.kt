@@ -1,5 +1,6 @@
 package com.firelib.techbot.staticdata
 
+import com.firelib.techbot.mainLogger
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 
@@ -25,15 +27,11 @@ fun getStartTime(timeFrame: Interval) : LocalDateTime{
 
 class OhlcsService(
     val daoProvider: (source: SourceName, interval: Interval) -> MdDao,
-    val sourceProvider: (source: SourceName) -> HistoricalSource, val window: Long = BotConfig.window,
-    val subscriptionService: SubscriptionService
+    val sourceProvider: (source: SourceName) -> HistoricalSource, val window: Long = BotConfig.window
 ) {
 
-    fun start(){
-        subscriptionService.addListener {
-            launchFlowIfNeeded(it)
-        }
-    }
+    val log = LoggerFactory.getLogger(javaClass)
+
 
     val baseFlows = ConcurrentHashMap<InstrId, SeriesContainer>()
 
@@ -48,6 +46,8 @@ class OhlcsService(
         val dao = daoProvider(instrId.sourceEnum(), Interval.Min10)
 
         val last = dao.queryLast(instrId)?.endTime ?: getStartTime(Interval.Week).toInstantDefault()
+
+        log.info("flow launched from start time ${last}")
 
         var latestFetched = last.atUtc()
 
@@ -68,6 +68,9 @@ class OhlcsService(
                 }
 
                 if (empty) {
+                    if(!ret.completed.isDone){
+                        ret.completed.complete(true)
+                    }
                     delay(60_000)
                 }
             }

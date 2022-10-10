@@ -2,14 +2,14 @@ package com.firelib.techbot.command
 
 import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.fromUser
-import com.firelib.techbot.staticdata.StaticDataService
+import com.firelib.techbot.staticdata.InstrumentsService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 import firelib.core.domain.Interval
 import firelib.core.store.MdStorageImpl
 import java.time.Instant
 
-class PruneCommandHandler(val storageImpl: MdStorageImpl, val staticDataService: StaticDataService) : CommandHandler {
+class PruneCommandHandler(val storageImpl: MdStorageImpl, val staticDataService: InstrumentsService) : CommandHandler {
     override fun command(): String {
         return "prune"
     }

@@ -3,12 +3,10 @@ package com.firelib.techbot.command
 import chart.SignalType
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.TechBotApp
-import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.getId
 import com.firelib.techbot.menu.chatId
-import com.firelib.techbot.staticdata.StaticDataService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 import java.io.File

@@ -2,23 +2,21 @@ package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
-import com.firelib.techbot.chart.*
+import com.firelib.techbot.chart.ChartService
+import com.firelib.techbot.chart.GenericCharter
+import com.firelib.techbot.chart.RenderUtils
+import com.firelib.techbot.chart.SeriesUX
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.initDatabase
 import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
-import com.firelib.techbot.staticdata.StaticDataService
+import com.firelib.techbot.staticdata.InstrumentsService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
-import firelib.core.SourceName
 import firelib.core.domain.InstrId
-import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdStorageImpl
 import java.io.File
-import java.time.Instant
-import java.time.LocalDate
 
-class FundamentalsCommand(val staticDataService: StaticDataService) : CommandHandler {
+class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHandler {
 
     companion object{
         val name = "fund"
@@ -117,29 +115,4 @@ class FundamentalsCommand(val staticDataService: StaticDataService) : CommandHan
         })
 
     }
-}
-
-fun main() {
-
-    println(LocalDate.of(2021, 8,25).toInstantDefault().epochSecond)
-    println(LocalDate.of(2021, 9,1).toInstantDefault().epochSecond)
-
-
-    println()
-    println(Instant.ofEpochSecond(1630367881L).minusSeconds(1000))
-    return
-
-
-    initDatabase()
-    val instrument = InstrId.dummyInstrument("FTI").copy(source = SourceName.EODHIST.name, market = "NYSE")
-
-    val evEbit = FundamentalService.ev2Ebitda(instrument, MdStorageImpl())
-
-    ChartService.post(
-        EvEbitdaCharter.makeSeries(evEbit[0], evEbit[1], "ev-ebitda"),
-        RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
-        "Chart"
-    )
-
-
 }

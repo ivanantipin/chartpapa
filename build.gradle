@@ -8,7 +8,7 @@ plugins {
     id 'idea'
 }
 
-allprojects {
+subprojects {
 
     apply plugin: "idea"
     apply plugin: "org.jetbrains.kotlin.jvm"

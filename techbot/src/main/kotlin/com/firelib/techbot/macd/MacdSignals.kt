@@ -13,17 +13,13 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.initDatabase
 import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
-import firelib.core.SourceName
 import firelib.core.domain.InstrId
-import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
-import firelib.core.store.MdStorageImpl
 import firelib.indicators.EmaSimple
 
 

@@ -134,10 +134,12 @@ class MoexSource : HistoricalSource {
         return SourceName.MOEX
     }
 
-    val secCache = symbols().associateBy { it.code.toLowerCase() }
+    val secCache : Map<String, InstrId> by lazy {
+        symbols().associateBy { it.code.lowercase() }
+    }
 
     override fun mapSecurity(security: String): InstrId {
-        return secCache.getOrDefault(security.toLowerCase(), InstrId())
+        return secCache.getOrDefault(security.lowercase(), InstrId())
     }
 
 }

@@ -16,9 +16,6 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.Executors
 
-@JvmInline
-value class UserId(val id: Long)
-
 class UsersNotifier(val techBotApp: TechBotApp) {
 
     fun getNotifyGroups(): Map<NotifyGroup, List<UserId>> {

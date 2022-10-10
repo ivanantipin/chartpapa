@@ -17,9 +17,14 @@ fun Ohlc.merge(ohlc: Ohlc): Ohlc {
     return Ohlc(ohlc.endTime, open,
             Math.max(high, ohlc.high),
             Math.min(low, ohlc.low),
-            ohlc.close, volume = ohlc.volume + volume, interpolated = !(this.interpolated && ohlc.interpolated)
+            ohlc.close, volume = ohlc.volume + volume, interpolated = !(!this.interpolated  || !ohlc.interpolated)
     )
 }
+
+// t/t -> t
+// f/t -> f
+// f/f -> f
+
 
 fun Ohlc.merge(price: Double, vol: Long): Ohlc {
     if (interpolated) {

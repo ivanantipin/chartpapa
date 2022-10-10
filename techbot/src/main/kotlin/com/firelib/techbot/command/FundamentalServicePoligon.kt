@@ -6,8 +6,6 @@ import com.firelib.techbot.ConfigParameters
 import com.firelib.techbot.chart.*
 import com.firelib.techbot.command.FundamentalService.mergeAndSort
 import com.firelib.techbot.command.FundamentalService.toQuarter
-import com.firelib.techbot.initDatabase
-import com.firelib.techbot.persistence.ConfigService
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -183,20 +181,4 @@ object FundamentalServicePoligon {
     fun Series<LocalDate>.mapToStr(): Series<String> {
         return Series(this.name, this.data.mapKeys { "${it.key.year - 2000}-Q${it.key.toQuarter()}" })
     }
-
-}
-
-
-fun main() {
-    initDatabase()
-    val instrId = InstrId.dummyInstrument("VET").copy(market = "XNYS", source = SourceName.POLIGON.name)
-    MdStorageImpl().updateMarketData(instrId, Interval.Min10)
-    //val ev2Ebitda = FundamentalServicePoligon.ev2Ebitda(instrId, MdStorageImpl())
-    val ev2Ebitda = FundamentalServicePoligon.getFromIncome(instrId, listOf("revenues")).map { SeriesUX(it, "blue", 0, makeTicks = true ) }
-    ChartService.post(
-        GenericCharter.makeSeries(ev2Ebitda, "ev ebitda", listOf("Money")),
-        RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
-        "Chart"
-    )
-
 }

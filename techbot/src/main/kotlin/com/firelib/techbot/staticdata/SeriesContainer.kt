@@ -7,18 +7,21 @@ import firelib.core.store.MdDao
 import firelib.core.store.MdStorageImpl
 import firelib.iqfeed.ContinousOhlcSeries
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 
 class SeriesContainer(val dao : MdDao, val instrId: InstrId){
 
     val flows = ConcurrentHashMap<Interval, FlowSnap>()
 
+    val completed = CompletableFuture<Boolean>()
+
     class FlowSnap(val flow : MutableStateFlow<List<Ohlc>>, val series : ContinousOhlcSeries)
 
     fun getFlow(interval: Interval) : MutableStateFlow<List<Ohlc>> {
         return flows.computeIfAbsent(interval, {
             val series = initSeries(instrId, interval)
-            FlowSnap(MutableStateFlow(emptyList()), series)
+            FlowSnap(MutableStateFlow(series.data), series)
         }).flow
     }
 

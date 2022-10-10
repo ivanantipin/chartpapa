@@ -3,7 +3,6 @@ package com.firelib.techbot.command
 import com.fasterxml.jackson.databind.JsonNode
 import com.firelib.techbot.chart.Series
 import com.firelib.techbot.chart.toSortedList
-import com.firelib.techbot.initDatabase
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.readJson
@@ -171,18 +170,4 @@ object FundamentalService {
     }
 
 
-}
-
-fun main() {
-    initDatabase()
-    transaction {
-        CacheService.getCached("some", { "initial".toByteArray() }, 1000)
-        Thread.sleep(500)
-        val updated = CacheService.getCached("some", { "update0".toByteArray() }, 1000)
-        println(String(updated))
-        Thread.sleep(600)
-        val updated1 = CacheService.getCached("some", { "update1".toByteArray() }, 1000)
-        println(String(updated1))
-
-    }
 }

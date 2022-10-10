@@ -35,8 +35,6 @@ fun main() {
 
     }
 
-    initDatabase()
-
     SettingsCommand.displaySettings(bot, 312778820L)
 }
 

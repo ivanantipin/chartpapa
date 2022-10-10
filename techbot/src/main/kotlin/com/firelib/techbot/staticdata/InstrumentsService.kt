@@ -2,20 +2,15 @@ package com.firelib.techbot.staticdata
 
 import com.firelib.techbot.UsersNotifier
 import com.firelib.techbot.mainLogger
-import firelib.core.HistoricalSource
-import firelib.core.SourceName
 import firelib.core.domain.InstrId
-import firelib.core.store.MdStorageImpl
 import firelib.finam.FinamDownloader
 import firelib.finam.MoexSource
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ForkJoinPool
 
-class StaticDataService(val instrIdDao: InstrIdDao) {
+class InstrumentsService(val instrIdDao: InstrIdDao) {
 
     val log: Logger = LoggerFactory.getLogger(UsersNotifier::class.java)
 
@@ -23,19 +18,22 @@ class StaticDataService(val instrIdDao: InstrIdDao) {
     val id2inst = ConcurrentHashMap<String, InstrId>()
     val instrumentByFirstCharacter = ConcurrentHashMap<String, MutableMap<String, InstrId>>()
 
-    fun start(){
+    init {
+        initialLoad()
+    }
+
+    private fun initialLoad(){
         instrIdDao.loadAll().forEach {
             putToCache(it)
         }
-        val storage = MdStorageImpl()
-        fetchSourceAsync(storage.sources[SourceName.MOEX], this)
-        fetchSourceAsync(storage.sources[SourceName.FINAM], this)
-        fetchSourceAsync(storage.sources[SourceName.POLIGON], this)
-
     }
 
 
     fun putToCache(instrId: InstrId){
+        if(instrId.code.isBlank()){
+            mainLogger.info("not adding instrument ${instrId} as code is blank")
+            return
+        }
         instrByCodeAndMarket.put(instrId.code to instrId.market , instrId)
         id2inst[instrId.id] = instrId
         val mp = instrumentByFirstCharacter.computeIfAbsent(instrId.code.first().toString(), {
@@ -43,7 +41,6 @@ class StaticDataService(val instrIdDao: InstrIdDao) {
         })
         mp[instrId.code] = instrId
     }
-
 
     fun byId(id: String): InstrId {
         require(id2inst.containsKey(id), { "no instrument for id ${id}" })
@@ -80,33 +77,5 @@ class StaticDataService(val instrIdDao: InstrIdDao) {
                 null
             }
         }.filterNotNull()
-    }
-
-    fun fetchSourceAsync(source: HistoricalSource, repo : StaticDataService): CompletableFuture<String> {
-        val ff = CompletableFuture<String>()
-        ForkJoinPool.commonPool().submit {
-            var attepmt = 0
-            while (true){
-                try {
-                    attepmt++
-                    val symbols = source.symbols()
-                    mainLogger.info("${source.getName()} instruments size " + symbols.size)
-                    symbols.forEach {
-                        repo.putToCache(it)
-                    }
-                    repo.instrIdDao.add(symbols)
-                    ff.completeAsync({""})
-                    break
-                }catch (e : Exception){
-                    if(attepmt > 5){
-                        ff.completeAsync({""})
-                        break
-                    }
-                    mainLogger.error("failed to load insttruments from ${source.getName()} due to ${e.message} retrying in 5 min")
-                    Thread.sleep(5*60_000)
-                }
-            }
-        }
-        return ff
     }
 }

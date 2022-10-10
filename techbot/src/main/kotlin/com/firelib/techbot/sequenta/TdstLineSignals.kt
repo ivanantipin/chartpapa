@@ -2,7 +2,6 @@ package com.firelib.techbot.sequenta
 
 import chart.BreachType
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvent
@@ -12,14 +11,14 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.HorizontalLevelsRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.initDatabase
-import firelib.core.SourceName
-import firelib.core.domain.*
-import firelib.core.store.MdStorageImpl
+import com.firelib.techbot.mainLogger
+import firelib.core.domain.InstrId
+import firelib.core.domain.LevelSignal
+import firelib.core.domain.Ohlc
+import firelib.core.domain.Side
 import firelib.indicators.SR
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SignalType
-import kotlinx.coroutines.runBlocking
 import java.lang.Integer.min
 
 data class TdstResult(val lines: List<SR>, val signals: List<LevelSignal>)
@@ -83,6 +82,11 @@ object TdstLineSignals : SignalGenerator {
     ): List<BreachEvent> {
 
         val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
+
+        if(targetOhlcs.isEmpty()){
+            mainLogger.info("ohlcs is empty for ${instr}")
+            return emptyList()
+        }
 
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)

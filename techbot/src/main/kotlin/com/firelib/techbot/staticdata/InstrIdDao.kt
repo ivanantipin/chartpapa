@@ -1,28 +1,17 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.persistence.Subscriptions.default
+import com.firelib.techbot.updateDatabase
 import firelib.core.domain.InstrId
-import firelib.finam.FinamDownloader
-import org.jetbrains.exposed.dao.id.IdTable
-import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.Table
-
-/*
-data class InstrId(val id: String = "N/A",
-                   val name: String = "N/A",
-                   val market: String = "NA",
-                   val code: String = "N/A",
-                   val source: String = "N/A",
-                   val minPriceIncr: BigDecimal = BigDecimal.ONE.divide(10.toBigDecimal()),
-                   val lot: Int = 1,
-                   val board : String = "N/A"
-
- */
+import firelib.core.misc.JsonHelper
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.statements.api.ExposedBlob
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object Instruments : Table() {
-    val id = varchar("id", 10)
-    val code = varchar("code", 10)
+    val id = varchar("id", 20)
+    val code = varchar("code", 20)
     val market = varchar("market", 10)
+    val sourceName = varchar("source", 20)
     val payload = blob("payload")
 
     init {
@@ -33,9 +22,23 @@ object Instruments : Table() {
 
 class InstrIdDao {
     fun loadAll(): List<InstrId>{
-        TODO()
+        return transaction {
+            Instruments.selectAll().map {
+                JsonHelper.fromJson<InstrId>(String(it[Instruments.payload].bytes))
+            }
+        }
+
     }
-    fun add(instrId: List<InstrId>){
-        TODO()
+    fun addAll(instrId: List<InstrId>){
+        updateDatabase("insert instruments"){
+            Instruments.batchReplace(instrId) {
+                this[Instruments.id] = it.id
+                this[Instruments.code] = it.code
+                this[Instruments.sourceName] = it.source
+                this[Instruments.market] = it.market
+                this[Instruments.payload] = ExposedBlob(JsonHelper.toJsonBytes(it))
+            }
+        }.get()
+
     }
 }

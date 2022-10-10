@@ -3,7 +3,6 @@ package com.firelib.techbot
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.SensitivityConfig
 import com.firelib.techbot.staticdata.OhlcsService
-import com.firelib.techbot.staticdata.StaticDataService
 import com.firelib.techbot.staticdata.SubscriptionService
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
@@ -35,7 +34,7 @@ object UpdateSensitivities {
                     }
                 }
                 if (!updated) {
-                    println("not found ${ticker}, ${timeFrame}")
+                    println("update senses : not found ${ticker}, ${timeFrame}")
                 }
             }
         }
@@ -67,4 +66,5 @@ object UpdateSensitivities {
         }
         return false
     }
+
 }

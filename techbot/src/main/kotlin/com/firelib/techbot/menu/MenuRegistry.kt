@@ -6,8 +6,6 @@ import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.macd.MacdSignals
 import com.firelib.techbot.macd.RsiBolingerSignals
-import com.firelib.techbot.staticdata.StaticDataService
-import com.firelib.techbot.staticdata.SubscriptionService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup

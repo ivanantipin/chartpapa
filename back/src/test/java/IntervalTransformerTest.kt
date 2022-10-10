@@ -30,26 +30,34 @@ class IntervalTransformerTest {
 
     @Test
     fun testWeek() {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        val mon = LocalDateTime.parse("2018-12-03 00:00:01", formatter).toInstant(ZoneOffset.UTC) //mon
-        val fri = LocalDateTime.parse("2018-12-07 12:00:00", formatter).toInstant(ZoneOffset.UTC) //mon
-        val sun = LocalDateTime.parse("2018-12-09 23:59:59", formatter).toInstant(ZoneOffset.UTC) //mon
-        val nextMon = LocalDateTime.parse("2018-12-10 00:00:01", formatter).toInstant(ZoneOffset.UTC) //mon
-        val nextSun = sun.plusSeconds(3600 * 24 * 7)
-
-        println(Date(1177718400000L))
-
+        val ohlcs = generateTestSetForWeek()
         val out = IntervalTransformer.transform(
-            Interval.Week, listOf(
+            Interval.Week, ohlcs
+        )
+        println(out)
+    }
+
+    companion object{
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        fun generateTestSetForWeek(): List<Ohlc> {
+            val mon = LocalDateTime.parse("2018-12-03 00:00:01", formatter).toInstant(ZoneOffset.UTC) //mon
+            val fri = LocalDateTime.parse("2018-12-07 12:00:00", formatter).toInstant(ZoneOffset.UTC) //mon
+            val sun = LocalDateTime.parse("2018-12-09 23:59:59", formatter).toInstant(ZoneOffset.UTC) //mon
+            val nextMon = LocalDateTime.parse("2018-12-10 00:00:01", formatter).toInstant(ZoneOffset.UTC) //mon
+            val nextSun = sun.plusSeconds(3600 * 24 * 7)
+
+            val ohlcs = listOf(
                 Ohlc(mon, 1.0, 2.0, 0.0, 1.0),
                 Ohlc(fri, 2.0, 3.0, 1.0, 2.0),
                 Ohlc(sun, 2.0, 3.5, 0.5, 2.0),
                 Ohlc(nextMon, 3.0, 4.0, 2.0, 3.0),
                 Ohlc(nextSun, 3.5, 4.5, 1.5, 3.5)
             )
-        )
-        println(out)
+            return ohlcs
+        }
+
     }
+
 
     @Test
     fun testTransformer() {
@@ -71,11 +79,11 @@ class IntervalTransformerTest {
         Assert.assertEquals(ohlcs.subList(0, 2).map { it.high }.maxOrNull(), out[0].high)
         Assert.assertEquals(ohlcs.subList(0, 2).map { it.low }.minOrNull(), out[0].low)
         Assert.assertEquals(out[0].close, ohlcs[1].close, 0.0000001)
-        Assert.assertTrue(out[0].volume == ohlcs.subList(0, 2).sumBy { it.volume.toInt() }.toLong())
+        Assert.assertTrue(out[0].volume == ohlcs.subList(0, 2).sumOf { it.volume.toInt() }.toLong())
         Assert.assertTrue(out[1].high == ohlcs.subList(2, 4).map { it.high }.maxOrNull())
         Assert.assertTrue(out[1].low == ohlcs.subList(2, 4).map { it.low }.minOrNull())
         Assert.assertTrue(out[1].close == ohlcs[3].close)
-        Assert.assertTrue(out[1].volume == ohlcs.subList(2, 4).sumBy { it.volume.toInt() }.toLong())
+        Assert.assertTrue(out[1].volume == ohlcs.subList(2, 4).sumOf { it.volume.toInt() }.toLong())
         Assert.assertEquals(out[2], ohlcs[4].copy(endTime = time4))
     }
 }

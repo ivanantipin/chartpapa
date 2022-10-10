@@ -5,6 +5,7 @@ import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.RenderUtils.makeBuySellPoint
 import com.firelib.techbot.chart.RenderUtils.markLevel
 import com.firelib.techbot.chart.domain.*
+import com.firelib.techbot.measureAndLogTime
 import com.funstat.domain.HLine
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
@@ -12,7 +13,6 @@ import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.SignalType
 import firelib.indicators.sequenta.calcStop
-import org.jetbrains.exposed.sql.logTimeSpent
 import java.text.DecimalFormat
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -58,9 +58,7 @@ object SequentaAnnCreator {
     }
 
     fun drawSequenta(ann: SequentaAnnnotations, hours: List<Ohlc>, title: String): ByteArray {
-        return logTimeSpent("draw sequenta hicharts server") {
-            ChartService.post(makeSequentaOpts(ann, hours, title))
-        }
+        return ChartService.post(makeSequentaOpts(ann, hours, title))
     }
 
     fun makeSequentaOpts(

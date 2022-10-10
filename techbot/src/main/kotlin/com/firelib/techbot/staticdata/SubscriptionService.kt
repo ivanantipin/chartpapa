@@ -12,12 +12,16 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
-class SubscriptionService(val staticDataService: StaticDataService) {
+class SubscriptionService(val staticDataService: InstrumentsService) {
 
     val subscriptions = ConcurrentHashMap<UserId, ConcurrentHashMap<String, InstrId>>()
 
 
     val listeners = CopyOnWriteArrayList<(InstrId)->Unit>()
+
+    init {
+        initialLoad()
+    }
 
     fun liveInstruments() : List<InstrId>{
         return subscriptions.values.flatMap { it.values }.distinct()
@@ -34,6 +38,8 @@ class SubscriptionService(val staticDataService: StaticDataService) {
                 (SourceSubscription.sourceId eq instrId.id) and (SourceSubscription.user eq userId.id)
             }
         }.get()
+        val subs = subscriptions.computeIfAbsent(userId, { ConcurrentHashMap<String, InstrId>() })
+        subs.remove(instrId.id)
         return rows > 0
     }
 
@@ -46,7 +52,7 @@ class SubscriptionService(val staticDataService: StaticDataService) {
                     it[sourceName] = instrId.source
                     it[user] = userId.id
                 }
-            }
+            }.get()
             listeners.forEach { it(instrId) }
             return true
         }
@@ -57,7 +63,7 @@ class SubscriptionService(val staticDataService: StaticDataService) {
         return subscriptions.computeIfAbsent(userId, { ConcurrentHashMap() }).put(instrId.id, instrId)
     }
 
-    fun start() {
+    private fun initialLoad() {
         transaction {
             SourceSubscription.selectAll().forEach { rr ->
                 val ret = staticDataService.id2inst[rr[SourceSubscription.sourceId]]

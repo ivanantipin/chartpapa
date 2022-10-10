@@ -5,11 +5,9 @@ import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.menu.langCode
 import com.firelib.techbot.persistence.*
-import com.firelib.techbot.staticdata.StaticDataService
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
-import firelib.core.domain.InstrId
 import firelib.core.misc.JsonHelper
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
