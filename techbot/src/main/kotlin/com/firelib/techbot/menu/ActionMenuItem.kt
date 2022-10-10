@@ -1,15 +1,15 @@
 package com.firelib.techbot.menu
 
-import com.firelib.techbot.MsgLocalazer
+import com.firelib.techbot.MsgLocalizer
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 
 class ActionMenuItem(
-    val name: MsgLocalazer,
+    val name: MsgLocalizer,
     val action: ((bot: Bot, update: Update) -> Unit)
 ) : IMenu {
 
-    override fun name(): MsgLocalazer {
+    override fun name(): MsgLocalizer {
         return name
     }
 

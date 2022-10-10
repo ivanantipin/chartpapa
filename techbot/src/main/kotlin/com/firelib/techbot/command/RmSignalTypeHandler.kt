@@ -1,7 +1,7 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.MsgLocalazer
+import com.firelib.techbot.MsgLocalizer
 import com.firelib.techbot.command.SignalTypeHandler.Companion.SIGNAL_TYPE_ATTRIBUTE
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.menu.langCode
@@ -33,7 +33,7 @@ class RmSignalTypeHandler : CommandHandler {
         }.thenAccept({
             bot.sendMessage(
                 chatId = ChatId.fromId(fromUser.id),
-                text = MsgLocalazer.SubscrptionRemoved.toLocal(update.langCode()) + signalType,
+                text = MsgLocalizer.SubscrptionRemoved.toLocal(update.langCode()) + signalType,
                 parseMode = ParseMode.HTML
             )
         })

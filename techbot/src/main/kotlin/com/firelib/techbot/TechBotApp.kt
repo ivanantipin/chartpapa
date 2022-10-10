@@ -112,8 +112,8 @@ class TechBotApp {
                         if (split.isNotEmpty() && split[0] == "/set") {
                             SettingsCommand().handle(split, this.bot, this.update)
                         }
-                        val msgLocalazer = MsgLocalazer.getReverseMap(text)
-                        val cmd = if (menuRegistry().menuActions.containsKey(msgLocalazer) && msgLocalazer != MsgLocalazer.MAIN_MENU) msgLocalazer else MsgLocalazer.HOME
+                        val msgLocalizer = MsgLocalizer.getReverseMap(text)
+                        val cmd = if (menuRegistry().menuActions.containsKey(msgLocalizer) && msgLocalizer != MsgLocalizer.MAIN_MENU) msgLocalizer else MsgLocalizer.HOME
                         menuRegistry().menuActions[cmd]!!(this.bot, this.update)
                     } catch (e: Exception) {
                         mainLogger.error("exception in action ${text}", e)
