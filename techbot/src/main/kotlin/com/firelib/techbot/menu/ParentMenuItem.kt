@@ -1,7 +1,7 @@
 package com.firelib.techbot.menu
 
 import com.firelib.techbot.Langs
-import com.firelib.techbot.Msg
+import com.firelib.techbot.MsgLocalazer
 import com.firelib.techbot.persistence.Users
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
@@ -11,34 +11,34 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ParentMenuItem(
-    val name: Msg,
+    val name: MsgLocalazer,
     val children: MutableList<IMenu> = mutableListOf(),
     var rowSize: Int = 3
 ) : IMenu {
 
-    fun addButtonMenu(chName: Msg, aa: MenuItemButtons.() -> Unit): MenuItemButtons {
+    fun addButtonMenu(chName: MsgLocalazer, aa: MenuItemButtons.() -> Unit): MenuItemButtons {
         children += MenuItemButtons(chName, title= {"Naa"}).apply(aa)
         return children.last() as MenuItemButtons
     }
 
-    fun addParentMenu(chName: Msg, aa: ParentMenuItem.() -> Unit) {
+    fun addParentMenu(chName: MsgLocalazer, aa: ParentMenuItem.() -> Unit) {
         children += ParentMenuItem(chName).apply(aa)
     }
 
-    fun addActionMenu(chName: Msg, action: ((bot: Bot, update: Update) -> Unit)) {
+    fun addActionMenu(chName: MsgLocalazer, action: ((bot: Bot, update: Update) -> Unit)) {
         children += ActionMenuItem(chName, action)
     }
 
-    override fun name(): Msg {
+    override fun name(): MsgLocalazer {
         return name
     }
 
     private fun listSubMenus(bot: Bot, update: Update) {
-        val sm = children.map { KeyboardButton( Msg.getMsg(update.langCode(),  it.name()) ) }.chunked(rowSize)
+        val sm = children.map { KeyboardButton( MsgLocalazer.getMsg(update.langCode(),  it.name()) ) }.chunked(rowSize)
         val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
         bot.sendMessage(
             chatId = update.chatId(),
-            text = Msg.getMsg(update.langCode(), name) ,
+            text = MsgLocalazer.getMsg(update.langCode(), name) ,
             replyMarkup = keyboardMarkup
         )
     }

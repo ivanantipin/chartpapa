@@ -1,6 +1,6 @@
 package chart
 
-import com.firelib.techbot.Msg
+import com.firelib.techbot.MsgLocalazer
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.macd.MacdSignals
 import com.firelib.techbot.macd.RsiBolingerSignals
@@ -11,13 +11,13 @@ import com.firelib.techbot.tdline.TdLineSignals
 enum class SignalType(
     val settingsName : String,
     val signalGenerator: SignalGenerator,
-    val msg : Msg
+    val msgLocalazer : MsgLocalazer
 ){
-    TREND_LINE("tl", TdLineSignals, Msg.TREND_LINE),
-    DEMARK("dema",  SequentaSignals, Msg.DEMARK),
-    MACD("macd", MacdSignals, Msg.MACD),
-    RSI_BOLINGER("rbc", RsiBolingerSignals, Msg.RSI_BOLINGER),
-    TDST("tdst", TdstLineSignals, Msg.TDST),
+    TREND_LINE("tl", TdLineSignals, MsgLocalazer.TREND_LINE),
+    DEMARK("dema",  SequentaSignals, MsgLocalazer.DEMARK),
+    MACD("macd", MacdSignals, MsgLocalazer.MACD),
+    RSI_BOLINGER("rbc", RsiBolingerSignals, MsgLocalazer.RSI_BOLINGER),
+    TDST("tdst", TdstLineSignals, MsgLocalazer.TDST),
 }
 
 enum class BreachType {

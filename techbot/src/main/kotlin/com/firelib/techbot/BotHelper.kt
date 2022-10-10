@@ -22,7 +22,7 @@ object BotHelper {
 
     fun displayTimeFrames(uid: Update): String {
         return transaction {
-            val header = Msg.YourTimeframes
+            val header = MsgLocalazer.YourTimeframes
             val resp = TimeFrames.select {
                 TimeFrames.user eq uid.fromUser().id
             }.map { it[TimeFrames.tf] }.sorted().joinToString(separator = "\n")

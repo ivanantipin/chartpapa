@@ -12,16 +12,16 @@ import java.util.concurrent.ConcurrentHashMap
 
 class SeriesContainer(val dao : MdDao, val instrId: InstrId){
 
-    val flows = ConcurrentHashMap<Interval, FlowSnap>()
+    val tf2data = ConcurrentHashMap<Interval, FlowAndSeries>()
 
     val completed = CompletableFuture<Boolean>()
 
-    class FlowSnap(val flow : MutableStateFlow<List<Ohlc>>, val series : ContinousOhlcSeries)
+    class FlowAndSeries(val flow : MutableStateFlow<List<Ohlc>>, val series : ContinousOhlcSeries)
 
-    fun getFlow(interval: Interval) : MutableStateFlow<List<Ohlc>> {
-        return flows.computeIfAbsent(interval, {
+    fun getFlowForTimeframe(interval: Interval) : MutableStateFlow<List<Ohlc>> {
+        return tf2data.computeIfAbsent(interval, {
             val series = initSeries(instrId, interval)
-            FlowSnap(MutableStateFlow(series.data), series)
+            FlowAndSeries(MutableStateFlow(series.data), series)
         }).flow
     }
 
@@ -39,7 +39,7 @@ class SeriesContainer(val dao : MdDao, val instrId: InstrId){
 
     fun add(ohlc : List<Ohlc>){
 
-        flows.forEach{timeFrame,v->
+        tf2data.forEach{ timeFrame, v->
 
             v.series.add(ohlc)
 

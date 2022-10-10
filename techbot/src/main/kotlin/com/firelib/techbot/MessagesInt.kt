@@ -4,7 +4,7 @@ enum class Langs {
     RU, EN
 }
 
-enum class Msg {
+enum class MsgLocalazer {
     TECH_ANALYSIS,
     MAIN_MENU,
     SETTINGS,
@@ -53,10 +53,10 @@ enum class Msg {
     }
 
     companion object {
-        private var reverseMap: Map<String, Msg>
+        private var reverseMap: Map<String, MsgLocalazer>
 
         val map = mapOf(
-            Langs.RU to mapOf<Msg, String>(
+            Langs.RU to mapOf<MsgLocalazer, String>(
                 TECH_ANALYSIS to "Технический Анализ",
                 MAIN_MENU to "Главное меню",
                 SETTINGS to "Настройки",
@@ -92,7 +92,7 @@ enum class Msg {
                 YourSymbolsPressToRemove to "*Ваши инструменты*\nНажмите чтобы отписаться"
             ),
 
-            Langs.EN to mapOf<Msg, String>(
+            Langs.EN to mapOf<MsgLocalazer, String>(
                 TECH_ANALYSIS to "Technical Analysis",
                 MAIN_MENU to "Main Menu",
                 SETTINGS to "Settings",
@@ -133,14 +133,14 @@ enum class Msg {
         init {
             val entries = map.values.flatMap { it.entries }
 
-            this.reverseMap = (entries.associateBy({ it.value }, { it.key }) + Msg.values().associateBy { it.name })
+            this.reverseMap = (entries.associateBy({ it.value }, { it.key }) + MsgLocalazer.values().associateBy { it.name })
         }
 
-        fun getMsg(lang: Langs, msg: Msg): String {
-            return map[lang]!!.getOrDefault(msg, msg.name)
+        fun getMsg(lang: Langs, msgLocalazer: MsgLocalazer): String {
+            return map[lang]!!.getOrDefault(msgLocalazer, msgLocalazer.name)
         }
 
-        fun getReverseMap(msg: String): Msg? {
+        fun getReverseMap(msg: String): MsgLocalazer? {
             return reverseMap.get(msg)
         }
 

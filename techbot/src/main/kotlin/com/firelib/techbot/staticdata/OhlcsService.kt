@@ -1,6 +1,5 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.mainLogger
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
@@ -11,7 +10,6 @@ import firelib.core.domain.sourceEnum
 import firelib.core.misc.atUtc
 import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdDao
-import firelib.core.store.MdStorageImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -39,7 +37,7 @@ class OhlcsService(
 
     fun CoroutineScope.launchFlow(instrId: InstrId) : SeriesContainer {
 
-        val ret = SeriesContainer(daoProvider(instrId.sourceEnum(), Interval.Min10), instrId)
+        val container = SeriesContainer(daoProvider(instrId.sourceEnum(), Interval.Min10), instrId)
 
         val dataLoader = sourceProvider(instrId.sourceEnum())
 
@@ -62,25 +60,25 @@ class OhlcsService(
 
                 lload.forEach { ohlcs ->
                     dao.insertOhlc(ohlcs, instrId)
-                    ret.add(ohlcs)
+                    container.add(ohlcs)
                     latestFetched = ohlcs.last().endTime.atUtc()
                     empty = false
                 }
 
                 if (empty) {
-                    if(!ret.completed.isDone){
-                        ret.completed.complete(true)
+                    if(!container.completed.isDone){
+                        container.completed.complete(true)
                     }
                     delay(60_000)
                 }
             }
         }
-        return ret
+        return container
     }
 
     fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): StateFlow<List<Ohlc>> {
         val persistFlow = launchFlowIfNeeded(ticker)
-        return persistFlow.getFlow(timeFrame)
+        return persistFlow.getFlowForTimeframe(timeFrame)
     }
 
     fun launchFlowIfNeeded(ticker: InstrId): SeriesContainer {

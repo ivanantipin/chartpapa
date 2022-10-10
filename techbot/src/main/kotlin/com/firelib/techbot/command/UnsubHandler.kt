@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.Msg
+import com.firelib.techbot.MsgLocalazer
 import com.firelib.techbot.UserId
 import com.firelib.techbot.getId
 import com.firelib.techbot.menu.chatId
@@ -26,7 +26,7 @@ class UnsubHandler(val staticDataService: InstrumentsService, val subscriptionSe
         subscriptionService.deleteSubscription(UserId(uid.getId()), instrId)
         bot.sendMessage(
             chatId = uid,
-            text = Msg.SubscrptionRemoved.toLocal(update.langCode()) + instrId.code,
+            text = MsgLocalazer.SubscrptionRemoved.toLocal(update.langCode()) + instrId.code,
             parseMode = ParseMode.MARKDOWN
         )
     }
