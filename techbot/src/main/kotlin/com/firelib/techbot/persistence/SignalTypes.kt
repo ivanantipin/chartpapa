@@ -2,12 +2,11 @@ package com.firelib.techbot.persistence
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 
-object TimeFrames : IntIdTable() {
+object SignalTypes : IntIdTable() {
     val user = long("user_id")
-    val tf = varchar("tf", 10)
+    val signalType = varchar("signalType", 20)
 
     init {
-        index(true, user, tf)
+        index(true, user, signalType)
     }
 }
-

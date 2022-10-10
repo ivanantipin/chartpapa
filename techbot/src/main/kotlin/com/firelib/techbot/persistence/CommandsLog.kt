@@ -1,4 +1,4 @@
-package com.firelib.techbot
+package com.firelib.techbot.persistence
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 

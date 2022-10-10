@@ -13,11 +13,6 @@ object ChartService {
 
     val executor = Executors.newSingleThreadExecutor()
 
-    data class HiRequest(
-        val async: Boolean, val infile: HOptions, val constr: String, val scale: Int,
-        var globalOptions: Map<String, *>? = null
-    )
-
     val urlString = "http://localhost:7801"
 
     private fun postJson(optJson: String): ByteArray {
@@ -39,7 +34,7 @@ object ChartService {
 
     fun post(options: HOptions, globalOptions: Map<String, *>? = null, chartType: String = "StockChart"): ByteArray {
         val optJson = JsonHelper.toStringPretty(
-            HiRequest(
+            HiChartRequest(
                 async = true,
                 infile = options,
                 constr = chartType,
