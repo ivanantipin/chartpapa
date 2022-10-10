@@ -5,7 +5,6 @@ import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.staticdata.SubscriptionService
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.batchInsert
@@ -22,7 +21,8 @@ class UsersNotifier(val techBotApp: TechBotApp) {
         val signalTypes = BotHelper.getSignalTypes()
         val userSettings = BotHelper.getAllSettings()
 
-        val flattenSubscriptions = techBotApp.getSubscriptionService().subscriptions.mapValues { it.value.values.toList() }
+        val flattenSubscriptions =
+            techBotApp.getSubscriptionService().subscriptions.mapValues { it.value.values.toList() }
 
         val pairs = BotHelper.getTimeFrames().flatMap { (userId, timeFrames) ->
             timeFrames.flatMap { timeFrame ->
@@ -46,9 +46,9 @@ class UsersNotifier(val techBotApp: TechBotApp) {
                 val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get().let {
                     it == "true"
                 }
-                if(!enabled){
+                if (!enabled) {
                     log.info("Notifications are disabled")
-                }else{
+                } else {
                     try {
                         measureAndLogTime("signal checking", {
                             check(2)
@@ -68,7 +68,7 @@ class UsersNotifier(val techBotApp: TechBotApp) {
         val notifyGroups = getNotifyGroups()
         log.info("notify group count is ${notifyGroups.size}")
         notifyGroups.map { (group, users) ->
-            notifyExecutor.submit{
+            notifyExecutor.submit {
                 try {
                     measureAndLogTime("group ${group} processing took", {
                         processGroup(group, breachWindow, existingEvents, users)

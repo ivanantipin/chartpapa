@@ -18,7 +18,7 @@ import java.io.File
 
 class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHandler {
 
-    companion object{
+    companion object {
         val name = "fund"
     }
 
@@ -37,20 +37,24 @@ class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHa
         "fixed_assets" to "green",
         "current_assets" to "lightGreen",
 
-
         "net_cash_flow_from_investing_activities_continuing" to "lightGreen",
         "net_cash_flow_from_financing_activities" to "gray",
         "net_cash_flow_from_operating_activities" to "green",
         "exchange_gains_losses" to "blue"
-        )
+    )
 
     val actions = mapOf(
         "balanceSheet" to { instrId: InstrId ->
-            val fields = listOf("equity_attributable_to_parent", "equity_attributable_to_noncontrolling_interest", "noncurrent_liabilities",  "current_liabilities")
+            val fields = listOf(
+                "equity_attributable_to_parent",
+                "equity_attributable_to_noncontrolling_interest",
+                "noncurrent_liabilities",
+                "current_liabilities"
+            )
             val series = FundamentalServicePoligon.getFromBalanceSheet(instrId, fields)
             ChartService.post(
                 GenericCharter.makeSeries(series.map {
-                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
+                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false)
                 }, "Balance Sheet Structure ${instrId.code}", listOf("Money")),
                 RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
@@ -61,18 +65,23 @@ class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHa
             val series = FundamentalServicePoligon.getFromBalanceSheet(instrId, fields)
             ChartService.post(
                 GenericCharter.makeSeries(series.map {
-                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
+                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false)
                 }, "Balance Sheet Structure / 2 ${instrId.code}", listOf("Money")),
                 RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
             )
         },
         "cashFlowStructure" to { instrId: InstrId ->
-            val fields = listOf("net_cash_flow_from_investing_activities_continuing", "net_cash_flow_from_financing_activities", "net_cash_flow_from_operating_activities", "exchange_gains_losses")
+            val fields = listOf(
+                "net_cash_flow_from_investing_activities_continuing",
+                "net_cash_flow_from_financing_activities",
+                "net_cash_flow_from_operating_activities",
+                "exchange_gains_losses"
+            )
             val series = FundamentalServicePoligon.getFromCashFlow(instrId, fields)
             ChartService.post(
                 GenericCharter.makeSeries(series.map {
-                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false )
+                    SeriesUX(it, colors[it.name]!!, 0, makeTicks = false)
                 }, "Cash Flow Structure ${instrId.code}", listOf("Money")),
                 RenderUtils.GLOBAL_OPTIONS_FOR_BILLIONS,
                 "Chart"
@@ -87,7 +96,7 @@ class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHa
             )
         },
 
-    )
+        )
 
     override fun command(): String {
         return name

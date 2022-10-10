@@ -3,7 +3,9 @@ package com.firelib.techbot.staticdata
 import com.firelib.techbot.updateDatabase
 import firelib.core.domain.InstrId
 import firelib.core.misc.JsonHelper
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.batchReplace
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -19,9 +21,8 @@ object Instruments : Table() {
     }
 }
 
-
 class InstrIdDao {
-    fun loadAll(): List<InstrId>{
+    fun loadAll(): List<InstrId> {
         return transaction {
             Instruments.selectAll().map {
                 JsonHelper.fromJson<InstrId>(String(it[Instruments.payload].bytes))
@@ -29,8 +30,9 @@ class InstrIdDao {
         }
 
     }
-    fun addAll(instrId: List<InstrId>){
-        updateDatabase("insert instruments"){
+
+    fun addAll(instrId: List<InstrId>) {
+        updateDatabase("insert instruments") {
             Instruments.batchReplace(instrId) {
                 this[Instruments.id] = it.id
                 this[Instruments.code] = it.code

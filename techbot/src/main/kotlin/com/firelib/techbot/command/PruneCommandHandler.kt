@@ -17,8 +17,8 @@ class PruneCommandHandler(val storageImpl: MdStorageImpl, val staticDataService:
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val instr = cmd.instr(staticDataService)
         val fromUser = update.fromUser()
-        val secInDay = 24*3600
-        storageImpl.deleteSince(instr, Interval.Min10, Instant.now().minusSeconds(7*secInDay.toLong()))
+        val secInDay = 24 * 3600
+        storageImpl.deleteSince(instr, Interval.Min10, Instant.now().minusSeconds(7 * secInDay.toLong()))
         mainLogger.info("pruned instrument ${instr} by ${fromUser}")
     }
 }

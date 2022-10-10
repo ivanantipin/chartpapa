@@ -133,7 +133,8 @@ enum class MsgLocalizer {
         init {
             val entries = map.values.flatMap { it.entries }
 
-            this.reverseMap = (entries.associateBy({ it.value }, { it.key }) + MsgLocalizer.values().associateBy { it.name })
+            this.reverseMap =
+                (entries.associateBy({ it.value }, { it.key }) + MsgLocalizer.values().associateBy { it.name })
         }
 
         fun getMsg(lang: Langs, msgLocalizer: MsgLocalizer): String {

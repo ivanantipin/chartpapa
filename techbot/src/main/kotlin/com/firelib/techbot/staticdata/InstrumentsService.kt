@@ -22,19 +22,18 @@ class InstrumentsService(val instrIdDao: InstrIdDao) {
         initialLoad()
     }
 
-    private fun initialLoad(){
+    private fun initialLoad() {
         instrIdDao.loadAll().forEach {
             putToCache(it)
         }
     }
 
-
-    fun putToCache(instrId: InstrId){
-        if(instrId.code.isBlank()){
+    fun putToCache(instrId: InstrId) {
+        if (instrId.code.isBlank()) {
             mainLogger.info("not adding instrument ${instrId} as code is blank")
             return
         }
-        instrByCodeAndMarket.put(instrId.code to instrId.market , instrId)
+        instrByCodeAndMarket.put(instrId.code to instrId.market, instrId)
         id2inst[instrId.id] = instrId
         val mp = instrumentByFirstCharacter.computeIfAbsent(instrId.code.first().toString(), {
             Collections.synchronizedMap(TreeMap<String, InstrId>())
@@ -46,7 +45,6 @@ class InstrumentsService(val instrIdDao: InstrIdDao) {
         require(id2inst.containsKey(id), { "no instrument for id ${id}" })
         return id2inst[id]!!
     }
-
 
     fun loadFinam(): List<InstrId> {
         val ret = FinamDownloader().symbols()

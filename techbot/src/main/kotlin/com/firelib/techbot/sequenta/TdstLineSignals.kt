@@ -83,7 +83,7 @@ object TdstLineSignals : SignalGenerator {
 
         val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
 
-        if(targetOhlcs.isEmpty()){
+        if (targetOhlcs.isEmpty()) {
             mainLogger.info("ohlcs is empty for ${instr}")
             return emptyList()
         }
@@ -115,7 +115,12 @@ object TdstLineSignals : SignalGenerator {
         }
     }
 
-    override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp): HOptions {
+    override fun drawPicture(
+        instr: InstrId,
+        tf: TimeFrame,
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
+    ): HOptions {
         val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)

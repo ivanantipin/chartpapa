@@ -7,7 +7,6 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.readJson
 import firelib.core.store.MdStorageImpl
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -15,12 +14,10 @@ import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
-
 object FundamentalService {
 
-
-    fun <T> List<T>.mapTrailing(extr : (T)->Double, n : Int): List<Double> {
-        return this.mapIndexed({idx, el->
+    fun <T> List<T>.mapTrailing(extr: (T) -> Double, n: Int): List<Double> {
+        return this.mapIndexed({ idx, el ->
             subList(maxOf(idx - n + 1, 0), idx + 1).sumOf { extr(it) }
         })
     }
@@ -52,15 +49,15 @@ object FundamentalService {
         val merged: List<Series<LocalDate>> = mergeAndSort(listOf(cashFlow, debt))
         val annualFcf = merged[0].toSortedList().mapTrailing({ it.second }, 4)
 
-        val ndata =  merged[1].toSortedList().mapIndexed({idx, oo->
-           val value = oo.second/annualFcf[idx]
+        val ndata = merged[1].toSortedList().mapIndexed({ idx, oo ->
+            val value = oo.second / annualFcf[idx]
             oo.first to cap(value, 20.0)
-        }) .toMap()
+        }).toMap()
         return listOf(Series("fcfToDebt", ndata).mapToStr(), merged[1].mapToStr())
     }
 
-    fun cap(value : Double, cap : Double = 30.0) : Double{
-        if(value.absoluteValue > cap){
+    fun cap(value: Double, cap: Double = 30.0): Double {
+        if (value.absoluteValue > cap) {
             return cap * value.sign
         }
         return value
@@ -73,7 +70,6 @@ object FundamentalService {
         val json = fetchRest(instrId.code).readJson()
         val debt = extractFromBs(json, "netDebt")
 
-
         val shares = json["SharesStats"]["SharesOutstanding"].longValue()
 
         val data = debt.data.mapValues {
@@ -85,7 +81,8 @@ object FundamentalService {
 
         val ebitda = extractFromIncome(json, "ebitda")
 
-        val merged: List<List<Pair<LocalDate,Double>>> = mergeAndSort(listOf(debt,cap, ebitda)).map { it.toSortedList() }
+        val merged: List<List<Pair<LocalDate, Double>>> =
+            mergeAndSort(listOf(debt, cap, ebitda)).map { it.toSortedList() }
 
         val trailingYear = merged[2].mapTrailing({ it.second }, 4)
 
@@ -94,11 +91,12 @@ object FundamentalService {
             val cp = merged[1][idx].second
             val evEbitda = (dbt + cp) / trailingYear[idx]
             val evEbitdaCapped = cap(evEbitda)
-            Triple(p.first,evEbitdaCapped, dbt + cp)
+            Triple(p.first, evEbitdaCapped, dbt + cp)
         }
 
-        return listOf(Series("ev", ndata.associateBy({it.first},{it.third})).mapToStr() ,
-            Series("evToEbitda", ndata.associateBy({it.first},{it.second})).mapToStr())
+        return listOf(Series("ev", ndata.associateBy({ it.first }, { it.third })).mapToStr(),
+            Series("evToEbitda", ndata.associateBy({ it.first }, { it.second })).mapToStr()
+        )
     }
 
     fun extractFromBs(json: JsonNode, name: String): Series<LocalDate> {
@@ -124,7 +122,6 @@ object FundamentalService {
         }
     }
 
-
     fun LocalDate.toQuarter(): Long {
         return Math.round((this.dayOfYear / 365.0) * 4.0)
     }
@@ -149,7 +146,6 @@ object FundamentalService {
         return Series(name, ret)
     }
 
-
     fun Series<LocalDate>.mapToStr(): Series<String> {
 
         return Series(this.name, this.data.mapKeys { "${it.key.year - 2000}-Q${it.key.toQuarter()}" })
@@ -161,13 +157,11 @@ object FundamentalService {
         }.sortedBy { it.first }.takeLast(16)
     }
 
-
     fun extractFromIncome(json: JsonNode, name: String): Series<LocalDate> {
         val ret = json["Financials"]["Income_Statement"]["quarterly"].associateBy(
             { LocalDate.parse(it["date"].textValue()) },
             { it[name].textValue()?.toDouble() ?: 0.0 })
         return Series(name, ret)
     }
-
 
 }

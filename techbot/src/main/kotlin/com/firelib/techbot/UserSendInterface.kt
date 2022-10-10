@@ -9,7 +9,7 @@ interface BotInterface {
     fun sendBreachEvent(be: BreachEvent, users: List<UserId>)
 }
 
-class BotInterfaceImpl(val bot: Bot) : BotInterface{
+class BotInterfaceImpl(val bot: Bot) : BotInterface {
     override fun sendBreachEvent(be: BreachEvent, users: List<UserId>) {
         users.forEach { userId ->
             mainLogger.info("notifiying user ${userId}")

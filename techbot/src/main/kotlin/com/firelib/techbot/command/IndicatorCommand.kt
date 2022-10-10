@@ -14,7 +14,7 @@ import java.io.File
 class IndicatorCommand(val techBotApp: TechBotApp) {
 
     companion object {
-        val indi = SignalType.values().associateBy({  it.settingsName}, {it.signalGenerator})
+        val indi = SignalType.values().associateBy({ it.settingsName }, { it.signalGenerator })
     }
 
     fun handle(cmd: Cmd, bot: Bot, update: Update) {

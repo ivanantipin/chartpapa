@@ -12,32 +12,32 @@ import java.nio.file.Paths
 class SubscriptionServiceTest {
 
     @Test
-    fun testSubService(){
+    fun testSubService() {
 
         DbIniter.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}.db"))
         ConfigService.initSystemVars()
-
 
         val instrIdDao = InstrIdDao()
 
         val instrId = InstrId("id", market = "market", source = SourceName.DUMMY.name, code = "code")
         val instrId1 = InstrId("id1", market = "market", source = SourceName.DUMMY.name, code = "code")
 
-        instrIdDao.addAll(listOf(
-            instrId,
-            instrId1
-        ))
-        instrIdDao.addAll(listOf(
-            instrId,
-            instrId1
-        ))
+        instrIdDao.addAll(
+            listOf(
+                instrId,
+                instrId1
+            )
+        )
+        instrIdDao.addAll(
+            listOf(
+                instrId,
+                instrId1
+            )
+        )
 
-        Assert.assertEquals(2, instrIdDao.loadAll().size )
-
+        Assert.assertEquals(2, instrIdDao.loadAll().size)
 
         val staticDataService = InstrumentsService(instrIdDao)
-
-
 
         val subService = SubscriptionService(staticDataService)
 

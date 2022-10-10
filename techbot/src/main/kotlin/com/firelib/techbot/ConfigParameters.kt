@@ -1,9 +1,9 @@
 package com.firelib.techbot
 
 enum class ConfigParameters {
-    TELEGRAM_TOKEN,POLYGON_TOKEN,NOTIFICATIONS_ENABLED;
+    TELEGRAM_TOKEN, POLYGON_TOKEN, NOTIFICATIONS_ENABLED;
 
-    fun get() : String?{
+    fun get(): String? {
         return System.getProperty(this.name)
     }
 }

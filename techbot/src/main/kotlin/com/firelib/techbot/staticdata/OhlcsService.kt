@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 
-fun getStartTime(timeFrame: Interval) : LocalDateTime{
+fun getStartTime(timeFrame: Interval): LocalDateTime {
     return LocalDateTime.now().minus(timeFrame.duration.multipliedBy(BotConfig.window))
 }
 
@@ -30,12 +30,11 @@ class OhlcsService(
 
     val log = LoggerFactory.getLogger(javaClass)
 
-
     val baseFlows = ConcurrentHashMap<InstrId, SeriesContainer>()
 
     val scope = CoroutineScope(Dispatchers.IO)
 
-    fun CoroutineScope.launchFlow(instrId: InstrId) : SeriesContainer {
+    fun CoroutineScope.launchFlow(instrId: InstrId): SeriesContainer {
 
         val container = SeriesContainer(daoProvider(instrId.sourceEnum(), Interval.Min10), instrId)
 
@@ -66,7 +65,7 @@ class OhlcsService(
                 }
 
                 if (empty) {
-                    if(!container.completed.isDone){
+                    if (!container.completed.isDone) {
                         container.completed.complete(true)
                     }
                     delay(60_000)

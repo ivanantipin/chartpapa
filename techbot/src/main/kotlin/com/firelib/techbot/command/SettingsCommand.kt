@@ -28,7 +28,7 @@ class SettingsCommand {
 
             val txt = BotHelper.readSettings(userId).joinToString(separator = "\\-\\-\\-", transform = {
                 "\\-\\-\\-_*${it["command"]!!.uppercase()}*_\\-\\-\\-\n" + it.entries.filter { it.key != "command" }
-                    .joinToString("\n", transform =  { entry -> "*${entry.key}* : _${entry.value}_" })
+                    .joinToString("\n", transform = { entry -> "*${entry.key}* : _${entry.value}_" })
             })
 
             bot.sendMessage(
@@ -48,7 +48,7 @@ class SettingsCommand {
 
         val signalType = SignalType.values().find { cmd[1] == it.settingsName }
 
-        if(signalType == null){
+        if (signalType == null) {
             bot.sendMessage(
                 chatId = ChatId.fromId(uid.toLong()),
                 text = "Неизвестная команда",
@@ -75,7 +75,7 @@ class SettingsCommand {
                 it[value] = settingsJson
             }
             recs > 0
-        }.thenAccept{
+        }.thenAccept {
             displaySettings(bot, fromUser.id)
         }
     }

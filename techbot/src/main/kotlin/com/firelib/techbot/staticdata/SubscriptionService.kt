@@ -16,23 +16,21 @@ class SubscriptionService(val staticDataService: InstrumentsService) {
 
     val subscriptions = ConcurrentHashMap<UserId, ConcurrentHashMap<String, InstrId>>()
 
-
-    val listeners = CopyOnWriteArrayList<(InstrId)->Unit>()
+    val listeners = CopyOnWriteArrayList<(InstrId) -> Unit>()
 
     init {
         initialLoad()
     }
 
-    fun liveInstruments() : List<InstrId>{
+    fun liveInstruments(): List<InstrId> {
         return subscriptions.values.flatMap { it.values }.distinct()
     }
 
-
-    fun addListener(ll : (InstrId)->Unit){
+    fun addListener(ll: (InstrId) -> Unit) {
         listeners += ll
     }
 
-    fun deleteSubscription(userId: UserId, instrId: InstrId) : Boolean{
+    fun deleteSubscription(userId: UserId, instrId: InstrId): Boolean {
         val rows = updateDatabase("insert subscription") {
             SourceSubscription.deleteWhere {
                 (SourceSubscription.sourceId eq instrId.id) and (SourceSubscription.user eq userId.id)
@@ -43,7 +41,7 @@ class SubscriptionService(val staticDataService: InstrumentsService) {
         return rows > 0
     }
 
-    fun addSubscription(userId: UserId, instrId: InstrId) : Boolean{
+    fun addSubscription(userId: UserId, instrId: InstrId): Boolean {
         val putToCache = putToCache(userId, instrId)
         if (putToCache == null) {
             updateDatabase("insert subscription") {

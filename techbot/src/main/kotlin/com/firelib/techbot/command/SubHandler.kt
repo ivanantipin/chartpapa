@@ -1,7 +1,7 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.*
 import com.firelib.techbot.BotHelper.ensureExist
+import com.firelib.techbot.UserId
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.staticdata.InstrumentsService
 import com.firelib.techbot.staticdata.SubscriptionService
@@ -10,12 +10,12 @@ import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 
-class SubHandler(val subscriptionService: SubscriptionService, val staticDataService: InstrumentsService) : CommandHandler {
+class SubHandler(val subscriptionService: SubscriptionService, val staticDataService: InstrumentsService) :
+    CommandHandler {
 
-    companion object{
+    companion object {
         val name = "sub"
     }
-
 
     override fun command(): String {
         return name
@@ -26,7 +26,7 @@ class SubHandler(val subscriptionService: SubscriptionService, val staticDataSer
         val fromUser = update.fromUser()
         val uid = fromUser.id
         ensureExist(fromUser)
-        if(subscriptionService.addSubscription(UserId(uid), instr)){
+        if (subscriptionService.addSubscription(UserId(uid), instr)) {
             bot.sendMessage(
                 chatId = ChatId.fromId(fromUser.id),
                 text = "Добавлен символ ${instr.code} ",

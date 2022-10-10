@@ -3,10 +3,11 @@ package com.firelib.techbot.command
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.firelib.techbot.ConfigParameters
-import com.firelib.techbot.chart.*
+import com.firelib.techbot.chart.Series
+import com.firelib.techbot.chart.SeriesUX
+import com.firelib.techbot.chart.toSortedList
 import com.firelib.techbot.command.FundamentalService.mergeAndSort
 import com.firelib.techbot.command.FundamentalService.toQuarter
-import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.misc.mapper
@@ -17,7 +18,6 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlin.math.absoluteValue
 import kotlin.math.sign
-
 
 object FundamentalServicePoligon {
 
@@ -51,18 +51,16 @@ object FundamentalServicePoligon {
         return CompanyInfo(String(cached).readJson()["results"]!!["outstanding_shares"]!!.numberValue().toLong())
     }
 
-
     fun fetchRest(ticker: String): String {
         val url = "https://api.polygon.io/vX/reference/financials?ticker=${ticker}&timeframe=quarterly&limit=24"
         return String(fetchCursor(url, apiKey))
     }
 
-    fun fetchRestCached(ticker : String) : ByteArray{
+    fun fetchRestCached(ticker: String): ByteArray {
         return CacheService.getCached("/ff/${ticker}", {
             fetchRest(ticker).toByteArray()
         }, Interval.Min60.durationMs)
     }
-
 
     fun <T> List<T>.mapTrailing(extr: (T) -> Double, n: Int): List<Double> {
         return this.mapIndexed({ idx, el ->
@@ -96,7 +94,6 @@ object FundamentalServicePoligon {
             }
         ).map { it.mapToStr() }
     }
-
 
     fun extractFromIncome(name: String, json: JsonNode): Series<LocalDate> {
         return extractSeries(json, "financials", "income_statement", name, "value").copy(name = name)
@@ -176,7 +173,6 @@ object FundamentalServicePoligon {
         ).mapValues { it.value }
         return Series("", ret)
     }
-
 
     fun Series<LocalDate>.mapToStr(): Series<String> {
         return Series(this.name, this.data.mapKeys { "${it.key.year - 2000}-Q${it.key.toQuarter()}" })

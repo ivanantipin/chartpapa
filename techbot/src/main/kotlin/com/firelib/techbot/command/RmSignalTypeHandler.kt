@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 
 class RmSignalTypeHandler : CommandHandler {
 
-    companion object{
+    companion object {
         val name = "rms"
     }
 

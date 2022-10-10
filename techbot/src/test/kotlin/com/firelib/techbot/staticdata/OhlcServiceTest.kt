@@ -36,10 +36,8 @@ class OhlcServiceTest {
         )
     }
 
-
     @Test
-    fun ohlcServiceTest(){
-
+    fun ohlcServiceTest() {
 
         DbIniter.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}_meta.db"))
 
@@ -55,7 +53,7 @@ class OhlcServiceTest {
         val dao = MdDao(dsForFile)
 
         val historicalSource = object : HistoricalSource {
-            var ohlcs : List<Ohlc>
+            var ohlcs: List<Ohlc>
             override fun symbols(): List<InstrId> {
                 return listOf(instr)
             }
@@ -88,10 +86,10 @@ class OhlcServiceTest {
 
 
         runBlocking {
-            for(i in 0 .. 10){
-                if(service.getOhlcsForTf(instr, Interval.Min10).value.isNotEmpty()){
+            for (i in 0..10) {
+                if (service.getOhlcsForTf(instr, Interval.Min10).value.isNotEmpty()) {
                     break
-                }else{
+                } else {
                     delay(1000)
                 }
             }

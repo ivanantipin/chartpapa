@@ -3,7 +3,7 @@ package com.firelib.techbot.persistence
 import com.firelib.techbot.domain.TimeFrame
 import org.jetbrains.exposed.sql.Table
 
-object SensitivityConfig: Table() {
+object SensitivityConfig : Table() {
     val instrId = varchar("ticker", 10)
     val pivotOrder = integer("pivot_order")
     val rSquare = double("r_square")

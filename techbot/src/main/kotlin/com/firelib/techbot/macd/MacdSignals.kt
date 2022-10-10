@@ -3,7 +3,6 @@ package com.firelib.techbot.macd
 import chart.BreachType
 import chart.SignalType
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvent
@@ -21,7 +20,6 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.EmaSimple
-
 
 object MacdSignals : SignalGenerator {
 
@@ -124,7 +122,12 @@ object MacdSignals : SignalGenerator {
         return emptyList()
     }
 
-    override fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp): HOptions {
+    override fun drawPicture(
+        instr: InstrId,
+        tf: TimeFrame,
+        settings: Map<String, String>,
+        techBotApp: TechBotApp
+    ): HOptions {
         val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         val macdParams = MacdParams.fromSettings(settings)
         return render(ohlcs, macdParams, makeTitle(tf, instr, settings)).options

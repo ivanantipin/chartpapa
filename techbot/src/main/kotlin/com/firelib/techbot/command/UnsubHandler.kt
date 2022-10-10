@@ -11,7 +11,8 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 
-class UnsubHandler(val staticDataService: InstrumentsService, val subscriptionService: SubscriptionService) : CommandHandler {
+class UnsubHandler(val staticDataService: InstrumentsService, val subscriptionService: SubscriptionService) :
+    CommandHandler {
     companion object {
         val name = "unsub"
     }

@@ -16,9 +16,10 @@ import org.jetbrains.exposed.sql.select
 
 class TfHandler : CommandHandler {
 
-    companion object{
+    companion object {
         val name = "add_tf"
     }
+
     override fun command(): String {
         return name
     }
@@ -39,14 +40,14 @@ class TfHandler : CommandHandler {
                     it[tf] = timeFrame
                 }
                 true
-            }else{
+            } else {
                 false
             }
-        }.thenAccept{flag->
+        }.thenAccept { flag ->
             if (flag) {
                 bot.sendMessage(
                     chatId = ChatId.fromId(fromUser.id),
-                    text = MsgLocalizer.TimeFrameAdded.toLocal(update.langCode()) ,
+                    text = MsgLocalizer.TimeFrameAdded.toLocal(update.langCode()),
                     parseMode = ParseMode.MARKDOWN
                 )
             }

@@ -1,7 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.UpdateSensitivities.updateSensitivties
-import com.firelib.techbot.persistence.*
+import com.firelib.techbot.persistence.ConfigService
 import firelib.core.store.GlobalConstants
 
 fun main() {

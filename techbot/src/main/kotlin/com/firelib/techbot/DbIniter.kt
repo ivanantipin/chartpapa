@@ -9,14 +9,14 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Path
 
-object DbIniter{
-    fun initDatabase(staticFile : Path) {
+object DbIniter {
+    fun initDatabase(staticFile: Path) {
         Database.connect(
             "jdbc:sqlite:${staticFile}?journal_mode=WAL",
             driver = "org.sqlite.JDBC"
         )
 
-        fun populateSignalTypes(){
+        fun populateSignalTypes() {
             updateDatabase("populate signal types") {
                 val allSignals: Map<UserId, List<SignalType>> = BotHelper.getSignalTypes()
                 Users.selectAll().forEach { userRow ->
@@ -80,10 +80,8 @@ object DbIniter{
             SchemaUtils.create(SourceSubscription)
             SchemaUtils.createMissingTablesAndColumns(SourceSubscription)
 
-
         }
         populateSignalTypes()
-
 
     }
 }

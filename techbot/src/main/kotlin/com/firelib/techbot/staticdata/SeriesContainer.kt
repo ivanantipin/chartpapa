@@ -10,36 +10,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 
-class SeriesContainer(val dao : MdDao, val instrId: InstrId){
+class SeriesContainer(val dao: MdDao, val instrId: InstrId) {
 
     val tf2data = ConcurrentHashMap<Interval, FlowAndSeries>()
 
     val completed = CompletableFuture<Boolean>()
 
-    class FlowAndSeries(val flow : MutableStateFlow<List<Ohlc>>, val series : ContinousOhlcSeries)
+    class FlowAndSeries(val flow: MutableStateFlow<List<Ohlc>>, val series: ContinousOhlcSeries)
 
-    fun getFlowForTimeframe(interval: Interval) : MutableStateFlow<List<Ohlc>> {
+    fun getFlowForTimeframe(interval: Interval): MutableStateFlow<List<Ohlc>> {
         return tf2data.computeIfAbsent(interval, {
             val series = initSeries(instrId, interval)
             FlowAndSeries(MutableStateFlow(series.data), series)
         }).flow
     }
 
-
     fun initSeries(ticker: InstrId, timeFrame: Interval): ContinousOhlcSeries {
         val transformingSeries = ContinousOhlcSeries(timeFrame)
 
         dao.queryAll(MdStorageImpl.makeTable(ticker), getStartTime(timeFrame))
             .chunked(500).forEach {
-            transformingSeries.add(it)
-        }
+                transformingSeries.add(it)
+            }
         return transformingSeries
 
     }
 
-    fun add(ohlc : List<Ohlc>){
+    fun add(ohlc: List<Ohlc>) {
 
-        tf2data.forEach{ timeFrame, v->
+        tf2data.forEach { timeFrame, v ->
 
             v.series.add(ohlc)
 

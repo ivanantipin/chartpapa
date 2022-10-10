@@ -15,7 +15,6 @@ import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
-import com.firelib.techbot.staticdata.OhlcsService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
@@ -169,7 +168,7 @@ object RsiBolingerSignals : SignalGenerator {
 
     override fun drawPicture(
         instr: InstrId,
-        tf: TimeFrame, settings: Map<String, String>,techBotApp: TechBotApp
+        tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp
     ): HOptions {
         val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
         return render(ohlcs, RsiBolingerParams.fromSettings(settings), makeTitle(tf, instr, settings)).options
@@ -194,7 +193,7 @@ object RsiBolingerSignals : SignalGenerator {
     ): MacdResult {
 
         val simpleMa = SimpleMovingAverage(params.bolingerPeriod, true)
-        if(ohlcs.isEmpty()){
+        if (ohlcs.isEmpty()) {
             return MacdResult(emptyList(), HOptions())
         }
 

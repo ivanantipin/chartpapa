@@ -14,10 +14,11 @@ import org.jetbrains.exposed.sql.select
 
 class SignalTypeHandler : CommandHandler {
 
-    companion object{
+    companion object {
         val name = "addS"
         val SIGNAL_TYPE_ATTRIBUTE = "sT"
     }
+
     override fun command(): String {
         return name
     }
@@ -38,11 +39,11 @@ class SignalTypeHandler : CommandHandler {
                     it[SignalTypes.signalType] = signalType
                 }
                 true
-            }else{
+            } else {
                 false
             }
 
-        }.thenAccept{flag->
+        }.thenAccept { flag ->
             if (flag) {
                 bot.sendMessage(
                     chatId = ChatId.fromId(fromUser.id),
@@ -51,7 +52,6 @@ class SignalTypeHandler : CommandHandler {
                 )
             }
         }
-
 
     }
 }

@@ -20,32 +20,33 @@ import org.jetbrains.exposed.sql.selectAll
 class TechBotApp {
     val services = SingletonsContainer()
 
-    fun start(){
+    fun start() {
         getUserNotifier().start()
         refresher().start()
         bot().startPolling()
         startSubsMigration()
     }
 
-    fun startSubsMigration(){
-        Thread{
-            while (true){
+    fun startSubsMigration() {
+        Thread {
+            while (true) {
                 val subscriptionService = getSubscriptionService()
                 val staticDataService = staticDataService()
-                if(staticDataService.id2inst.size > 0){
+                if (staticDataService.id2inst.size > 0) {
                     mainLogger.info("start migration , static data size is ${staticDataService.id2inst.size}")
-                    updateDatabase("migration"){
+                    updateDatabase("migration") {
                         Subscriptions.selectAll().forEach {
-                            val instr = staticDataService.instrByCodeAndMarket.get(it[Subscriptions.ticker] to it[Subscriptions.market])
-                            if(instr != null){
+                            val instr =
+                                staticDataService.instrByCodeAndMarket.get(it[Subscriptions.ticker] to it[Subscriptions.market])
+                            if (instr != null) {
                                 val userId = it[Subscriptions.user]
                                 subscriptionService.addSubscription(UserId(userId), instr)
-                                Subscriptions.deleteWhere { (Subscriptions.ticker  eq instr.code) and (Subscriptions.user eq userId) and (Subscriptions.market eq instr.market)}
+                                Subscriptions.deleteWhere { (Subscriptions.ticker eq instr.code) and (Subscriptions.user eq userId) and (Subscriptions.market eq instr.market) }
                             }
                         }
                     }.get()
                     break
-                }else{
+                } else {
                     Thread.sleep(1000)
                 }
 
@@ -54,33 +55,32 @@ class TechBotApp {
 
     }
 
-
-    fun staticDataService() : InstrumentsService{
-        return services.get("staticData", {InstrumentsService(InstrIdDao())})
+    fun staticDataService(): InstrumentsService {
+        return services.get("staticData", { InstrumentsService(InstrIdDao()) })
     }
 
-    fun getSubscriptionService() : SubscriptionService{
+    fun getSubscriptionService(): SubscriptionService {
         return services.get("subscription", { SubscriptionService(staticDataService()) })
     }
 
-    fun getUserNotifier() : UsersNotifier{
-        return services.get("notifier", {UsersNotifier(this)})
+    fun getUserNotifier(): UsersNotifier {
+        return services.get("notifier", { UsersNotifier(this) })
     }
 
-    fun refresher() : InstrumentRefresher{
-        return services.get("refreshr",{
+    fun refresher(): InstrumentRefresher {
+        return services.get("refreshr", {
             InstrumentRefresher(staticDataService())
         })
     }
 
-    fun mdStorage() : MdStorageImpl{
-        return services.get("mdStorage",{
+    fun mdStorage(): MdStorageImpl {
+        return services.get("mdStorage", {
             MdStorageImpl()
         })
     }
 
-    fun menuRegistry() : MenuRegistry{
-        return services.get("menuReg"){
+    fun menuRegistry(): MenuRegistry {
+        return services.get("menuReg") {
             val menuReg = MenuRegistry(this)
             menuReg.makeMenu()
             menuReg.commandData[SubHandler.name] = SubHandler(getSubscriptionService(), staticDataService())::handle
@@ -100,7 +100,7 @@ class TechBotApp {
         }
     }
 
-    fun bot() : Bot{
+    fun bot(): Bot {
         return bot {
             token = ConfigParameters.TELEGRAM_TOKEN.get()!!
             timeout = 30
@@ -113,7 +113,8 @@ class TechBotApp {
                             SettingsCommand().handle(split, this.bot, this.update)
                         }
                         val msgLocalizer = MsgLocalizer.getReverseMap(text)
-                        val cmd = if (menuRegistry().menuActions.containsKey(msgLocalizer) && msgLocalizer != MsgLocalizer.MAIN_MENU) msgLocalizer else MsgLocalizer.HOME
+                        val cmd =
+                            if (menuRegistry().menuActions.containsKey(msgLocalizer) && msgLocalizer != MsgLocalizer.MAIN_MENU) msgLocalizer else MsgLocalizer.HOME
                         menuRegistry().menuActions[cmd]!!(this.bot, this.update)
                     } catch (e: Exception) {
                         mainLogger.error("exception in action ${text}", e)
@@ -132,13 +133,13 @@ class TechBotApp {
 
     }
 
-    fun botInterface() : BotInterface{
+    fun botInterface(): BotInterface {
         return services.get("botInterface", {
             BotInterfaceImpl(bot())
         })
     }
 
-    fun ohlcService() : OhlcsService{
+    fun ohlcService(): OhlcsService {
 
         return services.get("ohlcService", {
             val mdStorage = mdStorage()

@@ -9,7 +9,7 @@ object ConfigService : Table() {
     val value = varchar("value", 100)
     override val primaryKey = PrimaryKey(name, name = "bot_config_pk")
 
-    fun initSystemVars(){
+    fun initSystemVars() {
         transaction {
             ConfigService.selectAll().forEach {
                 System.setProperty(it.get(name), it.get(value))

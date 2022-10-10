@@ -17,7 +17,7 @@ class ParentMenuItem(
 ) : IMenu {
 
     fun addButtonMenu(chName: MsgLocalizer, aa: MenuItemButtons.() -> Unit): MenuItemButtons {
-        children += MenuItemButtons(chName, title= {"Naa"}).apply(aa)
+        children += MenuItemButtons(chName, title = { "Naa" }).apply(aa)
         return children.last() as MenuItemButtons
     }
 
@@ -34,11 +34,11 @@ class ParentMenuItem(
     }
 
     private fun listSubMenus(bot: Bot, update: Update) {
-        val sm = children.map { KeyboardButton( MsgLocalizer.getMsg(update.langCode(),  it.name()) ) }.chunked(rowSize)
+        val sm = children.map { KeyboardButton(MsgLocalizer.getMsg(update.langCode(), it.name())) }.chunked(rowSize)
         val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
         bot.sendMessage(
             chatId = update.chatId(),
-            text = MsgLocalizer.getMsg(update.langCode(), name) ,
+            text = MsgLocalizer.getMsg(update.langCode(), name),
             replyMarkup = keyboardMarkup
         )
     }
@@ -50,16 +50,16 @@ class ParentMenuItem(
 
 }
 
-fun Update.langCode() : Langs{
+fun Update.langCode(): Langs {
     val update = this
     return transaction {
         val langs = Users.select { Users.userId eq update.fromUser().id }.map {
             it[Users.lang]
         }
         langs.firstOrNull().let {
-            if(it == null){
+            if (it == null) {
                 Langs.RU
-            }else{
+            } else {
                 Langs.valueOf(it)
             }
         }

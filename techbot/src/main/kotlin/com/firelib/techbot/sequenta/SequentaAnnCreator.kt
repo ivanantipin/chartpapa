@@ -5,7 +5,6 @@ import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.RenderUtils.makeBuySellPoint
 import com.firelib.techbot.chart.RenderUtils.markLevel
 import com.firelib.techbot.chart.domain.*
-import com.firelib.techbot.measureAndLogTime
 import com.funstat.domain.HLine
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
