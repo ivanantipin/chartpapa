@@ -1,6 +1,6 @@
 package firelib.indicators.sequenta
 
-data class Signal(val type: SignalType, val reference: Sequenta.Setup, val successor: Sequenta.Setup? = null) {
+data class Signal(val type: SequentaSignalType, val reference: Sequenta.Setup, val successor: Sequenta.Setup? = null) {
 
     val idx = reference.data().size - 1
 

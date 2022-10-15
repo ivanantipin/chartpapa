@@ -1,4 +1,4 @@
-package com.firelib.techbot.persistence
+package com.firelib.techbot.subscriptions
 
 import firelib.finam.FinamDownloader
 import org.jetbrains.exposed.dao.id.IntIdTable

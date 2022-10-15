@@ -1,7 +1,7 @@
 package com.firelib.techbot.command
 
-import chart.SignalType
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.SignalType
 import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.ChartService
@@ -21,10 +21,10 @@ class IndicatorCommand(val techBotApp: TechBotApp) {
         val userId = update.chatId().getId()
         val signalGenerator = indi[cmd.handlerName]!!
         val settings = signalGenerator.fetchSettings(userId)
-        val instrId = cmd.instr(techBotApp.staticDataService())
+        val instrId = cmd.instr(techBotApp.instrumentsService())
         val tkr = instrId.code
         val tf = cmd.tf()
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instrId, tf.interval).value
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instrId, tf.interval)
         val hOptions = signalGenerator.drawPicture(instrId, tf, settings, techBotApp)
         val bytes = ChartService.post(hOptions)
         val fileName = BreachEvents.makeSnapFileName(

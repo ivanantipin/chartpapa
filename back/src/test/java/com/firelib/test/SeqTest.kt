@@ -3,7 +3,7 @@ package com.firelib.test
 import firelib.core.domain.Ohlc
 import firelib.core.misc.atUtc
 import firelib.indicators.sequenta.Sequenta
-import firelib.indicators.sequenta.SignalType
+import firelib.indicators.sequenta.SequentaSignalType
 import org.junit.Assert
 import org.junit.Test
 import java.io.InputStreamReader
@@ -34,7 +34,7 @@ class SeqTest {
 
         data class SigSig(
             val date : LocalDate,
-            val type : SignalType,
+            val type : SequentaSignalType,
             val recRation : Double?,
             val count : Int,
             val tdst : Double?
@@ -47,7 +47,7 @@ class SeqTest {
 
         val siggi = ohlcs.flatMap {
             val signals = seq.onOhlc(it)
-            signals.filter { it.type == SignalType.Signal || it.type == SignalType.SetupReach }
+            signals.filter { it.type == SequentaSignalType.Signal || it.type == SequentaSignalType.SetupReach }
                 .map {
                     SigSig(
                         date = seq.data.last().endTime.atUtc().toLocalDate(),

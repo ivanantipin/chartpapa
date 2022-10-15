@@ -14,33 +14,43 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 
-class SettingsCommand {
+interface TextCommand{
+    fun name() : String
+    fun displaySettings(
+        bot: Bot,
+        userId: Long
+    )
+    fun handle(cmd: List<String>, bot: Bot, update: Update)
+}
 
-    companion object {
-        val name = "/set"
+class SettingsCommand : TextCommand{
 
-        fun displaySettings(
-            bot: Bot,
-            userId: Long
-        ) {
+    val name = "/set"
 
-            val header = "*_Ваши установки\n\n_*"
+    override fun displaySettings(
+        bot: Bot,
+        userId: Long
+    ) {
 
-            val txt = BotHelper.readSettings(userId).joinToString(separator = "\\-\\-\\-", transform = {
-                "\\-\\-\\-_*${it["command"]!!.uppercase()}*_\\-\\-\\-\n" + it.entries.filter { it.key != "command" }
-                    .joinToString("\n", transform = { entry -> "*${entry.key}* : _${entry.value}_" })
-            })
+        val header = "*_Ваши установки\n\n_*"
 
-            bot.sendMessage(
-                chatId = ChatId.fromId(userId.toLong()),
-                text = header + txt,
-                parseMode = ParseMode.MARKDOWN_V2
-            )
-        }
+        val txt = BotHelper.readSettings(userId).joinToString(separator = "\\-\\-\\-", transform = {
+            "\\-\\-\\-_*${it["command"]!!.uppercase()}*_\\-\\-\\-\n" + it.entries.filter { it.key != "command" }
+                .joinToString("\n", transform = { entry -> "*${entry.key}* : _${entry.value}_" })
+        })
 
+        bot.sendMessage(
+            chatId = ChatId.fromId(userId.toLong()),
+            text = header + txt,
+            parseMode = ParseMode.MARKDOWN_V2
+        )
     }
 
-    fun handle(cmd: List<String>, bot: Bot, update: Update) {
+    override fun name() : String{
+        return "/set"
+    }
+
+    override fun handle(cmd: List<String>, bot: Bot, update: Update) {
 
         val fromUser = update.fromUser()
 

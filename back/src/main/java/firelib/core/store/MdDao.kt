@@ -19,7 +19,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.system.measureTimeMillis
@@ -68,6 +67,18 @@ class MdDao(internal val ds: SQLiteDataSource) {
         )
     }
 
+    fun truncate(instrId: InstrId){
+        updateInThread {
+            val table = MdStorageImpl.makeTableName(instrId)
+            ds.connection.use {
+                val stmt = it.prepareStatement("delete from $table ")
+                stmt.use {
+                    it.execute()
+                }
+            }
+        }
+    }
+
     fun deleteSince(codeIn: String, fromTime: Instant) {
         updateInThread {
             val code = normName(codeIn)
@@ -83,7 +94,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     fun insertOhlc(ohlcs: List<Ohlc>, instrId: InstrId) {
-        insertOhlc(ohlcs, MdStorageImpl.makeTable(instrId))
+        insertOhlc(ohlcs, MdStorageImpl.makeTableName(instrId))
     }
 
     fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
@@ -146,7 +157,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     fun queryLast(instrId: InstrId) : Ohlc?{
-        return queryLast(MdStorageImpl.makeTable(instrId))
+        return queryLast(MdStorageImpl.makeTableName(instrId))
     }
 
 

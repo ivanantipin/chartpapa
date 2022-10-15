@@ -1,7 +1,7 @@
-package com.firelib.techbot.staticdata
+package com.firelib.techbot.subscriptions
 
 import com.firelib.techbot.UserId
-import com.firelib.techbot.persistence.SourceSubscription
+import com.firelib.techbot.staticdata.InstrumentsService
 import com.firelib.techbot.updateDatabase
 import firelib.core.domain.InstrId
 import org.jetbrains.exposed.sql.and

@@ -1,6 +1,5 @@
 package com.firelib.techbot.menu
 
-import chart.SignalType
 import com.firelib.techbot.*
 import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.TimeFrame
@@ -22,9 +21,8 @@ class MenuRegistry(val techBotApp: TechBotApp) {
     val commandData = mutableMapOf<String, (Cmd, Bot, Update) -> Unit>()
 
     companion object {
-        val mainMenu = MsgLocalizer.MAIN_MENU
 
-        fun list(buttons: List<List<IButton>>, bot: Bot, chatId: ChatId, title: String) {
+        fun listButtons(buttons: List<List<BotButton>>, bot: Bot, chatId: ChatId, title: String) {
             val keyboard = InlineKeyboardMarkup.create(
                 buttons.map {
                     it.map { but ->
@@ -41,7 +39,29 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             )
         }
 
+        fun listManyButtons(buttons: List<BotButton>, bot: Bot, chatId: ChatId, rowSize: Int, title: String = "") {
+            buttons.chunked(40).forEach { chunk ->
+                listButtons(chunk.chunked(rowSize), bot, chatId, title)
+            }
+        }
+
     }
+
+    private fun makeButtons(
+        cmd: String,
+        chatId: ChatId,
+        tf: TimeFrame
+    ): List<SimpleButton> {
+        val subs = techBotApp.subscriptionService().subscriptions.get(UserId(chatId.getId()))!!
+        val bts = subs.values.map { instrId ->
+            SimpleButton(
+                instrId.code,
+                Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name))
+            )
+        }
+        return bts
+    }
+
 
     val pool: ThreadPoolExecutor = Executors.newCachedThreadPool() as ThreadPoolExecutor
 
@@ -61,11 +81,6 @@ class MenuRegistry(val techBotApp: TechBotApp) {
         }
     }
 
-    fun listUncat(buttons: List<IButton>, bot: Bot, chatId: ChatId, rowSize: Int, title: String = "") {
-        buttons.chunked(40).forEach { chunk ->
-            list(chunk.chunked(rowSize), bot, chatId, title)
-        }
-    }
 
     fun makeMenu() {
         val root = ParentMenuItem(MsgLocalizer.HOME).apply {
@@ -109,7 +124,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             if (bts.isEmpty()) {
                 emtyListMsg(bot, update)
             } else {
-                list(
+                listButtons(
                     bts.chunked(4),
                     bot,
                     update.chatId(),
@@ -125,7 +140,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             addButtonMenu(MsgLocalizer.AddSymbol) {
                 title = { lang -> MsgLocalizer.Choose1stLetterOfCompany.toLocal(lang) }
                 this.rowSize = 4
-                val staticDataService = techBotApp.staticDataService()
+                val staticDataService = techBotApp.instrumentsService()
                 staticDataService.instrumentByFirstCharacter.keys.forEach { start ->
                     this.addButton(start, { langs -> MsgLocalizer.PickCompany.toLocal(langs) }) {
                         rowSize = 2
@@ -133,20 +148,20 @@ class MenuRegistry(val techBotApp: TechBotApp) {
                             start,
                             emptyMap()
                         ).values.map { code ->
-                            SimpleButton("(${code.code}) ${code.name}", Cmd(SubHandler.name, mapOf("id" to code.id)))
+                            SimpleButton("(${code.code}) ${code.name}", Cmd(SubscribeHandler.name, mapOf("id" to code.id)))
                         }
                     }
                 }
             }
 
             addActionMenu(MsgLocalizer.YourSymbolsOrRemoval, { bot, update ->
-                val subs = techBotApp.getSubscriptionService().subscriptions[UserId(
+                val subs = techBotApp.subscriptionService().subscriptions[UserId(
                     update.chatId().getId()
                 )]!!.values.distinct()
 
                 val buttons =
-                    subs.map { SimpleButton(it.code, Cmd(UnsubHandler.name, mapOf("id" to it.id))) }.chunked(4)
-                list(buttons, bot, update.chatId(), MsgLocalizer.YourSymbolsPressToRemove.toLocal(update.langCode()))
+                    subs.map { SimpleButton(it.code, Cmd(UnsubscribeHandler.name, mapOf("id" to it.id))) }.chunked(4)
+                listButtons(buttons, bot, update.chatId(), MsgLocalizer.YourSymbolsPressToRemove.toLocal(update.langCode()))
             })
             mainMenu()
         }
@@ -157,22 +172,22 @@ class MenuRegistry(val techBotApp: TechBotApp) {
 
             addActionMenu(MsgLocalizer.Language, { bot, update ->
                 val buttons =
-                    Langs.values().map { SimpleButton(it.name, Cmd(LanguageHandler.name, mapOf("lang" to it.name))) }
+                    Langs.values().map { SimpleButton(it.name, Cmd(LanguageChangeHandler.name, mapOf("lang" to it.name))) }
                         .chunked(1)
-                list(buttons, bot, update.chatId(), MsgLocalizer.ChooseLanguage.toLocal(update.langCode()))
+                listButtons(buttons, bot, update.chatId(), MsgLocalizer.ChooseLanguage.toLocal(update.langCode()))
             })
 
             addActionMenu(MsgLocalizer.Unsubscribe, { bot, update ->
                 val buttons = BotHelper.getTimeFrames(update.chatId())
-                    .map { SimpleButton(it, Cmd(RmTfHandler.name, mapOf("tf" to it))) }.chunked(1)
-                list(buttons, bot, update.chatId(), MsgLocalizer.PressTfToUnsubscribe.toLocal(update.langCode()))
+                    .map { SimpleButton(it, Cmd(RemoveTimeFrameHandler.name, mapOf("tf" to it))) }.chunked(1)
+                listButtons(buttons, bot, update.chatId(), MsgLocalizer.PressTfToUnsubscribe.toLocal(update.langCode()))
             })
 
             addButtonMenu(MsgLocalizer.AddTf) {
                 title = { lang -> MsgLocalizer.TfsTitle.toLocal(lang) }
                 rowSize = 1
                 buttons += TimeFrame.values().map { tf ->
-                    SimpleButton(tf.name, Cmd(TfHandler.name, mapOf("tf" to tf.name)))
+                    SimpleButton(tf.name, Cmd(TimeFrameHandler.name, mapOf("tf" to tf.name)))
                 }
             }
 
@@ -181,10 +196,10 @@ class MenuRegistry(val techBotApp: TechBotApp) {
                     .map {
                         SimpleButton(
                             it.msgLocalizer.toLocal(update.langCode()),
-                            Cmd(RmSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it.name))
+                            Cmd(RemoveSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it.name))
                         )
                     }.chunked(1)
-                list(buttons, bot, update.chatId(), MsgLocalizer.YourSignalsOrRemoval.toLocal(update.langCode()))
+                listButtons(buttons, bot, update.chatId(), MsgLocalizer.YourSignalsOrRemoval.toLocal(update.langCode()))
             })
 
             addButtonMenu(MsgLocalizer.AddSignalType) {
@@ -199,7 +214,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             }
 
             addActionMenu(MsgLocalizer.OtherSettings) { bot, update ->
-                SettingsCommand.displaySettings(bot, update.chatId().getId().toLong())
+                SettingsCommand().displaySettings(bot, update.chatId().getId().toLong())
                 MacdSignals.displayHelp(bot, update)
             }
 
@@ -221,7 +236,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
                             if (bts.isEmpty()) {
                                 emtyListMsg(bot, update)
                             } else {
-                                list(
+                                listButtons(
                                     bts.chunked(4),
                                     bot,
                                     update.chatId(),
@@ -246,19 +261,5 @@ class MenuRegistry(val techBotApp: TechBotApp) {
         menuActions[MsgLocalizer.SETTINGS]!!(bot, update)
     }
 
-    private fun makeButtons(
-        cmd: String,
-        chatId: ChatId,
-        tf: TimeFrame
-    ): List<SimpleButton> {
-        val subs = techBotApp.getSubscriptionService().subscriptions.get(UserId(chatId.getId()))!!
-        val bts = subs.values.map { instrId ->
-            SimpleButton(
-                instrId.code,
-                Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name))
-            )
-        }
-        return bts
-    }
 
 }

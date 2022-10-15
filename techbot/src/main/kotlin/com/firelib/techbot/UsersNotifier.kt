@@ -22,7 +22,7 @@ class UsersNotifier(val techBotApp: TechBotApp) {
         val userSettings = BotHelper.getAllSettings()
 
         val flattenSubscriptions =
-            techBotApp.getSubscriptionService().subscriptions.mapValues { it.value.values.toList() }
+            techBotApp.subscriptionService().subscriptions.mapValues { it.value.values.toList() }
 
         val pairs = BotHelper.getTimeFrames().flatMap { (userId, timeFrames) ->
             timeFrames.flatMap { timeFrame ->

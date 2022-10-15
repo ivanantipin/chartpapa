@@ -29,7 +29,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     }
 
     companion object{
-        fun makeTable(instrId: InstrId): String {
+        fun makeTableName(instrId: InstrId): String {
             return "${instrId.code}_${instrId.market}"
         }
     }
@@ -37,7 +37,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
     override fun read(instrId: InstrId, interval: Interval, targetInterval: Interval): List<Ohlc> {
         val dao = daos.getDao(instrId.sourceEnum(), interval)
         val startTime = LocalDateTime.now().minusSeconds(targetInterval.durationMs * 600 / 1000)
-        var ret = dao.queryAll(makeTable(instrId), startTime).toList()
+        var ret = dao.queryAll(makeTableName(instrId), startTime).toList()
         if (ret.isEmpty()) {
             updateMarketData(instrId, interval)
             ret = dao.queryAll(instrId.code, startTime).toList()
@@ -52,12 +52,12 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
     override fun read(instrId: InstrId, interval: Interval, start: LocalDateTime): List<Ohlc> {
         val dao = daos.getDao(instrId.sourceEnum(), interval)
-        return dao.queryAll(makeTable(instrId), start).toList()
+        return dao.queryAll(makeTableName(instrId), start).toList()
     }
 
     override fun insert(instrId: InstrId, interval: Interval, ohlcs: List<Ohlc>) {
         val dao = daos.getDao(instrId.sourceEnum(), interval)
-        dao.insertOhlc(ohlcs, makeTable(instrId))
+        dao.insertOhlc(ohlcs, makeTableName(instrId))
     }
 
     fun updateMarketData(instrId: InstrId, interval: Interval): Instant {
@@ -69,7 +69,7 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
         try {
             log.info("removing ${instrId} from ${time}")
             val dao = daos.getDao(instrId.sourceEnum(), interval)
-            dao.deleteSince(makeTable(instrId), time)
+            dao.deleteSince(makeTableName(instrId), time)
         } catch (e: Exception) {
             log.info("failed to remove ${instrId} from ${time}", e)
         }
@@ -77,19 +77,19 @@ class MdStorageImpl(private val folder: String = GlobalConstants.mdFolder.toStri
 
     fun queryPoint(instrId: InstrId, interval: Interval, epochMs: Long): Ohlc? {
         val dao = daos.getDao(instrId.sourceEnum(), interval)
-        return dao.queryPoint(makeTable(instrId), epochMs)
+        return dao.queryPoint(makeTableName(instrId), epochMs)
     }
 
     private fun updateMd(instrId: InstrId, source: HistoricalSource, interval: Interval): Instant {
         var instant = Instant.now()
         try {
             val dao = daos.getDao(instrId.sourceEnum(), interval)
-            val last = dao.queryLast(makeTable(instrId))
+            val last = dao.queryLast(makeTableName(instrId))
             val startTime = if (last == null) LocalDateTime.now().minusDays(5000) else last.endTime.atUtc().minus(interval.duration)
 
             source.load(instrId, startTime, interval).chunked(5000).forEach {
                 instant = it.last().endTime
-                dao.insertOhlc(it, makeTable(instrId))
+                dao.insertOhlc(it, makeTableName(instrId))
             }
         } catch (e: Exception) {
             log.info("failed to update " + instrId + " " + e.message)

@@ -120,18 +120,18 @@ class Sequenta(val counts : Array<Int> = arrayOf(13, 21)) {
 
             if (isCntdn(idx)) {
                 countDowns.add(idx)
-                ret.add(Signal(SignalType.Cdn, this))
+                ret.add(Signal(SequentaSignalType.Cdn, this))
                 if (countDowns.size >= counts[pendingSignal]) {
                     if (up && data[idx].high > data[countDowns[7]].close || !up && data[idx].low < data[countDowns[7]].close) {
                         pendingSignal++
-                        ret.add(Signal(SignalType.Signal, this))
+                        ret.add(Signal(SequentaSignalType.Signal, this))
                     } else {
-                        ret.add(Signal(SignalType.Deffered, this))
+                        ret.add(Signal(SequentaSignalType.Deffered, this))
                     }
                 }
             }
             if (isCompleted) {
-                ret.add(Signal(SignalType.Completed, this))
+                ret.add(Signal(SequentaSignalType.Completed, this))
             }
             return ret
         }
@@ -186,19 +186,19 @@ class Sequenta(val counts : Array<Int> = arrayOf(13, 21)) {
         currentSetup.updateEnd(idx)
         if (currentTrend != currentSetup.up) {
             if (!currentSetup.reached()) {
-                ret.add(Signal(SignalType.SetupUnreach, currentSetup))
+                ret.add(Signal(SequentaSignalType.SetupUnreach, currentSetup))
             } else {
-                ret.add(Signal(SignalType.Flip, currentSetup))
+                ret.add(Signal(SequentaSignalType.Flip, currentSetup))
             }
             currentSetup = Setup(idx, idx, currentTrend)
             return ret
         } else {
-            ret.add(Signal(SignalType.SetupCount, currentSetup))
+            ret.add(Signal(SequentaSignalType.SetupCount, currentSetup))
         }
         //check completed because sometimes setup not flipped untill 21
         if (currentSetup.reached() && !pendingSetups.contains(currentSetup) && !currentSetup.isCompleted) {
             pendingSetups.add(currentSetup)
-            ret.add(Signal(SignalType.SetupReach, currentSetup))
+            ret.add(Signal(SequentaSignalType.SetupReach, currentSetup))
         }
 
         for (i in 0 until pendingSetups.size - 1) {
@@ -209,14 +209,14 @@ class Sequenta(val counts : Array<Int> = arrayOf(13, 21)) {
             if (currentSetup.up == tchk.up && currentSetup.range() > tchk.range()) {
                 if (tchk.recycleRef == null || tchk.recycleRef!!.range() < currentSetup.range()) {
                     tchk.recycleRef = currentSetup
-                    ret.add(Signal(SignalType.Recycling, tchk, currentSetup))
+                    ret.add(Signal(SequentaSignalType.Recycling, tchk, currentSetup))
                 }
             }
 
             if (currentSetup.reached() && currentSetup.up != tchk.up) {
                 if (tchk.cancelledRef == null || tchk.cancelledRef!!.range() < currentSetup.range()) {
                     tchk.cancelledRef = currentSetup
-                    ret.add(Signal(SignalType.Cancel, tchk, currentSetup))
+                    ret.add(Signal(SequentaSignalType.Cancel, tchk, currentSetup))
                 }
             }
         }

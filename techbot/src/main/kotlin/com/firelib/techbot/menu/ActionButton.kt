@@ -8,9 +8,9 @@ class ActionButton(
     override val name: String,
     override val data: Cmd,
     val action: ((bot: Bot, update: Update) -> Unit)
-) :
-    IButton {
-    override fun children(): List<IButton> {
+) : BotButton {
+
+    override fun children(): List<BotButton> {
         return emptyList()
     }
 

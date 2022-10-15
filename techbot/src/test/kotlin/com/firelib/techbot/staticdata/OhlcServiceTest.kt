@@ -83,25 +83,15 @@ class OhlcServiceTest {
 
         val service = OhlcsService({ a, b -> dao }, { historicalSource })
 
+        service.initTimeframeIfNeeded(instr)
 
+        Assert.assertEquals(historicalSource.ohlcs, service.getOhlcsForTf(instr, Interval.Min10))
 
-        runBlocking {
-            for (i in 0..10) {
-                if (service.getOhlcsForTf(instr, Interval.Min10).value.isNotEmpty()) {
-                    break
-                } else {
-                    delay(1000)
-                }
-            }
-            Assert.assertEquals(historicalSource.ohlcs, service.getOhlcsForTf(instr, Interval.Min10).value)
+        val series = ContinousOhlcSeries(Interval.Min30)
+        series.add(historicalSource.ohlcs)
 
-            val series = ContinousOhlcSeries(Interval.Min30)
+        val tf = service.getOhlcsForTf(instr, Interval.Min30)
+        Assert.assertEquals(series.data, tf)
 
-            service.baseFlows.values.map { it.completed }.forEach { it.get() }
-            series.add(historicalSource.ohlcs)
-
-            val tf = service.getOhlcsForTf(instr, Interval.Min30).value
-            Assert.assertEquals(series.data, tf)
-        }
     }
 }

@@ -12,9 +12,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class ParentMenuItem(
     val name: MsgLocalizer,
-    val children: MutableList<IMenu> = mutableListOf(),
+    val children: MutableList<BotMenu> = mutableListOf(),
     var rowSize: Int = 3
-) : IMenu {
+) : BotMenu {
 
     fun addButtonMenu(chName: MsgLocalizer, aa: MenuItemButtons.() -> Unit): MenuItemButtons {
         children += MenuItemButtons(chName, title = { "Naa" }).apply(aa)

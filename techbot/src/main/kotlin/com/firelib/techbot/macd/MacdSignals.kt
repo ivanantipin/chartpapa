@@ -1,9 +1,9 @@
 package com.firelib.techbot.macd
 
 import chart.BreachType
-import chart.SignalType
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.SignalType
 import com.firelib.techbot.TechBotApp
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
@@ -87,7 +87,7 @@ object MacdSignals : SignalGenerator {
         settings: Map<String, String>,
         techBotApp: TechBotApp
     ): List<BreachEvent> {
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
 
         if (ohlcs.isEmpty()) {
             return emptyList()
@@ -128,7 +128,7 @@ object MacdSignals : SignalGenerator {
         settings: Map<String, String>,
         techBotApp: TechBotApp
     ): HOptions {
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
+        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val macdParams = MacdParams.fromSettings(settings)
         return render(ohlcs, macdParams, makeTitle(tf, instr, settings)).options
     }

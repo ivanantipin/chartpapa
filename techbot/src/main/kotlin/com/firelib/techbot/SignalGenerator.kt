@@ -1,6 +1,5 @@
 package com.firelib.techbot
 
-import chart.SignalType
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.chart.domain.HOptions
@@ -34,8 +33,7 @@ interface SignalGenerator {
             Settings.select { (Settings.user eq userId) and (Settings.name eq signalType().settingsName) }
                 .map { it[Settings.value] }.firstOrNull()
         }
-        return if (value == null) emptyMap()
-        else JsonHelper.fromJson(value)
+        return if (value == null) emptyMap() else JsonHelper.fromJson(value)
     }
 
     fun validate(split: List<String>): Boolean {

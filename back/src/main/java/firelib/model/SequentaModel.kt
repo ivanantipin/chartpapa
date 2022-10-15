@@ -15,7 +15,7 @@ import firelib.core.store.GlobalConstants
 import firelib.core.store.MdStorageImpl
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.Signal
-import firelib.indicators.sequenta.SignalType
+import firelib.indicators.sequenta.SequentaSignalType
 import firelib.indicators.sequenta.calcStop
 import java.time.LocalDate
 import java.time.LocalTime
@@ -73,7 +73,7 @@ class SequentaModel(context: ModelContext, properties: Map<String, String>) : Mo
                     val signals = sequenta.onOhlc(oh)
                     val signal = signals
                         .filter {
-                            it.type == SignalType.Signal
+                            it.type == SequentaSignalType.Signal
                                     && it.reference.completedSignal == 13
                                     && it.reference.recycleRef == null
                         }

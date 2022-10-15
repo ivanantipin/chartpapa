@@ -1,6 +1,5 @@
 package com.firelib.techbot
 
-import chart.SignalType
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.InstrId
 

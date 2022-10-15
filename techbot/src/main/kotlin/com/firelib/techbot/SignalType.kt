@@ -1,7 +1,5 @@
-package chart
+package com.firelib.techbot
 
-import com.firelib.techbot.MsgLocalizer
-import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.macd.MacdSignals
 import com.firelib.techbot.macd.RsiBolingerSignals
 import com.firelib.techbot.sequenta.SequentaSignals
@@ -18,4 +16,12 @@ enum class SignalType(
     MACD("macd", MacdSignals, MsgLocalizer.MACD),
     RSI_BOLINGER("rbc", RsiBolingerSignals, MsgLocalizer.RSI_BOLINGER),
     TDST("tdst", TdstLineSignals, MsgLocalizer.TDST),
+}
+
+
+
+fun main() {
+    for(i in 0 until Int.MAX_VALUE){
+        i.hashCode()
+    }
 }

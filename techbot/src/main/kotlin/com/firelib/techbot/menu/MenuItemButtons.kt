@@ -8,10 +8,10 @@ import com.github.kotlintelegrambot.entities.Update
 
 class MenuItemButtons(
     val name: MsgLocalizer,
-    val buttons: MutableList<IButton> = mutableListOf(),
+    val buttons: MutableList<BotButton> = mutableListOf(),
     var title: (lang: Langs) -> String,
     var rowSize: Int = 3
-) : IMenu {
+) : BotMenu {
 
     override fun name(): MsgLocalizer {
         return name
@@ -19,7 +19,7 @@ class MenuItemButtons(
 
     override fun register(registry: MenuRegistry) {
         registry.menuActions[name] = { bot, update ->
-            registry.listUncat(buttons, bot, update.chatId(), rowSize, title(update.langCode()))
+            MenuRegistry.listManyButtons(buttons, bot, update.chatId(), rowSize, title(update.langCode()))
         }
         buttons.forEach { it.register(registry) }
     }

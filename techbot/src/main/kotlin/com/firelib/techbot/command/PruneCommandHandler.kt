@@ -3,22 +3,32 @@ package com.firelib.techbot.command
 import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.staticdata.InstrumentsService
+import com.firelib.techbot.staticdata.OhlcsService
 import com.github.kotlintelegrambot.Bot
+import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
-import firelib.core.domain.Interval
-import firelib.core.store.MdStorageImpl
-import java.time.Instant
 
-class PruneCommandHandler(val storageImpl: MdStorageImpl, val staticDataService: InstrumentsService) : CommandHandler {
+class PruneCommandHandler(
+    val instrumentsService: InstrumentsService,
+    val ohlcsService: OhlcsService
+) : CommandHandler {
+
     override fun command(): String {
         return "prune"
     }
 
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
-        val instr = cmd.instr(staticDataService)
+        mainLogger.info("pruning ${cmd}")
+        val instr = cmd.instr(instrumentsService)
+        ohlcsService.prune(instr)
         val fromUser = update.fromUser()
-        val secInDay = 24 * 3600
-        storageImpl.deleteSince(instr, Interval.Min10, Instant.now().minusSeconds(7 * secInDay.toLong()))
+        bot.sendMessage(
+            chatId = ChatId.fromId(update.fromUser().id),
+            text = "pruned ${instr}",
+            parseMode = ParseMode.MARKDOWN
+        )
         mainLogger.info("pruned instrument ${instr} by ${fromUser}")
+
     }
 }

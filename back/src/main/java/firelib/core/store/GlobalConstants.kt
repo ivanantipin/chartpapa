@@ -29,14 +29,6 @@ object GlobalConstants {
         return props[name]!! as String
     }
 
-    val locks = ConcurrentHashMap<String,Lock>()
-    fun lock(id : String) : Lock{
-        return locks.computeIfAbsent(id, {
-            ReentrantLock()
-        })
-    }
-
-
     val rootReportPath = Paths.get("/home/ivan/projects/chartpapa/market_research/report_out")
 
     fun ensureDirsExist() {

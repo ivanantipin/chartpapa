@@ -10,7 +10,7 @@ import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.Signal
-import firelib.indicators.sequenta.SignalType
+import firelib.indicators.sequenta.SequentaSignalType
 import firelib.indicators.sequenta.calcStop
 import java.text.DecimalFormat
 import java.util.concurrent.atomic.AtomicInteger
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
 data class SignalEvent(
     val idx: Int,
     val up: Boolean,
-    val type: SignalType,
+    val type: SequentaSignalType,
     val setupStart: Int,
     val setupEnd: Int,
     val tdst: Double,
@@ -96,7 +96,7 @@ object SequentaAnnCreator {
             )
 
             when (s.type) {
-                SignalType.Cdn -> {
+                SequentaSignalType.Cdn -> {
                     val count = s.cntdn
                     if (count == 8 || displayedCounts.contains(count)) {
                         labels.add(
@@ -104,12 +104,12 @@ object SequentaAnnCreator {
                         )
                     }
                 }
-                SignalType.Deffered -> if (s.completedSignal < 13) {
+                SequentaSignalType.Deffered -> if (s.completedSignal < 13) {
                     labels.add(
                         base.copy(text = "+", shape = "connector", style = HStyle(fontSize = "6px"), distance = 6)
                     )
                 }
-                SignalType.Signal -> {
+                SequentaSignalType.Signal -> {
 
                     val ratio = s.recycleRatio
                     val recycle = if (ratio != null) "/R=${formatDbl(ratio)}" else "";
@@ -136,7 +136,7 @@ object SequentaAnnCreator {
                         lines0.add(hline)
                     }
                 }
-                SignalType.SetupReach -> {
+                SequentaSignalType.SetupReach -> {
                     val hhline = HLine(
                         ohlcs[s.setupStart].endTime.toEpochMilli(),
                         ohlcs[s.setupEnd].endTime.toEpochMilli(),
@@ -151,7 +151,7 @@ object SequentaAnnCreator {
                         curLine.incrementAndGet()
                     }
                 }
-                SignalType.Flip -> {
+                SequentaSignalType.Flip -> {
                     if (s.up) oh.high else oh.low
                     labels.add(
                         base.copy(

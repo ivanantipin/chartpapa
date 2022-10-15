@@ -1,11 +1,7 @@
 package com.firelib.techbot.tdline
 
 import chart.BreachType
-import chart.SignalType
-import com.firelib.techbot.BotHelper
-import com.firelib.techbot.SignalGenerator
-import com.firelib.techbot.TechBotApp
-import com.firelib.techbot.TrendsCreator
+import com.firelib.techbot.*
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
@@ -33,7 +29,7 @@ object TdLineSignals : SignalGenerator {
         settings: Map<String, String>,
         techBotApp: TechBotApp
     ): List<BreachEvent> {
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
 
@@ -61,7 +57,7 @@ object TdLineSignals : SignalGenerator {
         settings: Map<String, String>,
         techBotApp: TechBotApp
     ): HOptions {
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
         return TrendLinesRenderer.makeTrendLines(targetOhlcs, makeTitle(tf, instr, settings), lines)

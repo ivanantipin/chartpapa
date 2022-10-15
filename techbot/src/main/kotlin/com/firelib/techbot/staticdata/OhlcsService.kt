@@ -1,5 +1,6 @@
 package com.firelib.techbot.staticdata
 
+import com.firelib.techbot.SeriesContainer
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
@@ -7,17 +8,13 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
-import firelib.core.misc.atUtc
-import firelib.core.misc.toInstantDefault
+import firelib.core.misc.timeSequence
 import firelib.core.store.MdDao
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 
 fun getStartTime(timeFrame: Interval): LocalDateTime {
     return LocalDateTime.now().minus(timeFrame.duration.multipliedBy(BotConfig.window))
@@ -30,59 +27,53 @@ class OhlcsService(
 
     val log = LoggerFactory.getLogger(javaClass)
 
+    val pool = Executors.newFixedThreadPool(5)
+
     val baseFlows = ConcurrentHashMap<InstrId, SeriesContainer>()
 
-    val scope = CoroutineScope(Dispatchers.IO)
+    fun start(){
+        Thread{
+            updateTimeseries()
+            timeSequence(Instant.now(), Interval.Min10).forEach { _ ->
+                updateTimeseries()
+            }
+        }.start()
+    }
 
-    fun CoroutineScope.launchFlow(instrId: InstrId): SeriesContainer {
-
-        val container = SeriesContainer(daoProvider(instrId.sourceEnum(), Interval.Min10), instrId)
-
-        val dataLoader = sourceProvider(instrId.sourceEnum())
-
-        val dao = daoProvider(instrId.sourceEnum(), Interval.Min10)
-
-        val last = dao.queryLast(instrId)?.endTime ?: getStartTime(Interval.Week).toInstantDefault()
-
-        log.info("flow launched from start time ${last}")
-
-        var latestFetched = last.atUtc()
-
-        launch {
-
-            while (true) {
-                val lload = dataLoader.load(instrId, latestFetched, Interval.Min10)
-                    .filter { it.endTime > latestFetched.toInstantDefault() }
-                    .chunked(5000)
-
-                var empty = true
-
-                lload.forEach { ohlcs ->
-                    dao.insertOhlc(ohlcs, instrId)
-                    container.add(ohlcs)
-                    latestFetched = ohlcs.last().endTime.atUtc()
-                    empty = false
-                }
-
-                if (empty) {
-                    if (!container.completed.isDone) {
-                        container.completed.complete(true)
-                    }
-                    delay(60_000)
+    fun updateTimeseries() {
+        baseFlows.values.map {
+            pool.submit {
+                try {
+                    it.sync()
+                }  catch (e : Exception){
+                   log.error("failed to update ${it.instrId}", e)
                 }
             }
+        }.forEach { it.get() }
+    }
+
+    fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
+        return initTimeframeIfNeeded(ticker).getOhlcForTimeframe(timeFrame)
+    }
+
+    fun prune(instrId: InstrId){
+        log.info("pruning ${instrId}")
+        baseFlows.get(instrId)?.reset()
+        pool.submit{
+
+            baseFlows.get(instrId)?.sync()
         }
-        return container
+        log.info("sync scheduled ${instrId}")
     }
 
-    fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): StateFlow<List<Ohlc>> {
-        val persistFlow = launchFlowIfNeeded(ticker)
-        return persistFlow.getFlowForTimeframe(timeFrame)
-    }
-
-    fun launchFlowIfNeeded(ticker: InstrId): SeriesContainer {
+    fun initTimeframeIfNeeded(ticker: InstrId): SeriesContainer {
         val persistFlow = baseFlows.computeIfAbsent(ticker, {
-            scope.launchFlow(ticker)
+            val ret = SeriesContainer(
+                daoProvider(ticker.sourceEnum(), Interval.Min10),
+                sourceProvider(ticker.sourceEnum()), ticker
+            )
+            ret.sync()
+            ret
         })
         return persistFlow
     }

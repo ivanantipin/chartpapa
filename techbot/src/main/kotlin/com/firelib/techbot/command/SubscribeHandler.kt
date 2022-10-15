@@ -4,13 +4,13 @@ import com.firelib.techbot.BotHelper.ensureExist
 import com.firelib.techbot.UserId
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.staticdata.InstrumentsService
-import com.firelib.techbot.staticdata.SubscriptionService
+import com.firelib.techbot.subscriptions.SubscriptionService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
 
-class SubHandler(val subscriptionService: SubscriptionService, val staticDataService: InstrumentsService) :
+class SubscribeHandler(val subscriptionService: SubscriptionService, val staticDataService: InstrumentsService) :
     CommandHandler {
 
     companion object {

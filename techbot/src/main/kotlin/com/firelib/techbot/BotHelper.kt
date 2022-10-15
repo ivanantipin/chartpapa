@@ -1,6 +1,5 @@
 package com.firelib.techbot
 
-import chart.SignalType
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.menu.langCode
@@ -28,11 +27,6 @@ object BotHelper {
             }.map { it[TimeFrames.tf] }.sorted().joinToString(separator = "\n")
             header.toLocal(uid.langCode()) + resp
         }
-    }
-
-    private fun deleteUnmappedSubscription(it: ResultRow) {
-        mainLogger.error("failed to map ${it} deleting")
-        Subscriptions.deleteWhere { Subscriptions.ticker eq it[Subscriptions.ticker] and (Subscriptions.market eq it[Subscriptions.market]) }
     }
 
     fun getTimeFrames(): Map<UserId, List<TimeFrame>> {

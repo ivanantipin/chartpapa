@@ -18,7 +18,7 @@ import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.SR
 import firelib.indicators.sequenta.Sequenta
-import firelib.indicators.sequenta.SignalType
+import firelib.indicators.sequenta.SequentaSignalType
 import java.lang.Integer.min
 
 data class TdstResult(val lines: List<SR>, val signals: List<LevelSignal>)
@@ -51,7 +51,7 @@ object TdstLineSignals : SignalGenerator {
         val levels = mutableListOf<Sequenta.Setup>()
 
         val signals = ohlcs.flatMapIndexed { idx, oh ->
-            val refs = sequenta.onOhlc(oh).filter { it.type == SignalType.SetupReach }
+            val refs = sequenta.onOhlc(oh).filter { it.type == SequentaSignalType.SetupReach }
             levels += refs.map { it.reference }
 
             val signals: List<LevelSignal> = levels.map { lvl ->
@@ -67,8 +67,8 @@ object TdstLineSignals : SignalGenerator {
         return TdstResult(levels.map { SR(it.getStart(), it.getEnd(), it.tdst) }, signals)
     }
 
-    override fun signalType(): chart.SignalType {
-        return chart.SignalType.TDST
+    override fun signalType(): com.firelib.techbot.SignalType {
+        return com.firelib.techbot.SignalType.TDST
     }
 
     override fun checkSignals(
@@ -81,7 +81,7 @@ object TdstLineSignals : SignalGenerator {
 
     ): List<BreachEvent> {
 
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
 
         if (targetOhlcs.isEmpty()) {
             mainLogger.info("ohlcs is empty for ${instr}")
@@ -121,7 +121,7 @@ object TdstLineSignals : SignalGenerator {
         settings: Map<String, String>,
         techBotApp: TechBotApp
     ): HOptions {
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval).value
+        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
         val options = HorizontalLevelsRenderer().levelBreaches(targetOhlcs, title, result.signals, result.lines)

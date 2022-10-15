@@ -7,7 +7,7 @@ import com.github.kotlintelegrambot.entities.Update
 class ActionMenuItem(
     val name: MsgLocalizer,
     val action: ((bot: Bot, update: Update) -> Unit)
-) : IMenu {
+) : BotMenu {
 
     override fun name(): MsgLocalizer {
         return name

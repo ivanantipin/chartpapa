@@ -8,7 +8,7 @@ import firelib.core.config.setTradeSize
 import firelib.core.domain.Interval
 import firelib.core.domain.isUpBar
 import firelib.indicators.sequenta.Sequenta
-import firelib.indicators.sequenta.SignalType
+import firelib.indicators.sequenta.SequentaSignalType
 import firelib.model.*
 import java.time.LocalDate
 
@@ -35,7 +35,7 @@ class ReversModel(context: ModelContext, val props: Map<String, String>) : Model
                     logRealtime { "day roll ${instruments()[idx]} -  ${ts[0]}" }
                     val siggis = sequenta.onOhlc(ts[0])
 
-                    siggis.filter { it.type == SignalType.SetupReach }
+                    siggis.filter { it.type == SequentaSignalType.SetupReach }
                         .forEach {
                             logRealtime { "established setup for tdst ${it.reference.tdst}" }
                             if(it.reference.isDown){
@@ -54,7 +54,7 @@ class ReversModel(context: ModelContext, val props: Map<String, String>) : Model
                         }
                     }
 
-                    siggis.filter { it.type == SignalType.SetupReach }
+                    siggis.filter { it.type == SequentaSignalType.SetupReach }
                         .forEach {
                             if (position(idx) > 0 && it.reference.isDown) {
                                 logRealtime { "flattening because of counter setup developed on 4h" }
@@ -62,7 +62,7 @@ class ReversModel(context: ModelContext, val props: Map<String, String>) : Model
                             }
                         }
 
-                    siggis.filter { it.type == SignalType.Signal && it.reference.recycleRef == null && it.reference.isUp }
+                    siggis.filter { it.type == SequentaSignalType.Signal && it.reference.recycleRef == null && it.reference.isUp }
                         .forEach {
                             if (position(idx) > 0) {
                                 logRealtime { "flattening because of signal non recycled" }

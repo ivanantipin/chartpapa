@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 
-class TfHandler : CommandHandler {
+class TimeFrameHandler : CommandHandler {
 
     companion object {
         val name = "add_tf"

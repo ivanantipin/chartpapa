@@ -1,10 +1,10 @@
 package com.firelib.techbot
 
-import chart.SignalType
 import com.firelib.techbot.command.*
 import com.firelib.techbot.menu.MenuRegistry
-import com.firelib.techbot.persistence.Subscriptions
+import com.firelib.techbot.subscriptions.Subscriptions
 import com.firelib.techbot.staticdata.*
+import com.firelib.techbot.subscriptions.SubscriptionService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
@@ -16,6 +16,7 @@ import firelib.core.store.SingletonsContainer
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
+import java.util.concurrent.Executors
 
 class TechBotApp {
     val services = SingletonsContainer()
@@ -30,8 +31,8 @@ class TechBotApp {
     fun startSubsMigration() {
         Thread {
             while (true) {
-                val subscriptionService = getSubscriptionService()
-                val staticDataService = staticDataService()
+                val subscriptionService = subscriptionService()
+                val staticDataService = instrumentsService()
                 if (staticDataService.id2inst.size > 0) {
                     mainLogger.info("start migration , static data size is ${staticDataService.id2inst.size}")
                     updateDatabase("migration") {
@@ -55,12 +56,12 @@ class TechBotApp {
 
     }
 
-    fun staticDataService(): InstrumentsService {
+    fun instrumentsService(): InstrumentsService {
         return services.get("staticData", { InstrumentsService(InstrIdDao()) })
     }
 
-    fun getSubscriptionService(): SubscriptionService {
-        return services.get("subscription", { SubscriptionService(staticDataService()) })
+    fun subscriptionService(): SubscriptionService {
+        return services.get("subscription", { SubscriptionService(instrumentsService()) })
     }
 
     fun getUserNotifier(): UsersNotifier {
@@ -69,7 +70,7 @@ class TechBotApp {
 
     fun refresher(): InstrumentRefresher {
         return services.get("refreshr", {
-            InstrumentRefresher(staticDataService())
+            InstrumentRefresher(instrumentsService())
         })
     }
 
@@ -83,24 +84,33 @@ class TechBotApp {
         return services.get("menuReg") {
             val menuReg = MenuRegistry(this)
             menuReg.makeMenu()
-            menuReg.commandData[SubHandler.name] = SubHandler(getSubscriptionService(), staticDataService())::handle
-            menuReg.commandData[UnsubHandler.name] = UnsubHandler(staticDataService(), getSubscriptionService())::handle
+            menuReg.commandData[SubscribeHandler.name] = SubscribeHandler(subscriptionService(), instrumentsService())::handle
+            menuReg.commandData[UnsubscribeHandler.name] = UnsubscribeHandler(instrumentsService(), subscriptionService())::handle
 
             SignalType.values().forEach {
                 menuReg.commandData[it.settingsName] = IndicatorCommand(this)::handle
             }
 
-            menuReg.commandData[TfHandler.name] = TfHandler()::handle
+            menuReg.commandData[TimeFrameHandler.name] = TimeFrameHandler()::handle
             menuReg.commandData[SignalTypeHandler.name] = SignalTypeHandler()::handle
-            menuReg.commandData[RmSignalTypeHandler.name] = RmSignalTypeHandler()::handle
-            menuReg.commandData[RmTfHandler.name] = RmTfHandler()::handle
-            menuReg.commandData[LanguageHandler.name] = LanguageHandler()::handle
-            menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand(staticDataService())::handle
+            menuReg.commandData[RemoveSignalTypeHandler.name] = RemoveSignalTypeHandler()::handle
+            menuReg.commandData[RemoveTimeFrameHandler.name] = RemoveTimeFrameHandler()::handle
+            menuReg.commandData[LanguageChangeHandler.name] = LanguageChangeHandler()::handle
+            menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand(instrumentsService())::handle
+
+            menuReg.commandData["prune"] = PruneCommandHandler(instrumentsService(), ohlcService())::handle
+
             menuReg
         }
     }
 
     fun bot(): Bot {
+
+        val commands = mapOf(
+            "/set" to SettingsCommand(),
+            "/prune" to PruneSearchCommand(instrumentsService(), subscriptionService())
+        )
+
         return bot {
             token = ConfigParameters.TELEGRAM_TOKEN.get()!!
             timeout = 30
@@ -109,12 +119,13 @@ class TechBotApp {
                 text(null) {
                     try {
                         val split = text.split(" ", "\t")
-                        if (split.isNotEmpty() && split[0] == "/set") {
-                            SettingsCommand().handle(split, this.bot, this.update)
+                        if (split.isNotEmpty()) {
+                            if(commands.containsKey(split[0])){
+                                commands[split[0]]!!.handle(split, this.bot, this.update)
+                            }
                         }
                         val msgLocalizer = MsgLocalizer.getReverseMap(text)
-                        val cmd =
-                            if (menuRegistry().menuActions.containsKey(msgLocalizer) && msgLocalizer != MsgLocalizer.MAIN_MENU) msgLocalizer else MsgLocalizer.HOME
+                        val cmd = if (menuRegistry().menuActions.containsKey(msgLocalizer) && msgLocalizer != MsgLocalizer.MAIN_MENU) msgLocalizer else MsgLocalizer.HOME
                         menuRegistry().menuActions[cmd]!!(this.bot, this.update)
                     } catch (e: Exception) {
                         mainLogger.error("exception in action ${text}", e)
@@ -147,18 +158,22 @@ class TechBotApp {
                 { src, interval -> mdStorage.daos.getDao(src, interval) },
                 { src -> mdStorage.sources[src] })
 
-            getSubscriptionService().liveInstruments().forEach {
-                mainLogger.info("launching ohlcs flow for ${it}")
-                ret.launchFlowIfNeeded(it)
-            }
-            mainLogger.info("waiting while initial load to complete")
-            ret.baseFlows.values.map { it.completed }.forEach { it.get() }
+            val pool = Executors.newCachedThreadPool()
+            subscriptionService().liveInstruments().map {
+                pool.submit({
+                    mainLogger.info("launching ohlcs flow for ${it}")
+                    ret.initTimeframeIfNeeded(it)
+                })
+            }.forEach { it.get() }
+            pool.shutdown()
+
             mainLogger.info("flows started")
 
-            getSubscriptionService().addListener {
+            subscriptionService().addListener {
                 mainLogger.info("launching ohlcs flow for ${it}")
-                ret.launchFlowIfNeeded(it)
+                ret.initTimeframeIfNeeded(it)
             }
+            ret.start()
             ret
         })
     }
