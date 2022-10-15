@@ -12,8 +12,7 @@ plugins {
 
 application {
     mainClassName = 'com.firelib.techbot.MainKt'
-    //, '-XX:+PrintGCDetails', '-Xlog:gc*,gc+phases=info'
-    applicationDefaultJvmArgs = ['-Xms128m', '-Xmx1024m']
+    applicationDefaultJvmArgs = ['-Xms128m', '-Xmx1024m', '-Xloggc:/ddisk/globaldatabase/gc.log', '–XX:+PrintGCDetails', '-XX:+PrintGCDateStamps']
 }
 
 dependencies {
