@@ -1,7 +1,8 @@
 package com.firelib.techbot
 
-import com.firelib.techbot.tdline.UpdateSensitivities.updateSensitivities
+import com.firelib.techbot.tdline.UpdateTrendLinesSensitivities.updateSensitivities
 import com.firelib.techbot.persistence.ConfigService
+import com.firelib.techbot.persistence.DbIniter
 import firelib.core.store.GlobalConstants
 
 fun main() {

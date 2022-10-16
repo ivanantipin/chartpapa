@@ -3,7 +3,6 @@ package com.firelib.techbot.tdline
 import com.firelib.techbot.LineConfig
 import com.firelib.techbot.TrendsCreator
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.persistence.SensitivityConfig
 import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.subscriptions.SubscriptionService
 import com.firelib.techbot.updateDatabase
@@ -14,7 +13,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import java.util.concurrent.Future
 
-object UpdateSensitivities {
+object UpdateTrendLinesSensitivities {
 
     fun updateSensitivities(subscriptionService: SubscriptionService, ohlcsService: OhlcsService) {
         subscriptionService.liveInstruments().forEach { instr ->

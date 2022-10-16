@@ -1,7 +1,7 @@
 package com.firelib.techbot.command
 
-import chart.SignalType
-import com.firelib.techbot.BotHelper
+import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.SignalType
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.Settings
 import com.firelib.techbot.updateDatabase
@@ -34,7 +34,7 @@ class SettingsCommand : TextCommand{
 
         val header = "*_Ваши установки\n\n_*"
 
-        val txt = BotHelper.readSettings(userId).joinToString(separator = "\\-\\-\\-", transform = {
+        val txt = DbIniter.readSettings(userId).joinToString(separator = "\\-\\-\\-", transform = {
             "\\-\\-\\-_*${it["command"]!!.uppercase()}*_\\-\\-\\-\n" + it.entries.filter { it.key != "command" }
                 .joinToString("\n", transform = { entry -> "*${entry.key}* : _${entry.value}_" })
         })

@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.BotHelper
+import com.firelib.techbot.persistence.DbIniter
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.SignalTypes
 import com.firelib.techbot.updateDatabase
@@ -29,7 +29,7 @@ class SignalTypeHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        BotHelper.ensureExist(fromUser)
+        DbIniter.ensureExist(fromUser)
 
         updateDatabase("update signal type") {
             if (SignalTypes.select { SignalTypes.user eq uid and (SignalTypes.signalType eq signalType) }

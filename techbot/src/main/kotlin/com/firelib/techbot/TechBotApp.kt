@@ -1,6 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.command.*
+import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.menu.MenuRegistry
 import com.firelib.techbot.subscriptions.Subscriptions
 import com.firelib.techbot.staticdata.*

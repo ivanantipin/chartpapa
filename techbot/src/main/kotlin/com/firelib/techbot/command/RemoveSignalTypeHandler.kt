@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.BotHelper
+import com.firelib.techbot.persistence.DbIniter
 import com.firelib.techbot.MsgLocalizer
 import com.firelib.techbot.command.SignalTypeHandler.Companion.SIGNAL_TYPE_ATTRIBUTE
 import com.firelib.techbot.menu.fromUser
@@ -27,7 +27,7 @@ class RemoveSignalTypeHandler : CommandHandler {
     override fun handle(cmd: Cmd, bot: Bot, update: Update) {
         val signalType = cmd.opts[SIGNAL_TYPE_ATTRIBUTE]!!
         val fromUser = update.fromUser()
-        BotHelper.ensureExist(fromUser)
+        DbIniter.ensureExist(fromUser)
         updateDatabase("update signal type") {
             SignalTypes.deleteWhere { SignalTypes.user eq fromUser.id and (SignalTypes.signalType eq signalType) }
         }.thenAccept({

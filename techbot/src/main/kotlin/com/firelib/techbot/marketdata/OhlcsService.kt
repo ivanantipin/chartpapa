@@ -1,4 +1,4 @@
-package com.firelib.techbot.staticdata
+package com.firelib.techbot.marketdata
 
 import com.firelib.techbot.SeriesContainer
 import com.firelib.techbot.persistence.BotConfig

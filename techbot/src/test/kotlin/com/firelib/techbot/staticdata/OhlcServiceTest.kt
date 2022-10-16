@@ -1,6 +1,6 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.DbIniter
+import com.firelib.techbot.persistence.DbIniter
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -10,8 +10,6 @@ import firelib.core.misc.SqlUtils
 import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdDao
 import firelib.iqfeed.ContinousOhlcSeries
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
 import java.nio.file.Paths

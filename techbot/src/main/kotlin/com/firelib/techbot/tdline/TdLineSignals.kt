@@ -1,6 +1,6 @@
 package com.firelib.techbot.tdline
 
-import chart.BreachType
+import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.*
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey

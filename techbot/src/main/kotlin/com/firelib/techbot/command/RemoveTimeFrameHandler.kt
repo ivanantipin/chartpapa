@@ -1,6 +1,7 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
+import com.firelib.techbot.persistence.DbIniter
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.TimeFrames
 import com.firelib.techbot.updateDatabase
@@ -27,7 +28,7 @@ class RemoveTimeFrameHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        BotHelper.ensureExist(fromUser)
+        DbIniter.ensureExist(fromUser)
 
         updateDatabase("update timeframes") {
             TimeFrames.deleteWhere { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }

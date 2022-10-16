@@ -1,6 +1,6 @@
-package com.firelib.techbot.macd
+package com.firelib.techbot.rsibolinger
 
-import chart.BreachType
+import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.*
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
@@ -9,6 +9,8 @@ import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.macd.MacdResult
+import com.firelib.techbot.macd.MacdSignals
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
 import com.github.kotlintelegrambot.Bot

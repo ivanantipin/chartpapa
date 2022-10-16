@@ -1,6 +1,5 @@
 package com.firelib.techbot.breachevent
 
-import chart.BreachType
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.store.GlobalConstants
 import org.jetbrains.exposed.dao.id.IntIdTable

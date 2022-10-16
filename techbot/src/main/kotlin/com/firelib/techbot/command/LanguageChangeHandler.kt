@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.BotHelper
+import com.firelib.techbot.persistence.DbIniter
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.Users
 import com.firelib.techbot.updateDatabase
@@ -26,7 +26,7 @@ class LanguageChangeHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        BotHelper.ensureExist(fromUser)
+        DbIniter.ensureExist(fromUser)
 
         updateDatabase("update language") {
             Users.update({ Users.userId eq uid }) {

@@ -1,0 +1,6 @@
+include("back")
+include ("transaqgate")
+include ("production")
+includeBuild("../transaqgrpc/client/java")
+include ("techbot")
+include ("demo")

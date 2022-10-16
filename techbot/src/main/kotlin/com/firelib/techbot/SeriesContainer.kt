@@ -1,7 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.domain.TimeFrame
-import com.firelib.techbot.staticdata.getStartTime
+import com.firelib.techbot.marketdata.getStartTime
 import firelib.core.HistoricalSource
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval

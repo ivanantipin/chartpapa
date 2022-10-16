@@ -2,6 +2,7 @@ package com.firelib.techbot.persistence
 
 import com.firelib.techbot.LineConfig
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.tdline.SensitivityConfig
 import firelib.core.domain.InstrId
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction

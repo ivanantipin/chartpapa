@@ -1,8 +1,0 @@
-include 'back'
-include 'transaqgate'
-include 'production'
-includeBuild("../transaqgrpc/client/java")
-include 'binance'
-include 'techbot'
-include 'demo'
-include 'activetick'

@@ -1,10 +1,12 @@
 package com.firelib.techbot
 
-import chart.BreachType
+import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.domain.UserId
+import com.firelib.techbot.persistence.DbIniter
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.batchInsert
@@ -18,13 +20,13 @@ import java.util.concurrent.Executors
 class UsersNotifier(val techBotApp: TechBotApp) {
 
     fun getNotifyGroups(): Map<NotifyGroup, List<UserId>> {
-        val signalTypes = BotHelper.getSignalTypes()
-        val userSettings = BotHelper.getAllSettings()
+        val signalTypes = DbIniter.getSignalTypes()
+        val userSettings = DbIniter.getAllSettings()
 
         val flattenSubscriptions =
             techBotApp.subscriptionService().subscriptions.mapValues { it.value.values.toList() }
 
-        val pairs = BotHelper.getTimeFrames().flatMap { (userId, timeFrames) ->
+        val pairs = DbIniter.getTimeFrames().flatMap { (userId, timeFrames) ->
             timeFrames.flatMap { timeFrame ->
                 flattenSubscriptions.getOrDefault(userId, emptyList()).flatMap { ticker ->
                     signalTypes.getOrDefault(userId, emptyList()).map { signalType ->

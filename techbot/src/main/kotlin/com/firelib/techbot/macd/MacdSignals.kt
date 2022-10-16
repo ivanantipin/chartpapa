@@ -1,6 +1,6 @@
 package com.firelib.techbot.macd
 
-import chart.BreachType
+import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.SignalType

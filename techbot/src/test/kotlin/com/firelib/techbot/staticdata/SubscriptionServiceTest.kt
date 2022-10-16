@@ -1,7 +1,7 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.DbIniter
-import com.firelib.techbot.UserId
+import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.persistence.ConfigService
 import com.firelib.techbot.subscriptions.SubscriptionService
 import firelib.core.SourceName

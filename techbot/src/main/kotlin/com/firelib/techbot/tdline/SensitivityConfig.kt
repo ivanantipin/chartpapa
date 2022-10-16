@@ -1,4 +1,4 @@
-package com.firelib.techbot.persistence
+package com.firelib.techbot.tdline
 
 import com.firelib.techbot.domain.TimeFrame
 import org.jetbrains.exposed.sql.Table

@@ -35,7 +35,7 @@ fun main() {
 
     }
 
-    SettingsCommand.displaySettings(bot, 312778820L)
+    SettingsCommand().displaySettings(bot, 312778820L)
 }
 
 

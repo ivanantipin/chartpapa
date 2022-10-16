@@ -1,6 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.domain.UserId
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import java.io.File

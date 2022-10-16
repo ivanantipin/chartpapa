@@ -3,8 +3,10 @@ package com.firelib.techbot.menu
 import com.firelib.techbot.*
 import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.macd.MacdSignals
-import com.firelib.techbot.macd.RsiBolingerSignals
+import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.rsibolinger.RsiBolingerSignals
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
@@ -178,7 +180,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             })
 
             addActionMenu(MsgLocalizer.Unsubscribe, { bot, update ->
-                val buttons = BotHelper.getTimeFrames(update.chatId())
+                val buttons = DbIniter.getTimeFrames(update.chatId())
                     .map { SimpleButton(it, Cmd(RemoveTimeFrameHandler.name, mapOf("tf" to it))) }.chunked(1)
                 listButtons(buttons, bot, update.chatId(), MsgLocalizer.PressTfToUnsubscribe.toLocal(update.langCode()))
             })
@@ -192,7 +194,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             }
 
             addActionMenu(MsgLocalizer.UnsubscribeFromSignal, { bot, update ->
-                val buttons = BotHelper.getSignalTypes(update.chatId())
+                val buttons = DbIniter.getSignalTypes(update.chatId())
                     .map {
                         SimpleButton(
                             it.msgLocalizer.toLocal(update.langCode()),

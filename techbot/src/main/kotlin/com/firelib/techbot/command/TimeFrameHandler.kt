@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.BotHelper
+import com.firelib.techbot.persistence.DbIniter
 import com.firelib.techbot.MsgLocalizer
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.menu.langCode
@@ -30,7 +30,7 @@ class TimeFrameHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        BotHelper.ensureExist(fromUser)
+        DbIniter.ensureExist(fromUser)
 
         updateDatabase("update timeframes") {
             if (TimeFrames.select { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }

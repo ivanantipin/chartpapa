@@ -1,6 +1,6 @@
 package com.firelib.techbot.subscriptions
 
-import com.firelib.techbot.UserId
+import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.staticdata.InstrumentsService
 import com.firelib.techbot.updateDatabase
 import firelib.core.domain.InstrId

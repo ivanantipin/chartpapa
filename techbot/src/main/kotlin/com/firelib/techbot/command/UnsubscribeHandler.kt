@@ -1,7 +1,7 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.MsgLocalizer
-import com.firelib.techbot.UserId
+import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.getId
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
