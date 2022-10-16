@@ -15,8 +15,25 @@ import firelib.core.misc.JsonHelper
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Path
+import java.util.concurrent.Callable
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-object DbIniter {
+object DbHelper {
+
+    /**
+     * sinse sqlite can not be updated by concurrent threads
+     */
+    val updateExecutor: ExecutorService = Executors.newSingleThreadExecutor{
+        Thread(it).apply {
+            name = "dbExecutor"
+        }
+    }
+
+    val resultExecutor = Executors.newFixedThreadPool(10)
+
+
     fun initDatabase(staticFile: Path) {
         Database.connect(
             "jdbc:sqlite:${staticFile}?journal_mode=WAL",
@@ -91,6 +108,39 @@ object DbIniter {
         populateSignalTypes()
 
     }
+
+    fun <T> updateDatabase(name: String, block: () -> T): CompletableFuture<T> {
+
+        fun rrun(): T {
+            return transaction {
+                try {
+                    //addLogger(StdOutSqlLogger)
+                    val (value, duration) = Misc.measureTime {
+                        block()
+                    }
+                    mainLogger.info("time spent on ${name} is ${duration / 1000.0} s.")
+                    value
+                } catch (e: Exception) {
+                    Misc.dumpThreads()
+                    throw e
+                }
+            }
+        }
+
+        return if (Thread.currentThread().name == "dbExecutor") {
+            mainLogger.info("executing ${name} without submitting")
+            CompletableFuture.completedFuture(rrun())
+        } else {
+            val f = updateExecutor.submit(
+                Callable<T> {
+                    rrun()
+                }
+
+            )
+            CompletableFuture.supplyAsync({ f.get() }, resultExecutor)
+        }
+    }
+
 
     fun getTimeFrames(): Map<UserId, List<TimeFrame>> {
         return transaction {

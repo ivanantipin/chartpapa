@@ -1,11 +1,10 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.MsgLocalizer
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.menu.langCode
 import com.firelib.techbot.persistence.TimeFrames
-import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
@@ -30,9 +29,9 @@ class TimeFrameHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        DbIniter.ensureExist(fromUser)
+        DbHelper.ensureExist(fromUser)
 
-        updateDatabase("update timeframes") {
+        DbHelper.updateDatabase("update timeframes") {
             if (TimeFrames.select { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }
                     .empty()) {
                 TimeFrames.insert {

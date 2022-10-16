@@ -1,10 +1,9 @@
 package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.TimeFrames
-import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
@@ -28,9 +27,9 @@ class RemoveTimeFrameHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        DbIniter.ensureExist(fromUser)
+        DbHelper.ensureExist(fromUser)
 
-        updateDatabase("update timeframes") {
+        DbHelper.updateDatabase("update timeframes") {
             TimeFrames.deleteWhere { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }
         }.thenAccept({
             bot.sendMessage(

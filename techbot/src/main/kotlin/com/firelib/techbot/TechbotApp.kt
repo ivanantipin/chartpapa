@@ -2,10 +2,13 @@ package com.firelib.techbot
 
 import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.UserId
+import com.firelib.techbot.marketdata.OhlcsService
 import com.firelib.techbot.menu.MenuRegistry
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.subscriptions.Subscriptions
 import com.firelib.techbot.staticdata.*
 import com.firelib.techbot.subscriptions.SubscriptionService
+import com.firelib.techbot.usernotifier.UsersNotifier
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
@@ -19,7 +22,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import java.util.concurrent.Executors
 
-class TechBotApp {
+class TechbotApp {
     val services = SingletonsContainer()
 
     fun start() {
@@ -36,7 +39,7 @@ class TechBotApp {
                 val staticDataService = instrumentsService()
                 if (staticDataService.id2inst.size > 0) {
                     mainLogger.info("start migration , static data size is ${staticDataService.id2inst.size}")
-                    updateDatabase("migration") {
+                    DbHelper.updateDatabase("migration") {
                         Subscriptions.selectAll().forEach {
                             val instr =
                                 staticDataService.instrByCodeAndMarket.get(it[Subscriptions.ticker] to it[Subscriptions.market])

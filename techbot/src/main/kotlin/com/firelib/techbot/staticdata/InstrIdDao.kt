@@ -1,6 +1,6 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.updateDatabase
+import com.firelib.techbot.persistence.DbHelper
 import firelib.core.domain.InstrId
 import firelib.core.misc.JsonHelper
 import org.jetbrains.exposed.sql.batchReplace
@@ -19,7 +19,7 @@ class InstrIdDao {
     }
 
     fun addAll(instrId: List<InstrId>) {
-        updateDatabase("insert instruments") {
+        DbHelper.updateDatabase("insert instruments") {
             Instruments.batchReplace(instrId) {
                 this[Instruments.id] = it.id
                 this[Instruments.code] = it.code

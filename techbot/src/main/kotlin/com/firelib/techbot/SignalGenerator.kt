@@ -23,10 +23,10 @@ interface SignalGenerator {
         window: Int,
         existing: Set<BreachEventKey>,
         settings: Map<String, String>,
-        techBotApp: TechBotApp
+        techBotApp: TechbotApp
     ): List<BreachEvent>
 
-    fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp): HOptions
+    fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechbotApp): HOptions
 
     fun fetchSettings(userId: Long): Map<String, String> {
         val value = transaction {

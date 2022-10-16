@@ -4,7 +4,7 @@ import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.SignalType
-import com.firelib.techbot.TechBotApp
+import com.firelib.techbot.TechbotApp
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
@@ -85,7 +85,7 @@ object MacdSignals : SignalGenerator {
         window: Int,
         existing: Set<BreachEventKey>,
         settings: Map<String, String>,
-        techBotApp: TechBotApp
+        techBotApp: TechbotApp
     ): List<BreachEvent> {
         val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
 
@@ -126,7 +126,7 @@ object MacdSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         settings: Map<String, String>,
-        techBotApp: TechBotApp
+        techBotApp: TechbotApp
     ): HOptions {
         val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val macdParams = MacdParams.fromSettings(settings)

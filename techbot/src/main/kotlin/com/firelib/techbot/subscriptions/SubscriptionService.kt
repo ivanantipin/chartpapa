@@ -1,8 +1,8 @@
 package com.firelib.techbot.subscriptions
 
 import com.firelib.techbot.domain.UserId
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.staticdata.InstrumentsService
-import com.firelib.techbot.updateDatabase
 import firelib.core.domain.InstrId
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
@@ -31,7 +31,7 @@ class SubscriptionService(val staticDataService: InstrumentsService) {
     }
 
     fun deleteSubscription(userId: UserId, instrId: InstrId): Boolean {
-        val rows = updateDatabase("insert subscription") {
+        val rows = DbHelper.updateDatabase("insert subscription") {
             SourceSubscription.deleteWhere {
                 (SourceSubscription.sourceId eq instrId.id) and (SourceSubscription.user eq userId.id)
             }
@@ -44,7 +44,7 @@ class SubscriptionService(val staticDataService: InstrumentsService) {
     fun addSubscription(userId: UserId, instrId: InstrId): Boolean {
         val putToCache = putToCache(userId, instrId)
         if (putToCache == null) {
-            updateDatabase("insert subscription") {
+            DbHelper.updateDatabase("insert subscription") {
                 SourceSubscription.insert {
                     it[sourceId] = instrId.id
                     it[sourceName] = instrId.source

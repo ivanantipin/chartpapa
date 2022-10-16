@@ -1,6 +1,6 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -37,7 +37,7 @@ class OhlcServiceTest {
     @Test
     fun ohlcServiceTest() {
 
-        DbIniter.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}_meta.db"))
+        DbHelper.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}_meta.db"))
 
 
         mutableListOf<Int>().add(0, 0)

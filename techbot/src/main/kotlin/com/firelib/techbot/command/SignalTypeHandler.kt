@@ -1,9 +1,8 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.SignalTypes
-import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
@@ -29,9 +28,9 @@ class SignalTypeHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        DbIniter.ensureExist(fromUser)
+        DbHelper.ensureExist(fromUser)
 
-        updateDatabase("update signal type") {
+        DbHelper.updateDatabase("update signal type") {
             if (SignalTypes.select { SignalTypes.user eq uid and (SignalTypes.signalType eq signalType) }
                     .empty()) {
                 SignalTypes.insert {

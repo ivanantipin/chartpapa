@@ -5,7 +5,7 @@ import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.macd.MacdSignals
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.rsibolinger.RsiBolingerSignals
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
@@ -17,7 +17,7 @@ import firelib.core.misc.JsonHelper
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 
-class MenuRegistry(val techBotApp: TechBotApp) {
+class MenuRegistry(val techBotApp: TechbotApp) {
     val menuActions = mutableMapOf<MsgLocalizer, (Bot, Update) -> Unit>()
 
     val commandData = mutableMapOf<String, (Cmd, Bot, Update) -> Unit>()
@@ -72,14 +72,14 @@ class MenuRegistry(val techBotApp: TechBotApp) {
 
         pool.execute {
             val command = JsonHelper.fromJson<Cmd>(data)
-            measureAndLogTime("processing command ${command}", {
-                try {
-                    commandData.get(command.handlerName)?.invoke(command, bot, update)
-                } catch (e: Exception) {
-                    bot.sendMessage(update.chatId(), "error happened ${e.message}", parseMode = ParseMode.MARKDOWN)
-                    e.printStackTrace()
-                }
-            })
+            Misc.measureAndLogTime("processing command ${command}", {
+                        try {
+                            commandData.get(command.handlerName)?.invoke(command, bot, update)
+                        } catch (e: Exception) {
+                            bot.sendMessage(update.chatId(), "error happened ${e.message}", parseMode = ParseMode.MARKDOWN)
+                            e.printStackTrace()
+                        }
+                    })
         }
     }
 
@@ -180,7 +180,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             })
 
             addActionMenu(MsgLocalizer.Unsubscribe, { bot, update ->
-                val buttons = DbIniter.getTimeFrames(update.chatId())
+                val buttons = DbHelper.getTimeFrames(update.chatId())
                     .map { SimpleButton(it, Cmd(RemoveTimeFrameHandler.name, mapOf("tf" to it))) }.chunked(1)
                 listButtons(buttons, bot, update.chatId(), MsgLocalizer.PressTfToUnsubscribe.toLocal(update.langCode()))
             })
@@ -194,7 +194,7 @@ class MenuRegistry(val techBotApp: TechBotApp) {
             }
 
             addActionMenu(MsgLocalizer.UnsubscribeFromSignal, { bot, update ->
-                val buttons = DbIniter.getSignalTypes(update.chatId())
+                val buttons = DbHelper.getSignalTypes(update.chatId())
                     .map {
                         SimpleButton(
                             it.msgLocalizer.toLocal(update.langCode()),

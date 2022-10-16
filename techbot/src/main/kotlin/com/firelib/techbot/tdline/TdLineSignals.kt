@@ -27,7 +27,7 @@ object TdLineSignals : SignalGenerator {
         window: Int,
         existing: Set<BreachEventKey>,
         settings: Map<String, String>,
-        techBotApp: TechBotApp
+        techBotApp: TechbotApp
     ): List<BreachEvent> {
         val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val conf = BotConfig.getConf(instr, tf)
@@ -55,7 +55,7 @@ object TdLineSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         settings: Map<String, String>,
-        techBotApp: TechBotApp
+        techBotApp: TechbotApp
     ): HOptions {
         val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val conf = BotConfig.getConf(instr, tf)

@@ -3,9 +3,9 @@ package com.firelib.techbot.tdline
 import com.firelib.techbot.LineConfig
 import com.firelib.techbot.TrendsCreator
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.subscriptions.SubscriptionService
-import com.firelib.techbot.updateDatabase
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import org.jetbrains.exposed.sql.and
@@ -23,7 +23,7 @@ object UpdateTrendLinesSensitivities {
 
     fun updateSens(ticker: InstrId, ohlcsService: OhlcsService): Future<Unit> {
 
-        return updateDatabase("senses update ${ticker.code}") {
+        return DbHelper.updateDatabase("senses update ${ticker.code}") {
             SensitivityConfig.deleteWhere { SensitivityConfig.instrId eq ticker.id }
             TimeFrame.values().forEach { timeFrame ->
                 val targetOhlcs = ohlcsService.getOhlcsForTf(ticker, timeFrame.interval)

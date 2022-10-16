@@ -133,7 +133,7 @@ object RsiBolingerSignals : SignalGenerator {
         window: Int,
         existing: Set<BreachEventKey>,
         settings: Map<String, String>,
-        techBotApp: TechBotApp
+        techBotApp: TechbotApp
     ): List<BreachEvent> {
         val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val params = RsiBolingerParams.fromSettings(settings)
@@ -166,7 +166,7 @@ object RsiBolingerSignals : SignalGenerator {
 
     override fun drawPicture(
         instr: InstrId,
-        tf: TimeFrame, settings: Map<String, String>, techBotApp: TechBotApp
+        tf: TimeFrame, settings: Map<String, String>, techBotApp: TechbotApp
     ): HOptions {
         val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         return render(ohlcs, RsiBolingerParams.fromSettings(settings), makeTitle(tf, instr, settings)).options

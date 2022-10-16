@@ -1,10 +1,9 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.SignalType
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.Settings
-import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
@@ -34,7 +33,7 @@ class SettingsCommand : TextCommand{
 
         val header = "*_Ваши установки\n\n_*"
 
-        val txt = DbIniter.readSettings(userId).joinToString(separator = "\\-\\-\\-", transform = {
+        val txt = DbHelper.readSettings(userId).joinToString(separator = "\\-\\-\\-", transform = {
             "\\-\\-\\-_*${it["command"]!!.uppercase()}*_\\-\\-\\-\n" + it.entries.filter { it.key != "command" }
                 .joinToString("\n", transform = { entry -> "*${entry.key}* : _${entry.value}_" })
         })
@@ -75,7 +74,7 @@ class SettingsCommand : TextCommand{
 
         val settingsJson = JsonHelper.toJsonString(parsed)
 
-        updateDatabase("update subscription") {
+        DbHelper.updateDatabase("update subscription") {
             val recs: Int = Settings.deleteWhere {
                 Settings.user eq uid and (Settings.name eq signalType.settingsName)
             }

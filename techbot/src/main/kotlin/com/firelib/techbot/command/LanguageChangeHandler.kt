@@ -1,9 +1,8 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.Users
-import com.firelib.techbot.updateDatabase
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
@@ -26,9 +25,9 @@ class LanguageChangeHandler : CommandHandler {
 
         val uid = fromUser.id
 
-        DbIniter.ensureExist(fromUser)
+        DbHelper.ensureExist(fromUser)
 
-        updateDatabase("update language") {
+        DbHelper.updateDatabase("update language") {
             Users.update({ Users.userId eq uid }) {
                 it[Users.lang] = lang
             }

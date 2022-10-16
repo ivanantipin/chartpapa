@@ -1,5 +1,6 @@
-package com.firelib.techbot
+package com.firelib.techbot.usernotifier
 
+import com.firelib.techbot.SignalType
 import com.firelib.techbot.domain.TimeFrame
 import firelib.core.domain.InstrId
 

@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.staticdata.InstrumentsService
@@ -25,7 +25,7 @@ class SubscribeHandler(val subscriptionService: SubscriptionService, val staticD
         val instr = cmd.instr(staticDataService)
         val fromUser = update.fromUser()
         val uid = fromUser.id
-        DbIniter.ensureExist(fromUser)
+        DbHelper.ensureExist(fromUser)
         if (subscriptionService.addSubscription(UserId(uid), instr)) {
             bot.sendMessage(
                 chatId = ChatId.fromId(fromUser.id),

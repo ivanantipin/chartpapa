@@ -2,7 +2,7 @@ package com.firelib.techbot.command
 
 import com.firelib.techbot.BotHelper
 import com.firelib.techbot.SignalType
-import com.firelib.techbot.TechBotApp
+import com.firelib.techbot.TechbotApp
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.getId
@@ -11,7 +11,7 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
 import java.io.File
 
-class IndicatorCommand(val techBotApp: TechBotApp) {
+class IndicatorCommand(val techBotApp: TechbotApp) {
 
     companion object {
         val indi = SignalType.values().associateBy({ it.settingsName }, { it.signalGenerator })

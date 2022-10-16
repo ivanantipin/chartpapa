@@ -1,6 +1,6 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.UsersNotifier
+import com.firelib.techbot.usernotifier.UsersNotifier
 import com.firelib.techbot.mainLogger
 import firelib.core.domain.InstrId
 import firelib.finam.FinamDownloader

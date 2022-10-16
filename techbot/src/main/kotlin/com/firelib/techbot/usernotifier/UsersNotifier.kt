@@ -1,12 +1,15 @@
-package com.firelib.techbot
+package com.firelib.techbot.usernotifier
 
+import com.firelib.techbot.ConfigParameters
+import com.firelib.techbot.Misc
+import com.firelib.techbot.TechbotApp
 import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.domain.UserId
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.batchInsert
@@ -17,16 +20,16 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.Executors
 
-class UsersNotifier(val techBotApp: TechBotApp) {
+class UsersNotifier(val techBotApp: TechbotApp) {
 
     fun getNotifyGroups(): Map<NotifyGroup, List<UserId>> {
-        val signalTypes = DbIniter.getSignalTypes()
-        val userSettings = DbIniter.getAllSettings()
+        val signalTypes = DbHelper.getSignalTypes()
+        val userSettings = DbHelper.getAllSettings()
 
         val flattenSubscriptions =
             techBotApp.subscriptionService().subscriptions.mapValues { it.value.values.toList() }
 
-        val pairs = DbIniter.getTimeFrames().flatMap { (userId, timeFrames) ->
+        val pairs = DbHelper.getTimeFrames().flatMap { (userId, timeFrames) ->
             timeFrames.flatMap { timeFrame ->
                 flattenSubscriptions.getOrDefault(userId, emptyList()).flatMap { ticker ->
                     signalTypes.getOrDefault(userId, emptyList()).map { signalType ->
@@ -52,7 +55,7 @@ class UsersNotifier(val techBotApp: TechBotApp) {
                     log.info("Notifications are disabled")
                 } else {
                     try {
-                        measureAndLogTime("signal checking", {
+                        Misc.measureAndLogTime("signal checking", {
                             check(2)
                         })
                     } catch (e: Exception) {
@@ -72,7 +75,7 @@ class UsersNotifier(val techBotApp: TechBotApp) {
         notifyGroups.map { (group, users) ->
             notifyExecutor.submit {
                 try {
-                    measureAndLogTime("group ${group} processing took", {
+                    Misc.measureAndLogTime("group ${group} processing took", {
                         processGroup(group, breachWindow, existingEvents, users)
                     })
                 } catch (e: Exception) {
@@ -105,7 +108,7 @@ class UsersNotifier(val techBotApp: TechBotApp) {
         }
 
         if (breaches.isNotEmpty()) {
-            updateDatabase("insert breaches ${breaches.size}") {
+            DbHelper.updateDatabase("insert breaches ${breaches.size}") {
                 BreachEvents.batchInsert(breaches) {
                     this[BreachEvents.instrId] = it.key.instrId
                     this[BreachEvents.timeframe] = it.key.tf.name

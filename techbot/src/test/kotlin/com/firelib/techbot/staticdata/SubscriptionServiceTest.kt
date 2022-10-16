@@ -1,6 +1,6 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.persistence.DbIniter
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.persistence.ConfigService
 import com.firelib.techbot.subscriptions.SubscriptionService
@@ -15,7 +15,7 @@ class SubscriptionServiceTest {
     @Test
     fun testSubService() {
 
-        DbIniter.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}.db"))
+        DbHelper.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}.db"))
         ConfigService.initSystemVars()
 
         val instrIdDao = InstrIdDao()
