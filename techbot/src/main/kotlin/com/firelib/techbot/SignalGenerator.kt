@@ -30,7 +30,7 @@ interface SignalGenerator {
 
     fun fetchSettings(userId: Long): Map<String, String> {
         val value = transaction {
-            Settings.select { (Settings.user eq userId) and (Settings.name eq signalType().settingsName) }
+            Settings.select { (Settings.user eq userId) and (Settings.name eq signalType().name) }
                 .map { it[Settings.value] }.firstOrNull()
         }
         return if (value == null) emptyMap() else JsonHelper.fromJson(value)

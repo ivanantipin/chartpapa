@@ -3,8 +3,8 @@ package com.firelib.techbot.tdline
 import com.firelib.techbot.LineConfig
 import com.firelib.techbot.TrendsCreator
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.marketdata.OhlcsService
 import com.firelib.techbot.persistence.DbHelper
-import com.firelib.techbot.staticdata.OhlcsService
 import com.firelib.techbot.subscriptions.SubscriptionService
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc

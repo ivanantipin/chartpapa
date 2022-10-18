@@ -1,6 +1,5 @@
 package com.firelib.techbot.marketdata
 
-import com.firelib.techbot.SeriesContainer
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.HistoricalSource
 import firelib.core.SourceName

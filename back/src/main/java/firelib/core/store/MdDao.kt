@@ -10,9 +10,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.sqlite.SQLiteDataSource
-import org.sqlite.core.CoreStatement
-import org.sqlite.core.DB
-import org.sqlite.jdbc3.JDBC3ResultSet
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.time.Instant
@@ -23,9 +20,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.system.measureTimeMillis
 
-val executors =  ConcurrentHashMap<String,ExecutorService>()
+val executors = ConcurrentHashMap<String, ExecutorService>()
 
-fun <T> MdDao.updateInThread(block: () -> T)  {
+fun <T> MdDao.updateInThread(block: () -> T) {
 
     val exec = executors.computeIfAbsent(this.ds.url, {
         Executors.newSingleThreadExecutor()
@@ -33,12 +30,11 @@ fun <T> MdDao.updateInThread(block: () -> T)  {
 
     try {
         exec.submit(block).get()
-    }catch (e : Exception){
+    } catch (e: Exception) {
         e.printStackTrace()
     }
 
 }
-
 
 class MdDao(internal val ds: SQLiteDataSource) {
 
@@ -54,8 +50,6 @@ class MdDao(internal val ds: SQLiteDataSource) {
         }
     }
 
-
-
     fun listAvailableInstruments(): List<String> {
         return JdbcTemplate(ds).queryForList(
             """SELECT    name
@@ -67,7 +61,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
         )
     }
 
-    fun truncate(instrId: InstrId){
+    fun truncate(instrId: InstrId) {
         updateInThread {
             val table = MdStorageImpl.makeTableName(instrId)
             ds.connection.use {
@@ -125,7 +119,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
                         data
                     )
                 }
-                if(timeSpent > 1000){
+                if (timeSpent > 1000) {
                     log.info("spent ${timeSpent / 1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
                 }
             } catch (e: Exception) {
@@ -153,13 +147,12 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun normName(name: String): String {
         return name.replace('-', '_').replace('.', '_')
-            .replace('@', '_').replace('#', '_').replace(':','_')
+            .replace('@', '_').replace('#', '_').replace(':', '_')
     }
 
-    fun queryLast(instrId: InstrId) : Ohlc?{
+    fun queryLast(instrId: InstrId): Ohlc? {
         return queryLast(MdStorageImpl.makeTableName(instrId))
     }
-
 
     fun queryLast(codeIn: String): Ohlc? {
         val code = normName(codeIn)
@@ -167,7 +160,7 @@ class MdDao(internal val ds: SQLiteDataSource) {
         return queryToSequence { it.prepareStatement("select * from $code order by dt desc LIMIT 1 ") }.firstOrNull()
     }
 
-    fun queryPoint(codeIn: String, epochMs : Long): Ohlc? {
+    fun queryPoint(codeIn: String, epochMs: Long): Ohlc? {
         val code = normName(codeIn)
         ensureExist(code)
         return queryToSequence {
@@ -177,7 +170,6 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
         }.firstOrNull()
     }
-
 
     fun queryAll(codeIn: String): List<Ohlc> {
         return queryAll(codeIn, LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC)).toList()
@@ -199,35 +191,27 @@ class MdDao(internal val ds: SQLiteDataSource) {
     }
 
     private fun queryToSequence(
-        prepStatement : (Connection)->PreparedStatement
+        prepStatement: (Connection) -> PreparedStatement
     ) = sequence {
         ds.connection.use {
-            val stmt =  prepStatement(it)
+            val stmt = prepStatement(it)
             stmt.use {
                 val rs = stmt.executeQuery()
-                val sqLiteRs = rs as JDBC3ResultSet
-                val stmt1 = sqLiteRs.statement as CoreStatement
-                val db = stmt1.datbase
-                rs.use {
-                    while (rs.next()) {
-                        // highly optimized code
-                        yield(
-                            mapOh(db, stmt1)
-                        )
-                    }
+                while (rs.next()){
+                    val oh = Ohlc(
+                        Instant.ofEpochMilli(rs.getLong(1)),
+                        rs.getDouble(2),
+                        rs.getDouble(3),
+                        rs.getDouble(4),
+                        rs.getDouble(5),
+                        volume = rs.getLong(6),
+                        interpolated = false
+                    )
+                    yield(oh)
                 }
             }
         }
     }
 
-    private fun mapOh(db: DB, stmt1: CoreStatement) = Ohlc(
-        Instant.ofEpochMilli(db.column_long(stmt1.pointer, 0)),
-        db.column_double(stmt1.pointer, 1),
-        db.column_double(stmt1.pointer, 2),
-        db.column_double(stmt1.pointer, 3),
-        db.column_double(stmt1.pointer, 4),
-        volume = db.column_long(stmt1.pointer, 5),
-        interpolated = false
-    )
 }
 

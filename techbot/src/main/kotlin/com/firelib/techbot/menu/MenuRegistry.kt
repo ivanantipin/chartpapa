@@ -234,7 +234,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                     title = { lang -> MsgLocalizer.ChooseTfFor.toLocal(lang) + stype.msgLocalizer.toLocal(lang) }
                     TimeFrame.values().forEach { tf ->
                         addActionButton(tf.name, { bot, update ->
-                            val bts = makeButtons(stype.settingsName, update.chatId(), tf)
+                            val bts = makeButtons(stype.name, update.chatId(), tf)
                             if (bts.isEmpty()) {
                                 emtyListMsg(bot, update)
                             } else {

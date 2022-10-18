@@ -15,7 +15,7 @@ dependencies {
     implementation("org.apache.commons:commons-io:1.3.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
-    implementation("org.xerial:sqlite-jdbc:3.25.2")
+    implementation ("org.xerial:sqlite-jdbc:${Versions.sqlite}")
     implementation("com.opencsv:opencsv:5.3")
     implementation("org.apache.commons:commons-csv:1.8")
     implementation("com.github.wendykierp:JTransforms:3.1")

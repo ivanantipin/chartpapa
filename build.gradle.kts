@@ -2,7 +2,14 @@ plugins {
     kotlin("jvm") version "${Versions.kotlin_version}"
     id("org.jetbrains.kotlin.kapt") version "${Versions.kotlin_version}"
     id("idea")
+    id("org.ajoberstar.grgit") version "5.0.0"
+
 }
+
+fun version() : String{
+    return grgit.tag.list().sortedBy { it.commit.dateTime }.last().name
+}
+
 
 subprojects {
 
@@ -24,8 +31,8 @@ subprojects {
     }
 
 
-    group = "com.funstat"
-    version = "0.0.1-SNAPSHOT"
+    group = "firelib.techbot"
+    version = "${version()}"
 
     repositories {
         mavenCentral()

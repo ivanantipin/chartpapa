@@ -2,14 +2,16 @@ package com.firelib.techbot.usernotifier
 
 import com.firelib.techbot.ConfigParameters
 import com.firelib.techbot.Misc
+import com.firelib.techbot.SignalType
 import com.firelib.techbot.TechbotApp
-import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
+import com.firelib.techbot.breachevent.BreachType
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.persistence.DbHelper
+import com.firelib.techbot.persistence.DbHelper.getNotifyGroups
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import org.jetbrains.exposed.sql.batchInsert
@@ -22,35 +24,12 @@ import java.util.concurrent.Executors
 
 class UsersNotifier(val techBotApp: TechbotApp) {
 
-    fun getNotifyGroups(): Map<NotifyGroup, List<UserId>> {
-        val signalTypes = DbHelper.getSignalTypes()
-        val userSettings = DbHelper.getAllSettings()
-
-        val flattenSubscriptions =
-            techBotApp.subscriptionService().subscriptions.mapValues { it.value.values.toList() }
-
-        val pairs = DbHelper.getTimeFrames().flatMap { (userId, timeFrames) ->
-            timeFrames.flatMap { timeFrame ->
-                flattenSubscriptions.getOrDefault(userId, emptyList()).flatMap { ticker ->
-                    signalTypes.getOrDefault(userId, emptyList()).map { signalType ->
-                        val settings = userSettings.getOrDefault(userId, emptyList())
-                        val signalSettings = settings.find { it["command"] == signalType.settingsName } ?: emptyMap()
-                        NotifyGroup(ticker, signalType, timeFrame, signalSettings) to userId
-                    }
-                }
-            }
-        }
-        return pairs.groupBy { it.first }.mapValues { it.value.map { e -> e.second }.distinct() }
-    }
-
     val log: Logger = LoggerFactory.getLogger(UsersNotifier::class.java)
 
     fun start() {
         Thread({
             timeSequence(Instant.now(), Interval.Min30, 10000).forEach {
-                val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get().let {
-                    it == "true"
-                }
+                val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get() == "true"
                 if (!enabled) {
                     log.info("Notifications are disabled")
                 } else {
@@ -71,6 +50,10 @@ class UsersNotifier(val techBotApp: TechbotApp) {
     fun check(breachWindow: Int) {
         val existingEvents = loadExistingBreaches().map { it.key }.toSet()
         val notifyGroups = getNotifyGroups()
+
+
+
+
         log.info("notify group count is ${notifyGroups.size}")
         notifyGroups.map { (group, users) ->
             notifyExecutor.submit {
@@ -91,11 +74,13 @@ class UsersNotifier(val techBotApp: TechbotApp) {
         existingEvents: Set<BreachEventKey>,
         users: List<UserId>
     ) {
-        val instrId = group.ticker
+        val instrId = group.instrumentId
         val timeFrame = group.timeFrame
 
+        val instr = techBotApp.instrumentsService().id2inst[instrId]!!
+
         val breaches = group.signalType.signalGenerator.checkSignals(
-            instrId,
+            instr,
             timeFrame,
             breachWindow,
             existingEvents,

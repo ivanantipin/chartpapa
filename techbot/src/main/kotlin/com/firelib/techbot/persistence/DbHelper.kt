@@ -9,10 +9,14 @@ import com.firelib.techbot.staticdata.Instruments
 import com.firelib.techbot.subscriptions.SourceSubscription
 import com.firelib.techbot.subscriptions.Subscriptions
 import com.firelib.techbot.tdline.SensitivityConfig
+import com.firelib.techbot.usernotifier.NotifyGroup
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.User
 import firelib.core.misc.JsonHelper
+import firelib.core.store.GlobalConstants
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SchemaUtils.withDataBaseLock
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Path
 import java.util.concurrent.Callable
@@ -25,7 +29,7 @@ object DbHelper {
     /**
      * sinse sqlite can not be updated by concurrent threads
      */
-    val updateExecutor: ExecutorService = Executors.newSingleThreadExecutor{
+    val updateExecutor: ExecutorService = Executors.newSingleThreadExecutor {
         Thread(it).apply {
             name = "dbExecutor"
         }
@@ -33,12 +37,12 @@ object DbHelper {
 
     val resultExecutor = Executors.newFixedThreadPool(10)
 
-
     fun initDatabase(staticFile: Path) {
-        Database.connect(
+        TransactionManager.defaultDatabase = Database.connect(
             "jdbc:sqlite:${staticFile}?journal_mode=WAL",
             driver = "org.sqlite.JDBC"
         )
+
 
         fun populateSignalTypes() {
             updateDatabase("populate signal types") {
@@ -65,6 +69,8 @@ object DbHelper {
             }
         }
 
+
+
         transaction {
 
             addLogger(StdOutSqlLogger)
@@ -89,9 +95,6 @@ object DbHelper {
             SchemaUtils.create(SignalTypes)
             SchemaUtils.createMissingTablesAndColumns(SignalTypes)
 
-            SchemaUtils.create(CacheTable)
-            SchemaUtils.createMissingTablesAndColumns(CacheTable)
-
             SchemaUtils.create(Settings)
             SchemaUtils.createMissingTablesAndColumns(Settings)
 
@@ -109,31 +112,32 @@ object DbHelper {
 
     }
 
-    fun <T> updateDatabase(name: String, block: () -> T): CompletableFuture<T> {
+    fun <T> updateDatabase(name: String, runBlock: () -> T): CompletableFuture<T> {
 
-        fun rrun(): T {
+        fun blockInTransaction(): T? {
             return transaction {
                 try {
                     //addLogger(StdOutSqlLogger)
                     val (value, duration) = Misc.measureTime {
-                        block()
+                        runBlock()
                     }
                     mainLogger.info("time spent on ${name} is ${duration / 1000.0} s.")
                     value
                 } catch (e: Exception) {
                     Misc.dumpThreads()
-                    throw e
+                    mainLogger.error("exception in update database thread", e)
+                    null
                 }
             }
         }
 
         return if (Thread.currentThread().name == "dbExecutor") {
             mainLogger.info("executing ${name} without submitting")
-            CompletableFuture.completedFuture(rrun())
+            CompletableFuture.completedFuture(runBlock())
         } else {
             val f = updateExecutor.submit(
                 Callable<T> {
-                    rrun()
+                    blockInTransaction()
                 }
 
             )
@@ -141,27 +145,42 @@ object DbHelper {
         }
     }
 
+    fun getNotifyGroups(): Map<NotifyGroup, List<UserId>> {
+        val sql = """
+                select s.user_id, s.source_id instrument_id, st.signalType, t.tf, se.settings  from sourcesubscription s, signaltypes st , timeframes t
+                left join settings se on st.user_id = se.user_id and st.signalType = se.name
+                where s.user_id = st.user_id and s.user_id = t.user_id ;              
+        """.trimIndent()
 
-    fun getTimeFrames(): Map<UserId, List<TimeFrame>> {
-        return transaction {
-            TimeFrames.selectAll().map {
-                UserId(it[TimeFrames.user].toLong()) to TimeFrame.valueOf(it[TimeFrames.tf])
-            }.groupBy({ it.first }, { it.second })
+        val ret = mutableListOf<Pair<NotifyGroup, UserId>>()
+
+        transaction {
+            exec(sql) { rs ->
+                while (rs.next()) {
+                    val instrId = rs.getString("instrument_id")
+                    rs.getString("signalType")
+
+                    val ss = rs.getString("settings")
+                    ret.add(
+                        NotifyGroup(
+                            instrumentId = instrId,
+                            signalType = SignalType.valueOf(rs.getString("signalType")),
+                            timeFrame = TimeFrame.valueOf(rs.getString("tf")),
+                            if(ss == null) emptyMap() else JsonHelper.fromJson(ss)
+                        )
+                                to UserId(rs.getString("user_id").toLong())
+                    )
+                }
+            }
+
         }
+        return ret.groupBy({ it.first }, { it.second })
     }
 
     fun getSignalTypes(): Map<UserId, List<SignalType>> {
         return transaction {
             SignalTypes.selectAll().map {
                 UserId(it[SignalTypes.user].toLong()) to SignalType.valueOf(it[SignalTypes.signalType])
-            }.groupBy({ it.first }, { it.second })
-        }
-    }
-
-    fun getAllSettings(): Map<UserId, List<Map<String, String>>> {
-        return transaction {
-            Settings.selectAll().map {
-                UserId(it[Settings.user].toLong()) to JsonHelper.fromJson<Map<String, String>>(it[Settings.value])
             }.groupBy({ it.first }, { it.second })
         }
     }
@@ -222,5 +241,10 @@ object DbHelper {
             }
         }
     }
+}
 
+fun main() {
+    DbHelper.initDatabase(GlobalConstants.metaDb.toAbsolutePath())
+
+    DbHelper.getNotifyGroups().forEach { println(it) }
 }

@@ -26,7 +26,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
     implementation ( "org.springframework:spring-jdbc:5.1.9.RELEASE")
     implementation ( "org.springframework:spring-web:5.1.9.RELEASE")
-    implementation ( "org.xerial:sqlite-jdbc:3.25.2")
+    implementation ("org.xerial:sqlite-jdbc:${Versions.sqlite}")
     implementation (project(":back"))
     implementation ("org.jetbrains.exposed:exposed-core:${Versions.exposed_version}")
     implementation ("org.jetbrains.exposed:exposed-dao:${Versions.exposed_version}")

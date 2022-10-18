@@ -92,7 +92,7 @@ class TechbotApp {
             menuReg.commandData[UnsubscribeHandler.name] = UnsubscribeHandler(instrumentsService(), subscriptionService())::handle
 
             SignalType.values().forEach {
-                menuReg.commandData[it.settingsName] = IndicatorCommand(this)::handle
+                menuReg.commandData[it.name] = IndicatorCommand(this)::handle
             }
 
             menuReg.commandData[TimeFrameHandler.name] = TimeFrameHandler()::handle

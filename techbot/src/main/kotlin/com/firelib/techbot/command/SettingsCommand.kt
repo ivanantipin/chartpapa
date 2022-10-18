@@ -55,7 +55,7 @@ class SettingsCommand : TextCommand{
 
         val uid = fromUser.id
 
-        val signalType = SignalType.values().find { cmd[1] == it.settingsName }
+        val signalType = SignalType.values().find { cmd[1] == it.name }
 
         if (signalType == null) {
             bot.sendMessage(
@@ -76,7 +76,7 @@ class SettingsCommand : TextCommand{
 
         DbHelper.updateDatabase("update subscription") {
             val recs: Int = Settings.deleteWhere {
-                Settings.user eq uid and (Settings.name eq signalType.settingsName)
+                Settings.user eq uid and (Settings.name eq signalType.name)
             }
             Settings.insert {
                 it[user] = uid
