@@ -7,15 +7,9 @@ jib{
 
     container{
         mainClass = "com.firelib.techbot.MainKt"
-
+        jvmFlags = listOf("-Xms128m", "-Xmx1024m", "-Xlog:gc*:/ddisk/globaldatabase/gc.log:time")
     }
 }
-
-//application{
-//    mainClass.set("com.firelib.techbot.MainKt")
-//    applicationDefaultJvmArgs = listOf("-Xms128m", "-Xmx1024m", "-Xloggc:/ddisk/globaldatabase/gc.log", "–XX:+PrintGCDetails", "-XX:+PrintGCDateStamps")
-//}
-
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
