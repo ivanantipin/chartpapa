@@ -1,13 +1,17 @@
 package com.firelib.techbot
 
+import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.command.*
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.marketdata.OhlcsService
 import com.firelib.techbot.menu.MenuRegistry
+import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.DbHelper
-import com.firelib.techbot.subscriptions.Subscriptions
-import com.firelib.techbot.staticdata.*
+import com.firelib.techbot.staticdata.InstrIdDao
+import com.firelib.techbot.staticdata.InstrumentRefresher
+import com.firelib.techbot.staticdata.InstrumentsService
 import com.firelib.techbot.subscriptions.SubscriptionService
+import com.firelib.techbot.subscriptions.Subscriptions
 import com.firelib.techbot.usernotifier.UsersNotifier
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
@@ -15,14 +19,13 @@ import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.logging.LogLevel
-import firelib.core.store.MdStorageImpl
-import firelib.core.store.SingletonsContainer
+import firelib.core.store.*
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import java.util.concurrent.Executors
 
-class TechbotApp {
+open class TechbotApp {
     val services = SingletonsContainer()
 
     fun start() {
@@ -69,7 +72,7 @@ class TechbotApp {
     }
 
     fun getUserNotifier(): UsersNotifier {
-        return services.get("notifier", { UsersNotifier(this) })
+        return services.get("notifier", { UsersNotifier(this.botInterface(), this.ohlcService(), this.instrumentsService(), ChartService) })
     }
 
     fun refresher(): InstrumentRefresher {
@@ -78,17 +81,30 @@ class TechbotApp {
         })
     }
 
-    fun mdStorage(): MdStorageImpl {
-        return services.get("mdStorage", {
-            MdStorageImpl()
-        })
+    fun subscribeHandler() : SubscribeHandler{
+        return services.get("subHandler"){
+            SubscribeHandler(subscriptionService(), instrumentsService())
+        }
     }
+
+    open fun historicalSourceProvider() : HistoricalSourceProvider{
+        return services.get("source provider"){
+            SourceFactory()
+        }
+    }
+
+    open fun signalTypeHandler() : SignalTypeHandler{
+        return services.get("signal type handler"){
+            SignalTypeHandler()
+        }
+    }
+
 
     fun menuRegistry(): MenuRegistry {
         return services.get("menuReg") {
             val menuReg = MenuRegistry(this)
             menuReg.makeMenu()
-            menuReg.commandData[SubscribeHandler.name] = SubscribeHandler(subscriptionService(), instrumentsService())::handle
+            menuReg.commandData[SubscribeHandler.name] = subscribeHandler()::handle
             menuReg.commandData[UnsubscribeHandler.name] = UnsubscribeHandler(instrumentsService(), subscriptionService())::handle
 
             SignalType.values().forEach {
@@ -96,7 +112,7 @@ class TechbotApp {
             }
 
             menuReg.commandData[TimeFrameHandler.name] = TimeFrameHandler()::handle
-            menuReg.commandData[SignalTypeHandler.name] = SignalTypeHandler()::handle
+            menuReg.commandData[SignalTypeHandler.name] = signalTypeHandler()::handle
             menuReg.commandData[RemoveSignalTypeHandler.name] = RemoveSignalTypeHandler()::handle
             menuReg.commandData[RemoveTimeFrameHandler.name] = RemoveTimeFrameHandler()::handle
             menuReg.commandData[LanguageChangeHandler.name] = LanguageChangeHandler()::handle
@@ -108,7 +124,7 @@ class TechbotApp {
         }
     }
 
-    fun bot(): Bot {
+    open fun bot(): Bot {
 
         val commands = mapOf(
             "/set" to SettingsCommand(),
@@ -130,7 +146,7 @@ class TechbotApp {
                         }
                         val msgLocalizer = MsgLocalizer.getReverseMap(text)
                         val cmd = if (menuRegistry().menuActions.containsKey(msgLocalizer) && msgLocalizer != MsgLocalizer.MAIN_MENU) msgLocalizer else MsgLocalizer.HOME
-                        menuRegistry().menuActions[cmd]!!(this.bot, this.update)
+                        menuRegistry().menuActions[cmd]!!(this.bot, this.update.fromUser())
                     } catch (e: Exception) {
                         mainLogger.error("exception in action ${text}", e)
                     }
@@ -148,21 +164,29 @@ class TechbotApp {
 
     }
 
-    fun botInterface(): BotInterface {
+    open fun botInterface(): BotInterface {
         return services.get("botInterface", {
             BotInterfaceImpl(bot())
         })
     }
 
+    fun daoContainer() : MdDaoContainer{
+        return services.get("dao container"){
+            MdDaoContainer()
+        }
+    }
+
     fun ohlcService(): OhlcsService {
 
         return services.get("ohlcService", {
-            val mdStorage = mdStorage()
             val ret = OhlcsService(
-                { src, interval -> mdStorage.daos.getDao(src, interval) },
-                { src -> mdStorage.sources[src] })
+                daoContainer(),
+                historicalSourceProvider()
+            )
 
-            val pool = Executors.newCachedThreadPool()
+            val pool = Executors.newCachedThreadPool({
+                Thread(it).apply { isDaemon = true }
+            })
             subscriptionService().liveInstruments().map {
                 pool.submit({
                     mainLogger.info("launching ohlcs flow for ${it}")

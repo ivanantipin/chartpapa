@@ -12,7 +12,12 @@ import firelib.vantage.VantageDownloader
 import java.nio.file.Paths
 import java.util.concurrent.ConcurrentHashMap
 
-class SourceFactory{
+
+fun interface HistoricalSourceProvider{
+    operator fun get(source: SourceName) : HistoricalSource
+}
+
+class SourceFactory : HistoricalSourceProvider{
     val sources = mapOf(
         SourceName.FINAM to { FinamDownloader() },
         SourceName.VANTAGE to { VantageDownloader() },
@@ -25,7 +30,7 @@ class SourceFactory{
 
     val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()
 
-    operator fun get(source: SourceName) : HistoricalSource {
+    override operator fun get(source: SourceName) : HistoricalSource {
         return concurrentHashMap.computeIfAbsent(source, {sources[source]!!()})
     }
 }

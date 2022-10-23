@@ -1,8 +1,8 @@
 package com.firelib.techbot.staticdata
 
-import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.persistence.ConfigService
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.subscriptions.SubscriptionService
 import firelib.core.SourceName
 import firelib.core.domain.InstrId

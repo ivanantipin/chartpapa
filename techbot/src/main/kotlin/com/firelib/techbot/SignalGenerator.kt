@@ -1,17 +1,19 @@
 package com.firelib.techbot
 
-import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.Settings
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
+import firelib.core.domain.Ohlc
 import firelib.core.misc.JsonHelper
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
 
 interface SignalGenerator {
 
@@ -21,12 +23,12 @@ interface SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         window: Int,
-        existing: Set<BreachEventKey>,
+        lastSignalTime : Instant,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
-    ): List<BreachEvent>
+        ohlcs : List<Ohlc>
+    ): List<Pair<BreachEventKey, HOptions>>
 
-    fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, techBotApp: TechbotApp): HOptions
+    fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, ohlcs : List<Ohlc>): HOptions
 
     fun fetchSettings(userId: Long): Map<String, String> {
         val value = transaction {
@@ -44,7 +46,7 @@ interface SignalGenerator {
         return emptyMap()
     }
 
-    fun displayHelp(bot: Bot, update: Update) {
+    fun displayHelp(bot: Bot, user: User) {
 
     }
 

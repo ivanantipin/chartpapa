@@ -1,12 +1,11 @@
 package com.firelib.techbot.command
 
+import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.persistence.DbHelper
-import com.firelib.techbot.menu.fromUser
 import com.firelib.techbot.persistence.SignalTypes
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
-import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -22,19 +21,16 @@ class SignalTypeHandler : CommandHandler {
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, update: Update) {
+    override fun handle(cmd: Cmd, bot: Bot, user: User) {
         val signalType = cmd.opts[SIGNAL_TYPE_ATTRIBUTE]!!
-        val fromUser = update.fromUser()
 
-        val uid = fromUser.id
-
-        DbHelper.ensureExist(fromUser)
+        DbHelper.ensureExist(user)
 
         DbHelper.updateDatabase("update signal type") {
-            if (SignalTypes.select { SignalTypes.user eq uid and (SignalTypes.signalType eq signalType) }
+            if (SignalTypes.select { SignalTypes.user eq user.id and (SignalTypes.signalType eq signalType) }
                     .empty()) {
                 SignalTypes.insert {
-                    it[SignalTypes.user] = uid
+                    it[SignalTypes.user] = user.id
                     it[SignalTypes.signalType] = signalType
                 }
                 true
@@ -45,7 +41,7 @@ class SignalTypeHandler : CommandHandler {
         }.thenAccept { flag ->
             if (flag) {
                 bot.sendMessage(
-                    chatId = ChatId.fromId(fromUser.id),
+                    chatId = user.chatId(),
                     text = "Тип сигнала добавлен в нотификации ${signalType}",
                     parseMode = ParseMode.MARKDOWN
                 )

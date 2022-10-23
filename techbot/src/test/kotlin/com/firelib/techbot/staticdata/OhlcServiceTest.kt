@@ -1,14 +1,14 @@
 package com.firelib.techbot.staticdata
 
+import com.firelib.techbot.marketdata.OhlcsService
 import com.firelib.techbot.persistence.DbHelper
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
-import firelib.core.misc.SqlUtils
 import firelib.core.misc.toInstantDefault
-import firelib.core.store.MdDao
+import firelib.core.store.MdDaoContainer
 import firelib.iqfeed.ContinousOhlcSeries
 import org.junit.Assert
 import org.junit.Test
@@ -46,9 +46,7 @@ class OhlcServiceTest {
 
         val instr = InstrId(id = ticker, market = "XNAS", code = ticker, source = SourceName.POLIGON.name)
 
-        val dsForFile = SqlUtils.getDsForFile("/tmp/${System.currentTimeMillis()}.db")
-
-        val dao = MdDao(dsForFile)
+        val mdDaoContainer = MdDaoContainer()
 
         val historicalSource = object : HistoricalSource {
             var ohlcs: List<Ohlc>
@@ -79,7 +77,7 @@ class OhlcServiceTest {
             }
         }
 
-        val service = OhlcsService({ a, b -> dao }, { historicalSource })
+        val service = OhlcsService(mdDaoContainer) { historicalSource }
 
         service.initTimeframeIfNeeded(instr)
 

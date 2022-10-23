@@ -25,7 +25,9 @@ val executors = ConcurrentHashMap<String, ExecutorService>()
 fun <T> MdDao.updateInThread(block: () -> T) {
 
     val exec = executors.computeIfAbsent(this.ds.url, {
-        Executors.newSingleThreadExecutor()
+        Executors.newSingleThreadExecutor({
+            Thread(it).apply { isDaemon = true }
+        })
     })
 
     try {

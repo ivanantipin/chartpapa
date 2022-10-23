@@ -1,13 +1,8 @@
 package com.firelib.techbot.sequenta
 
-import com.firelib.techbot.breachevent.BreachType
-import com.firelib.techbot.BotHelper
 import com.firelib.techbot.SignalGenerator
-import com.firelib.techbot.TechbotApp
-import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.SignalType
 import com.firelib.techbot.breachevent.BreachEventKey
-import com.firelib.techbot.breachevent.BreachEvents
-import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.HorizontalLevelsRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
@@ -20,6 +15,7 @@ import firelib.indicators.SR
 import firelib.indicators.sequenta.Sequenta
 import firelib.indicators.sequenta.SequentaSignalType
 import java.lang.Integer.min
+import java.time.Instant
 
 data class TdstResult(val lines: List<SR>, val signals: List<LevelSignal>)
 
@@ -75,13 +71,12 @@ object TdstLineSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         window: Int,
-        existing: Set<BreachEventKey>,
+        lastSignalTime: Instant,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
+        ohlcs: List<Ohlc>
+    ): List<Pair<BreachEventKey,HOptions>> {
 
-    ): List<BreachEvent> {
-
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = ohlcs
 
         if (targetOhlcs.isEmpty()) {
             mainLogger.info("ohlcs is empty for ${instr}")
@@ -91,37 +86,21 @@ object TdstLineSignals : SignalGenerator {
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
         val options = HorizontalLevelsRenderer().levelBreaches(targetOhlcs, title, result.signals, result.lines)
-
         val threshold = targetOhlcs[targetOhlcs.size - window - 1].endTime.toEpochMilli()
-
         val newSignals = result.signals
-            .filter { it.time >= threshold }
-            .map { BreachEventKey(instr.id, tf, targetOhlcs.last().endTime.toEpochMilli(), BreachType.TDST_SIGNAL) }
-            .filter { !existing.contains(it) }
-
-
-
-        return if (newSignals.isNotEmpty()) {
-            val img = ChartService.post(options)
-            newSignals.map {
-                val fileName = BreachEvents.makeSnapFileName(
-                    BreachType.TDST_SIGNAL.name, instr.id, tf, it.eventTimeMs
-                )
-                BotHelper.saveFile(img, fileName)
-                BreachEvent(it, fileName)
-            }
-        } else {
-            emptyList()
-        }
+            .filter { it.time >= threshold && it.time > lastSignalTime.toEpochMilli() }
+            .lastOrNull() ?: return emptyList()
+        val key = BreachEventKey(instr.id, tf,  newSignals.time, SignalType.TDST)
+        return listOf(key to options)
     }
 
     override fun drawPicture(
         instr: InstrId,
         tf: TimeFrame,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
+        ohlcs : List<Ohlc>
     ): HOptions {
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = ohlcs
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
         val options = HorizontalLevelsRenderer().levelBreaches(targetOhlcs, title, result.signals, result.lines)

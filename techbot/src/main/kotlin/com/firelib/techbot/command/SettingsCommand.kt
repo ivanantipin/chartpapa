@@ -1,8 +1,8 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.SignalType
 import com.firelib.techbot.menu.fromUser
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.persistence.Settings
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
@@ -67,7 +67,7 @@ class SettingsCommand : TextCommand{
         }
 
         if (!signalType.signalGenerator.validate(cmd)) {
-            signalType.signalGenerator.displayHelp(bot, update)
+            signalType.signalGenerator.displayHelp(bot, update.fromUser())
             return
         }
         val parsed = signalType.signalGenerator.parsePayload(cmd)

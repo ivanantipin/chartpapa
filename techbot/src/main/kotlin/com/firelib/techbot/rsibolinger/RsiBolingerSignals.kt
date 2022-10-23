@@ -1,26 +1,25 @@
 package com.firelib.techbot.rsibolinger
 
-import com.firelib.techbot.breachevent.BreachType
-import com.firelib.techbot.*
-import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.SignalType
 import com.firelib.techbot.breachevent.BreachEventKey
-import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
-import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.macd.MacdResult
 import com.firelib.techbot.macd.MacdSignals
+import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
-import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.Rsi
 import firelib.indicators.SimpleMovingAverage
+import java.time.Instant
 
 data class BolingerBands(val ma: Double, val lowerBand: Double, val upperBand: Double) {
     val arr = arrayOf(ma, lowerBand, upperBand)
@@ -131,13 +130,11 @@ object RsiBolingerSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         window: Int,
-        existing: Set<BreachEventKey>,
+        lastSignalTime: Instant,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
-    ): List<BreachEvent> {
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
+        ohlcs: List<Ohlc>
+    ): List<Pair<BreachEventKey, HOptions>> {
         val params = RsiBolingerParams.fromSettings(settings)
-
         val result = render(
             ohlcs, params, "Signal: ${makeTitle(tf, instr, settings)}"
         )
@@ -146,19 +143,15 @@ object RsiBolingerSignals : SignalGenerator {
         if (result.signals.isNotEmpty()) {
             val last = result.signals.last()
             val time = ohlcs[last.first].endTime
-            val key = BreachEventKey(instr.id + suffix, tf, time.toEpochMilli(), BreachType.MACD)
-            val newSignal = last.first > ohlcs.size - window && !existing.contains(key)
-            if (newSignal) {
-                val img = ChartService.post(result.options)
-
-                val fileName = makeSnapFileName(
-                    BreachType.MACD.name,
-                    instr.id + suffix,
-                    tf,
-                    time.toEpochMilli()
+            if (time > lastSignalTime && time > ohlcs[window].endTime) {
+                return listOf(
+                    BreachEventKey(
+                        instr.id + suffix,
+                        tf,
+                        time.toEpochMilli(),
+                        SignalType.RSI_BOLINGER
+                    ) to result.options
                 )
-                BotHelper.saveFile(img, fileName)
-                return listOf(BreachEvent(key, fileName))
             }
         }
         return emptyList()
@@ -166,9 +159,8 @@ object RsiBolingerSignals : SignalGenerator {
 
     override fun drawPicture(
         instr: InstrId,
-        tf: TimeFrame, settings: Map<String, String>, techBotApp: TechbotApp
+        tf: TimeFrame, settings: Map<String, String>, ohlcs: List<Ohlc>
     ): HOptions {
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         return render(ohlcs, RsiBolingerParams.fromSettings(settings), makeTitle(tf, instr, settings)).options
     }
 
@@ -254,7 +246,7 @@ object RsiBolingerSignals : SignalGenerator {
         )
     }
 
-    override fun displayHelp(bot: Bot, update: Update) {
+    override fun displayHelp(bot: Bot, user: User) {
         //fixme internationalize
         val header = """
         *Конфигурация индикатора RSI-BOLINGER*
@@ -273,9 +265,9 @@ object RsiBolingerSignals : SignalGenerator {
         rsiLow=25
         rsiHigh=75                       
     """.trimIndent()
-        update.langCode()
+        user.langCode()
         bot.sendMessage(
-            chatId = update.chatId(),
+            chatId = user.chatId(),
             text = header,
             parseMode = ParseMode.MARKDOWN
         )

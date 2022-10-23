@@ -1,14 +1,8 @@
 package com.firelib.techbot.macd
 
-import com.firelib.techbot.breachevent.BreachType
-import com.firelib.techbot.BotHelper
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.SignalType
-import com.firelib.techbot.TechbotApp
-import com.firelib.techbot.breachevent.BreachEvent
 import com.firelib.techbot.breachevent.BreachEventKey
-import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
-import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
@@ -16,10 +10,12 @@ import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.EmaSimple
+import java.time.Instant
 
 object MacdSignals : SignalGenerator {
 
@@ -83,11 +79,10 @@ object MacdSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         window: Int,
-        existing: Set<BreachEventKey>,
+        lastSignalTime: Instant,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
-    ): List<BreachEvent> {
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
+        ohlcs : List<Ohlc>
+    ): List<Pair<BreachEventKey, HOptions>> {
 
         if (ohlcs.isEmpty()) {
             return emptyList()
@@ -102,21 +97,10 @@ object MacdSignals : SignalGenerator {
         val suffix = "_${macdParams.shortEma}_${macdParams.longEma}_${macdParams.signalEma}"
 
         if (result.signals.isNotEmpty()) {
-            val last = result.signals.last()
-            val time = ohlcs[last.first].endTime
-            val key = BreachEventKey(instr.id + suffix, tf, time.toEpochMilli(), BreachType.MACD)
-            val newSignal = last.first > ohlcs.size - window && !existing.contains(key)
-            if (newSignal) {
-                val img = ChartService.post(result.options)
-
-                val fileName = makeSnapFileName(
-                    BreachType.MACD.name,
-                    instr.id + suffix,
-                    tf,
-                    time.toEpochMilli()
-                )
-                BotHelper.saveFile(img, fileName)
-                return listOf(BreachEvent(key, fileName))
+            val lastSignal = result.signals.last()
+            val time = ohlcs[lastSignal.first].endTime
+            if (time > lastSignalTime && time > ohlcs[ohlcs.size - window].endTime ) {
+                return listOf(BreachEventKey(instr.id + suffix, tf, time.toEpochMilli(), SignalType.MACD) to result.options)
             }
         }
         return emptyList()
@@ -126,9 +110,8 @@ object MacdSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
+        ohlcs : List<Ohlc>
     ): HOptions {
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
         val macdParams = MacdParams.fromSettings(settings)
         return render(ohlcs, macdParams, makeTitle(tf, instr, settings)).options
     }
@@ -195,7 +178,7 @@ object MacdSignals : SignalGenerator {
         )
     }
 
-    override fun displayHelp(bot: Bot, update: Update) {
+    override fun displayHelp(bot: Bot, update: User) {
         //fixme internationalize
         val header = """
         *Конфигурация индикатора MACD*

@@ -1,5 +1,6 @@
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
+import firelib.core.misc.atUtc
 import firelib.core.misc.toInstantDefault
 import firelib.iqfeed.IntervalTransformer
 import org.junit.Assert
@@ -8,7 +9,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 import kotlin.random.Random
 
 class IntervalTransformerTest {
@@ -37,7 +37,7 @@ class IntervalTransformerTest {
         println(out)
     }
 
-    companion object{
+    companion object {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         fun generateTestSetForWeek(): List<Ohlc> {
             val mon = LocalDateTime.parse("2018-12-03 00:00:01", formatter).toInstant(ZoneOffset.UTC) //mon
@@ -57,7 +57,6 @@ class IntervalTransformerTest {
         }
 
     }
-
 
     @Test
     fun testTransformer() {
@@ -85,6 +84,25 @@ class IntervalTransformerTest {
         Assert.assertTrue(out[1].close == ohlcs[3].close)
         Assert.assertTrue(out[1].volume == ohlcs.subList(2, 4).sumOf { it.volume.toInt() }.toLong())
         Assert.assertEquals(out[2], ohlcs[4].copy(endTime = time4))
+    }
+
+    @Test
+    fun testDaysTransformer() {
+        val times = listOf(
+            LocalDateTime.parse("2018-04-01T05:31:00").toInstantDefault(),
+            LocalDateTime.parse("2018-05-01T01:40:00").toInstantDefault(),
+            LocalDateTime.parse("2018-06-01T01:20:00").toInstantDefault()
+        )
+        val ohlcs = times.map {
+            makeRandomOhlc(it)
+        }
+        val out = IntervalTransformer.transform(Interval.Day, ohlcs)
+        times.forEachIndexed { idx, time ->
+            Assert.assertEquals(
+                ohlcs[idx].copy(endTime = time.atUtc().toLocalDate().plusDays(1).toInstantDefault()),
+                out[idx]
+            )
+        }
     }
 }
 

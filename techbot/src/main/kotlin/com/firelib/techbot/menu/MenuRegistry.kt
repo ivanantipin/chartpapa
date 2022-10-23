@@ -8,19 +8,16 @@ import com.firelib.techbot.macd.MacdSignals
 import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.rsibolinger.RsiBolingerSignals
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.ChatId
-import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
-import com.github.kotlintelegrambot.entities.ParseMode
-import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import firelib.core.misc.JsonHelper
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 
 class MenuRegistry(val techBotApp: TechbotApp) {
-    val menuActions = mutableMapOf<MsgLocalizer, (Bot, Update) -> Unit>()
+    val menuActions = mutableMapOf<MsgLocalizer, (Bot, User) -> Unit>()
 
-    val commandData = mutableMapOf<String, (Cmd, Bot, Update) -> Unit>()
+    val commandData = mutableMapOf<String, (Cmd, Bot, User) -> Unit>()
 
     companion object {
 
@@ -65,7 +62,11 @@ class MenuRegistry(val techBotApp: TechbotApp) {
     }
 
 
-    val pool: ThreadPoolExecutor = Executors.newCachedThreadPool() as ThreadPoolExecutor
+    val pool: ThreadPoolExecutor = Executors.newCachedThreadPool({
+        Thread(it).apply {
+            isDaemon = true
+        }
+    }) as ThreadPoolExecutor
 
     fun processData(data: String, bot: Bot, update: Update) {
         mainLogger.info("pool size is ${pool.poolSize} active count is ${pool.activeCount}")
@@ -74,7 +75,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
             val command = JsonHelper.fromJson<Cmd>(data)
             Misc.measureAndLogTime("processing command ${command}", {
                         try {
-                            commandData.get(command.handlerName)?.invoke(command, bot, update)
+                            commandData.get(command.handlerName)?.invoke(command, bot, update.fromUser())
                         } catch (e: Exception) {
                             bot.sendMessage(update.chatId(), "error happened ${e.message}", parseMode = ParseMode.MARKDOWN)
                             e.printStackTrace()
@@ -233,16 +234,16 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                 addButtonMenu(stype.msgLocalizer) {
                     title = { lang -> MsgLocalizer.ChooseTfFor.toLocal(lang) + stype.msgLocalizer.toLocal(lang) }
                     TimeFrame.values().forEach { tf ->
-                        addActionButton(tf.name, { bot, update ->
-                            val bts = makeButtons(stype.name, update.chatId(), tf)
+                        addActionButton(tf.name, { bot, user ->
+                            val bts = makeButtons(stype.name, user.chatId(), tf)
                             if (bts.isEmpty()) {
-                                emtyListMsg(bot, update)
+                                emtyListMsg(bot, user)
                             } else {
                                 listButtons(
                                     bts.chunked(4),
                                     bot,
-                                    update.chatId(),
-                                    MsgLocalizer.Companies.toLocal(update.langCode())
+                                    user.chatId(),
+                                    MsgLocalizer.Companies.toLocal(user.langCode())
                                 )
                             }
                         })
@@ -253,7 +254,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
         }
     }
 
-    private fun emtyListMsg(bot: Bot, update: Update) {
+    private fun emtyListMsg(bot: Bot, update: User) {
         bot.sendMessage(
             chatId = update.chatId(),
             text = "Ваш список символов пуст, используйте *Добавить символ* меню",

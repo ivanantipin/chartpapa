@@ -1,18 +1,15 @@
 package com.firelib.techbot.tdline
 
-import com.firelib.techbot.breachevent.BreachType
-import com.firelib.techbot.*
-import com.firelib.techbot.breachevent.BreachEvent
+import com.firelib.techbot.SignalGenerator
+import com.firelib.techbot.SignalType
+import com.firelib.techbot.TrendsCreator
 import com.firelib.techbot.breachevent.BreachEventKey
-import com.firelib.techbot.breachevent.BreachEvents
-import com.firelib.techbot.chart.ChartService.post
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.domain.InstrId
-import firelib.core.misc.atMoscow
-import firelib.finam.timeFormatter
+import firelib.core.domain.Ohlc
 import java.time.Instant
 
 object TdLineSignals : SignalGenerator {
@@ -25,29 +22,24 @@ object TdLineSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         window: Int,
-        existing: Set<BreachEventKey>,
+        lastSignalTime: Instant,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
-    ): List<BreachEvent> {
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
+        ohlcs: List<Ohlc>
+    ): List<Pair<BreachEventKey, HOptions>> {
+        val targetOhlcs = ohlcs
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
 
         return lines.filter { it.intersectPoint != null && it.intersectPoint!!.first >= targetOhlcs.size - window }
             .groupBy {
                 val endTime = targetOhlcs[it.intersectPoint!!.first].endTime
-                BreachEventKey(instr.id, tf, endTime.toEpochMilli(), BreachType.TREND_LINE)
-            }.filter { !existing.contains(it.key) }.map {
+                BreachEventKey(instr.id, tf, endTime.toEpochMilli(), SignalType.TREND_LINE)
+            }.filter { it.key.eventTimeMs > lastSignalTime.toEpochMilli() }
+            .map {
                 val key = it.key
-                val fileName = BreachEvents.makeSnapFileName(
-                    BreachType.TREND_LINE.name, instr.id, tf, it.key.eventTimeMs
-                )
-
-                val time = timeFormatter.format(Instant.ofEpochMilli(it.key.eventTimeMs).atMoscow())
                 val title = "Signal: ${makeTitle(tf, instr, settings)}"
-                val img = post(TrendLinesRenderer.makeTrendLines(targetOhlcs, title, it.value))
-                BotHelper.saveFile(img, fileName)
-                BreachEvent(key, fileName)
+                val options = TrendLinesRenderer.makeTrendLines(targetOhlcs, title, it.value)
+                key to options
             }
     }
 
@@ -55,9 +47,9 @@ object TdLineSignals : SignalGenerator {
         instr: InstrId,
         tf: TimeFrame,
         settings: Map<String, String>,
-        techBotApp: TechbotApp
+        ohlcs: List<Ohlc>
     ): HOptions {
-        val targetOhlcs = techBotApp.ohlcService().getOhlcsForTf(instr, tf.interval)
+        val targetOhlcs = ohlcs
         val conf = BotConfig.getConf(instr, tf)
         val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
         return TrendLinesRenderer.makeTrendLines(targetOhlcs, makeTitle(tf, instr, settings), lines)

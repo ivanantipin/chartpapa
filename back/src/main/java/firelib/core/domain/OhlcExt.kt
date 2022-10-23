@@ -14,7 +14,7 @@ fun Ohlc.ret(): Double = (close - open) / open
 fun Ohlc.retAbs(): Double = (close - open)
 fun Ohlc.isInRange(vv: Double): Boolean = high > vv && vv > low
 fun Ohlc.merge(ohlc: Ohlc): Ohlc {
-    return Ohlc(ohlc.endTime, open,
+    return Ohlc(this.endTime, open,
             Math.max(high, ohlc.high),
             Math.min(low, ohlc.low),
             ohlc.close, volume = ohlc.volume + volume, interpolated = !(!this.interpolated  || !ohlc.interpolated)

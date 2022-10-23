@@ -5,6 +5,7 @@ import com.firelib.techbot.MsgLocalizer
 import com.firelib.techbot.command.Cmd
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 
 class MenuItemButtons(
     val name: MsgLocalizer,
@@ -28,7 +29,7 @@ class MenuItemButtons(
         buttons += StaticButtonParent(chName, Cmd(getCmdName()), buttonTitle).apply(aa)
     }
 
-    fun addActionButton(buttonName: String, action: (bot: Bot, update: Update) -> Unit) {
+    fun addActionButton(buttonName: String, action: (bot: Bot, update: User) -> Unit) {
         buttons += ActionButton(buttonName, Cmd(getCmdName()), action)
     }
 

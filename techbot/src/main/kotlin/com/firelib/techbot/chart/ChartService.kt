@@ -8,7 +8,7 @@ import kotlinx.coroutines.runBlocking
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
-object ChartService {
+object ChartService : IChartService {
     val client = HttpClient()
 
     val executor = Executors.newSingleThreadExecutor()
@@ -32,7 +32,7 @@ object ChartService {
         }).get()
     }
 
-    fun post(options: HOptions, globalOptions: Map<String, *>? = null, chartType: String = "StockChart"): ByteArray {
+    override fun post(options: HOptions, globalOptions: Map<String, *>?, chartType: String): ByteArray {
         val optJson = JsonHelper.toStringPretty(
             HiChartRequest(
                 async = true,

@@ -5,11 +5,13 @@ import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.getId
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
+import com.firelib.techbot.menu.userId
 import com.firelib.techbot.staticdata.InstrumentsService
 import com.firelib.techbot.subscriptions.SubscriptionService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 
 class UnsubscribeHandler(val staticDataService: InstrumentsService, val subscriptionService: SubscriptionService) :
     CommandHandler {
@@ -21,13 +23,12 @@ class UnsubscribeHandler(val staticDataService: InstrumentsService, val subscrip
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, update: Update) {
+    override fun handle(cmd: Cmd, bot: Bot, user: User) {
         val instrId = cmd.instr(staticDataService)
-        val uid = update.chatId()
-        subscriptionService.deleteSubscription(UserId(uid.getId()), instrId)
+        subscriptionService.deleteSubscription(user.userId(), instrId)
         bot.sendMessage(
-            chatId = uid,
-            text = MsgLocalizer.SubscrptionRemoved.toLocal(update.langCode()) + instrId.code,
+            chatId = user.chatId(),
+            text = MsgLocalizer.SubscrptionRemoved.toLocal(user.langCode()) + instrId.code,
             parseMode = ParseMode.MARKDOWN
         )
     }

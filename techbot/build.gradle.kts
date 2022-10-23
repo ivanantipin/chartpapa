@@ -22,8 +22,10 @@ dependencies {
     implementation ( "org.springframework:spring-web:5.1.9.RELEASE")
     implementation ("org.xerial:sqlite-jdbc:${Versions.sqlite}")
     implementation (project(":back"))
+    // https://mvnrepository.com/artifact/io.mockk/mockk
     implementation ("org.jetbrains.exposed:exposed-core:${Versions.exposed_version}")
     implementation ("org.jetbrains.exposed:exposed-dao:${Versions.exposed_version}")
     implementation ("org.jetbrains.exposed:exposed-jdbc:${Versions.exposed_version}")
     testImplementation("junit:junit:4.13")
+    testImplementation("io.mockk:mockk:1.13.2")
 }

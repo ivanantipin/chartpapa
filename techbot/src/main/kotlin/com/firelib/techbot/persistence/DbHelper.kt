@@ -1,8 +1,8 @@
 package com.firelib.techbot.persistence
 
 import com.firelib.techbot.*
+import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.breachevent.BreachEvents
-import com.firelib.techbot.command.CacheTable
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.staticdata.Instruments
@@ -15,7 +15,6 @@ import com.github.kotlintelegrambot.entities.User
 import firelib.core.misc.JsonHelper
 import firelib.core.store.GlobalConstants
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SchemaUtils.withDataBaseLock
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Path
@@ -29,13 +28,13 @@ object DbHelper {
     /**
      * sinse sqlite can not be updated by concurrent threads
      */
-    val updateExecutor: ExecutorService = Executors.newSingleThreadExecutor {
-        Thread(it).apply {
-            name = "dbExecutor"
-        }
-    }
+    val updateExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     val resultExecutor = Executors.newFixedThreadPool(10)
+
+    fun initDefaultDb() {
+        initDatabase(GlobalConstants.metaDb.toAbsolutePath())
+    }
 
     fun initDatabase(staticFile: Path) {
         TransactionManager.defaultDatabase = Database.connect(
@@ -73,6 +72,13 @@ object DbHelper {
 
         transaction {
 
+            try {
+                exec("alter table breachevents drop column photo_file");
+            }catch (e : Exception){
+                mainLogger.info("not dropping column probably already dropped")
+            }
+
+
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(Users)
             SchemaUtils.createMissingTablesAndColumns(Users)
@@ -85,6 +91,7 @@ object DbHelper {
 
             SchemaUtils.create(BreachEvents)
             SchemaUtils.createMissingTablesAndColumns(BreachEvents)
+
 
             SchemaUtils.create(CommandsLog)
             SchemaUtils.createMissingTablesAndColumns(CommandsLog)
@@ -143,6 +150,26 @@ object DbHelper {
             )
             CompletableFuture.supplyAsync({ f.get() }, resultExecutor)
         }
+    }
+
+    fun getLatestBreachEvents(): List<BreachEventKey> {
+        val sql = "select ticker, timeframe, event_type, max(event_time_ms) maxTime from breachevents where event_time_ms > ? group by ticker, timeframe, event_type "
+        val ret = mutableListOf<BreachEventKey>()
+
+        transaction {
+            exec(sql, listOf(LongColumnType() to System.currentTimeMillis() - 10 * 24 * 3600_000L)) { rs ->
+                while (rs.next()) {
+                    ret.add(
+                        BreachEventKey(rs.getString("ticker"),
+                            TimeFrame.valueOf(rs.getString("timeframe")),
+                            rs.getLong("maxTime"),
+                            SignalType.valueOf(rs.getString("event_Type")))
+                    )
+                }
+            }
+
+        }
+        return ret
     }
 
     fun getNotifyGroups(): Map<NotifyGroup, List<UserId>> {
@@ -246,5 +273,7 @@ object DbHelper {
 fun main() {
     DbHelper.initDatabase(GlobalConstants.metaDb.toAbsolutePath())
 
-    DbHelper.getNotifyGroups().forEach { println(it) }
+    DbHelper.getLatestBreachEvents().forEach {
+        println(it)
+    }
 }

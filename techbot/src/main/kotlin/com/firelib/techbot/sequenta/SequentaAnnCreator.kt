@@ -9,8 +9,8 @@ import com.funstat.domain.HLine
 import firelib.core.domain.Ohlc
 import firelib.core.domain.Side
 import firelib.indicators.sequenta.Sequenta
-import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.SequentaSignalType
+import firelib.indicators.sequenta.Signal
 import firelib.indicators.sequenta.calcStop
 import java.text.DecimalFormat
 import java.util.concurrent.atomic.AtomicInteger

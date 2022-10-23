@@ -1,14 +1,13 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.MsgLocalizer
-import com.firelib.techbot.menu.fromUser
+import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
+import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.persistence.TimeFrames
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
-import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -23,19 +22,16 @@ class TimeFrameHandler : CommandHandler {
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, update: Update) {
+    override fun handle(cmd: Cmd, bot: Bot, user: User) {
         val timeFrame = cmd.opts["tf"]!!
-        val fromUser = update.fromUser()
 
-        val uid = fromUser.id
-
-        DbHelper.ensureExist(fromUser)
+        DbHelper.ensureExist(user)
 
         DbHelper.updateDatabase("update timeframes") {
-            if (TimeFrames.select { TimeFrames.user eq uid and (TimeFrames.tf eq timeFrame) }
+            if (TimeFrames.select { TimeFrames.user eq user.id and (TimeFrames.tf eq timeFrame) }
                     .empty()) {
                 TimeFrames.insert {
-                    it[user] = uid
+                    it[this.user] = user.id
                     it[tf] = timeFrame
                 }
                 true
@@ -45,8 +41,8 @@ class TimeFrameHandler : CommandHandler {
         }.thenAccept { flag ->
             if (flag) {
                 bot.sendMessage(
-                    chatId = ChatId.fromId(fromUser.id),
-                    text = MsgLocalizer.TimeFrameAdded.toLocal(update.langCode()),
+                    chatId = user.chatId(),
+                    text = MsgLocalizer.TimeFrameAdded.toLocal(user.langCode()),
                     parseMode = ParseMode.MARKDOWN
                 )
             }

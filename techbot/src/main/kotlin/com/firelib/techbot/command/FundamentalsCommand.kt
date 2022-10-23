@@ -12,6 +12,7 @@ import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.staticdata.InstrumentsService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.store.MdStorageImpl
 import java.io.File
@@ -102,7 +103,7 @@ class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHa
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, update: Update) {
+    override fun handle(cmd: Cmd, bot: Bot, update: User) {
 
         val instrId = cmd.instr(staticDataService)
 
