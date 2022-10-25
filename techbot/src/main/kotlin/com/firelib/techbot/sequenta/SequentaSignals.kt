@@ -19,15 +19,14 @@ object SequentaSignals : SignalGenerator {
     override fun checkSignals(
         instr: InstrId,
         tf: TimeFrame,
-        window: Int,
-        lastSignalTime : Instant,
+        threshold : Instant,
         settings: Map<String, String>,
         ohlcs : List<Ohlc>
-    ): List<Pair<BreachEventKey,HOptions>> {
+    ): List<Pair<Instant,HOptions>> {
         val signals = SequentaAnnCreator.genSignals(ohlcs)
 
         val ret = signals.
-            filter { it.type == SequentaSignalType.Signal && it.idx > ohlcs.size - window && ohlcs[it.idx].endTime > lastSignalTime}
+            filter { it.type == SequentaSignalType.Signal && ohlcs[it.idx].endTime > threshold}
             .map {
             val time = ohlcs[it.idx].endTime
             val key = BreachEventKey(instr.id, tf, time.toEpochMilli(), SignalType.DEMARK)
@@ -38,7 +37,7 @@ object SequentaSignals : SignalGenerator {
             val signal = ret.last()
             val opts = SequentaAnnCreator.makeSequentaOpts(SequentaAnnCreator.createAnnotations(signals, ohlcs), ohlcs,
                 "Signal: ${makeTitle(tf, instr, settings)}")
-            return listOf(signal.first to opts)
+            return listOf(Instant.ofEpochMilli(signal.first.eventTimeMs) to opts)
         }
 
         return emptyList()

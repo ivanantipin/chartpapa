@@ -3,6 +3,7 @@ package com.firelib.techbot.staticdata
 import com.firelib.techbot.BotInterface
 import com.firelib.techbot.TechbotApp
 import com.firelib.techbot.command.Cmd
+import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.persistence.DbHelper
 import com.github.kotlintelegrambot.Bot
@@ -37,7 +38,7 @@ class TdstTest {
 
         val instrIdDao = InstrIdDao()
 
-        val instrId = InstrId(id = "KLXE_XNAS", code = "KLXE", market = "XNAS", source = SourceName.POLIGON.name)
+        val instrId = InstrId(id = "EQT_XNYS", code = "EQT", market = "XNYS", source = SourceName.POLIGON.name)
 
         instrIdDao.addAll(listOf(instrId))
 
@@ -53,7 +54,16 @@ class TdstTest {
 
         val mockedApp = MockedApp()
 
-        mockedApp.subscribeHandler().handle(Cmd("", mapOf("id" to instrId.id)), bot, User(0L, firstName = "Ivan", lastName = "Antipin", isBot = false))
+        val user = User(0L, firstName = "Ivan", lastName = "Antipin", isBot = false)
+
+        mockedApp.subscribeHandler().handle(Cmd("", mapOf("id" to instrId.id)), bot, user)
+
+        TimeFrame.values().forEach {
+            if(it != TimeFrame.H4){
+                mockedApp.removeTfHandler().handle(Cmd("", mapOf("tf" to it.name)), bot, user)
+            }
+        }
+
 
         val poligon = mockk<HistoricalSource>()
 
@@ -61,6 +71,7 @@ class TdstTest {
 
         every { sourceProvider.get(SourceName.POLIGON) } returns poligon
 
+        mockedApp.getUserNotifier().check(2)
         mockedApp.getUserNotifier().check(2)
 
  //       verify(exactly = 1) {  botInterface.sendBreachEvent(any(), any(), listOf(UserId(0))) }

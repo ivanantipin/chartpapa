@@ -1,11 +1,9 @@
 package com.firelib.techbot
 
-import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.persistence.Settings
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
@@ -22,11 +20,10 @@ interface SignalGenerator {
     fun checkSignals(
         instr: InstrId,
         tf: TimeFrame,
-        window: Int,
-        lastSignalTime : Instant,
+        threshold : Instant,
         settings: Map<String, String>,
         ohlcs : List<Ohlc>
-    ): List<Pair<BreachEventKey, HOptions>>
+    ): List<Pair<Instant, HOptions>>
 
     fun drawPicture(instr: InstrId, tf: TimeFrame, settings: Map<String, String>, ohlcs : List<Ohlc>): HOptions
 

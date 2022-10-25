@@ -3,7 +3,6 @@ package com.firelib.techbot.tdline
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.SignalType
 import com.firelib.techbot.TrendsCreator
-import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.chart.TrendLinesRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
@@ -21,24 +20,22 @@ object TdLineSignals : SignalGenerator {
     override fun checkSignals(
         instr: InstrId,
         tf: TimeFrame,
-        window: Int,
-        lastSignalTime: Instant,
+        threshold: Instant,
         settings: Map<String, String>,
         ohlcs: List<Ohlc>
-    ): List<Pair<BreachEventKey, HOptions>> {
-        val targetOhlcs = ohlcs
+    ): List<Pair<Instant, HOptions>> {
         val conf = BotConfig.getConf(instr, tf)
-        val lines = TrendsCreator.findRegresLines(targetOhlcs, conf)
+        val lines = TrendsCreator.findRegresLines(ohlcs, conf)
 
-        return lines.filter { it.intersectPoint != null && it.intersectPoint!!.first >= targetOhlcs.size - window }
+        return lines.filter { it.intersectPoint != null }
             .groupBy {
-                val endTime = targetOhlcs[it.intersectPoint!!.first].endTime
-                BreachEventKey(instr.id, tf, endTime.toEpochMilli(), SignalType.TREND_LINE)
-            }.filter { it.key.eventTimeMs > lastSignalTime.toEpochMilli() }
+                val endTime = ohlcs[it.intersectPoint!!.first].endTime
+                endTime
+            }.filter { it.key.toEpochMilli() > threshold.toEpochMilli() }
             .map {
                 val key = it.key
                 val title = "Signal: ${makeTitle(tf, instr, settings)}"
-                val options = TrendLinesRenderer.makeTrendLines(targetOhlcs, title, it.value)
+                val options = TrendLinesRenderer.makeTrendLines(ohlcs, title, it.value)
                 key to options
             }
     }

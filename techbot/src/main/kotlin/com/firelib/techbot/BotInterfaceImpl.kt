@@ -8,7 +8,7 @@ import com.github.kotlintelegrambot.entities.TelegramFile
 
 class BotInterfaceImpl(val bot: Bot) : BotInterface {
 
-    override fun sendBreachEvent(be: BreachEventKey, img: ByteArray, users: List<UserId>) {
+    override fun sendBreachEvent(img: ByteArray, users: List<UserId>) {
         users.forEach { userId ->
             mainLogger.info("notifiying user ${userId}")
             val response = bot.sendPhoto(ChatId.fromId(userId.id), TelegramFile.ByByteArray(img))

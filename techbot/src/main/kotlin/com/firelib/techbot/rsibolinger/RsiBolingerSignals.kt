@@ -2,7 +2,6 @@ package com.firelib.techbot.rsibolinger
 
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.SignalType
-import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
@@ -84,11 +83,8 @@ object RsiBolingerSignals : SignalGenerator {
                 ), marker = HMarker(false), showInLegend = false, yAxis = 1, lineWidth = 0.5
             )
         }
-
         addRsiThreshold(25.0)
         addRsiThreshold(75.0)
-
-
 
         options.yAxis += HAxis(height = "30%", lineWidth = 1, offset = 10, opposite = false, top = "70%")
         options.series += HSeries(
@@ -129,28 +125,21 @@ object RsiBolingerSignals : SignalGenerator {
     override fun checkSignals(
         instr: InstrId,
         tf: TimeFrame,
-        window: Int,
-        lastSignalTime: Instant,
+        threshold: Instant,
         settings: Map<String, String>,
         ohlcs: List<Ohlc>
-    ): List<Pair<BreachEventKey, HOptions>> {
+    ): List<Pair<Instant, HOptions>> {
         val params = RsiBolingerParams.fromSettings(settings)
         val result = render(
             ohlcs, params, "Signal: ${makeTitle(tf, instr, settings)}"
         )
-        val suffix = "_${params.bolingerPeriod}_${params.rsiPeriod}_${params.rsiLow}_${params.rsiHigh}"
 
         if (result.signals.isNotEmpty()) {
             val last = result.signals.last()
             val time = ohlcs[last.first].endTime
-            if (time > lastSignalTime && time > ohlcs[window].endTime) {
+            if (time > threshold) {
                 return listOf(
-                    BreachEventKey(
-                        instr.id + suffix,
-                        tf,
-                        time.toEpochMilli(),
-                        SignalType.RSI_BOLINGER
-                    ) to result.options
+                    time to result.options
                 )
             }
         }

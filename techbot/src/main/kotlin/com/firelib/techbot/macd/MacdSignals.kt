@@ -2,14 +2,12 @@ package com.firelib.techbot.macd
 
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.SignalType
-import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.domain.*
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ParseMode
-import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
@@ -78,11 +76,10 @@ object MacdSignals : SignalGenerator {
     override fun checkSignals(
         instr: InstrId,
         tf: TimeFrame,
-        window: Int,
-        lastSignalTime: Instant,
+        threshold: Instant,
         settings: Map<String, String>,
         ohlcs : List<Ohlc>
-    ): List<Pair<BreachEventKey, HOptions>> {
+    ): List<Pair<Instant, HOptions>> {
 
         if (ohlcs.isEmpty()) {
             return emptyList()
@@ -99,8 +96,8 @@ object MacdSignals : SignalGenerator {
         if (result.signals.isNotEmpty()) {
             val lastSignal = result.signals.last()
             val time = ohlcs[lastSignal.first].endTime
-            if (time > lastSignalTime && time > ohlcs[ohlcs.size - window].endTime ) {
-                return listOf(BreachEventKey(instr.id + suffix, tf, time.toEpochMilli(), SignalType.MACD) to result.options)
+            if (time > threshold ) {
+                return listOf(time to result.options)
             }
         }
         return emptyList()

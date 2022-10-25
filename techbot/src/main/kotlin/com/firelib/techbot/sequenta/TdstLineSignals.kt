@@ -2,7 +2,6 @@ package com.firelib.techbot.sequenta
 
 import com.firelib.techbot.SignalGenerator
 import com.firelib.techbot.SignalType
-import com.firelib.techbot.breachevent.BreachEventKey
 import com.firelib.techbot.chart.HorizontalLevelsRenderer
 import com.firelib.techbot.chart.domain.HOptions
 import com.firelib.techbot.domain.TimeFrame
@@ -63,18 +62,17 @@ object TdstLineSignals : SignalGenerator {
         return TdstResult(levels.map { SR(it.getStart(), it.getEnd(), it.tdst) }, signals)
     }
 
-    override fun signalType(): com.firelib.techbot.SignalType {
-        return com.firelib.techbot.SignalType.TDST
+    override fun signalType(): SignalType {
+        return SignalType.TDST
     }
 
     override fun checkSignals(
         instr: InstrId,
         tf: TimeFrame,
-        window: Int,
-        lastSignalTime: Instant,
+        threshold: Instant,
         settings: Map<String, String>,
         ohlcs: List<Ohlc>
-    ): List<Pair<BreachEventKey,HOptions>> {
+    ): List<Pair<Instant,HOptions>> {
 
         val targetOhlcs = ohlcs
 
@@ -86,12 +84,10 @@ object TdstLineSignals : SignalGenerator {
         val result = genSignals(targetOhlcs)
         val title = makeTitle(tf, instr, settings)
         val options = HorizontalLevelsRenderer().levelBreaches(targetOhlcs, title, result.signals, result.lines)
-        val threshold = targetOhlcs[targetOhlcs.size - window - 1].endTime.toEpochMilli()
         val newSignals = result.signals
-            .filter { it.time >= threshold && it.time > lastSignalTime.toEpochMilli() }
+            .filter { it.time > threshold.toEpochMilli() }
             .lastOrNull() ?: return emptyList()
-        val key = BreachEventKey(instr.id, tf,  newSignals.time, SignalType.TDST)
-        return listOf(key to options)
+        return listOf(Instant.ofEpochMilli(newSignals.time) to options)
     }
 
     override fun drawPicture(

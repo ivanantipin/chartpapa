@@ -84,30 +84,35 @@ class UsersNotifier(val botInterface: BotInterface,
 
         val instr = instrumentsService.id2inst[instrId]!!
 
+        val ohlcs = ohlcsService.getOhlcsForTf(instr, timeFrame.interval)
+
+        var threshold = ohlcs[ohlcs.size - breachWindow].endTime
+        if(threshold < lastEvent){
+           threshold = lastEvent
+        }
+
         val breaches = group.signalType.signalGenerator.checkSignals(
             instr,
             timeFrame,
-            breachWindow,
-            lastEvent,
+            threshold,
             group.settings,
-            ohlcsService.getOhlcsForTf(instr, timeFrame.interval)
+            ohlcs
         )
 
-        val bes = breaches.map {
-            val img = chartService.post(it.second)
-            botInterface.sendBreachEvent(it.first, img, users)
+        val bes = breaches.filter { it.first > threshold }.map {
+            botInterface.sendBreachEvent(chartService.post(it.second), users)
             it.first
         }
 
         if (bes.isNotEmpty()) {
             DbHelper.updateDatabase("insert breaches ${breaches.size}") {
                 BreachEvents.batchInsert(bes) {
-                    this[BreachEvents.instrId] = it.instrId
-                    this[BreachEvents.timeframe] = it.tf.name
-                    this[BreachEvents.eventTimeMs] = it.eventTimeMs
-                    this[BreachEvents.eventType] = it.type.name
+                    this[BreachEvents.instrId] = group.instrumentId
+                    this[BreachEvents.timeframe] = group.timeFrame.name
+                    this[BreachEvents.eventTimeMs] = it.toEpochMilli()
+                    this[BreachEvents.eventType] = group.signalType.name
                 }
-            }
+            }.get()
         }
     }
 

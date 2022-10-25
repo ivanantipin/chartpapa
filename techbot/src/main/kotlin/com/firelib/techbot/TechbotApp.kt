@@ -99,6 +99,13 @@ open class TechbotApp {
         }
     }
 
+    open fun removeTfHandler() : RemoveTimeFrameHandler{
+        return services.get("remove tf handler"){
+            RemoveTimeFrameHandler()
+        }
+    }
+
+
 
     fun menuRegistry(): MenuRegistry {
         return services.get("menuReg") {
@@ -114,7 +121,7 @@ open class TechbotApp {
             menuReg.commandData[TimeFrameHandler.name] = TimeFrameHandler()::handle
             menuReg.commandData[SignalTypeHandler.name] = signalTypeHandler()::handle
             menuReg.commandData[RemoveSignalTypeHandler.name] = RemoveSignalTypeHandler()::handle
-            menuReg.commandData[RemoveTimeFrameHandler.name] = RemoveTimeFrameHandler()::handle
+            menuReg.commandData[RemoveTimeFrameHandler.name] = removeTfHandler()::handle
             menuReg.commandData[LanguageChangeHandler.name] = LanguageChangeHandler()::handle
             menuReg.commandData[FundamentalsCommand.name] = FundamentalsCommand(instrumentsService())::handle
 
