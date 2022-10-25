@@ -11,6 +11,10 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import firelib.core.misc.JsonHelper
+import io.ktor.util.*
+import org.springframework.util.Base64Utils
+import org.springframework.util.DigestUtils
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
 
@@ -21,13 +25,15 @@ class MenuRegistry(val techBotApp: TechbotApp) {
 
     companion object {
 
+        val md5Serializer = Md5Serializer()
+
         fun listButtons(buttons: List<List<BotButton>>, bot: Bot, chatId: ChatId, title: String) {
             val keyboard = InlineKeyboardMarkup.create(
                 buttons.map {
                     it.map { but ->
                         InlineKeyboardButton.CallbackData(
                             text = but.name,
-                            callbackData = JsonHelper.toJsonString(but.data)
+                            callbackData = md5Serializer.serialize(but.data)
                         )
                     }
                 })
@@ -72,13 +78,17 @@ class MenuRegistry(val techBotApp: TechbotApp) {
         mainLogger.info("pool size is ${pool.poolSize} active count is ${pool.activeCount}")
 
         pool.execute {
-            val command = JsonHelper.fromJson<Cmd>(data)
+            val command = md5Serializer.deserialize<Cmd>(data)
             Misc.measureAndLogTime("processing command ${command}", {
                         try {
-                            commandData.get(command.handlerName)?.invoke(command, bot, update.fromUser())
+                            val handler = commandData.get(command.handlerName)
+                            if(handler == null){
+                                mainLogger.info("nothing found for command ${command}")
+                            }
+                            handler?.invoke(command, bot, update.fromUser())
                         } catch (e: Exception) {
+                            mainLogger.error("failed to process data ${data}", e)
                             bot.sendMessage(update.chatId(), "error happened ${e.message}", parseMode = ParseMode.MARKDOWN)
-                            e.printStackTrace()
                         }
                     })
         }
@@ -236,6 +246,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                     TimeFrame.values().forEach { tf ->
                         addActionButton(tf.name, { bot, user ->
                             val bts = makeButtons(stype.name, user.chatId(), tf)
+                            mainLogger.info("listing companies for user ${user} buttons size is ${bts.size}")
                             if (bts.isEmpty()) {
                                 emtyListMsg(bot, user)
                             } else {
@@ -264,5 +275,22 @@ class MenuRegistry(val techBotApp: TechbotApp) {
         menuActions[MsgLocalizer.SETTINGS]!!(bot, update)
     }
 
+}
+
+class Md5Serializer{
+
+    val data = ConcurrentHashMap<String, Any>()
+
+    fun serialize(obj : Any) : String{
+        val bytes = JsonHelper.toJsonBytes(obj)
+        val id = Base64Utils.encodeToString(DigestUtils.md5Digest(bytes))
+        data.put(id, obj)
+        return id
+    }
+
+    inline fun <reified T> deserialize(id : String) : T{
+        return data.get(id)!! as T
+    }
 
 }
+
