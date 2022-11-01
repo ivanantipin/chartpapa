@@ -22,18 +22,18 @@ class RemoveSignalTypeHandler : CommandHandler {
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, user: User) {
+    override suspend fun handle(cmd: Cmd, bot: Bot, user: User) {
         val signalType = cmd.opts[SIGNAL_TYPE_ATTRIBUTE]!!
         DbHelper.ensureExist(user)
         DbHelper.updateDatabase("update signal type") {
             SignalTypes.deleteWhere { SignalTypes.user eq user.id and (SignalTypes.signalType eq signalType) }
-        }.thenAccept({
-            bot.sendMessage(
-                chatId = user.chatId(),
-                text = MsgLocalizer.SubscrptionRemoved.toLocal(user.langCode()) + signalType,
-                parseMode = ParseMode.HTML
-            )
-        })
+        }
+
+        bot.sendMessage(
+            chatId = user.chatId(),
+            text = MsgLocalizer.SubscrptionRemoved.toLocal(user.langCode()) + signalType,
+            parseMode = ParseMode.HTML
+        )
 
     }
 }

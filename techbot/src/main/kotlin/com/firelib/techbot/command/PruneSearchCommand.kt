@@ -17,7 +17,7 @@ class PruneSearchCommand(val instrumentService : InstrumentsService, val subscri
 
     }
 
-    override fun handle(cmd: List<String>, bot: Bot, update: Update) {
+    override suspend fun handle(cmd: List<String>, bot: Bot, update: Update) {
         val liveInstruments = subscriptionService.liveInstruments().toSet()
         val filter = instrumentService.id2inst.values.filter {
             it.code.contains(cmd[1], ignoreCase = true) || it.name.contains(

@@ -56,7 +56,7 @@ object SequentaAnnCreator {
         }
     }
 
-    fun drawSequenta(ann: SequentaAnnnotations, hours: List<Ohlc>, title: String): ByteArray {
+    suspend fun drawSequenta(ann: SequentaAnnnotations, hours: List<Ohlc>, title: String): ByteArray {
         return ChartService.post(makeSequentaOpts(ann, hours, title))
     }
 

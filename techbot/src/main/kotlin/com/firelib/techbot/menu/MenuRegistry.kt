@@ -11,17 +11,18 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import firelib.core.misc.JsonHelper
-import io.ktor.util.*
+import firelib.poligon.PoligonSourceAsync
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.springframework.util.Base64Utils
 import org.springframework.util.DigestUtils
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadPoolExecutor
 
 class MenuRegistry(val techBotApp: TechbotApp) {
-    val menuActions = mutableMapOf<MsgLocalizer, (Bot, User) -> Unit>()
+    val menuActions = mutableMapOf<MsgLocalizer, suspend (Bot, User) -> Unit>()
 
-    val commandData = mutableMapOf<String, (Cmd, Bot, User) -> Unit>()
+    val commandData = mutableMapOf<String, suspend (Cmd, Bot, User) -> Unit>()
 
     companion object {
 
@@ -68,29 +69,23 @@ class MenuRegistry(val techBotApp: TechbotApp) {
     }
 
 
-    val pool: ThreadPoolExecutor = Executors.newCachedThreadPool({
-        Thread(it).apply {
-            isDaemon = true
-        }
-    }) as ThreadPoolExecutor
+    val scope = CoroutineScope(Dispatchers.Default)
 
     fun processData(data: String, bot: Bot, update: Update) {
-        mainLogger.info("pool size is ${pool.poolSize} active count is ${pool.activeCount}")
-
-        pool.execute {
+        scope.launch {
             val command = md5Serializer.deserialize<Cmd>(data)
             Misc.measureAndLogTime("processing command ${command}", {
-                        try {
-                            val handler = commandData.get(command.handlerName)
-                            if(handler == null){
-                                mainLogger.info("nothing found for command ${command}")
-                            }
-                            handler?.invoke(command, bot, update.fromUser())
-                        } catch (e: Exception) {
-                            mainLogger.error("failed to process data ${data}", e)
-                            bot.sendMessage(update.chatId(), "error happened ${e.message}", parseMode = ParseMode.MARKDOWN)
-                        }
-                    })
+                try {
+                    val handler = commandData.get(command.handlerName)
+                    if(handler == null){
+                        mainLogger.info("nothing found for command ${command}")
+                    }
+                    handler?.invoke(command, bot, update.fromUser())
+                } catch (e: Exception) {
+                    mainLogger.error("failed to process data ${data}", e)
+                    bot.sendMessage(update.chatId(), "error happened ${e.message}", parseMode = ParseMode.MARKDOWN)
+                }
+            })
         }
     }
 
@@ -244,7 +239,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                 addButtonMenu(stype.msgLocalizer) {
                     title = { lang -> MsgLocalizer.ChooseTfFor.toLocal(lang) + stype.msgLocalizer.toLocal(lang) }
                     TimeFrame.values().forEach { tf ->
-                        addActionButton(tf.name, { bot, user ->
+                        addActionButton(tf.name,  { bot, user ->
                             val bts = makeButtons(stype.name, user.chatId(), tf)
                             mainLogger.info("listing companies for user ${user} buttons size is ${bts.size}")
                             if (bts.isEmpty()) {
@@ -265,7 +260,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
         }
     }
 
-    private fun emtyListMsg(bot: Bot, update: User) {
+    private suspend fun emtyListMsg(bot: Bot, update: User) {
         bot.sendMessage(
             chatId = update.chatId(),
             text = "Ваш список символов пуст, используйте *Добавить символ* меню",

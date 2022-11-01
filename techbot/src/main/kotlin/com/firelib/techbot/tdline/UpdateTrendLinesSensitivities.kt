@@ -8,6 +8,7 @@ import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.subscriptions.SubscriptionService
 import firelib.core.domain.InstrId
 import firelib.core.domain.Ohlc
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -15,28 +16,30 @@ import java.util.concurrent.Future
 
 object UpdateTrendLinesSensitivities {
 
-    fun updateSensitivities(subscriptionService: SubscriptionService, ohlcsService: OhlcsService) {
+    suspend fun updateSensitivities(subscriptionService: SubscriptionService, ohlcsService: OhlcsService) {
         subscriptionService.liveInstruments().forEach { instr ->
-            updateSens(instr, ohlcsService).get()
+            updateSens(instr, ohlcsService)
         }
     }
 
-    fun updateSens(ticker: InstrId, ohlcsService: OhlcsService): Future<Unit> {
+    suspend fun updateSens(ticker: InstrId, ohlcsService: OhlcsService) {
 
         return DbHelper.updateDatabase("senses update ${ticker.code}") {
             SensitivityConfig.deleteWhere { SensitivityConfig.instrId eq ticker.id }
-            TimeFrame.values().forEach { timeFrame ->
-                val targetOhlcs = ohlcsService.getOhlcsForTf(ticker, timeFrame.interval)
+            runBlocking {
+                TimeFrame.values().forEach { timeFrame ->
+                    val targetOhlcs = ohlcsService.getOhlcsForTf(ticker, timeFrame.interval)
 
-                var updated = false
-                for (i in 7 downTo 2) {
-                    if (updateForOrder(targetOhlcs, ticker, timeFrame, i)) {
-                        updated = true
-                        break
+                    var updated = false
+                    for (i in 7 downTo 2) {
+                        if (updateForOrder(targetOhlcs, ticker, timeFrame, i)) {
+                            updated = true
+                            break
+                        }
                     }
-                }
-                if (!updated) {
-                    println("update senses : not found ${ticker}, ${timeFrame}")
+                    if (!updated) {
+                        println("update senses : not found ${ticker}, ${timeFrame}")
+                    }
                 }
             }
         }

@@ -20,9 +20,15 @@ class PruneCommandHandler(
         return "prune"
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, update: User) {
+    override suspend fun handle(cmd: Cmd, bot: Bot, update: User) {
         mainLogger.info("pruning ${cmd}")
         val instr = cmd.instr(instrumentsService)
+
+        bot.sendMessage(
+            chatId = update.chatId(),
+            text = "pruning ${instr}",
+            parseMode = ParseMode.MARKDOWN
+        )
         ohlcsService.prune(instr)
         bot.sendMessage(
             chatId = update.chatId(),

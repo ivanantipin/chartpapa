@@ -19,7 +19,7 @@ interface TextCommand{
         bot: Bot,
         userId: Long
     )
-    fun handle(cmd: List<String>, bot: Bot, update: Update)
+    suspend fun handle(cmd: List<String>, bot: Bot, update: Update)
 }
 
 class SettingsCommand : TextCommand{
@@ -49,7 +49,7 @@ class SettingsCommand : TextCommand{
         return "/set"
     }
 
-    override fun handle(cmd: List<String>, bot: Bot, update: Update) {
+    override suspend fun handle(cmd: List<String>, bot: Bot, update: Update) {
 
         val fromUser = update.fromUser()
 
@@ -84,9 +84,8 @@ class SettingsCommand : TextCommand{
                 it[value] = settingsJson
             }
             recs > 0
-        }.thenAccept {
-            displaySettings(bot, fromUser.id)
         }
+        displaySettings(bot, fromUser.id)
     }
 
 }

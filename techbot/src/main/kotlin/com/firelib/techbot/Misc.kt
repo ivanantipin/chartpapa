@@ -1,8 +1,27 @@
 package com.firelib.techbot
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
 import java.lang.management.ManagementFactory
 
 object Misc{
+
+    suspend fun <T> Flow<T>.batchedCollect(size : Int = 1000, callback : suspend (List<T>)->Unit){
+        val buffer = mutableListOf<T>()
+
+        this.buffer(2000).collect{
+            buffer.add(it)
+            if(buffer.size >= size){
+                callback(buffer)
+                buffer.clear()
+            }
+        }
+        if(buffer.isNotEmpty()){
+            callback(buffer)
+        }
+    }
+
+
     inline fun <R> measureTime(block: () -> R): Pair<R, Long> {
         val start = System.currentTimeMillis()
         val answer = block()

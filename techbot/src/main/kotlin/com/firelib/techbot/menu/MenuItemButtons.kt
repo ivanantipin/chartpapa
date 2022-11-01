@@ -29,7 +29,7 @@ class MenuItemButtons(
         buttons += StaticButtonParent(chName, Cmd(getCmdName()), buttonTitle).apply(aa)
     }
 
-    fun addActionButton(buttonName: String, action: (bot: Bot, update: User) -> Unit) {
+    fun addActionButton(buttonName: String, action: suspend (bot: Bot, update: User) -> Unit) {
         buttons += ActionButton(buttonName, Cmd(getCmdName()), action)
     }
 

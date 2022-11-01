@@ -1,21 +1,17 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.BotHelper
-import com.firelib.techbot.breachevent.BreachEvents.makeSnapFileName
 import com.firelib.techbot.chart.ChartService
 import com.firelib.techbot.chart.GenericCharter
 import com.firelib.techbot.chart.RenderUtils
 import com.firelib.techbot.chart.SeriesUX
-import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.mainLogger
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.staticdata.InstrumentsService
 import com.github.kotlintelegrambot.Bot
-import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.TelegramFile
 import com.github.kotlintelegrambot.entities.User
 import firelib.core.domain.InstrId
 import firelib.core.store.MdStorageImpl
-import java.io.File
 
 class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHandler {
 
@@ -44,8 +40,8 @@ class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHa
         "exchange_gains_losses" to "blue"
     )
 
-    val actions = mapOf(
-        "balanceSheet" to { instrId: InstrId ->
+    val actions = mapOf<String, suspend (InstrId) -> ByteArray>(
+        "balanceSheet" to { instrId ->
             val fields = listOf(
                 "equity_attributable_to_parent",
                 "equity_attributable_to_noncontrolling_interest",
@@ -103,26 +99,14 @@ class FundamentalsCommand(val staticDataService: InstrumentsService) : CommandHa
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, update: User) {
-
+    override suspend fun handle(cmd: Cmd, bot: Bot, user: User) {
         val instrId = cmd.instr(staticDataService)
-
         actions.forEach({ ee ->
             try {
-                val bytes = ee.value(instrId)
-                val fileName = makeSnapFileName(
-                    ee.key,
-                    instrId.code,
-                    TimeFrame.D,
-                    System.currentTimeMillis()
-                )
-                BotHelper.saveFile(bytes, fileName)
-                bot.sendPhoto(chatId = update.chatId(), photo = File(fileName))
+                bot.sendPhoto(chatId = user.chatId(), photo = TelegramFile.ByByteArray(ee.value(instrId)))
             } catch (e: Exception) {
                 mainLogger.error("failed to execute fundamental action ${ee.key}  for cmd ${cmd}", e)
             }
-
         })
-
     }
 }

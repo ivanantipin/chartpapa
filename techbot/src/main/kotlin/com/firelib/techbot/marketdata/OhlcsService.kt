@@ -8,6 +8,7 @@ import firelib.core.domain.sourceEnum
 import firelib.core.misc.timeSequence
 import firelib.core.store.HistoricalSourceProvider
 import firelib.core.store.MdDaoContainer
+import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDateTime
@@ -25,55 +26,50 @@ class OhlcsService(
 
     val log = LoggerFactory.getLogger(javaClass)
 
-    val pool = Executors.newFixedThreadPool(5){
-        Thread(it)
-    }
+    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     val baseFlows = ConcurrentHashMap<InstrId, SeriesContainer>()
 
     fun start(){
-        Thread{
+        CoroutineScope(Dispatchers.Default).launch {
             updateTimeseries()
-            timeSequence(Instant.now(), Interval.Min10).forEach { _ ->
-                updateTimeseries()
-            }
-        }.start()
+            delay(60_000)
+        }
     }
 
-    fun updateTimeseries() {
+    suspend fun updateTimeseries() {
         baseFlows.values.map {
-            pool.submit {
-                try {
-                    it.sync()
-                }  catch (e : Exception){
-                   log.error("failed to update ${it.instrId}", e)
-                }
+            scope.async {
+                it.sync()
             }
-        }.forEach { it.get() }
+        }.forEach { it.await() }
     }
 
-    fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
+    suspend fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
         return initTimeframeIfNeeded(ticker).getOhlcForTimeframe(timeFrame)
     }
 
-    fun prune(instrId: InstrId){
+    suspend fun prune(instrId: InstrId){
         log.info("pruning ${instrId}")
         baseFlows.get(instrId)?.reset()
-        pool.submit{
+        scope.launch {
             baseFlows.get(instrId)?.sync()
         }
         log.info("sync scheduled ${instrId}")
     }
 
-    fun initTimeframeIfNeeded(ticker: InstrId): SeriesContainer {
+    suspend fun initTimeframeIfNeeded(ticker: InstrId): SeriesContainer {
+        var inited = false
         val persistFlow = baseFlows.computeIfAbsent(ticker, {
-            val ret = SeriesContainer(
+            inited = true
+            SeriesContainer(
                 daoProvider.getDao(ticker.sourceEnum(), Interval.Min10),
                 sourceProvider[ticker.sourceEnum()], ticker
             )
-            ret.sync()
-            ret
         })
+        if(inited){
+            persistFlow.sync()
+        }
         return persistFlow
     }
 }

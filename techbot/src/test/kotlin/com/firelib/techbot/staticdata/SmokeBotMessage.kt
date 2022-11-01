@@ -1,13 +1,20 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.command.SettingsCommand
+import com.firelib.techbot.persistence.ConfigService
+import com.firelib.techbot.persistence.DbHelper
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
 import com.github.kotlintelegrambot.dispatcher.text
+import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.ParseMode
 import com.github.kotlintelegrambot.logging.LogLevel
 
-fun main() {
+suspend fun main() {
+
+    DbHelper.initDefaultDb()
+    ConfigService.initSystemVars()
 
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
         mainLogger.error("unhandled exception thrown", throwable)
@@ -34,8 +41,6 @@ fun main() {
         }
 
     }
-
-    SettingsCommand().displaySettings(bot, 312778820L)
 }
 
 

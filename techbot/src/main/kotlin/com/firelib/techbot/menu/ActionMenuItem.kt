@@ -7,7 +7,7 @@ import com.github.kotlintelegrambot.entities.User
 
 class ActionMenuItem(
     val name: MsgLocalizer,
-    val action: ((bot: Bot, update: User) -> Unit)
+    val action: suspend  ((bot: Bot, update: User) -> Unit)
 ) : BotMenu {
 
     override fun name(): MsgLocalizer {

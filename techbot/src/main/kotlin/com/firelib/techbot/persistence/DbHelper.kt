@@ -18,10 +18,10 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Path
-import java.util.concurrent.Callable
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 object DbHelper {
 
@@ -30,20 +30,18 @@ object DbHelper {
      */
     val updateExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
-    val resultExecutor = Executors.newFixedThreadPool(10)
-
-    fun initDefaultDb() {
+    suspend fun initDefaultDb() {
         initDatabase(GlobalConstants.metaDb.toAbsolutePath())
     }
 
-    fun initDatabase(staticFile: Path) {
+    suspend fun initDatabase(staticFile: Path) {
         TransactionManager.defaultDatabase = Database.connect(
             "jdbc:sqlite:${staticFile}?journal_mode=WAL",
             driver = "org.sqlite.JDBC"
         )
 
 
-        fun populateSignalTypes() {
+        suspend fun populateSignalTypes() {
             updateDatabase("populate signal types") {
                 val allSignals: Map<UserId, List<SignalType>> = getSignalTypes()
                 Users.selectAll().forEach { userRow ->
@@ -74,7 +72,7 @@ object DbHelper {
 
             try {
                 exec("alter table breachevents drop column photo_file");
-            }catch (e : Exception){
+            } catch (e: Exception) {
                 mainLogger.info("not dropping column probably already dropped")
             }
 
@@ -119,9 +117,9 @@ object DbHelper {
 
     }
 
-    fun <T> updateDatabase(name: String, runBlock: () -> T): CompletableFuture<T> {
+    suspend fun <T> updateDatabase(name: String, runBlock: () -> T): T {
 
-        fun blockInTransaction(): T? {
+        fun blockInTransaction(): T {
             return transaction {
                 try {
                     //addLogger(StdOutSqlLogger)
@@ -133,37 +131,44 @@ object DbHelper {
                 } catch (e: Exception) {
                     Misc.dumpThreads()
                     mainLogger.error("exception in update database thread", e)
-                    null
+                    throw e
                 }
             }
         }
 
-        return if (Thread.currentThread().name == "dbExecutor") {
-            mainLogger.info("executing ${name} without submitting")
-            CompletableFuture.completedFuture(runBlock())
-        } else {
-            val f = updateExecutor.submit(
-                Callable<T> {
-                    blockInTransaction()
+        return suspendCoroutine<T> {
+            if (Thread.currentThread().name == "dbExecutor") {
+                mainLogger.info("executing ${name} without submitting")
+                it.resumeWith(Result.success(runBlock()))
+            } else {
+                updateExecutor.submit {
+                    try {
+                        val result = Result.success(blockInTransaction())
+                        it.resumeWith(result)
+                    } catch (e: Exception) {
+                        it.resumeWithException(e)
+                    }
                 }
-
-            )
-            CompletableFuture.supplyAsync({ f.get() }, resultExecutor)
+            }
         }
+
     }
 
     fun getLatestBreachEvents(): List<BreachEventKey> {
-        val sql = "select ticker, timeframe, event_type, max(event_time_ms) maxTime from breachevents where event_time_ms > ? group by ticker, timeframe, event_type "
+        val sql =
+            "select ticker, timeframe, event_type, max(event_time_ms) maxTime from breachevents where event_time_ms > ? group by ticker, timeframe, event_type "
         val ret = mutableListOf<BreachEventKey>()
 
         transaction {
             exec(sql, listOf(LongColumnType() to System.currentTimeMillis() - 10 * 24 * 3600_000L)) { rs ->
                 while (rs.next()) {
                     ret.add(
-                        BreachEventKey(rs.getString("ticker"),
+                        BreachEventKey(
+                            rs.getString("ticker"),
                             TimeFrame.valueOf(rs.getString("timeframe")),
                             rs.getLong("maxTime"),
-                            SignalType.valueOf(rs.getString("event_Type")))
+                            SignalType.valueOf(rs.getString("event_Type"))
+                        )
                     )
                 }
             }
@@ -193,9 +198,8 @@ object DbHelper {
                             instrumentId = instrId,
                             signalType = SignalType.valueOf(rs.getString("signalType")),
                             timeFrame = TimeFrame.valueOf(rs.getString("tf")),
-                            if(ss == null) emptyMap() else JsonHelper.fromJson(ss)
-                        )
-                                to UserId(rs.getString("user_id").toLong())
+                            if (ss == null) emptyMap() else JsonHelper.fromJson(ss)
+                        ) to UserId(rs.getString("user_id").toLong())
                     )
                 }
             }
@@ -236,7 +240,7 @@ object DbHelper {
         }
     }
 
-    fun ensureExist(user: User) {
+    suspend fun ensureExist(user: User) {
         updateDatabase("user update") {
 
             val llang = try {
@@ -270,7 +274,7 @@ object DbHelper {
     }
 }
 
-fun main() {
+suspend fun main() {
     DbHelper.initDatabase(GlobalConstants.metaDb.toAbsolutePath())
 
     DbHelper.getLatestBreachEvents().forEach {

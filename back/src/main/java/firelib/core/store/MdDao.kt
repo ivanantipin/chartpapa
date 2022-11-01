@@ -15,6 +15,7 @@ import java.sql.PreparedStatement
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -22,7 +23,7 @@ import kotlin.system.measureTimeMillis
 
 val executors = ConcurrentHashMap<String, ExecutorService>()
 
-fun <T> MdDao.updateInThread(block: () -> T) {
+fun <T> MdDao.updateInThread(block: () -> T) : CompletableFuture<T>{
 
     val exec = executors.computeIfAbsent(this.ds.url, {
         Executors.newSingleThreadExecutor({
@@ -30,12 +31,18 @@ fun <T> MdDao.updateInThread(block: () -> T) {
         })
     })
 
-    try {
-        exec.submit(block).get()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+    val ret = CompletableFuture<T>()
 
+    try {
+        exec.submit{
+            val rr = block()
+            ret.complete(rr)
+        }
+    } catch (e: Exception) {
+        this.log.error("Error updating ${this.ds.url}", e)
+        ret.completeExceptionally(e)
+    }
+    return ret
 }
 
 class MdDao(internal val ds: SQLiteDataSource) {
@@ -63,8 +70,8 @@ class MdDao(internal val ds: SQLiteDataSource) {
         )
     }
 
-    fun truncate(instrId: InstrId) {
-        updateInThread {
+    fun truncate(instrId: InstrId) : CompletableFuture<Unit>{
+        return updateInThread {
             val table = MdStorageImpl.makeTableName(instrId)
             ds.connection.use {
                 val stmt = it.prepareStatement("delete from $table ")
@@ -75,26 +82,12 @@ class MdDao(internal val ds: SQLiteDataSource) {
         }
     }
 
-    fun deleteSince(codeIn: String, fromTime: Instant) {
-        updateInThread {
-            val code = normName(codeIn)
-            ensureExist(code)
-            ds.connection.use {
-                val stmt = it.prepareStatement("delete from $code where dt > ? ", 1)
-                stmt.setLong(1, fromTime.toEpochMilli())
-                stmt.use {
-                    it.execute()
-                }
-            }
-        }
+    fun insertOhlc(ohlcs: List<Ohlc>, instrId: InstrId) : CompletableFuture<Unit>{
+        return insertOhlc(ohlcs, MdStorageImpl.makeTableName(instrId))
     }
 
-    fun insertOhlc(ohlcs: List<Ohlc>, instrId: InstrId) {
-        insertOhlc(ohlcs, MdStorageImpl.makeTableName(instrId))
-    }
-
-    fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) {
-        updateInThread {
+    fun insertOhlc(ohlcs: List<Ohlc>, tableIn: String) : CompletableFuture<Unit>{
+        return updateInThread {
             val table = normName(tableIn)
             ensureExist(table)
             val data = ohlcs.filter {
@@ -114,18 +107,14 @@ class MdDao(internal val ds: SQLiteDataSource) {
                     "VOLUME" to it.volume
                 )
             }
-            try {
-                val timeSpent = measureTimeMillis {
-                    saveInTransaction(
-                        "insert or replace into $table(DT,O,H,L,C,V) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE,:VOLUME)",
-                        data
-                    )
-                }
-                if (timeSpent > 1000) {
-                    log.info("spent ${timeSpent / 1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            val timeSpent = measureTimeMillis {
+                saveInTransaction(
+                    "insert or replace into $table(DT,O,H,L,C,V) values (:DT,:OPEN,:HIGH,:LOW,:CLOSE,:VOLUME)",
+                    data
+                )
+            }
+            if (timeSpent > 1000) {
+                log.info("spent ${timeSpent / 1000.0} s. to insert ${ohlcs.size}  into ${table} last time is ${ohlcs.lastOrNull()?.endTime}")
             }
         }
     }

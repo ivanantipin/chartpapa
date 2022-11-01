@@ -21,21 +21,19 @@ class LanguageChangeHandler : CommandHandler {
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, update: User) {
+    override suspend fun handle(cmd: Cmd, bot: Bot, update: User) {
         val lang = cmd.opts["lang"]!!
         DbHelper.ensureExist(update)
         DbHelper.updateDatabase("update language") {
             Users.update({ Users.userId eq update.id }) {
                 it[Users.lang] = lang
             }
-        }.thenAccept({
-            bot.sendMessage(
-                chatId = update.chatId(),
-                text = "User language set to ${lang}",
-                parseMode = ParseMode.MARKDOWN_V2
-            )
-        })
-
+        }
+        bot.sendMessage(
+            chatId = update.chatId(),
+            text = "User language set to ${lang}",
+            parseMode = ParseMode.MARKDOWN_V2
+        )
     }
 }
 

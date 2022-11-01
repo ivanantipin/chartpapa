@@ -18,7 +18,7 @@ class InstrIdDao {
 
     }
 
-    fun addAll(instrId: List<InstrId>) {
+    suspend fun addAll(instrId: List<InstrId>) {
         DbHelper.updateDatabase("insert instruments") {
             Instruments.batchReplace(instrId) {
                 this[Instruments.id] = it.id
@@ -27,7 +27,6 @@ class InstrIdDao {
                 this[Instruments.market] = it.market
                 this[Instruments.payload] = ExposedBlob(JsonHelper.toJsonBytes(it))
             }
-        }.get()
-
+        }
     }
 }

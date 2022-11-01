@@ -9,7 +9,7 @@ import com.github.kotlintelegrambot.entities.User
 class ActionButton(
     override val name: String,
     override val data: Cmd,
-    val action: ((bot: Bot, update: User) -> Unit)
+    val action: suspend ((bot: Bot, update: User) -> Unit)
 ) : BotButton {
 
     override fun children(): List<BotButton> {

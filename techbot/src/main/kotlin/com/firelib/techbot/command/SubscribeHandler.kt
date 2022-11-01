@@ -20,7 +20,7 @@ class SubscribeHandler(val subscriptionService: SubscriptionService, val staticD
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, user: User) {
+    override suspend fun handle(cmd: Cmd, bot: Bot, user: User) {
         val instr = cmd.instr(staticDataService)
         DbHelper.ensureExist(user)
         if (subscriptionService.addSubscription(user.userId(), instr)) {

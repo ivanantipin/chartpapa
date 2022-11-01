@@ -12,11 +12,13 @@ import com.firelib.techbot.persistence.DbHelper.getNotifyGroups
 import com.firelib.techbot.staticdata.InstrumentsService
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.batchInsert
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Instant
-import java.util.concurrent.Executors
 
 class UsersNotifier(val botInterface: BotInterface,
                     val ohlcsService: OhlcsService,
@@ -25,31 +27,24 @@ class UsersNotifier(val botInterface: BotInterface,
 
     val log: Logger = LoggerFactory.getLogger(UsersNotifier::class.java)
 
+    val scope = CoroutineScope(Dispatchers.Default)
+
     fun start() {
-        Thread({
-            timeSequence(Instant.now(), Interval.Min30, 10000).forEach {
-                val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get() == "true"
-                if (!enabled) {
-                    log.info("Notifications are disabled")
-                } else {
-                    try {
-                        Misc.measureAndLogTime("signal checking", {
-                            check(2)
-                        })
-                    } catch (e: Exception) {
-                        log.error("error in user notifier", e)
-                    }
-                }
+        val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get() == "true"
+        if(enabled){
+            scope.launch {
+                timeSequence(Instant.now(), Interval.Min5, 0, {
+                    Misc.measureAndLogTime("signal checking", {
+                        checkSignals(2)
+                    })
+                })
             }
-        }, "breach_notifier").start()
+        }
     }
 
-    val notifyExecutor = Executors.newFixedThreadPool(40){
-        Thread(it).apply { isDaemon=true }
-    }
+    suspend fun checkSignals(breachWindow: Int) {
 
-    fun check(breachWindow: Int) {
-
+        //fixme does not count settings
         val map = DbHelper.getLatestBreachEvents().associateBy({
             NotifyGroup(it.instrId, it.type, it.tf, emptyMap())
 
@@ -60,8 +55,9 @@ class UsersNotifier(val botInterface: BotInterface,
         val notifyGroups = getNotifyGroups()
 
         log.info("notify group count is ${notifyGroups.size}")
+
         notifyGroups.map { (group, users) ->
-            notifyExecutor.submit {
+            scope.launch {
                 try {
                     Misc.measureAndLogTime("group ${group} processing took", {
                         processGroup(group, breachWindow, map.getOrDefault(group.copy(settings = emptyMap()), Instant.EPOCH), users)
@@ -70,10 +66,11 @@ class UsersNotifier(val botInterface: BotInterface,
                     log.error("error notifying group ${group}", e)
                 }
             }
-        }.forEach { it.get() }
+        }.forEach { it.join() }
+
     }
 
-    fun processGroup(
+    suspend fun processGroup(
         group: NotifyGroup,
         breachWindow: Int,
         lastEvent : Instant,
@@ -100,7 +97,7 @@ class UsersNotifier(val botInterface: BotInterface,
         )
 
         val bes = breaches.filter { it.first > threshold }.map {
-            botInterface.sendBreachEvent(chartService.post(it.second), users)
+            botInterface.sendPhoto(chartService.post(it.second), users)
             it.first
         }
 
@@ -112,7 +109,7 @@ class UsersNotifier(val botInterface: BotInterface,
                     this[BreachEvents.eventTimeMs] = it.toEpochMilli()
                     this[BreachEvents.eventType] = group.signalType.name
                 }
-            }.get()
+            }
         }
     }
 

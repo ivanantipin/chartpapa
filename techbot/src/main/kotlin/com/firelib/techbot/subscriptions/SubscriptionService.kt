@@ -30,18 +30,18 @@ class SubscriptionService(val staticDataService: InstrumentsService) {
         listeners += ll
     }
 
-    fun deleteSubscription(userId: UserId, instrId: InstrId): Boolean {
+    suspend fun deleteSubscription(userId: UserId, instrId: InstrId): Boolean {
         val rows = DbHelper.updateDatabase("insert subscription") {
             SourceSubscription.deleteWhere {
                 (SourceSubscription.sourceId eq instrId.id) and (SourceSubscription.user eq userId.id)
             }
-        }.get()
+        }
         val subs = subscriptions.computeIfAbsent(userId, { ConcurrentHashMap<String, InstrId>() })
         subs.remove(instrId.id)
         return rows > 0
     }
 
-    fun addSubscription(userId: UserId, instrId: InstrId): Boolean {
+    suspend fun addSubscription(userId: UserId, instrId: InstrId): Boolean {
         val putToCache = putToCache(userId, instrId)
         if (putToCache == null) {
             DbHelper.updateDatabase("insert subscription") {
@@ -50,7 +50,7 @@ class SubscriptionService(val staticDataService: InstrumentsService) {
                     it[sourceName] = instrId.source
                     it[user] = userId.id
                 }
-            }.get()
+            }
             listeners.forEach { it(instrId) }
             return true
         }

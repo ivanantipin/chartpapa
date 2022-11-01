@@ -28,7 +28,7 @@ class ParentMenuItem(
         children += ParentMenuItem(chName).apply(aa)
     }
 
-    fun addActionMenu(chName: MsgLocalizer, action: ((bot: Bot, update: User) -> Unit)) {
+    fun addActionMenu(chName: MsgLocalizer, action: suspend ((bot: Bot, update: User) -> Unit)) {
         children += ActionMenuItem(chName, action)
     }
 
@@ -36,7 +36,7 @@ class ParentMenuItem(
         return name
     }
 
-    private fun listSubMenus(bot: Bot, update: User) {
+    private suspend fun listSubMenus(bot: Bot, update: User) {
         val sm = children.map { KeyboardButton(MsgLocalizer.getMsg(update.langCode(), it.name())) }.chunked(rowSize)
         val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
         bot.sendMessage(

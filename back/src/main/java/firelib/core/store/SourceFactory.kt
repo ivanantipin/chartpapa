@@ -8,6 +8,7 @@ import firelib.finam.FinamDownloader
 import firelib.finam.MoexSource
 import firelib.iqfeed.IqFeedHistoricalSource
 import firelib.poligon.PoligonSource
+import firelib.poligon.PoligonSourceAsync
 import firelib.vantage.VantageDownloader
 import java.nio.file.Paths
 import java.util.concurrent.ConcurrentHashMap
@@ -25,7 +26,7 @@ class SourceFactory : HistoricalSourceProvider{
         SourceName.MOEX to { MoexSource() },
         SourceName.IQFEED to { IqFeedHistoricalSource(Paths.get("/ddisk/globaldatabase/1MIN/STK")) },
         SourceName.EODHIST to { EodHistSource() },
-        SourceName.POLIGON to { PoligonSource(GlobalConstants.getProp("POLYGON_TOKEN")) },
+        SourceName.POLIGON to { PoligonSource(PoligonSourceAsync(GlobalConstants.getProp("POLYGON_TOKEN")) ) },
     )
 
     val concurrentHashMap = ConcurrentHashMap<SourceName, HistoricalSource>()

@@ -22,12 +22,12 @@ class TimeFrameHandler : CommandHandler {
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, user: User) {
+    override suspend fun handle(cmd: Cmd, bot: Bot, user: User) {
         val timeFrame = cmd.opts["tf"]!!
 
         DbHelper.ensureExist(user)
 
-        DbHelper.updateDatabase("update timeframes") {
+        val flag = DbHelper.updateDatabase("update timeframes") {
             if (TimeFrames.select { TimeFrames.user eq user.id and (TimeFrames.tf eq timeFrame) }
                     .empty()) {
                 TimeFrames.insert {
@@ -38,14 +38,13 @@ class TimeFrameHandler : CommandHandler {
             } else {
                 false
             }
-        }.thenAccept { flag ->
-            if (flag) {
-                bot.sendMessage(
-                    chatId = user.chatId(),
-                    text = MsgLocalizer.TimeFrameAdded.toLocal(user.langCode()),
-                    parseMode = ParseMode.MARKDOWN
-                )
-            }
+        }
+        if (flag) {
+            bot.sendMessage(
+                chatId = user.chatId(),
+                text = MsgLocalizer.TimeFrameAdded.toLocal(user.langCode()),
+                parseMode = ParseMode.MARKDOWN
+            )
         }
     }
 }

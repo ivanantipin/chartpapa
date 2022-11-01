@@ -23,7 +23,7 @@ class UnsubscribeHandler(val staticDataService: InstrumentsService, val subscrip
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, user: User) {
+    override suspend fun handle(cmd: Cmd, bot: Bot, user: User) {
         val instrId = cmd.instr(staticDataService)
         subscriptionService.deleteSubscription(user.userId(), instrId)
         bot.sendMessage(

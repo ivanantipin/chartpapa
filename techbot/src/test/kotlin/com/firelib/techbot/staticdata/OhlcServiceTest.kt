@@ -10,6 +10,7 @@ import firelib.core.domain.Ohlc
 import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdDaoContainer
 import firelib.iqfeed.ContinousOhlcSeries
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
 import java.nio.file.Paths
@@ -37,57 +38,61 @@ class OhlcServiceTest {
     @Test
     fun ohlcServiceTest() {
 
-        DbHelper.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}_meta.db"))
+        runBlocking {
+            DbHelper.initDatabase(Paths.get("/tmp/${System.currentTimeMillis()}_meta.db"))
 
 
-        mutableListOf<Int>().add(0, 0)
+            mutableListOf<Int>().add(0, 0)
 
-        val ticker = "A${System.currentTimeMillis()}"
+            val ticker = "A${System.currentTimeMillis()}"
 
-        val instr = InstrId(id = ticker, market = "XNAS", code = ticker, source = SourceName.POLIGON.name)
+            val instr = InstrId(id = ticker, market = "XNAS", code = ticker, source = SourceName.POLIGON.name)
 
-        val mdDaoContainer = MdDaoContainer()
+            val mdDaoContainer = MdDaoContainer()
 
-        val historicalSource = object : HistoricalSource {
-            var ohlcs: List<Ohlc>
-            override fun symbols(): List<InstrId> {
-                return listOf(instr)
-            }
+            val historicalSource = object : HistoricalSource {
+                var ohlcs: List<Ohlc>
+                override fun symbols(): List<InstrId> {
+                    return listOf(instr)
+                }
 
-            init {
-                val startTime = Interval.Min10.roundTime(Instant.now())
-                ohlcs = (0..10).map {
-                    makeRandomOhlc(startTime.plusSeconds(it * 60 * 10L))
+                init {
+                    val startTime = Interval.Min10.roundTime(Instant.now())
+                    ohlcs = (0..10).map {
+                        makeRandomOhlc(startTime.plusSeconds(it * 60 * 10L))
+                    }
+                }
+
+                override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
+                    TODO("Not yet implemented")
+                }
+
+                override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+
+                    val ret = ohlcs.filter { it.endTime > dateTime.toInstantDefault() }
+                    println("start loading ${dateTime} interval ${interval} ohlcs ${ret}")
+                    return ret.asSequence()
+                }
+
+                override fun getName(): SourceName {
+                    return SourceName.DUMMY
                 }
             }
 
-            override fun load(instrId: InstrId, interval: Interval): Sequence<Ohlc> {
-                TODO("Not yet implemented")
-            }
+            val service = OhlcsService(mdDaoContainer) { historicalSource }
 
-            override fun load(instrId: InstrId, dateTime: LocalDateTime, interval: Interval): Sequence<Ohlc> {
+            service.initTimeframeIfNeeded(instr)
 
-                val ret = ohlcs.filter { it.endTime > dateTime.toInstantDefault() }
-                println("start loading ${dateTime} interval ${interval} ohlcs ${ret}")
-                return ret.asSequence()
-            }
+            Assert.assertEquals(historicalSource.ohlcs, service.getOhlcsForTf(instr, Interval.Min10))
 
-            override fun getName(): SourceName {
-                return SourceName.DUMMY
-            }
+            val series = ContinousOhlcSeries(Interval.Min30)
+            series.add(historicalSource.ohlcs)
+
+            val tf = service.getOhlcsForTf(instr, Interval.Min30)
+            Assert.assertEquals(series.data, tf)
         }
 
-        val service = OhlcsService(mdDaoContainer) { historicalSource }
 
-        service.initTimeframeIfNeeded(instr)
-
-        Assert.assertEquals(historicalSource.ohlcs, service.getOhlcsForTf(instr, Interval.Min10))
-
-        val series = ContinousOhlcSeries(Interval.Min30)
-        series.add(historicalSource.ohlcs)
-
-        val tf = service.getOhlcsForTf(instr, Interval.Min30)
-        Assert.assertEquals(series.data, tf)
 
     }
 }

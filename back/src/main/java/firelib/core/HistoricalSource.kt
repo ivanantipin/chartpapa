@@ -13,4 +13,13 @@ interface HistoricalSource {
     fun mapSecurity(security : String) : InstrId {
         return InstrId(code = security)
     }
+
+    /**
+     * transitional one
+     */
+    fun getAsyncInterface() : HistoricalSourceAsync?{
+        return null
+    }
+
 }
+

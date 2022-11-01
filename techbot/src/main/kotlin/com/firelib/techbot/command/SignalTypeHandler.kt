@@ -21,12 +21,12 @@ class SignalTypeHandler : CommandHandler {
         return name
     }
 
-    override fun handle(cmd: Cmd, bot: Bot, user: User) {
+    override suspend fun handle(cmd: Cmd, bot: Bot, user: User) {
         val signalType = cmd.opts[SIGNAL_TYPE_ATTRIBUTE]!!
 
         DbHelper.ensureExist(user)
 
-        DbHelper.updateDatabase("update signal type") {
+        val flag = DbHelper.updateDatabase("update signal type") {
             if (SignalTypes.select { SignalTypes.user eq user.id and (SignalTypes.signalType eq signalType) }
                     .empty()) {
                 SignalTypes.insert {
@@ -38,14 +38,13 @@ class SignalTypeHandler : CommandHandler {
                 false
             }
 
-        }.thenAccept { flag ->
-            if (flag) {
-                bot.sendMessage(
-                    chatId = user.chatId(),
-                    text = "Тип сигнала добавлен в нотификации ${signalType}",
-                    parseMode = ParseMode.MARKDOWN
-                )
-            }
+        }
+        if (flag) {
+            bot.sendMessage(
+                chatId = user.chatId(),
+                text = "Тип сигнала добавлен в нотификации ${signalType}",
+                parseMode = ParseMode.MARKDOWN
+            )
         }
 
     }

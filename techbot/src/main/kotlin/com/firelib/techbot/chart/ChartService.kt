@@ -11,28 +11,18 @@ import java.util.concurrent.Executors
 object ChartService : IChartService {
     val client = HttpClient()
 
-    val executor = Executors.newSingleThreadExecutor()
-
     val urlString = "http://localhost:7801"
 
-    private fun postJson(optJson: String): ByteArray {
-        return executor.submit(Callable {
-            runBlocking {
-                val imagePath = client.post<String> {
-                    url(urlString)
-                    header("Content-Type", "application/json")
-                    body = optJson
-                }
-                val imgUrl = "$urlString/" + imagePath
-                //println(optJson)
-                //println(imgUrl)
-
-                client.get<ByteArray>(imgUrl)
-            }
-        }).get()
+    private suspend fun postJson(optJson: String): ByteArray {
+        val imagePath = client.post<String> {
+            url(urlString)
+            header("Content-Type", "application/json")
+            body = optJson
+        }
+        return client.get("$urlString/${imagePath}")
     }
 
-    override fun post(options: HOptions, globalOptions: Map<String, *>?, chartType: String): ByteArray {
+    override suspend fun post(options: HOptions, globalOptions: Map<String, *>?, chartType: String): ByteArray {
         val optJson = JsonHelper.toStringPretty(
             HiChartRequest(
                 async = true,
@@ -42,7 +32,6 @@ object ChartService : IChartService {
                 globalOptions = globalOptions
             )
         )
-        //println(optJson)
         return postJson(optJson)
     }
 

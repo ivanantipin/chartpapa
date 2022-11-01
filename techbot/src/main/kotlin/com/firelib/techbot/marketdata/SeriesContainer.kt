@@ -1,6 +1,9 @@
 package com.firelib.techbot.marketdata
 
+import com.firelib.techbot.Misc.batchedCollect
 import com.firelib.techbot.domain.TimeFrame
+import com.firelib.techbot.marketdata.MdDaoExt.insertOhlcSuspend
+import com.firelib.techbot.marketdata.MdDaoExt.truncateSuspend
 import firelib.core.HistoricalSource
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -10,24 +13,31 @@ import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdDao
 import firelib.core.store.MdStorageImpl
 import firelib.iqfeed.ContinousOhlcSeries
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 
-class SeriesContainer(val dao: MdDao, val dataLoader : HistoricalSource, val instrId: InstrId) {
+class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, val instrId: InstrId) {
 
     private val tf2data = ConcurrentHashMap<Interval, TfOhlcs>()
 
     val log = LoggerFactory.getLogger(javaClass)
 
-    @Synchronized
-    fun reset(){
-        dao.truncate(instrId)
-        tf2data.clear()
+    val mutex = Mutex()
+
+    suspend fun reset() {
+        mutex.withLock {
+            dao.truncateSuspend(instrId)
+            tf2data.clear()
+        }
     }
 
     class TfOhlcs(
         @Volatile var data: List<Ohlc>,
-        val series: ContinousOhlcSeries)
+        val series: ContinousOhlcSeries
+    )
 
     fun getOhlcForTimeframe(interval: Interval): List<Ohlc> {
         return tf2data.computeIfAbsent(interval, {
@@ -36,7 +46,6 @@ class SeriesContainer(val dao: MdDao, val dataLoader : HistoricalSource, val ins
         }).data
     }
 
-    @Synchronized
     fun initSeries(ticker: InstrId, timeFrame: Interval): ContinousOhlcSeries {
         val transformingSeries = ContinousOhlcSeries(timeFrame)
         dao.queryAll(MdStorageImpl.makeTableName(ticker), getStartTime(timeFrame))
@@ -46,21 +55,20 @@ class SeriesContainer(val dao: MdDao, val dataLoader : HistoricalSource, val ins
         return transformingSeries
     }
 
-
-    @Synchronized
-    fun sync(){
-        var empty = false
-        var latestFetched = dao.queryLast(instrId)?.endTime?.atUtc() ?: getStartTime(TimeFrame.W.interval)
-        while (!empty){
-            empty = true
-            val ohs = dataLoader.load(instrId, latestFetched, Interval.Min10)
-                .filter { it.endTime > latestFetched.toInstantDefault() }
-                .chunked(5000)
-            ohs.forEach { ohlcs ->
-                dao.insertOhlc(ohlcs, instrId)
-                latestFetched = ohlcs.last().endTime.atUtc()
-                add(ohlcs)
-                empty = false
+    suspend fun sync() {
+        mutex.withLock {
+            var empty = false
+            var latestFetched = dao.queryLast(instrId)?.endTime?.atUtc() ?: getStartTime(TimeFrame.W.interval)
+            while (!empty) {
+                empty = true
+                historicalSource.getAsyncInterface()!!.load(instrId, latestFetched, Interval.Min10)
+                    .filter { it.endTime > latestFetched.toInstantDefault() }
+                    .batchedCollect(5000) { ohlcs ->
+                        dao.insertOhlcSuspend(ohlcs, instrId)
+                        latestFetched = ohlcs.last().endTime.atUtc()
+                        add(ohlcs)
+                        empty = false
+                    }
             }
         }
     }

@@ -16,7 +16,7 @@ class IndicatorCommand(val techBotApp: TechbotApp) {
         val indi = SignalType.values().associateBy({ it.name }, { it.signalGenerator })
     }
 
-    fun handle(cmd: Cmd, bot: Bot, update: User) {
+    suspend fun handle(cmd: Cmd, bot: Bot, update: User) {
         val userId = update.chatId().getId()
         val signalGenerator = indi[cmd.handlerName]!!
         val settings = signalGenerator.fetchSettings(userId)

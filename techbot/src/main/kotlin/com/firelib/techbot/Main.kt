@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 val mainLogger = LoggerFactory.getLogger("main")
 
-fun main() {
+suspend fun main() {
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
         mainLogger.error("unhandled exception thrown", throwable)
     }

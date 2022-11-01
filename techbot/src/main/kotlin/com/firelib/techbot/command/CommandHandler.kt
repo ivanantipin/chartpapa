@@ -6,5 +6,5 @@ import com.github.kotlintelegrambot.entities.User
 
 interface CommandHandler {
     fun command(): String
-    fun handle(cmd: Cmd, bot: Bot, user : User)
+    suspend fun handle(cmd: Cmd, bot: Bot, user : User)
 }
