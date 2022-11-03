@@ -147,13 +147,19 @@ class MdDao(internal val ds: SQLiteDataSource) {
 
     fun queryLast(codeIn: String): Ohlc? {
         val code = normName(codeIn)
-        ensureExist(code)
+        if (!SqlUtils.checkTableExists(ds, code)) {
+            println("table does not exists!!!!! ${code}")
+            return null
+        }
         return queryToSequence { it.prepareStatement("select * from $code order by dt desc LIMIT 1 ") }.firstOrNull()
     }
 
     fun queryPoint(codeIn: String, epochMs: Long): Ohlc? {
         val code = normName(codeIn)
-        ensureExist(code)
+        if (!SqlUtils.checkTableExists(ds, code)) {
+            println("table does not exists!!!!! ${code}")
+            return null
+        }
         return queryToSequence {
             val stmt = it.prepareStatement("select * from $code where dt < ? order by dt desc LIMIT 1 ")
             stmt.setLong(1, epochMs)

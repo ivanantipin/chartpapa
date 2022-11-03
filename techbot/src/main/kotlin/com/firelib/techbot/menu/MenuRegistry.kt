@@ -10,14 +10,10 @@ import com.firelib.techbot.rsibolinger.RsiBolingerSignals
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
-import firelib.core.misc.JsonHelper
-import firelib.poligon.PoligonSourceAsync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.springframework.util.Base64Utils
-import org.springframework.util.DigestUtils
-import java.util.concurrent.ConcurrentHashMap
 
 class MenuRegistry(val techBotApp: TechbotApp) {
     val menuActions = mutableMapOf<MsgLocalizer, suspend (Bot, User) -> Unit>()
@@ -46,7 +42,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
         }
 
         fun listManyButtons(buttons: List<BotButton>, bot: Bot, chatId: ChatId, rowSize: Int, title: String = "") {
-            buttons.chunked(40).forEach { chunk ->
+            buttons.sortedBy { it.name }.chunked(40).forEach { chunk ->
                 listButtons(chunk.chunked(rowSize), bot, chatId, title)
             }
         }
@@ -69,10 +65,10 @@ class MenuRegistry(val techBotApp: TechbotApp) {
     }
 
 
-    val scope = CoroutineScope(Dispatchers.Default)
+    val callbackScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     fun processData(data: String, bot: Bot, update: Update) {
-        scope.launch {
+        callbackScope.launch {
             val command = md5Serializer.deserialize<Cmd>(data)
             Misc.measureAndLogTime("processing command ${command}", {
                 try {
@@ -132,12 +128,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
             if (bts.isEmpty()) {
                 emtyListMsg(bot, update)
             } else {
-                listButtons(
-                    bts.chunked(4),
-                    bot,
-                    update.chatId(),
-                    "Выберите компанию для показа фундаментальных данных"
-                )
+                listManyButtons(bts, bot, update.chatId(), 4, "Choose company for fundamentals")
             }
         })
     }
@@ -166,10 +157,8 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                 val subs = techBotApp.subscriptionService().subscriptions[UserId(
                     update.chatId().getId()
                 )]!!.values.distinct()
-
-                val buttons =
-                    subs.map { SimpleButton(it.code, Cmd(UnsubscribeHandler.name, mapOf("id" to it.id))) }.chunked(4)
-                listButtons(buttons, bot, update.chatId(), MsgLocalizer.YourSymbolsPressToRemove.toLocal(update.langCode()))
+                val buttons = subs.map { SimpleButton(it.code, Cmd(UnsubscribeHandler.name, mapOf("id" to it.id))) }
+                listManyButtons(buttons,  bot, update.chatId(), 4, MsgLocalizer.YourSymbolsPressToRemove.toLocal(update.langCode()))
             })
             mainMenu()
         }
@@ -181,14 +170,13 @@ class MenuRegistry(val techBotApp: TechbotApp) {
             addActionMenu(MsgLocalizer.Language, { bot, update ->
                 val buttons =
                     Langs.values().map { SimpleButton(it.name, Cmd(LanguageChangeHandler.name, mapOf("lang" to it.name))) }
-                        .chunked(1)
-                listButtons(buttons, bot, update.chatId(), MsgLocalizer.ChooseLanguage.toLocal(update.langCode()))
+                listManyButtons(buttons, bot, update.chatId(), 1, MsgLocalizer.ChooseLanguage.toLocal(update.langCode()))
             })
 
             addActionMenu(MsgLocalizer.Unsubscribe, { bot, update ->
                 val buttons = DbHelper.getTimeFrames(update.chatId())
-                    .map { SimpleButton(it, Cmd(RemoveTimeFrameHandler.name, mapOf("tf" to it))) }.chunked(1)
-                listButtons(buttons, bot, update.chatId(), MsgLocalizer.PressTfToUnsubscribe.toLocal(update.langCode()))
+                    .map { SimpleButton(it, Cmd(RemoveTimeFrameHandler.name, mapOf("tf" to it))) }
+                listManyButtons(buttons, bot, update.chatId(), 1, MsgLocalizer.PressTfToUnsubscribe.toLocal(update.langCode()))
             })
 
             addButtonMenu(MsgLocalizer.AddTf) {
@@ -206,8 +194,8 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                             it.msgLocalizer.toLocal(update.langCode()),
                             Cmd(RemoveSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it.name))
                         )
-                    }.chunked(1)
-                listButtons(buttons, bot, update.chatId(), MsgLocalizer.YourSignalsOrRemoval.toLocal(update.langCode()))
+                    }
+                listManyButtons(buttons, bot, update.chatId(), 1, MsgLocalizer.YourSignalsOrRemoval.toLocal(update.langCode()))
             })
 
             addButtonMenu(MsgLocalizer.AddSignalType) {
@@ -245,12 +233,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                             if (bts.isEmpty()) {
                                 emtyListMsg(bot, user)
                             } else {
-                                listButtons(
-                                    bts.chunked(4),
-                                    bot,
-                                    user.chatId(),
-                                    MsgLocalizer.Companies.toLocal(user.langCode())
-                                )
+                                listManyButtons(bts, bot, user.chatId(), 4, MsgLocalizer.Companies.toLocal(user.langCode()))
                             }
                         })
                     }
@@ -268,23 +251,6 @@ class MenuRegistry(val techBotApp: TechbotApp) {
         )
 
         menuActions[MsgLocalizer.SETTINGS]!!(bot, update)
-    }
-
-}
-
-class Md5Serializer{
-
-    val data = ConcurrentHashMap<String, Any>()
-
-    fun serialize(obj : Any) : String{
-        val bytes = JsonHelper.toJsonBytes(obj)
-        val id = Base64Utils.encodeToString(DigestUtils.md5Digest(bytes))
-        data.put(id, obj)
-        return id
-    }
-
-    inline fun <reified T> deserialize(id : String) : T{
-        return data.get(id)!! as T
     }
 
 }

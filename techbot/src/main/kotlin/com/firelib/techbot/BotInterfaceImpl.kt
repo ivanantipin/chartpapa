@@ -5,6 +5,7 @@ import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.TelegramFile
 
+
 class BotInterfaceImpl(val bot: Bot) : BotInterface {
 
     override suspend fun sendPhoto(img: ByteArray, users: List<UserId>) {

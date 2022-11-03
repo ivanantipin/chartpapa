@@ -14,6 +14,7 @@ import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.batchInsert
 import org.slf4j.Logger
@@ -27,12 +28,12 @@ class UsersNotifier(val botInterface: BotInterface,
 
     val log: Logger = LoggerFactory.getLogger(UsersNotifier::class.java)
 
-    val scope = CoroutineScope(Dispatchers.Default)
+    val notifierScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     fun start() {
         val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get() == "true"
         if(enabled){
-            scope.launch {
+            notifierScope.launch {
                 timeSequence(Instant.now(), Interval.Min5, 0, {
                     Misc.measureAndLogTime("signal checking", {
                         checkSignals(2)
@@ -57,7 +58,7 @@ class UsersNotifier(val botInterface: BotInterface,
         log.info("notify group count is ${notifyGroups.size}")
 
         notifyGroups.map { (group, users) ->
-            scope.launch {
+            notifierScope.launch {
                 try {
                     Misc.measureAndLogTime("group ${group} processing took", {
                         processGroup(group, breachWindow, map.getOrDefault(group.copy(settings = emptyMap()), Instant.EPOCH), users)
@@ -82,6 +83,11 @@ class UsersNotifier(val botInterface: BotInterface,
         val instr = instrumentsService.id2inst[instrId]!!
 
         val ohlcs = ohlcsService.getOhlcsForTf(instr, timeFrame.interval)
+
+        if(ohlcs.isEmpty()){
+            log.info("No market data for group ${group}")
+            return
+        }
 
         var threshold = ohlcs[ohlcs.size - breachWindow].endTime
         if(threshold < lastEvent){
