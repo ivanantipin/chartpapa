@@ -4,6 +4,7 @@ import com.firelib.techbot.persistence.DbHelper
 import firelib.core.domain.InstrId
 import firelib.core.misc.JsonHelper
 import org.jetbrains.exposed.sql.batchReplace
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,9 +19,14 @@ class InstrIdDao {
 
     }
 
-    suspend fun addAll(instrId: List<InstrId>) {
+    suspend fun replaceSourceInstruments(symbols: List<InstrId>) {
+        if(symbols.isEmpty()){
+            return
+        }
         DbHelper.updateDatabase("insert instruments") {
-            Instruments.batchReplace(instrId) {
+            Instruments.deleteWhere { Instruments.sourceName eq symbols.first().source }
+
+            Instruments.batchReplace(symbols) {
                 this[Instruments.id] = it.id
                 this[Instruments.code] = it.code
                 this[Instruments.sourceName] = it.source

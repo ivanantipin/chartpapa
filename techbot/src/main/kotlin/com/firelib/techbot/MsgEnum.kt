@@ -4,7 +4,7 @@ enum class Langs {
     RU, EN
 }
 
-enum class MsgLocalizer {
+enum class MsgEnum {
     TECH_ANALYSIS,
     MAIN_MENU,
     SETTINGS,
@@ -45,18 +45,20 @@ enum class MsgLocalizer {
     SubscrptionRemoved,
     TimeFrameAdded,
     ChooseLanguage,
-
+    None,
+    Subscribed
     ;
+
 
     fun toLocal(langCode: Langs): String {
         return getMsg(langCode, this)
     }
 
     companion object {
-        private var reverseMap: Map<String, MsgLocalizer>
+        private var reverseMap: Map<String, MsgEnum>
 
         val map = mapOf(
-            Langs.RU to mapOf<MsgLocalizer, String>(
+            Langs.RU to mapOf<MsgEnum, String>(
                 TECH_ANALYSIS to "Технический Анализ",
                 MAIN_MENU to "Главное меню",
                 SETTINGS to "Настройки",
@@ -68,6 +70,7 @@ enum class MsgLocalizer {
                 YourSymbolsOrRemoval to "Ваши символы / Удаление",
                 SettingsU to "Установки",
                 Unsubscribe to "Отписаться от таймфрейма",
+                Subscribed to "Вы подписаны на сигналы по ",
                 AddTf to "Добавить таймфрейм",
                 UnsubscribeFromSignal to "Отписаться от сигнала",
                 SupportChannel to "Канал поддержки",
@@ -92,7 +95,7 @@ enum class MsgLocalizer {
                 YourSymbolsPressToRemove to "*Ваши инструменты*\nНажмите чтобы отписаться"
             ),
 
-            Langs.EN to mapOf<MsgLocalizer, String>(
+            Langs.EN to mapOf<MsgEnum, String>(
                 TECH_ANALYSIS to "Technical Analysis",
                 MAIN_MENU to "Main Menu",
                 SETTINGS to "Settings",
@@ -106,6 +109,7 @@ enum class MsgLocalizer {
                 Unsubscribe to "Unsubscribe from timeframe",
                 AddTf to "Add timeframe",
                 UnsubscribeFromSignal to "Unsubscribe from signal",
+                Subscribed to "You are subscribed to instrument ",
                 SupportChannel to "Support channel",
                 RsiBolingerConf to "RSI-BOLINGER congfigartion",
                 AddSignalType to "Add signal",
@@ -134,15 +138,15 @@ enum class MsgLocalizer {
             val entries = map.values.flatMap { it.entries }
 
             this.reverseMap =
-                (entries.associateBy({ it.value }, { it.key }) + MsgLocalizer.values().associateBy { it.name })
+                (entries.associateBy({ it.value }, { it.key }) + MsgEnum.values().associateBy { it.name })
         }
 
-        fun getMsg(lang: Langs, msgLocalizer: MsgLocalizer): String {
-            return map[lang]!!.getOrDefault(msgLocalizer, msgLocalizer.name)
+        fun getMsg(lang: Langs, msgEnum: MsgEnum): String {
+            return map[lang]!!.getOrDefault(msgEnum, msgEnum.name)
         }
 
-        fun getReverseMap(msg: String): MsgLocalizer? {
-            return reverseMap.get(msg)
+        fun getReverseMap(msg: String): MsgEnum {
+            return reverseMap.get(msg) ?: None
         }
 
     }

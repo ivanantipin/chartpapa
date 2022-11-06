@@ -37,7 +37,7 @@ class TdstTest {
 
             val instrId = InstrId(id = "EQT_XNYS", code = "EQT", market = "XNYS", source = SourceName.POLIGON.name)
 
-            instrIdDao.addAll(listOf(instrId))
+            instrIdDao.replaceSourceInstruments(listOf(instrId))
 
             class MockedApp : TechbotApp(){
                 override fun botInterface(): BotInterface {

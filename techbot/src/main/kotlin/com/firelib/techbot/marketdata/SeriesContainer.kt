@@ -75,9 +75,20 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
 
     private fun add(ohlc: List<Ohlc>) {
 
+
+
         tf2data.forEach { timeFrame, v ->
 
+            val triggerTimeToTrim = getStartTime(timeFrame).minusDays(30)
+
             v.series.add(ohlc)
+
+            if( v.series.startTime() < triggerTimeToTrim.toInstantDefault()){
+                val startTime = getStartTime(timeFrame).toInstantDefault()
+                log.info("trimming series ${instrId} timeframe ${timeFrame} to start time ${startTime}")
+                v.series.trimStart(startTime)
+                log.info("start time after trimming is ${v.series.startTime()}")
+            }
 
             val maxAllowedReminder = when (timeFrame) {
                 Interval.Day, Interval.Week -> {

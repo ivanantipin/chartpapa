@@ -3,9 +3,10 @@ package com.firelib.techbot.staticdata
 import com.firelib.techbot.mainLogger
 import firelib.core.HistoricalSource
 import firelib.core.SourceName
+import firelib.core.domain.InstrId
 import firelib.core.store.MdStorageImpl
+import firelib.finam.FinamDownloader
 import kotlinx.coroutines.*
-import java.util.concurrent.CompletableFuture
 
 class InstrumentRefresher(val staticDataService: InstrumentsService) {
 
@@ -17,7 +18,7 @@ class InstrumentRefresher(val staticDataService: InstrumentsService) {
         scope.launch {  fetchSourceAsync(storage.sources[SourceName.POLIGON], staticDataService)}
     }
 
-    suspend fun fetchSourceAsync(source: HistoricalSource, repo: InstrumentsService){
+    suspend fun fetchSourceAsync(source: HistoricalSource, repo: InstrumentsService, filter : (InstrId)->Boolean = {true}){
         var attepmt = 0
         while (true) {
             try {
@@ -45,7 +46,7 @@ class InstrumentRefresher(val staticDataService: InstrumentsService) {
         symbols.forEach {
             repo.putToCache(it)
         }
-        repo.instrIdDao.addAll(symbols)
+        repo.instrIdDao.replaceSourceInstruments(symbols)
     }
 
 }

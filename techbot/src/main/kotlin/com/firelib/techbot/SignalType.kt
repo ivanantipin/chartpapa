@@ -8,11 +8,11 @@ import com.firelib.techbot.tdline.TdLineSignals
 
 enum class SignalType(
     val signalGenerator: SignalGenerator,
-    val msgLocalizer: MsgLocalizer
+    val msgEnum: MsgEnum
 ) {
-    TREND_LINE(TdLineSignals, MsgLocalizer.TREND_LINE),
-    DEMARK(SequentaSignals, MsgLocalizer.DEMARK),
-    MACD(MacdSignals, MsgLocalizer.MACD),
-    RSI_BOLINGER(RsiBolingerSignals, MsgLocalizer.RSI_BOLINGER),
-    TDST(TdstLineSignals, MsgLocalizer.TDST),
+    TREND_LINE(TdLineSignals, MsgEnum.TREND_LINE),
+    DEMARK(SequentaSignals, MsgEnum.DEMARK),
+    MACD(MacdSignals, MsgEnum.MACD),
+    RSI_BOLINGER(RsiBolingerSignals, MsgEnum.RSI_BOLINGER),
+    TDST(TdstLineSignals, MsgEnum.TDST),
 }

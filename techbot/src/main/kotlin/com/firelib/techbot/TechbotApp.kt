@@ -6,28 +6,24 @@ import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.marketdata.OhlcsService
 import com.firelib.techbot.menu.MenuRegistry
 import com.firelib.techbot.menu.fromUser
-import com.firelib.techbot.persistence.DbHelper
+import com.firelib.techbot.menu.userId
 import com.firelib.techbot.staticdata.InstrIdDao
 import com.firelib.techbot.staticdata.InstrumentRefresher
 import com.firelib.techbot.staticdata.InstrumentsService
 import com.firelib.techbot.subscriptions.SubscriptionService
-import com.firelib.techbot.subscriptions.Subscriptions
 import com.firelib.techbot.usernotifier.UsersNotifier
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.callbackQuery
+import com.github.kotlintelegrambot.dispatcher.handlers.TextHandlerEnvironment
 import com.github.kotlintelegrambot.dispatcher.text
+import com.github.kotlintelegrambot.entities.Update
+import com.github.kotlintelegrambot.entities.User
 import com.github.kotlintelegrambot.logging.LogLevel
 import firelib.core.store.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.selectAll
-import java.util.concurrent.Executors
+import kotlinx.coroutines.*
+import java.util.concurrent.ConcurrentHashMap
 
 open class TechbotApp {
     val services = SingletonsContainer()
@@ -106,7 +102,15 @@ open class TechbotApp {
         }
     }
 
-    val scope = CoroutineScope(Dispatchers.Default)
+    val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    val lastCommand = ConcurrentHashMap<UserId,MsgEnum>()
+
+    val commandsActions = ConcurrentHashMap<MsgEnum,(txt: String, user: User)->Unit>().apply {
+        this[MsgEnum.AddSymbol] = {txt, user->
+            ListAddSymbolsHandler(instrumentsService()).handle(txt, bot(), user)
+        }
+    }
 
     open fun bot(): Bot {
 
@@ -130,10 +134,15 @@ open class TechbotApp {
                                 }
                             }
                         }
-                        val msgLocalizer = MsgLocalizer.getReverseMap(text)
-                        val cmd = if (menuRegistry().menuActions.containsKey(msgLocalizer) && msgLocalizer != MsgLocalizer.MAIN_MENU) msgLocalizer else MsgLocalizer.HOME
-                        scope.launch {
-                            menuRegistry().menuActions[cmd]!!(bot, update.fromUser())
+
+
+                        if(!executeFreeTextIfNeeded(text, update)){
+                            val msgEnum = MsgEnum.getReverseMap(text)
+                            val cmd = if (menuRegistry().menuActions.containsKey(msgEnum) && msgEnum != MsgEnum.MAIN_MENU) msgEnum else MsgEnum.HOME
+                            lastCommand.put(update.fromUser().userId(), cmd)
+                            scope.launch {
+                                menuRegistry().menuActions[cmd]!!(bot, update.fromUser())
+                            }
                         }
 
                     } catch (e: Exception) {
@@ -147,6 +156,18 @@ open class TechbotApp {
 
         }
 
+    }
+
+    private fun executeFreeTextIfNeeded(text : String, update : Update) : Boolean{
+        if(MsgEnum.getReverseMap(text) != MsgEnum.None){
+            return false
+        }
+        val lastCmd = lastCommand.getOrDefault(update.fromUser().userId(), MsgEnum.None)
+        if (commandsActions[lastCmd] != null) {
+            commandsActions[lastCmd]!!(text, update.fromUser())
+            return true
+        }
+        return false
     }
 
     open fun botInterface(): BotInterface {

@@ -16,7 +16,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class MenuRegistry(val techBotApp: TechbotApp) {
-    val menuActions = mutableMapOf<MsgLocalizer, suspend (Bot, User) -> Unit>()
+    val menuActions = mutableMapOf<MsgEnum, suspend (Bot, User) -> Unit>()
 
     val commandData = mutableMapOf<String, suspend (Cmd, Bot, User) -> Unit>()
 
@@ -87,23 +87,23 @@ class MenuRegistry(val techBotApp: TechbotApp) {
 
 
     fun makeMenu() {
-        val root = ParentMenuItem(MsgLocalizer.HOME).apply {
+        val root = ParentMenuItem(MsgEnum.HOME).apply {
             rowSize = 2
             makeTechMenu()
             makeInstrumentMenu()
             makeFundamentalMenu()
-            addParentMenu(MsgLocalizer.HELP) {
-                addActionMenu(MsgLocalizer.SupportChannel, { bot, update ->
+            addParentMenu(MsgEnum.HELP) {
+                addActionMenu(MsgEnum.SupportChannel, { bot, update ->
                     bot.sendMessage(
                         chatId = update.chatId(),
-                        text = "[${MsgLocalizer.SupportMsg.toLocal(update.langCode())}](https://t.me/techBotSupport)",
+                        text = "[${MsgEnum.SupportMsg.toLocal(update.langCode())}](https://t.me/techBotSupport)",
                         parseMode = ParseMode.MARKDOWN
                     )
                 })
-                addActionMenu(MsgLocalizer.MacdConf, { bot, update ->
+                addActionMenu(MsgEnum.MacdConf, { bot, update ->
                     MacdSignals.displayHelp(bot, update)
                 })
-                addActionMenu(MsgLocalizer.RsiBolingerConf, { bot, update ->
+                addActionMenu(MsgEnum.RsiBolingerConf, { bot, update ->
                     RsiBolingerSignals.displayHelp(bot, update)
                 })
 
@@ -115,11 +115,11 @@ class MenuRegistry(val techBotApp: TechbotApp) {
     }
 
     private fun ParentMenuItem.mainMenu() {
-        addButtonMenu(MsgLocalizer.MAIN_MENU) {}
+        addButtonMenu(MsgEnum.MAIN_MENU) {}
     }
 
     private fun ParentMenuItem.makeFundamentalMenu() {
-        addActionMenu(MsgLocalizer.FUNDAMENTALS, { bot, update ->
+        addActionMenu(MsgEnum.FUNDAMENTALS, { bot, update ->
             val bts = makeButtons(
                 FundamentalsCommand.name,
                 update.chatId(),
@@ -134,72 +134,79 @@ class MenuRegistry(val techBotApp: TechbotApp) {
     }
 
     private fun ParentMenuItem.makeInstrumentMenu() {
-        addParentMenu(MsgLocalizer.Instruments) {
+        addParentMenu(MsgEnum.Instruments) {
             rowSize = 2
-            addButtonMenu(MsgLocalizer.AddSymbol) {
-                title = { lang -> MsgLocalizer.Choose1stLetterOfCompany.toLocal(lang) }
-                this.rowSize = 4
-                val staticDataService = techBotApp.instrumentsService()
-                staticDataService.instrumentByFirstCharacter.keys.forEach { start ->
-                    this.addButton(start, { langs -> MsgLocalizer.PickCompany.toLocal(langs) }) {
-                        rowSize = 2
-                        buttons += staticDataService.instrumentByFirstCharacter.getOrDefault(
-                            start,
-                            emptyMap()
-                        ).values.map { code ->
-                            SimpleButton("(${code.code}) ${code.name}", Cmd(SubscribeHandler.name, mapOf("id" to code.id)))
-                        }
-                    }
-                }
+            addActionMenu(MsgEnum.AddSymbol){bot, user->
+                bot.sendMessage(user.chatId(),
+                    text = "Enter text to find ticker",
+                    parseMode = ParseMode.MARKDOWN
+                )
             }
+//            addButtonMenu(MsgEnum.AddSymbol) {
+//                title = { lang -> MsgEnum.Choose1stLetterOfCompany.toLocal(lang) }
+//                this.rowSize = 4
+//                val staticDataService = techBotApp.instrumentsService()
+//
+//                staticDataService.instrumentByFirstCharacter.keys.forEach { start ->
+//                    this.addButton(start, { langs -> MsgEnum.PickCompany.toLocal(langs) }) {
+//                        rowSize = 2
+//                        buttons += staticDataService.instrumentByFirstCharacter.getOrDefault(
+//                            start,
+//                            emptyMap()
+//                        ).values.map { code ->
+//                            SimpleButton("(${code.code}) ${code.name}", Cmd(SubscribeHandler.name, mapOf("id" to code.id)))
+//                        }
+//                    }
+//                }
+//            }
 
-            addActionMenu(MsgLocalizer.YourSymbolsOrRemoval, { bot, update ->
+            addActionMenu(MsgEnum.YourSymbolsOrRemoval, { bot, update ->
                 val subs = techBotApp.subscriptionService().subscriptions[UserId(
                     update.chatId().getId()
                 )]!!.values.distinct()
                 val buttons = subs.map { SimpleButton(it.code, Cmd(UnsubscribeHandler.name, mapOf("id" to it.id))) }
-                listManyButtons(buttons,  bot, update.chatId(), 4, MsgLocalizer.YourSymbolsPressToRemove.toLocal(update.langCode()))
+                listManyButtons(buttons,  bot, update.chatId(), 4, MsgEnum.YourSymbolsPressToRemove.toLocal(update.langCode()))
             })
             mainMenu()
         }
 
 
-        addParentMenu(MsgLocalizer.SettingsU) {
+        addParentMenu(MsgEnum.SettingsU) {
             rowSize = 2
 
-            addActionMenu(MsgLocalizer.Language, { bot, update ->
+            addActionMenu(MsgEnum.Language, { bot, update ->
                 val buttons =
                     Langs.values().map { SimpleButton(it.name, Cmd(LanguageChangeHandler.name, mapOf("lang" to it.name))) }
-                listManyButtons(buttons, bot, update.chatId(), 1, MsgLocalizer.ChooseLanguage.toLocal(update.langCode()))
+                listManyButtons(buttons, bot, update.chatId(), 1, MsgEnum.ChooseLanguage.toLocal(update.langCode()))
             })
 
-            addActionMenu(MsgLocalizer.Unsubscribe, { bot, update ->
+            addActionMenu(MsgEnum.Unsubscribe, { bot, update ->
                 val buttons = DbHelper.getTimeFrames(update.chatId())
                     .map { SimpleButton(it, Cmd(RemoveTimeFrameHandler.name, mapOf("tf" to it))) }
-                listManyButtons(buttons, bot, update.chatId(), 1, MsgLocalizer.PressTfToUnsubscribe.toLocal(update.langCode()))
+                listManyButtons(buttons, bot, update.chatId(), 1, MsgEnum.PressTfToUnsubscribe.toLocal(update.langCode()))
             })
 
-            addButtonMenu(MsgLocalizer.AddTf) {
-                title = { lang -> MsgLocalizer.TfsTitle.toLocal(lang) }
+            addButtonMenu(MsgEnum.AddTf) {
+                title = { lang -> MsgEnum.TfsTitle.toLocal(lang) }
                 rowSize = 1
                 buttons += TimeFrame.values().map { tf ->
                     SimpleButton(tf.name, Cmd(TimeFrameHandler.name, mapOf("tf" to tf.name)))
                 }
             }
 
-            addActionMenu(MsgLocalizer.UnsubscribeFromSignal, { bot, update ->
+            addActionMenu(MsgEnum.UnsubscribeFromSignal, { bot, update ->
                 val buttons = DbHelper.getSignalTypes(update.chatId())
                     .map {
                         SimpleButton(
-                            it.msgLocalizer.toLocal(update.langCode()),
+                            it.msgEnum.toLocal(update.langCode()),
                             Cmd(RemoveSignalTypeHandler.name, mapOf(SignalTypeHandler.SIGNAL_TYPE_ATTRIBUTE to it.name))
                         )
                     }
-                listManyButtons(buttons, bot, update.chatId(), 1, MsgLocalizer.YourSignalsOrRemoval.toLocal(update.langCode()))
+                listManyButtons(buttons, bot, update.chatId(), 1, MsgEnum.YourSignalsOrRemoval.toLocal(update.langCode()))
             })
 
-            addButtonMenu(MsgLocalizer.AddSignalType) {
-                title = { lang -> MsgLocalizer.PressSignalToSubscribe.toLocal(lang) }
+            addButtonMenu(MsgEnum.AddSignalType) {
+                title = { lang -> MsgEnum.PressSignalToSubscribe.toLocal(lang) }
                 rowSize = 1
                 buttons += SignalType.values().map { signalType ->
                     SimpleButton(
@@ -209,7 +216,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                 }
             }
 
-            addActionMenu(MsgLocalizer.OtherSettings) { bot, update ->
+            addActionMenu(MsgEnum.OtherSettings) { bot, update ->
                 SettingsCommand().displaySettings(bot, update.chatId().getId().toLong())
                 MacdSignals.displayHelp(bot, update)
             }
@@ -221,11 +228,11 @@ class MenuRegistry(val techBotApp: TechbotApp) {
     }
 
     private fun ParentMenuItem.makeTechMenu() {
-        addParentMenu(MsgLocalizer.TECH_ANALYSIS) {
+        addParentMenu(MsgEnum.TECH_ANALYSIS) {
             rowSize = 2
             SignalType.values().forEach { stype ->
-                addButtonMenu(stype.msgLocalizer) {
-                    title = { lang -> MsgLocalizer.ChooseTfFor.toLocal(lang) + stype.msgLocalizer.toLocal(lang) }
+                addButtonMenu(stype.msgEnum) {
+                    title = { lang -> MsgEnum.ChooseTfFor.toLocal(lang) + stype.msgEnum.toLocal(lang) }
                     TimeFrame.values().forEach { tf ->
                         addActionButton(tf.name,  { bot, user ->
                             val bts = makeButtons(stype.name, user.chatId(), tf)
@@ -233,13 +240,13 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                             if (bts.isEmpty()) {
                                 emtyListMsg(bot, user)
                             } else {
-                                listManyButtons(bts, bot, user.chatId(), 4, MsgLocalizer.Companies.toLocal(user.langCode()))
+                                listManyButtons(bts, bot, user.chatId(), 4, MsgEnum.Companies.toLocal(user.langCode()))
                             }
                         })
                     }
                 }
             }
-            addButtonMenu(MsgLocalizer.MAIN_MENU) {}
+            addButtonMenu(MsgEnum.MAIN_MENU) {}
         }
     }
 
@@ -250,7 +257,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
             parseMode = ParseMode.MARKDOWN
         )
 
-        menuActions[MsgLocalizer.SETTINGS]!!(bot, update)
+        menuActions[MsgEnum.SETTINGS]!!(bot, update)
     }
 
 }

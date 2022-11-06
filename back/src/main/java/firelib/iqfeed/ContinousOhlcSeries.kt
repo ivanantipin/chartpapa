@@ -3,11 +3,24 @@ package firelib.iqfeed
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.merge
+import java.time.Instant
 
 class ContinousOhlcSeries(val interval: Interval) {
     var lastFetchedTs: Long = -1L
 
-    val data = mutableListOf<Ohlc>()
+    var data = mutableListOf<Ohlc>()
+
+    fun trimStart(startTime : Instant){
+        if(data.isNotEmpty() && data.first().endTime > startTime){
+            data = data.asSequence().filter { it.endTime < startTime }.toMutableList()
+        }
+    }
+
+
+    fun startTime() : Instant{
+        return data.firstOrNull()?.endTime ?: Instant.now()
+    }
+
 
     fun add(ohlcsIn: List<Ohlc>) {
         val ohlcs = ohlcsIn.filter { it.endTime.toEpochMilli() > lastFetchedTs }

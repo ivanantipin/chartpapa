@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.MsgLocalizer
+import com.firelib.techbot.MsgEnum
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
 import com.firelib.techbot.persistence.DbHelper
@@ -42,7 +42,7 @@ class TimeFrameHandler : CommandHandler {
         if (flag) {
             bot.sendMessage(
                 chatId = user.chatId(),
-                text = MsgLocalizer.TimeFrameAdded.toLocal(user.langCode()),
+                text = MsgEnum.TimeFrameAdded.toLocal(user.langCode()),
                 parseMode = ParseMode.MARKDOWN
             )
         }

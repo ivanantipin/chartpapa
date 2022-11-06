@@ -17,7 +17,7 @@ object BotHelper {
 
     fun displayTimeFrames(uid: User): String {
         return transaction {
-            val header = MsgLocalizer.YourTimeframes
+            val header = MsgEnum.YourTimeframes
             val resp = TimeFrames.select {
                 TimeFrames.user eq uid.id
             }.map { it[TimeFrames.tf] }.sorted().joinToString(separator = "\n")

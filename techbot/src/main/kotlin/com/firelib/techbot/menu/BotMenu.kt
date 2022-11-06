@@ -1,8 +1,8 @@
 package com.firelib.techbot.menu
 
-import com.firelib.techbot.MsgLocalizer
+import com.firelib.techbot.MsgEnum
 
 interface BotMenu {
-    fun name(): MsgLocalizer
+    fun name(): MsgEnum
     fun register(registry: MenuRegistry)
 }

@@ -25,13 +25,13 @@ class SubscriptionServiceTest {
             val instrId = InstrId("id", market = "market", source = SourceName.DUMMY.name, code = "code")
             val instrId1 = InstrId("id1", market = "market", source = SourceName.DUMMY.name, code = "code")
 
-            instrIdDao.addAll(
+            instrIdDao.replaceSourceInstruments(
                 listOf(
                     instrId,
                     instrId1
                 )
             )
-            instrIdDao.addAll(
+            instrIdDao.replaceSourceInstruments(
                 listOf(
                     instrId,
                     instrId1

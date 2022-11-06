@@ -80,6 +80,11 @@ class UsersNotifier(val botInterface: BotInterface,
         val instrId = group.instrumentId
         val timeFrame = group.timeFrame
 
+        if(!instrumentsService.id2inst.containsKey(instrId)){
+            log.info("No instrument found for id ${instrId}")
+            return
+        }
+
         val instr = instrumentsService.id2inst[instrId]!!
 
         val ohlcs = ohlcsService.getOhlcsForTf(instr, timeFrame.interval)

@@ -1,7 +1,7 @@
 package com.firelib.techbot.menu
 
 import com.firelib.techbot.Langs
-import com.firelib.techbot.MsgLocalizer
+import com.firelib.techbot.MsgEnum
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.persistence.Users
 import com.github.kotlintelegrambot.Bot
@@ -14,34 +14,34 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ParentMenuItem(
-    val name: MsgLocalizer,
+    val name: MsgEnum,
     val children: MutableList<BotMenu> = mutableListOf(),
     var rowSize: Int = 3
 ) : BotMenu {
 
-    fun addButtonMenu(chName: MsgLocalizer, aa: MenuItemButtons.() -> Unit): MenuItemButtons {
+    fun addButtonMenu(chName: MsgEnum, aa: MenuItemButtons.() -> Unit): MenuItemButtons {
         children += MenuItemButtons(chName, title = { "Naa" }).apply(aa)
         return children.last() as MenuItemButtons
     }
 
-    fun addParentMenu(chName: MsgLocalizer, aa: ParentMenuItem.() -> Unit) {
+    fun addParentMenu(chName: MsgEnum, aa: ParentMenuItem.() -> Unit) {
         children += ParentMenuItem(chName).apply(aa)
     }
 
-    fun addActionMenu(chName: MsgLocalizer, action: suspend ((bot: Bot, update: User) -> Unit)) {
+    fun addActionMenu(chName: MsgEnum, action: suspend ((bot: Bot, update: User) -> Unit)) {
         children += ActionMenuItem(chName, action)
     }
 
-    override fun name(): MsgLocalizer {
+    override fun name(): MsgEnum {
         return name
     }
 
     private suspend fun listSubMenus(bot: Bot, update: User) {
-        val sm = children.map { KeyboardButton(MsgLocalizer.getMsg(update.langCode(), it.name())) }.chunked(rowSize)
+        val sm = children.map { KeyboardButton(MsgEnum.getMsg(update.langCode(), it.name())) }.chunked(rowSize)
         val keyboardMarkup = KeyboardReplyMarkup(keyboard = sm, resizeKeyboard = true, oneTimeKeyboard = false)
         bot.sendMessage(
             chatId = update.chatId(),
-            text = MsgLocalizer.getMsg(update.langCode(), name),
+            text = MsgEnum.getMsg(update.langCode(), name),
             replyMarkup = keyboardMarkup
         )
     }

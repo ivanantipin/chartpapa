@@ -1,6 +1,6 @@
 package com.firelib.techbot.command
 
-import com.firelib.techbot.MsgLocalizer
+import com.firelib.techbot.MsgEnum
 import com.firelib.techbot.command.SignalTypeHandler.Companion.SIGNAL_TYPE_ATTRIBUTE
 import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.menu.langCode
@@ -31,7 +31,7 @@ class RemoveSignalTypeHandler : CommandHandler {
 
         bot.sendMessage(
             chatId = user.chatId(),
-            text = MsgLocalizer.SubscrptionRemoved.toLocal(user.langCode()) + signalType,
+            text = MsgEnum.SubscrptionRemoved.toLocal(user.langCode()) + signalType,
             parseMode = ParseMode.HTML
         )
 
