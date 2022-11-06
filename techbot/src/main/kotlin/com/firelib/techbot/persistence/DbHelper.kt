@@ -7,7 +7,6 @@ import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.staticdata.Instruments
 import com.firelib.techbot.subscriptions.SourceSubscription
-import com.firelib.techbot.subscriptions.Subscriptions
 import com.firelib.techbot.tdline.SensitivityConfig
 import com.firelib.techbot.usernotifier.NotifyGroup
 import com.github.kotlintelegrambot.entities.ChatId
@@ -83,9 +82,6 @@ object DbHelper {
 
             SchemaUtils.create(SensitivityConfig)
             SchemaUtils.createMissingTablesAndColumns(SensitivityConfig)
-
-            SchemaUtils.create(Subscriptions)
-            SchemaUtils.createMissingTablesAndColumns(Subscriptions)
 
             SchemaUtils.create(BreachEvents)
             SchemaUtils.createMissingTablesAndColumns(BreachEvents)
