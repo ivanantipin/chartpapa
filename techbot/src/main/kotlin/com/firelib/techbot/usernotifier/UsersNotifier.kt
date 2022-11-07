@@ -12,6 +12,7 @@ import com.firelib.techbot.persistence.DbHelper.getNotifyGroups
 import com.firelib.techbot.staticdata.InstrumentsService
 import firelib.core.domain.Interval
 import firelib.core.misc.timeSequence
+import firelib.core.misc.toInstantDefault
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,6 +21,7 @@ import org.jetbrains.exposed.sql.batchInsert
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.time.LocalDateTime
 
 class UsersNotifier(val botInterface: BotInterface,
                     val ohlcsService: OhlcsService,
@@ -30,16 +32,15 @@ class UsersNotifier(val botInterface: BotInterface,
 
     val notifierScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
+    val notificationEnabled = ConfigParameters.NOTIFICATIONS_ENABLED.get() == "true"
+
     fun start() {
-        val enabled = ConfigParameters.NOTIFICATIONS_ENABLED.get() == "true"
-        if(enabled){
-            notifierScope.launch {
-                timeSequence(Instant.now(), Interval.Min5, 0, {
-                    Misc.measureAndLogTime("signal checking", {
-                        checkSignals(2)
-                    })
+        notifierScope.launch {
+            timeSequence(Instant.now(), Interval.Min5, 0, {
+                Misc.measureAndLogTime("signal checking", {
+                    checkSignals(2)
                 })
-            }
+            })
         }
     }
 
@@ -94,7 +95,16 @@ class UsersNotifier(val botInterface: BotInterface,
             return
         }
 
-        var threshold = ohlcs[ohlcs.size - breachWindow].endTime
+        val lastMdTime = ohlcs[ohlcs.size - breachWindow].endTime
+
+        val yetAnotherThreshold = LocalDateTime.now().minusDays(20).toInstantDefault()
+
+        if(lastMdTime < yetAnotherThreshold){
+            log.info("market data is stale, not notifying group ${group}")
+            return
+        }
+
+        var threshold = lastMdTime
         if(threshold < lastEvent){
            threshold = lastEvent
         }
@@ -107,8 +117,12 @@ class UsersNotifier(val botInterface: BotInterface,
             ohlcs
         )
 
-        val bes = breaches.filter { it.first > threshold }.map {
-            botInterface.sendPhoto(chartService.post(it.second), users)
+
+
+        val bes = breaches.filter { it.first > threshold}.map {
+            if(notificationEnabled){
+                botInterface.sendPhoto(chartService.post(it.second), users)
+            }
             it.first
         }
 
