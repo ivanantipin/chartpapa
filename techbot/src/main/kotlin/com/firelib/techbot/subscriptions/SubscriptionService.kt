@@ -12,7 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
-class SubscriptionService(val staticDataService: InstrumentsService) {
+class SubscriptionService(val instrumentsService: InstrumentsService) {
 
     val subscriptions = ConcurrentHashMap<UserId, ConcurrentHashMap<String, InstrId>>()
 
@@ -64,7 +64,7 @@ class SubscriptionService(val staticDataService: InstrumentsService) {
     private fun initialLoad() {
         transaction {
             SourceSubscription.selectAll().forEach { rr ->
-                val ret = staticDataService.id2inst[rr[SourceSubscription.sourceId]]
+                val ret = instrumentsService.id2inst[rr[SourceSubscription.sourceId]]
                 if (ret != null) {
                     putToCache(UserId(rr[SourceSubscription.user]), ret)
                 }

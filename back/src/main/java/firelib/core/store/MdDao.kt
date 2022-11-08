@@ -6,12 +6,14 @@ import firelib.core.misc.SqlUtils
 import firelib.core.misc.toInstantDefault
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.sqlite.SQLiteDataSource
 import java.sql.Connection
 import java.sql.PreparedStatement
+import java.sql.ResultSet
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -151,7 +153,9 @@ class MdDao(internal val ds: SQLiteDataSource) {
             println("table does not exists!!!!! ${code}")
             return null
         }
-        return queryToSequence { it.prepareStatement("select * from $code order by dt desc LIMIT 1 ") }.firstOrNull()
+        return JdbcTemplate(ds).query("select * from $code order by dt desc LIMIT 1 ", RowMapper{rs,_->
+            mapToOhlc(rs)
+        }).firstOrNull()
     }
 
     fun queryPoint(codeIn: String, epochMs: Long): Ohlc? {
@@ -160,12 +164,11 @@ class MdDao(internal val ds: SQLiteDataSource) {
             println("table does not exists!!!!! ${code}")
             return null
         }
-        return queryToSequence {
-            val stmt = it.prepareStatement("select * from $code where dt < ? order by dt desc LIMIT 1 ")
-            stmt.setLong(1, epochMs)
-            stmt
 
-        }.firstOrNull()
+        return JdbcTemplate(ds).query("select * from $code where dt < ? order by dt desc LIMIT 1 ", arrayOf(epochMs),
+            { rs, _->
+                mapToOhlc(rs)
+            }).firstOrNull()
     }
 
     fun queryAll(codeIn: String): List<Ohlc> {
@@ -195,19 +198,24 @@ class MdDao(internal val ds: SQLiteDataSource) {
             stmt.use {
                 val rs = stmt.executeQuery()
                 while (rs.next()){
-                    val oh = Ohlc(
-                        Instant.ofEpochMilli(rs.getLong(1)),
-                        rs.getDouble(2),
-                        rs.getDouble(3),
-                        rs.getDouble(4),
-                        rs.getDouble(5),
-                        volume = rs.getLong(6),
-                        interpolated = false
-                    )
+                    val oh = mapToOhlc(rs)
                     yield(oh)
                 }
             }
         }
+    }
+
+    private fun mapToOhlc(rs: ResultSet): Ohlc {
+        val oh = Ohlc(
+            Instant.ofEpochMilli(rs.getLong(1)),
+            rs.getDouble(2),
+            rs.getDouble(3),
+            rs.getDouble(4),
+            rs.getDouble(5),
+            volume = rs.getLong(6),
+            interpolated = false
+        )
+        return oh
     }
 
 }
