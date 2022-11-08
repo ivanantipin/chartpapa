@@ -5,15 +5,12 @@ import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
-import firelib.core.misc.timeSequence
 import firelib.core.store.HistoricalSourceProvider
 import firelib.core.store.MdDaoContainer
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
 
 fun getStartTime(timeFrame: Interval): LocalDateTime {
     return LocalDateTime.now().minus(timeFrame.duration.multipliedBy(BotConfig.window))
@@ -32,17 +29,26 @@ class OhlcsService(
 
     fun start(){
         CoroutineScope(Dispatchers.Default).launch {
-            updateTimeseries()
-            delay(60_000)
+            while (true){
+                updateTimeseries()
+                delay(60_000)
+            }
         }
     }
 
     suspend fun updateTimeseries() {
+        log.info("updating ${baseFlows.size} instruments")
         baseFlows.values.map {
             scope.async {
-                it.sync()
+                try {
+                    it.sync()
+                }catch (e : Exception){
+                    log.error("Failed to sync ${it.instrId}", e)
+                }
             }
-        }.forEach { it.await() }
+        }.forEach {
+            it.await()
+        }
     }
 
     suspend fun getOhlcsForTf(ticker: InstrId, timeFrame: Interval): List<Ohlc> {
@@ -73,4 +79,3 @@ class OhlcsService(
         return persistFlow
     }
 }
-
