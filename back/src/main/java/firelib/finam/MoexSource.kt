@@ -3,14 +3,13 @@ package firelib.finam
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import firelib.core.HistoricalSource
+import firelib.core.HistoricalSourceAsync
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.atMoscow
 import firelib.core.misc.toInstantMoscow
-import firelib.core.store.MdStorageImpl
-import firelib.model.tickers
 import org.slf4j.LoggerFactory
 import org.springframework.web.client.RestTemplate
 import java.math.BigDecimal
@@ -88,8 +87,6 @@ class MoexSource : HistoricalSource {
 
             val obj: JsonNode = mapper.readTree(entity.body)
 
-            //"columns": ["open", "close", "high", "low", "value", "volume", "begin", "end"],
-
             val indexMap =
                 obj["candles"]["columns"].toList().mapIndexed({ idx, nd -> Pair(nd.textValue(), idx) }).toMap()
             val openIdx = indexMap["open"]!!.toInt()
@@ -138,102 +135,14 @@ class MoexSource : HistoricalSource {
         symbols().associateBy { it.code.lowercase() }
     }
 
+    override fun getAsyncInterface(): HistoricalSourceAsync {
+        return MoexSourceAsync()
+    }
+
     override fun mapSecurity(security: String): InstrId {
         return secCache.getOrDefault(security.lowercase(), InstrId())
     }
 
 }
 
-val lst = listOf(
-    "SBER",
-    "GAZP",
-    "LKOH",
-    "POLY",
-    "TCSG",
-    "QIWI",
-    "ALRS",
-    "AFLT",
-    "VTBR",
-    "GMKN",
-    "SIBN",
-    "DSKY",
-    "IRAO",
-    "LNTA",
-    "MAGN",
-    "MRKP",
-    "MTSS",
-    "MGNT",
-    "MTLR",
-    "MOEX",
-    "NLMK",
-    "NVTK",
-    "OGKB",
-    "PLZL",
-    "RUAL",
-    "RASP",
-    "ROSN",
-    "RTKM",
-    "HYDR",
-    "CHMF",
-    "AFKS",
-    "SNGS",
-    "TGKA",
-    "TATN",
-    "TRNFP",
-    "FEES",
-    "PHOR",
-    "SBERP",
-    "TATNP",
-    "SNGSP",
-    "UPRO",
-    "TTLK",
-    "AGRO",
-    "GLTR",
-    "MAIL",
-    "ENRU",
-    "LSNGP",
-    "POGR",
-    "ETLN",
-    "LSNG",
-    "NMTP",
-    "T-RM",
-    "MTLRP",
-    "GAZAP",
-    "RTKMP",
-    "RNFT",
-    "FIVE",
-    "FESH",
-    "UNAC",
-    "RSTI",
-    "BANEP",
-    "LSRG",
-    "TWTR-RM",
-    "PIKK",
-    "LNZL",
-    "ENPG",
-    "RSTIP",
-    "RUSP",
-    "AQUA",
-    "AKRN",
-    "VIPS-RM",
-    "SGZH",
-    "FLOT",
-    "TSLA-RM",
-    "BELU",
-    "YNDX",
-)
 
-fun main() {
-
-    val impl = MdStorageImpl()
-
-    val moexSource = MoexSource()
-    val symbols = moexSource.symbols().map { it.code }.toSet()
-
-    symbols.forEach {
-        if (lst.contains(it)) {
-            println(it)
-        }
-    }
-
-}

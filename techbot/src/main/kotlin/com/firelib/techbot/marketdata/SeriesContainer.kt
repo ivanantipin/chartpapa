@@ -34,7 +34,7 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
         }
     }
 
-    class TfOhlcs(
+    private class TfOhlcs(
         @Volatile var data: List<Ohlc>,
         val series: ContinousOhlcSeries
     )
@@ -46,7 +46,7 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
         }).data
     }
 
-    fun initSeries(ticker: InstrId, timeFrame: Interval): ContinousOhlcSeries {
+    private fun initSeries(ticker: InstrId, timeFrame: Interval): ContinousOhlcSeries {
         val transformingSeries = ContinousOhlcSeries(timeFrame)
         dao.queryAll(MdStorageImpl.makeTableName(ticker), getStartTime(timeFrame))
             .chunked(500).forEach {
@@ -74,9 +74,6 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
     }
 
     private fun add(ohlc: List<Ohlc>) {
-
-
-
         tf2data.forEach { timeFrame, v ->
 
             val triggerTimeToTrim = getStartTime(timeFrame).minusDays(30)

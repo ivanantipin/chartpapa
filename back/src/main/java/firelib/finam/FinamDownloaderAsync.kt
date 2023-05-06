@@ -6,7 +6,6 @@ import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
-import firelib.core.misc.FinamTickerMapper
 import firelib.core.misc.moscowZoneId
 import io.netty.util.concurrent.DefaultThreadFactory
 import kotlinx.coroutines.delay

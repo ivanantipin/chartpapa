@@ -14,7 +14,7 @@ class InstrumentRefresher(val staticDataService: InstrumentsService) {
 
     fun start() {
         val storage = MdStorageImpl()
-        scope.launch {  fetchSourceAsync(storage.sources[SourceName.FINAM], staticDataService)}
+        scope.launch {  fetchSourceAsync(storage.sources[SourceName.MOEX], staticDataService)}
         scope.launch {  fetchSourceAsync(storage.sources[SourceName.POLIGON], staticDataService)}
     }
 

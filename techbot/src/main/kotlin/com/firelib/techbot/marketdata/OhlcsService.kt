@@ -7,6 +7,8 @@ import firelib.core.domain.Ohlc
 import firelib.core.domain.sourceEnum
 import firelib.core.store.HistoricalSourceProvider
 import firelib.core.store.MdDaoContainer
+import firelib.core.store.SourceFactory
+import firelib.finam.MoexSourceAsync
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -28,10 +30,21 @@ class OhlcsService(
     val baseFlows = ConcurrentHashMap<InstrId, SeriesContainer>()
 
     fun start(){
-        CoroutineScope(Dispatchers.Default).launch {
+        val job = CoroutineScope(Dispatchers.Default).launch {
             while (true){
-                updateTimeseries()
-                delay(60_000)
+                try {
+                    updateTimeseries()
+                    delay(60_000)
+                }catch (e : Exception){
+                    log.error("failed to update timeseries")
+                }
+            }
+        }
+
+        job.invokeOnCompletion {
+            println("TIMESERIES coroutine is OUT!!, err is ${it}")
+            if(it != null){
+                it.printStackTrace()
             }
         }
     }
@@ -78,4 +91,11 @@ class OhlcsService(
         }
         return persistFlow
     }
+}
+
+suspend fun main() {
+    val service = OhlcsService(MdDaoContainer(), SourceFactory())
+    val ticker = MoexSourceAsync().symbols().first { it.code.contains("SBER") }
+
+    service.initTimeframeIfNeeded(ticker)
 }

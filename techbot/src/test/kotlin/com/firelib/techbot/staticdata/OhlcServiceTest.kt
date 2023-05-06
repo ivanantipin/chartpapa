@@ -3,6 +3,7 @@ package com.firelib.techbot.staticdata
 import com.firelib.techbot.marketdata.OhlcsService
 import com.firelib.techbot.persistence.DbHelper
 import firelib.core.HistoricalSource
+import firelib.core.HistoricalSourceAsync
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
@@ -10,6 +11,8 @@ import firelib.core.domain.Ohlc
 import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdDaoContainer
 import firelib.iqfeed.ContinousOhlcSeries
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
@@ -56,6 +59,8 @@ class OhlcServiceTest {
                     return listOf(instr)
                 }
 
+                val parent = this
+
                 init {
                     val startTime = Interval.Min10.roundTime(Instant.now())
                     ohlcs = (0..10).map {
@@ -76,6 +81,31 @@ class OhlcServiceTest {
 
                 override fun getName(): SourceName {
                     return SourceName.DUMMY
+                }
+
+                override fun getAsyncInterface(): HistoricalSourceAsync {
+                    return object : HistoricalSourceAsync{
+                        override suspend fun symbols(): List<InstrId> {
+                            return parent.symbols()
+                        }
+
+                        override suspend fun load(instrId: InstrId, interval: Interval): Flow<Ohlc> {
+                            return parent.load(instrId, interval).toList().asFlow()
+                        }
+
+                        override suspend fun load(
+                            instrId: InstrId,
+                            dateTime: LocalDateTime,
+                            interval: Interval
+                        ): Flow<Ohlc> {
+                            return parent.load(instrId, dateTime, interval).toList().asFlow()
+                        }
+
+                        override fun getName(): SourceName {
+                            return parent.getName()
+                        }
+
+                    }
                 }
             }
 
