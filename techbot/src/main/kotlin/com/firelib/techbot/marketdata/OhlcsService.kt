@@ -1,6 +1,7 @@
 package com.firelib.techbot.marketdata
 
 import com.firelib.techbot.persistence.BotConfig
+import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
@@ -30,28 +31,32 @@ class OhlcsService(
     val baseFlows = ConcurrentHashMap<InstrId, SeriesContainer>()
 
     fun start(){
-        val job = CoroutineScope(Dispatchers.Default).launch {
-            while (true){
-                try {
-                    updateTimeseries()
-                    delay(60_000)
-                }catch (e : Exception){
-                    log.error("failed to update timeseries")
+        mapOf(SourceName.MOEX to 30*60_000L,SourceName.POLIGON to 5*60_000L).map { (source, delayMs)->
+            CoroutineScope(Dispatchers.Default).launch {
+                while (true){
+                    try {
+                        updateTimeseries(source)
+                        delay(delayMs)
+                    }catch (e : Exception){
+                        log.error("failed to update timeseries, unexpected exception", e)
+                    }
+                }
+            }
+        }.forEach { job->
+            job.invokeOnCompletion {
+                println("TIMESERIES coroutine is OUT!!, err is ${it}")
+                if(it != null){
+                    it.printStackTrace()
                 }
             }
         }
 
-        job.invokeOnCompletion {
-            println("TIMESERIES coroutine is OUT!!, err is ${it}")
-            if(it != null){
-                it.printStackTrace()
-            }
-        }
     }
 
-    suspend fun updateTimeseries() {
+    suspend fun updateTimeseries(sourceName: SourceName) {
         log.info("updating ${baseFlows.size} instruments")
-        baseFlows.values.map {
+
+        baseFlows.values.filter { it.instrId.source == sourceName.name }.map {
             scope.async {
                 try {
                     it.sync()
