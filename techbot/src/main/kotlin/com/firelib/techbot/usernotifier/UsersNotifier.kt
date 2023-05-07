@@ -90,7 +90,7 @@ class UsersNotifier(val botInterface: BotInterface,
 
         val ohlcs = ohlcsService.getOhlcsForTf(instr, timeFrame.interval)
 
-        if(ohlcs.isEmpty()){
+        if(ohlcs.isEmpty() || ohlcs.size < breachWindow){
             log.info("No market data for group ${group}")
             return
         }
