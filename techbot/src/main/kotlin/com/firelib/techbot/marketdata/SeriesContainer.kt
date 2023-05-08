@@ -1,5 +1,6 @@
 package com.firelib.techbot.marketdata
 
+import com.firelib.techbot.InflightHandler.registerInflight
 import com.firelib.techbot.Misc.batchedCollect
 import com.firelib.techbot.domain.TimeFrame
 import com.firelib.techbot.marketdata.MdDaoExt.insertOhlcSuspend
@@ -61,14 +62,17 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
             var latestFetched = dao.queryLast(instrId)?.endTime?.atUtc() ?: getStartTime(TimeFrame.W.interval)
             while (!empty) {
                 empty = true
-                historicalSource.getAsyncInterface()!!.load(instrId, latestFetched, Interval.Min10)
-                    .filter { it.endTime > latestFetched.toInstantDefault() }
-                    .batchedCollect(5000) { ohlcs ->
-                        dao.insertOhlcSuspend(ohlcs, instrId)
-                        latestFetched = ohlcs.last().endTime.atUtc()
-                        add(ohlcs)
-                        empty = false
-                    }
+                registerInflight("${historicalSource.getName()}_LOAD"){
+                    historicalSource.getAsyncInterface()!!.load(instrId, latestFetched, Interval.Min10)
+                        .filter { it.endTime > latestFetched.toInstantDefault() }
+                        .batchedCollect(5000) { ohlcs ->
+                            dao.insertOhlcSuspend(ohlcs, instrId)
+                            latestFetched = ohlcs.last().endTime.atUtc()
+                            add(ohlcs)
+                            empty = false
+                        }
+                }
+
             }
         }
     }

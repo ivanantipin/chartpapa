@@ -1,5 +1,6 @@
 package com.firelib.techbot.marketdata
 
+import com.firelib.techbot.InflightHandler
 import com.firelib.techbot.persistence.BotConfig
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -45,9 +46,7 @@ class OhlcsService(
         }.forEach { job->
             job.invokeOnCompletion {
                 println("TIMESERIES coroutine is OUT!!, err is ${it}")
-                if(it != null){
-                    it.printStackTrace()
-                }
+                it?.printStackTrace()
             }
         }
 
@@ -59,7 +58,9 @@ class OhlcsService(
         baseFlows.values.filter { it.instrId.source == sourceName.name }.map {
             scope.async {
                 try {
-                    it.sync()
+                    InflightHandler.registerInflight("OHLC_SYNC"){
+                        it.sync()
+                    }
                 }catch (e : Exception){
                     log.error("Failed to sync ${it.instrId}", e)
                 }

@@ -12,6 +12,7 @@ suspend fun main() {
     Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
         mainLogger.error("unhandled exception thrown", throwable)
     }
+    InflightHandler.start()
     DbHelper.initDefaultDb()
     ConfigService.initSystemVars()
     val app = TechbotApp()
