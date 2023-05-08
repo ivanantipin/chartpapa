@@ -60,6 +60,7 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
         mutex.withLock {
             var empty = false
             var latestFetched = dao.queryLast(instrId)?.endTime?.atUtc() ?: getStartTime(TimeFrame.W.interval)
+            log.info("synching ${instrId.code} last fetched time is ${latestFetched}")
             while (!empty) {
                 empty = true
                 registerInflight("${historicalSource.getName()}_LOAD"){
@@ -68,6 +69,7 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
                         .batchedCollect(5000) { ohlcs ->
                             dao.insertOhlcSuspend(ohlcs, instrId)
                             latestFetched = ohlcs.last().endTime.atUtc()
+                            log.info("updated ${instrId.code} last fetched time is ${latestFetched}")
                             add(ohlcs)
                             empty = false
                         }
@@ -78,7 +80,7 @@ class SeriesContainer(val dao: MdDao, val historicalSource: HistoricalSource, va
     }
 
     private fun add(ohlc: List<Ohlc>) {
-        tf2data.forEach { timeFrame, v ->
+        tf2data.forEach { (timeFrame, v) ->
 
             val triggerTimeToTrim = getStartTime(timeFrame).minusDays(30)
 
