@@ -12,7 +12,9 @@ import firelib.core.domain.date
 import firelib.core.misc.mapper
 import firelib.core.misc.readJson
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
@@ -125,7 +127,17 @@ class PoligonSourceAsync(val token: String) : HistoricalSourceAsync{
             var filterBefore = Instant.EPOCH
 
             while (true) {
-                val ohlcs = fetchChunk(instrId, from, to, interval).filter { it.endTime > filterBefore }
+                val ohlcs = try {
+                    fetchChunk(instrId, from, to, interval).filter { it.endTime > filterBefore }
+                }catch (e : ClientRequestException){
+                    if(e.response.status == HttpStatusCode.Forbidden){
+                        from = to
+                        to = from.plusDays(chunkDays)
+                        continue
+                    }
+                    break
+                }
+
                 if (ohlcs.isEmpty()) {
                     if (to.isBefore(LocalDate.now().minusDays(5))) {
                         from = to
