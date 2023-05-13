@@ -4,9 +4,8 @@ import com.firelib.techbot.chart.domain.HOptions
 import firelib.core.misc.JsonHelper
 import io.ktor.client.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.Callable
-import java.util.concurrent.Executors
+import io.ktor.client.statement.*
+import io.ktor.http.*
 
 object ChartService : IChartService {
     val client = HttpClient()
@@ -14,12 +13,11 @@ object ChartService : IChartService {
     val urlString = "http://localhost:7801"
 
     private suspend fun postJson(optJson: String): ByteArray {
-        val imagePath = client.post<String> {
-            url(urlString)
-            header("Content-Type", "application/json")
-            body = optJson
+        val imagePath = client.post(urlString) {
+            contentType(ContentType.Application.Json)
+            setBody(optJson)
         }
-        return client.get("$urlString/${imagePath}")
+        return client.get("$urlString/${imagePath}").readBytes()
     }
 
     override suspend fun post(options: HOptions, globalOptions: Map<String, *>?, chartType: String): ByteArray {

@@ -1,6 +1,5 @@
 package firelib.poligon
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.firelib.techbot.command.CacheService
 import firelib.core.HistoricalSourceAsync
@@ -12,8 +11,9 @@ import firelib.core.domain.date
 import firelib.core.misc.mapper
 import firelib.core.misc.readJson
 import io.ktor.client.*
-import io.ktor.client.features.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -54,23 +54,23 @@ class PoligonSourceAsync(val token: String) : HistoricalSourceAsync{
     }
 
      suspend fun fetchSymbols(): ByteArray {
-         var json = client.get<String>("https://api.polygon.io/v3/reference/tickers"){
+         var json = client.get("https://api.polygon.io/v3/reference/tickers"){
              url {
                  parameters.append("active", "true")
                  parameters.append("apiKey", token)
                  parameters.append("limit", "1000")
              }
-         }.readJson()
+         }.bodyAsText().readJson()
 
         val arrayNode = json["results"] as ArrayNode
 
         while (json["next_url"] != null) {
-            json = client.get<String>(json["next_url"].textValue()){
+            json = client.get(json["next_url"].textValue()){
                 log.info("fetching symbols, current size is ${arrayNode.size()}")
                 url {
                     parameters.append("apiKey", token)
                 }
-            }.readJson()
+            }.bodyAsText().readJson()
             arrayNode.addAll((json["results"] as ArrayNode))
         }
 
@@ -92,14 +92,14 @@ class PoligonSourceAsync(val token: String) : HistoricalSourceAsync{
             println("took $msTime ms to fetch ${instrId.code}")
         }
 
-        val json = client.get<String>("https://api.polygon.io/v2/aggs/ticker/${instrId.code}/range/${mins}/minute/${from}/${to}"){
+        val json = client.get("https://api.polygon.io/v2/aggs/ticker/${instrId.code}/range/${mins}/minute/${from}/${to}"){
             url {
                 parameters.append("apiKey", token)
                 parameters.append("adjusted", "true")
                 parameters.append("sort", "asc")
                 parameters.append("limit", "5000")
             }
-        }.readJson()
+        }.bodyAsText().readJson()
 
         if (json["results"] == null) {
             return emptyList()

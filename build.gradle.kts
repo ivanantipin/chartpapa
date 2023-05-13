@@ -38,11 +38,7 @@ subprojects {
         mavenCentral()
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
         google()
-        jcenter()
         mavenLocal()
         maven(url = "https://jitpack.io")
     }
-}
-repositories {
-    mavenCentral()
 }

@@ -1,7 +1,5 @@
 package firelib.finam
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import firelib.core.HistoricalSourceAsync
 import firelib.core.SourceName
 import firelib.core.domain.InstrId
@@ -12,12 +10,10 @@ import firelib.core.misc.readJson
 import firelib.core.misc.toInstantMoscow
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
-import org.springframework.web.client.RestTemplate
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -36,7 +32,7 @@ class MoexSourceAsync : HistoricalSourceAsync {
                 "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json?iss.meta=off&iss.only=securities"
 
 
-            val obj = client.get<String>(request).readJson()
+            val obj = client.get(request).bodyAsText().readJson()
 
             val header = obj["securities"]["columns"].mapIndexed { idx, hh -> hh.asText()!! to idx }.toMap()
 
@@ -83,7 +79,7 @@ class MoexSourceAsync : HistoricalSourceAsync {
 
                 val from = pattern.format(curDt)
 
-                val obj = client.get<String>("${url}?from=${from}&interval=10&start=0").readJson()
+                val obj = client.get("${url}?from=${from}&interval=10&start=0").bodyAsText().readJson()
 
                 val indexMap =
                     obj["candles"]["columns"].toList().mapIndexed({ idx, nd -> Pair(nd.textValue(), idx) }).toMap()

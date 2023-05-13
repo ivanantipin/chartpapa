@@ -15,7 +15,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("info.picocli:picocli:4.5.2")
     implementation ("io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.6")
-    implementation("io.ktor:ktor-client-cio:1.4.1")
+    implementation("io.ktor:ktor-client-cio-jvm:${Versions.ktor_version}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin_version}")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
     implementation ( "org.springframework:spring-jdbc:5.1.9.RELEASE")

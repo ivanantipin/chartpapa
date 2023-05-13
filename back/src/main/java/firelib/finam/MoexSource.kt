@@ -10,6 +10,7 @@ import firelib.core.domain.Interval
 import firelib.core.domain.Ohlc
 import firelib.core.misc.atMoscow
 import firelib.core.misc.toInstantMoscow
+import firelib.poligon.PoligonSourceAsync
 import org.slf4j.LoggerFactory
 import org.springframework.web.client.RestTemplate
 import java.math.BigDecimal
@@ -145,4 +146,8 @@ class MoexSource : HistoricalSource {
 
 }
 
-
+suspend fun main() {
+    PoligonSourceAsync("mBbK9N0OGVjrr6GrDMyz9N8Nxxnl2BVN").symbols().forEach {
+        println(it)
+    }
+}
