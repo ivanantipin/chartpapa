@@ -16,7 +16,7 @@ object ChartService : IChartService {
         val imagePath = client.post(urlString) {
             contentType(ContentType.Application.Json)
             setBody(optJson)
-        }
+        }.bodyAsText()
         return client.get("$urlString/${imagePath}").readBytes()
     }
 
