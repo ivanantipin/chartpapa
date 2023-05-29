@@ -1,25 +1,59 @@
-package firelib.stockviz.api
+package com.firelib.reportrest
 
 import firelib.common.Trades
+import firelib.core.SourceName
+import firelib.core.domain.Interval
 import firelib.core.domain.Side
 import firelib.core.domain.TradeStat
 import firelib.core.misc.JsonHelper
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
+import firelib.core.misc.atMoscow
+import firelib.core.store.MdStorageImpl
+import firelib.stockviz.api.*
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
+import java.time.Instant
 
-@Controller("/api/v1")
-class PortfoliosApiController {
+@RestController
+@RequestMapping("/api/v1")
+open class ReportController {
 
-    @Get(value = "/portfolios/{portfolio}/available-instruments-meta/", produces = ["application/json"])
+    @GetMapping(
+        value = ["/candles/{timeframe}/{symbol}/"],
+        produces = ["application/json"]
+    )
+    fun candlesRead(symbol: String, timeframe: String, fromTs: Long, toTs: Long
+    ): List<Candle> {
+
+        val storage = MdStorageImpl()
+        val dao = storage.daos.getDao(SourceName.MOEX, Interval.Min10)
+        val ohlcs = dao.queryAll(symbol.replace(".MICEX", ""), Instant.ofEpochMilli(fromTs).atMoscow())
+
+        return ohlcs.map {
+            Candle(
+                it.endTime.toEpochMilli(),
+                it.open.toBigDecimal(),
+                it.high.toBigDecimal(),
+                it.low.toBigDecimal(),
+                it.close.toBigDecimal(),
+                it.volume.toInt()
+            )
+        }.toList()
+    }
+
+
+    @GetMapping(value = ["/portfolios/{portfolio}/available-instruments-meta/"], produces = ["application/json"])
     fun portfoliosAvailableInstrumentsMetaList(portfolio: String): PortfolioInstrumentsMeta {
         return PortfolioInstrumentsMeta(emptyList(), emptyList())
     }
 
-    @Get(value = "/portfolios/{portfolio}/available-tags/", produces = ["application/json"])
+    @GetMapping(value = ["/portfolios/{portfolio}/available-tags/"], produces = ["application/json"])
     fun portfoliosAvailableTagsList(portfolio: String): TagsMetaSummary {
         return transaction {
             val continuousMeta = mutableMapOf<String, ContinuousMeta>()
@@ -37,7 +71,7 @@ class PortfoliosApiController {
                 trd.discreteTags.forEach { facName, lbl ->
                     val dmeta = descMeta.computeIfAbsent(
                         facName,
-                        { DiscreteMeta(facName, emptyList())})
+                        { DiscreteMeta(facName, emptyList()) })
 
 
                     if(!dmeta.values.contains(lbl)){
@@ -50,19 +84,19 @@ class PortfoliosApiController {
         }
     }
 
-    @Get(value = "/portfolios/", produces = ["application/json"])
+    @GetMapping("/portfolios/")
     fun portfoliosList(): List<Portfolio> {
         return transaction {  Trades.slice(Trades.ModelName).selectAll().withDistinct(true).map {
             Portfolio(it[Trades.ModelName], System.currentTimeMillis())
         }}
     }
 
-    @Get(value = "/portfolios/{portfolio}/orders/", produces = ["application/json"])
-    fun portfoliosOrdersList(portfolio: String): List<Order> {
+    @GetMapping(value = ["/portfolios/{portfolio}/orders/"], produces = ["application/json"])
+    fun portfoliosOrdersList(portfolio: String?): List<Order> {
         return emptyList()
     }
 
-    @Get(value = "/portfolios/describe/{tradeId}", produces = ["application/json"])
+    @GetMapping(value = ["/portfolios/describe/{tradeId}"], produces = ["application/json"])
     fun displayTrade(tradeId: String): String {
         return transaction {
             val row = Trades.select { Trades.tradeId eq tradeId }.firstOrNull()
@@ -71,9 +105,9 @@ class PortfoliosApiController {
     }
 
 
-    @Get(value = "/portfolios/{portfolio}/trades/", produces = ["application/json"])
+    @GetMapping("/portfolios/{portfolio}/trades/")
     fun portfoliosTradesList(
-        portfolio: String
+        @PathVariable portfolio: String
     ): List<Trade> {
         return transaction {
             mapTrades(portfolio)
@@ -103,4 +137,6 @@ class PortfoliosApiController {
             discreteTags = stat.discreteFactors.associateBy({ it.first }, { it.second.toString() }),
         )
     }
+
+
 }

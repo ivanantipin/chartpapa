@@ -4,8 +4,8 @@ import firelib.core.SourceName
 import firelib.core.domain.InstrId
 import firelib.core.domain.Interval
 import firelib.core.store.MdStorageImpl
-import firelib.core.store.finamMapperWriter
 import firelib.finam.FinamDownloader
+import firelib.finam.MoexSource
 import firelib.model.tickers
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -23,9 +23,22 @@ object UtilsHandy {
         val storageImpl = MdStorageImpl()
         val finamDownloader = FinamDownloader()
         val symbols =
-            finamDownloader.symbols().filter { tickers.contains(it.code.toUpperCase()) && it.market == market }
+            finamDownloader.symbols().filter { tickers.contains(it.code.uppercase()) && it.market == market }
         return symbols.map { Pair(it.code, storageImpl.updateMarketData(it, interval)) }
     }
+
+    fun updateMoexStocks(
+        interval: Interval
+    ): List<Pair<String, Instant>> {
+        log.info("updating tickers that have a divs")
+        log.info("tickers to update ${tickers}")
+        val storageImpl = MdStorageImpl()
+        val source = MoexSource()
+        val symbols =
+            source.symbols().filter { tickers.contains(it.code.uppercase()) }
+        return symbols.map { Pair(it.code, storageImpl.updateMarketData(it, interval)) }
+    }
+
 
 
     fun updateTicker(ticker: String, market: String = FinamDownloader.SHARES_MARKET, interval : Interval = Interval.Min1) {

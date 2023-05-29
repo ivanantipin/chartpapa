@@ -31,7 +31,7 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
                     val idxToRet = daytss.mapIndexed { idx, ts ->
                         var ret = (daytss[idx][0].close - nonInterpolated[idx][back].close) / nonInterpolated[idx][back].close
                         if(position(idx) > 0){
-                            ret += 0.005
+                            //ret += 0.005
                         }
                         Pair(idx, ret)
                     }
@@ -75,11 +75,11 @@ class TrendModel(context: ModelContext, val props: Map<String, String>) : Model(
 
 
 fun main() {
-    UtilsHandy.updateRussianDivStocks(interval = Interval.Min10)
+    //UtilsHandy.updateMoexStocks(interval = Interval.Min1)
     TrendModel.modelConfig().runStrat(ModelBacktestConfig().apply {
         instruments = tickers
         interval = Interval.Min1
-        histSourceName = SourceName.FINAM
-        startDate(LocalDate.now().minusDays(300))
+        histSourceName = SourceName.MOEX
+        startDate(LocalDate.now().minusDays(900))
     })
 }

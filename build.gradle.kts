@@ -11,7 +11,8 @@ fun version() : String{
 }
 
 
-subprojects {
+
+allprojects {
 
     apply(plugin = "idea")
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -20,12 +21,12 @@ subprojects {
     tasks {
         compileKotlin {
             kotlinOptions {
-                jvmTarget = "13"
+                jvmTarget = "17"
             }
         }
         compileTestKotlin {
             kotlinOptions {
-                jvmTarget = "13"
+                jvmTarget = "17"
             }
         }
     }

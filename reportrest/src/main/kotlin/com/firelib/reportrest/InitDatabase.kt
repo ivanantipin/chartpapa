@@ -1,4 +1,4 @@
-package com.example
+package com.firelib.reportrest
 
 import firelib.common.Trades
 import org.jetbrains.exposed.sql.Database

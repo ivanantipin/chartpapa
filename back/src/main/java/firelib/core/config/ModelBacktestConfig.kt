@@ -41,7 +41,7 @@ class ModelBacktestConfig() : Cloneable {
 
     var maxRiskMoney = 15_000_000L
 
-    var market : String = FinamDownloader.SHARES_MARKET
+    var market : String = SourceName.MOEX.name
 
     var maxRiskMoneyPerSec = 10_000_000L
 
