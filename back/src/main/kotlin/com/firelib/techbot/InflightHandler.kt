@@ -1,6 +1,7 @@
 package com.firelib.techbot
 
 import com.firelib.techbot.InflightHandler.registerInflight
+import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -35,6 +36,14 @@ object InflightHandler {
                     log.info("number of inflight for category ${cat} is ${requests.size}")
                     val cnt = requests.asSequence().filter { System.currentTimeMillis() - it.value > 10_000 }.count()
                     log.info("number of long running inflight for category ${cat} is ${cnt}")
+                }
+                inflightRequests.forEach{ (cat, requests) ->
+                    val cnt = requests.asSequence().filter { System.currentTimeMillis() - it.value > 3*60_000 }.count()
+                    if(cnt > 0){
+                        log.error("too long running inflight for category ${cat} is ${cnt} exiting")
+                        Thread.sleep(2000)
+                        System.exit(-1)
+                    }
                 }
                 Thread.sleep(10_000L)
             }

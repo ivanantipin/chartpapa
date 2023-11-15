@@ -1,24 +1,44 @@
-version: '3'
+version: '3.5'
 services:
-  hiserver:
+  hiserver1:
     image: "ivanantipin/hiexport:1.1"
     restart: on-failure
+    ports:
+      - "8001:7801"
     deploy:
       resources:
         limits:
-          memory: 4000M
-    network_mode: host
+          memory: 1500M
+  hiserver2:
+    image: "ivanantipin/hiexport:1.1"
+    restart: on-failure
+    ports:
+      - "8002:7801"
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
+
+  hiserver3:
+    image: "ivanantipin/hiexport:1.1"
+    restart: on-failure
+    ports:
+      - "8003:7801"
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
   bot:
-    image: "ivanantipin/techbot:20220827_0"
+    image: "ivanantipin/techbot:${TAG}"
     restart: on-failure
     network_mode: host
     deploy:
       resources:
         limits:
           memory: 2000M
-    environment:
-      - TELEGRAM_TOKEN=1366338282:AAGb0wrt1IzE_AEj38a9FdUVJWeVzdnZ_HM
     volumes:
       - /ddisk/globaldatabase:/ddisk/globaldatabase
     depends_on:
-      - hiserver
+      - hiserver1
+      - hiserver2
+      - hiserver3
