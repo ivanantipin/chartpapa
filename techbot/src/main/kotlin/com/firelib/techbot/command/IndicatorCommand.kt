@@ -25,7 +25,7 @@ class IndicatorCommand(val techBotApp: TechbotApp) {
         val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instrId, tf.interval)
         val hOptions = signalGenerator.drawPicture(instrId, tf, settings, ohlcs)
         val bytes = ChartService.post(hOptions)
-        bot.sendMessage(chatId = update.chatId(), "#${hOptions.title?.text}")
+        bot.sendMessage(chatId = update.chatId(), "#${instrId.code}")
         bot.sendPhoto(chatId = update.chatId(), TelegramFile.ByByteArray(bytes))
     }
 }
