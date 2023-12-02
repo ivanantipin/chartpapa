@@ -17,4 +17,13 @@ class BotInterfaceImpl(val bot: Bot) : BotInterface {
             }
         }
     }
+
+    override fun sendMessage(msg: String, users: List<UserId>) {
+        users.forEach { userId ->
+            val response = bot.sendMessage(ChatId.fromId(userId.id), msg)
+            if (response.second != null) {
+                response.second!!.printStackTrace()
+            }
+        }
+    }
 }

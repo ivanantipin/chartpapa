@@ -7,6 +7,7 @@ import com.firelib.techbot.breachevent.BreachEvents
 import com.firelib.techbot.chart.IChartService
 import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.marketdata.OhlcsService
+import com.firelib.techbot.menu.chatId
 import com.firelib.techbot.persistence.DbHelper
 import com.firelib.techbot.persistence.DbHelper.getNotifyGroups
 import com.firelib.techbot.staticdata.InstrumentsService
@@ -121,6 +122,7 @@ class UsersNotifier(val botInterface: BotInterface,
 
         val bes = breaches.filter { it.first > threshold}.map {
             if(notificationEnabled){
+                botInterface.sendMessage("#${instr.code}", users)
                 botInterface.sendPhoto(chartService.post(it.second), users)
             }
             it.first
