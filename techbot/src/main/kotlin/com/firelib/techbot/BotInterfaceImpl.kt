@@ -8,10 +8,10 @@ import com.github.kotlintelegrambot.entities.TelegramFile
 
 class BotInterfaceImpl(val bot: Bot) : BotInterface {
 
-    override suspend fun sendPhoto(img: ByteArray, users: List<UserId>) {
+    override suspend fun sendPhoto(img: ByteArray, users: List<UserId>, caption : String) {
         users.forEach { userId ->
             mainLogger.info("notifiying user ${userId}")
-            val response = bot.sendPhoto(ChatId.fromId(userId.id), TelegramFile.ByByteArray(img))
+            val response = bot.sendPhoto(ChatId.fromId(userId.id), TelegramFile.ByByteArray(img), caption = caption)
             if (response.second != null) {
                 response.second!!.printStackTrace()
             }

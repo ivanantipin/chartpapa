@@ -122,8 +122,7 @@ class UsersNotifier(val botInterface: BotInterface,
 
         val bes = breaches.filter { it.first > threshold}.map {
             if(notificationEnabled){
-                botInterface.sendMessage("#${instr.code}", users)
-                botInterface.sendPhoto(chartService.post(it.second), users)
+                botInterface.sendPhoto(chartService.post(it.second), users, "#${instr.code}_Signal")
             }
             it.first
         }
