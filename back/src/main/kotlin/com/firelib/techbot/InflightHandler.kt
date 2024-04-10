@@ -38,7 +38,7 @@ object InflightHandler {
                     log.info("number of long running inflight for category ${cat} is ${cnt}")
                 }
                 inflightRequests.forEach{ (cat, requests) ->
-                    val cnt = requests.asSequence().filter { System.currentTimeMillis() - it.value > 3*60_000 }.count()
+                    val cnt = requests.asSequence().filter { System.currentTimeMillis() - it.value > 10*60_000 }.count()
                     if(cnt > 0){
                         log.error("too long running inflight for category ${cat} is ${cnt} exiting")
                         Thread.sleep(2000)
