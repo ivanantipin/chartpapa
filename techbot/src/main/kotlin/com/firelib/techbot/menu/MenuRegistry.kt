@@ -142,24 +142,6 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                     parseMode = ParseMode.MARKDOWN
                 )
             }
-//            addButtonMenu(MsgEnum.AddSymbol) {
-//                title = { lang -> MsgEnum.Choose1stLetterOfCompany.toLocal(lang) }
-//                this.rowSize = 4
-//                val staticDataService = techBotApp.instrumentsService()
-//
-//                staticDataService.instrumentByFirstCharacter.keys.forEach { start ->
-//                    this.addButton(start, { langs -> MsgEnum.PickCompany.toLocal(langs) }) {
-//                        rowSize = 2
-//                        buttons += staticDataService.instrumentByFirstCharacter.getOrDefault(
-//                            start,
-//                            emptyMap()
-//                        ).values.map { code ->
-//                            SimpleButton("(${code.code}) ${code.name}", Cmd(SubscribeHandler.name, mapOf("id" to code.id)))
-//                        }
-//                    }
-//                }
-//            }
-
             addActionMenu(MsgEnum.YourSymbolsOrRemoval, { bot, update ->
                 val subs = techBotApp.subscriptionService().subscriptions[UserId(
                     update.chatId().getId()
@@ -248,6 +230,17 @@ class MenuRegistry(val techBotApp: TechbotApp) {
             }
             addButtonMenu(MsgEnum.MAIN_MENU) {}
         }
+
+        addParentMenu(MsgEnum.OTHER) {
+            rowSize = 2
+
+            addActionMenu(MsgEnum.TOP_N, {bot, user->
+                TopNExecutor(techBotApp.ohlcService(), techBotApp.instrumentsService()).handle(bot, user)
+            })
+
+            addButtonMenu(MsgEnum.MAIN_MENU) {}
+        }
+
     }
 
     private suspend fun emtyListMsg(bot: Bot, update: User) {

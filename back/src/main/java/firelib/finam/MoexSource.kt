@@ -120,8 +120,6 @@ class MoexSource : HistoricalSource {
 
             prevFetched = rr.last().endTime
 
-            println("size is ${ret.size} last ${ret.last()}")
-
         }
         return sequence {
             yieldAll(ret)

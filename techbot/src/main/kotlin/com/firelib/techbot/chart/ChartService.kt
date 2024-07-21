@@ -17,9 +17,9 @@ object ChartService : IChartService {
     val log = LoggerFactory.getLogger(javaClass)
 
     val list = listOf(
-        "http://localhost:8001",
-        "http://localhost:8002",
-        "http://localhost:8003",
+        "http://localhost:7801",
+        "http://localhost:7801",
+        "http://localhost:7801",
     )
 
     val cnt = AtomicInteger(0);

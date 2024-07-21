@@ -24,7 +24,7 @@ class ListAddSymbolsHandler(
         val buttons = filtered
             .map { SubscribeHandler.makeSubscribeButton(it) }
 
-        if(filtered.size > 50){
+        if(filtered.size > 200){
             bot.sendMessage(
                 user.chatId(),
                 text = "Too many symbols, please narrow the search",

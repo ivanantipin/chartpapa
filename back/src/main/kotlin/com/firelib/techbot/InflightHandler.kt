@@ -16,8 +16,7 @@ object InflightHandler {
     val counter = AtomicLong()
 
     suspend fun <T> registerInflight(category : String, block : suspend ()->T) : T{
-        val coll =
-            inflightRequests.computeIfAbsent(category, { ConcurrentHashMap()})
+        val coll = inflightRequests.computeIfAbsent(category, { ConcurrentHashMap()})
         val id = counter.incrementAndGet()
         coll[id] =  System.currentTimeMillis()
         try {

@@ -6,6 +6,7 @@ enum class Langs {
 
 enum class MsgEnum {
     TECH_ANALYSIS,
+    OTHER,
     MAIN_MENU,
     SETTINGS,
     HELP,
@@ -34,6 +35,7 @@ enum class MsgEnum {
     MACD,
     RSI_BOLINGER,
     TDST,
+    TOP_N,
     Companies,
     PressTfToUnsubscribe,
     PressSignalToSubscribe,

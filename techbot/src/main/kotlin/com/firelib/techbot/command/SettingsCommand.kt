@@ -39,7 +39,7 @@ class SettingsCommand : TextCommand{
         })
 
         bot.sendMessage(
-            chatId = ChatId.fromId(userId.toLong()),
+            chatId = ChatId.fromId(userId),
             text = header + txt,
             parseMode = ParseMode.MARKDOWN_V2
         )

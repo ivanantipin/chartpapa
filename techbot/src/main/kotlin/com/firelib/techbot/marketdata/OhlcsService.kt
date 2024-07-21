@@ -84,18 +84,16 @@ class OhlcsService(
     }
 
     suspend fun initTimeframeIfNeeded(ticker: InstrId): SeriesContainer {
-        var inited = false
-        val persistFlow = baseFlows.computeIfAbsent(ticker, {
-            inited = true
-            SeriesContainer(
+        return baseFlows.computeIfAbsent(ticker, {
+            val ret = SeriesContainer(
                 daoProvider.getDao(ticker.sourceEnum(), Interval.Min10),
                 sourceProvider[ticker.sourceEnum()], ticker
             )
+            runBlocking {
+                ret.sync()
+            }
+            ret
         })
-        if(inited){
-            persistFlow.sync()
-        }
-        return persistFlow
     }
 }
 

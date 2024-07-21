@@ -19,7 +19,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
         context.mdDistributor.addListener(Interval.Week) {a,b->
             if(Instant.now().epochSecond - currentTime().epochSecond < 5000){
                 try {
-                    divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1)).groupBy { it.ticker.toLowerCase() }
+                    divMap = mapOf()
                     log.info("divs updated ${divMap}")
                 }catch (e : Exception){
                     log.info("error updating divs", e)
@@ -67,7 +67,7 @@ class RealDivModel(context: ModelContext, val props: Map<String, String>) : Mode
 }
 
 fun commonRunConfig() : ModelBacktestConfig{
-    val divMap = OpenDivHelper.fetchDivs(LocalDate.now().minusDays(1300)).groupBy { it.ticker.toLowerCase() }
+    val divMap = mapOf<String, List<Div>>()
     return ModelBacktestConfig().apply {
         instruments = tickers
         interval = Interval.Min1

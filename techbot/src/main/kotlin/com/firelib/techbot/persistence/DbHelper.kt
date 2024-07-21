@@ -16,6 +16,7 @@ import firelib.core.store.GlobalConstants
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -29,11 +30,14 @@ object DbHelper {
      */
     val updateExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
+    val log = LoggerFactory.getLogger(javaClass)
+
     suspend fun initDefaultDb() {
         initDatabase(GlobalConstants.metaDb.toAbsolutePath())
     }
 
     suspend fun initDatabase(staticFile: Path) {
+        log.info("initing database for path $staticFile")
         TransactionManager.defaultDatabase = Database.connect(
             "jdbc:sqlite:${staticFile}?journal_mode=WAL",
             driver = "org.sqlite.JDBC"

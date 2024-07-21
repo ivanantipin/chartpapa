@@ -18,9 +18,11 @@ dependencies {
     implementation("io.ktor:ktor-client-cio-jvm:${Versions.ktor_version}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin_version}")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3")
     implementation ( "org.springframework:spring-jdbc:5.1.9.RELEASE")
     implementation ( "org.springframework:spring-web:5.1.9.RELEASE")
     implementation ("org.xerial:sqlite-jdbc:${Versions.sqlite}")
+    implementation ("org.jsoup:jsoup:1.10.2")
     implementation (project(":back"))
     // https://mvnrepository.com/artifact/io.mockk/mockk
     implementation ("org.jetbrains.exposed:exposed-core:${Versions.exposed_version}")
