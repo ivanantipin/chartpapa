@@ -37,10 +37,12 @@ class TopCalculator(val ohlcsService: OhlcsService, val instrumentsService: Inst
                     if(tooOld){
                         println("instrument is filtered out because last update is too old ${days.last().endTime} " )
                     }
-                    val volume = days.last().volume * days.last().close
-                    val ret = days.isNotEmpty() && volume > 300_000_000
+                    val tradingVolume = days.filter { !it.interpolated }.subList(days.size - 5, days.size).sumOf { it.volume * it.close }
+
+
+                    val ret = tradingVolume > 1000_000_000
                     if(!ret){
-                        println("instrument is filtered out because volume ${volume/1000_000} mils is less than enough" )
+                        println("instrument is filtered out because volume ${tradingVolume/1000_000} mils is less than enough" )
                     }
                     ret &&  !tooOld
                 } catch (e: Exception) {
