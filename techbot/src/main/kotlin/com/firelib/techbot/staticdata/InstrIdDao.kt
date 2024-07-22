@@ -19,6 +19,12 @@ class InstrIdDao {
 
     }
 
+    suspend fun deleteById(instrId: String){
+        DbHelper.updateDatabase("delete instrument") {
+            Instruments.deleteWhere { Instruments.id.eq(instrId) }
+        }
+    }
+
     suspend fun replaceSourceInstruments(symbols: List<InstrId>) {
         if(symbols.isEmpty()){
             return

@@ -83,7 +83,8 @@ class UsersNotifier(val botInterface: BotInterface,
         val timeFrame = group.timeFrame
 
         if(!instrumentsService.id2inst.containsKey(instrId)){
-            log.info("No instrument found for id ${instrId}")
+            log.info("No instrument found for id ${instrId} deleting")
+            instrumentsService.instrIdDao.deleteById(instrId)
             return
         }
 
