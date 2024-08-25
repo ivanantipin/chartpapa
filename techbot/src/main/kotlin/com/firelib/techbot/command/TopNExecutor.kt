@@ -18,17 +18,27 @@ class TopNExecutor(val ohlcService: OhlcsService, val instrumentsService: Instru
     val topCalculator = TopCalculator(ohlcService, instrumentsService)
 
     fun handle(bot: Bot, user: User) {
-        val top = topCalculator.calculate(37, 7)
+        val cals = listOf(
+            Triple(37,10, false),
+            Triple(60,10, false),
+            Triple(37,10, true),
+            Triple(60,10, true),
 
-        val txt = "* Top 7 stocks, return for last 37 days *  \n" + top.joinToString(
-            separator = "",
-            transform = { pair -> " *${pair.first.code}* : ${dbl2Str(pair.second * 100, 2)} % \n" })
-
-        bot.sendMessage(
-            chatId = user.chatId(),
-            text = txt,
-            parseMode = ParseMode.MARKDOWN
         )
+        cals.forEach {
+            val top = topCalculator.calculate(it.first, it.second, it.third)
+
+            val txt = "* ${ if(it.third) "Worst" else "Best" } ${it.second} stocks, return for last ${it.first} days *  \n" + top.joinToString(
+                separator = "",
+                transform = { pair -> " *${pair.first.code}* : ${dbl2Str(pair.second * 100, 2)} % \n" })
+
+            bot.sendMessage(
+                chatId = user.chatId(),
+                text = txt,
+                parseMode = ParseMode.MARKDOWN
+            )
+        }
+
 
     }
 }

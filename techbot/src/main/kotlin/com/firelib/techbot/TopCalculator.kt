@@ -1,5 +1,8 @@
 package com.firelib.techbot
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.firelib.techbot.command.CacheService
 import com.firelib.techbot.divreader.Div
 import com.firelib.techbot.divreader.DivReader
 import com.firelib.techbot.marketdata.OhlcsService
@@ -11,10 +14,8 @@ import firelib.core.domain.Interval
 import firelib.core.misc.toInstantDefault
 import firelib.core.store.MdDaoContainer
 import firelib.core.store.SourceFactory
-import firelib.finam.MoexSourceAsync
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
 class TopCalculator(val ohlcsService: OhlcsService, val instrumentsService: InstrumentsService) {
@@ -27,28 +28,44 @@ class TopCalculator(val ohlcsService: OhlcsService, val instrumentsService: Inst
 
     var instrs: List<InstrId> = emptyList()
 
-    init {
-        runBlocking {
+    val mapper = jacksonObjectMapper()
+
+    fun instrumentsList() : List<InstrId>{
+        return runBlocking {
             val preInstr = instrumentsService.id2inst.values.filter { it.source == "MOEX" }
-            instrs = preInstr.filter {
+            preInstr.filter {
                 try {
                     val days = ohlcsService.getOhlcsForTf(it, Interval.Day)
-                    val tooOld = System.currentTimeMillis() - days.last().endTime.toEpochMilli() > 4*24*3600_000
-                    if(tooOld){
-                        println("instrument ${it.code} is filtered out because last update is too old ${days.last().endTime} " )
+                    val tooOld = System.currentTimeMillis() - days.last().endTime.toEpochMilli() > 4 * 24 * 3600_000
+                    if (tooOld) {
+                        println("instrument ${it.code} is filtered out because last update is too old ${days.last().endTime} ")
                     }
-                    val tradingVolume = days.filter { !it.interpolated }.subList(days.size - 6, days.size).sumOf { it.volume * it.close }
-
+                    val tradingVolume =
+                        days.filter { !it.interpolated }.subList(days.size - 6, days.size).sumOf { it.volume * it.close }
 
                     val ret = tradingVolume > 1000_000_000
-                    if(!ret){
-                        println("instrument ${it.code} is filtered out because volume ${tradingVolume/1000_000} mils is less than enough" )
+                    if (!ret) {
+                        println("instrument ${it.code} is filtered out because volume ${tradingVolume / 1000_000} mils is less than enough")
                     }
-                    ret &&  !tooOld
+                    ret && !tooOld
                 } catch (e: Exception) {
                     false;
                 }
             }
+
+        }
+    }
+
+
+
+    init {
+        runBlocking {
+            val cacheRecord = CacheService.getCacheRecord("top_instruments", {
+                mapper.writeValueAsBytes(instrumentsList())
+            }, 5 * 24 * 3600 * 1000)
+
+            instrs = mapper.readValue(cacheRecord.data, object : TypeReference<List<InstrId>>(){})
+
             instrs.forEach { updateDiv(it) }
         }
 
@@ -65,7 +82,7 @@ class TopCalculator(val ohlcsService: OhlcsService, val instrumentsService: Inst
         }
     }
 
-    fun calculate(lastDays: Int, top : Int): List<Pair<InstrId, Double>> {
+    fun calculate(lastDays: Int, top : Int, reverse : Boolean = false): List<Pair<InstrId, Double>> {
         val ret = instrs.map {
             runBlocking {
                 ohlcsService.initTimeframeIfNeeded(it);
@@ -73,20 +90,18 @@ class TopCalculator(val ohlcsService: OhlcsService, val instrumentsService: Inst
                 calculate(it, lastDays)
 
             }
-        }.sortedBy { it.second }
+        }.filterNotNull().sortedBy { it.second }
+        if(reverse){
+            return ret.reversed().takeLast(top)
+        }
         return ret.takeLast(top)
 
-    }
-
-    suspend fun calc(instr : String, lastDays: Int) : Pair<InstrId, Double>{
-        val find = instrs.find { it.code == instr }!!
-        return calculate(find, lastDays)
     }
 
     private suspend fun calculate(
         it: InstrId,
         lastDays: Int
-    ): Pair<InstrId, Double> {
+    ): Pair<InstrId, Double>? {
         val ohlcsForTf = ohlcsService.getOhlcsForTf(it, Interval.Day)
         if (ohlcsForTf.size < lastDays) {
             return it to -1000.0
@@ -99,8 +114,8 @@ class TopCalculator(val ohlcsService: OhlcsService, val instrumentsService: Inst
         val last = ohlcsForTf.last()
 
 
-        if (ohlc.volume * ohlc.close < 200_000_000) {
-            return it to -1000.0
+        if (ohlc.volume * ohlc.close < 50_000_000) {
+            null
         }
 
         val ret = (adjust + last.close - ohlc.close) / ohlc.close
