@@ -61,7 +61,7 @@ class MenuRegistry(val techBotApp: TechbotApp) {
                 Cmd(cmd, mapOf("id" to instrId.id, "tf" to tf.name))
             )
         }
-        return bts
+        return bts + SimpleButton("All", Cmd(cmd, mapOf("id" to "All", "tf" to tf.name)))
     }
 
 

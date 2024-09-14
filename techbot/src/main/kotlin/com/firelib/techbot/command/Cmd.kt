@@ -7,10 +7,18 @@ import firelib.core.domain.InstrId
 data class Cmd(val handlerName: String, val opts: Map<String, String> = mutableMapOf()) {
 
     fun instr(staticDataService: InstrumentsService): InstrId {
-        return staticDataService.byId(opts["id"]!!)
+        return staticDataService.byId(instrId())
     }
 
-    fun tf(): TimeFrame {
-        return TimeFrame.valueOf(opts["tf"]!!)
+    fun instrId() : String{
+        return opts["id"]!!
+    }
+
+    fun tf(): List<TimeFrame> {
+        val ret = TimeFrame.valueOf(opts["tf"]!!)
+        if(ret == TimeFrame.All){
+            return TimeFrame.values().filter { it != TimeFrame.All }
+        }
+        return listOf(ret)
     }
 }

@@ -62,7 +62,7 @@ class TopCalculator(val ohlcsService: OhlcsService, val instrumentsService: Inst
         runBlocking {
             val cacheRecord = CacheService.getCacheRecord("top_instruments", {
                 mapper.writeValueAsBytes(instrumentsList())
-            }, 5 * 24 * 3600 * 1000)
+            }, 20 * 24 * 3600 * 1000)
 
             instrs = mapper.readValue(cacheRecord.data, object : TypeReference<List<InstrId>>(){})
 

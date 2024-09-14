@@ -3,12 +3,13 @@ package com.firelib.techbot.command
 import com.firelib.techbot.SignalType
 import com.firelib.techbot.TechbotApp
 import com.firelib.techbot.chart.ChartService
+import com.firelib.techbot.domain.UserId
 import com.firelib.techbot.getId
 import com.firelib.techbot.menu.chatId
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.TelegramFile
-import com.github.kotlintelegrambot.entities.Update
 import com.github.kotlintelegrambot.entities.User
+import firelib.core.domain.InstrId
 
 class IndicatorCommand(val techBotApp: TechbotApp) {
 
@@ -20,11 +21,26 @@ class IndicatorCommand(val techBotApp: TechbotApp) {
         val userId = update.chatId().getId()
         val signalGenerator = indi[cmd.handlerName]!!
         val settings = signalGenerator.fetchSettings(userId)
-        val instrId = cmd.instr(techBotApp.instrumentsService())
-        val tf = cmd.tf()
-        val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instrId, tf.interval)
-        val hOptions = signalGenerator.drawPicture(instrId, tf, settings, ohlcs)
-        val bytes = ChartService.post(hOptions)
-        bot.sendPhoto(chatId = update.chatId(), TelegramFile.ByByteArray(bytes), "#${instrId.code}")
+        val code = cmd.instrId()
+        val instruments = if(code == "All"){
+            techBotApp.subscriptionService().subscriptions[UserId(
+                update.chatId().getId()
+            )]!!.values.distinct()
+        }else{
+            listOf(techBotApp.instrumentsService().byId(code))
+
+        }
+
+        val tfs = cmd.tf()
+
+        tfs.forEach { tf->
+            instruments.forEach {instrId->
+                val ohlcs = techBotApp.ohlcService().getOhlcsForTf(instrId, tf.interval)
+                val hOptions = signalGenerator.drawPicture(instrId, tf, settings, ohlcs)
+                val bytes = ChartService.post(hOptions)
+                bot.sendPhoto(chatId = update.chatId(), TelegramFile.ByByteArray(bytes), "#${instrId.code}")
+            }
+        }
+
     }
 }
