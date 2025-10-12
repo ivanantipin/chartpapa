@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:tradeapi.finam.ru)",
+      "WebSearch",
+      "WebFetch(domain:trade-api.finam.ru)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:finamweb.github.io)",
+      "Bash(python -c \"import requests; r = requests.post(''https://trade-api.finam.ru/Auth'', json={''secret'': ''test''}); print(f''Status: {r.status_code}''); print(f''URL: {r.url}'')\")",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(chcp:*)",
+      "Bash(cmd /c:*)",
+      "Bash(git clone:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
